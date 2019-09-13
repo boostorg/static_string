@@ -19,7 +19,7 @@ namespace fixed_string {
 using string_view = boost::string_view;
 
 /// The type of `basic_string_view` used by the library
-template<class CharT, class Traits>
+template<typename CharT, typename Traits>
 using basic_string_view =
     boost::basic_string_view<CharT, Traits>;
 

@@ -25,7 +25,7 @@ using is_input_iterator =
     std::integral_constant<bool,
         ! std::is_integral<T>::value>;
 
-template<class CharT, class Traits>
+template<typename CharT, typename Traits>
 int
 lexicographical_compare(
     CharT const* s1, std::size_t n1,
@@ -40,7 +40,7 @@ lexicographical_compare(
     return Traits::compare(s1, s2, n1);
 }
 
-template<class CharT, class Traits>
+template<typename CharT, typename Traits>
 int
 lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
@@ -50,7 +50,7 @@ lexicographical_compare(
         CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
 
-template<class CharT, class Traits>
+template<typename CharT, typename Traits>
 int
 lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
@@ -72,7 +72,7 @@ max_digits(std::size_t bytes)
         bytes * 2.41) + 1 + 1;
 }
 
-template<class CharT, class Integer, class Traits>
+template<typename CharT, class Integer, typename Traits>
 CharT*
 raw_to_string(
     CharT* buf, Integer x, std::true_type)
@@ -97,7 +97,7 @@ raw_to_string(
     return buf;
 }
 
-template<class CharT, class Integer, class Traits>
+template<typename CharT, class Integer, typename Traits>
 CharT*
 raw_to_string(
     CharT* buf, Integer x, std::false_type)
@@ -114,9 +114,9 @@ raw_to_string(
 }
 
 template<
-    class CharT,
+    typename CharT,
     class Integer,
-    class Traits = std::char_traits<CharT>>
+    typename Traits = std::char_traits<CharT>>
 CharT*
 raw_to_string(CharT* last, std::size_t size, Integer i)
 {

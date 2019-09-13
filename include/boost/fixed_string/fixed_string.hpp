@@ -23,22 +23,21 @@
 namespace boost {
 namespace fixed_string {
 
-/** A modifiable string with a fixed-size storage area.
+/** A fixed-capacity string.
 
     These objects behave like `std::string` except that the storage
-    is not dynamically allocated but rather fixed in size.
+    is not dynamically allocated but rather fixed in size, and
+    stored in the object itself.
 
-    These strings offer performance advantages when a protocol
-    imposes a natural small upper limit on the size of a value.
-
-    @note The stored string is always null-terminated.
+    These strings offer performance advantages when an algorithm
+    can execute with a reasonable upper limit on the size of a value.
 
     @see to_fixed_string 
 */
 template<
     std::size_t N,
-    class CharT = char,
-    class Traits = std::char_traits<CharT>>
+    typename CharT = char,
+    typename Traits = std::char_traits<CharT>>
 class fixed_string
 {
     template<std::size_t, class, class>
@@ -54,22 +53,26 @@ class fixed_string
     CharT s_[N+1];
 
 public:
+    //--------------------------------------------------------------------------
     //
     // Member types
     //
+    //--------------------------------------------------------------------------
 
-    using traits_type = Traits;
-    using value_type = typename Traits::char_type;
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
-    using pointer = value_type*;
-    using reference = value_type&;
-    using const_pointer = value_type const*;
-    using const_reference = value_type const&;
-    using iterator = value_type*;
-    using const_iterator = value_type const*;
+    using traits_type       = Traits;
+    using value_type        = typename Traits::char_type;
+    using size_type         = std::size_t;
+    using difference_type   = std::ptrdiff_t;
+    using pointer           = value_type*;
+    using reference         = value_type&;
+    using const_pointer     = value_type const*;
+    using const_reference   = value_type const&;
+    using iterator          = value_type*;
+    using const_iterator    = value_type const*;
+    
     using reverse_iterator =
         std::reverse_iterator<iterator>;
+    
     using const_reverse_iterator =
         std::reverse_iterator<const_iterator>;
 
@@ -77,19 +80,23 @@ public:
     using string_view_type =
         basic_string_view<CharT, Traits>;
 
+    //--------------------------------------------------------------------------
     //
     // Constants
     //
+    //--------------------------------------------------------------------------
 
-    /// Maximum size of the string excluding the null terminator
-    static std::size_t constexpr max_size_n = N;
+    /// Maximum size of the string excluding any null terminator
+    static std::size_t constexpr static_capacity = N;
 
     /// A special index
     static constexpr size_type npos = size_type(-1);
 
+    //--------------------------------------------------------------------------
     //
-    // (constructor)
+    // Construction
     //
+    //--------------------------------------------------------------------------
 
     /// Default constructor (empty string).
     fixed_string();
@@ -98,41 +105,61 @@ public:
     
         The behavior is undefined if `count >= npos`
     */
-    fixed_string(size_type count, CharT ch);
+    fixed_string(
+        size_type count,
+        CharT ch);
 
     /// Construct with a substring (pos, other.size()) of `other`.
     template<std::size_t M>
-    fixed_string(fixed_string<M, CharT, Traits> const& other,
+    fixed_string(
+        fixed_string<M, CharT, Traits> const& other,
         size_type pos);
 
     /// Construct with a substring (pos, count) of `other`.
     template<std::size_t M>
-    fixed_string(fixed_string<M, CharT, Traits> const& other,
-        size_type pos, size_type count);
+    fixed_string(
+        fixed_string<M, CharT, Traits> const& other,
+        size_type pos,
+        size_type count);
 
     /// Construct with the first `count` characters of `s`, including nulls.
-    fixed_string(CharT const* s, size_type count);
+    fixed_string(
+        CharT const* s,
+        size_type count);
 
     /// Construct from a null terminated string.
-    fixed_string(CharT const* s);
+    fixed_string(
+        CharT const* s);
 
     /// Construct from a range of characters
     template<class InputIt>
-    fixed_string(InputIt first, InputIt last);
+    fixed_string(
+        InputIt first,
+        InputIt last
+    #ifndef GENERATING_DOCUMENTATION
+        , typename std::enable_if<
+            detail::is_input_iterator<InputIt>::value,
+                iterator>::type* = 0
+    #endif
+    );
 
     /// Copy constructor.
-    fixed_string(fixed_string const& other);
+    fixed_string(
+        fixed_string const& other);
 
     /// Copy constructor.
     template<std::size_t M>
-    fixed_string(fixed_string<M, CharT, Traits> const& other);
+    fixed_string(
+        fixed_string<M, CharT, Traits> const& other);
 
     /// Construct from an initializer list
-    fixed_string(std::initializer_list<CharT> init);
+    fixed_string(
+        std::initializer_list<CharT> init);
 
     /// Construct from a `string_view`
     explicit
-    fixed_string(string_view_type sv);
+    fixed_string(
+        string_view_type sv);
 
     /** Construct from any object convertible to `string_view_type`.
 
@@ -140,40 +167,49 @@ public:
         obtained by converting `t` to `string_view_type`,
         and used to construct the string.
     */
-#if BOOST_BEAST_DOXYGEN
-    template<class T>
-#else
-    template<class T, class = typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value>::type>
+    template<class T
+#ifndef GENERATING_DOCUMENTATION
+    , class = typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value>::type
 #endif
-    fixed_string(T const& t, size_type pos, size_type n);
+    >
+    fixed_string(
+        T const& t,
+        size_type pos,
+        size_type n);
 
+    //--------------------------------------------------------------------------
     //
-    // (assignment)
+    // Assignment
     //
+    //--------------------------------------------------------------------------
 
     /// Copy assignment.
     fixed_string&
-    operator=(fixed_string const& str)
+    operator=(
+        fixed_string const& s)
     {
-        return assign(str);
+        return assign(s);
     }
 
     /// Copy assignment.
     template<std::size_t M>
     fixed_string&
-    operator=(fixed_string<M, CharT, Traits> const& str)
+    operator=(
+        fixed_string<M, CharT, Traits> const& s)
     {
-        return assign(str);
+        return assign(s);
     }
 
     /// Assign from null-terminated string.
     fixed_string&
-    operator=(CharT const* s);
+    operator=(
+        CharT const* s);
 
     /// Assign from single character.
     fixed_string&
-    operator=(CharT ch)
+    operator=(
+        CharT ch)
     {
         return assign_char(ch,
             std::integral_constant<bool, (N>0)>{});
@@ -181,72 +217,92 @@ public:
 
     /// Assign from initializer list.
     fixed_string&
-    operator=(std::initializer_list<CharT> init)
+    operator=(
+        std::initializer_list<CharT> init)
     {
         return assign(init);
     }
 
     /// Assign from `string_view_type`.
     fixed_string&
-    operator=(string_view_type sv)
+    operator=(
+        string_view_type sv)
     {
         return assign(sv);
     }
 
     /// Assign `count` copies of `ch`.
     fixed_string&
-    assign(size_type count, CharT ch);
+    assign(
+        size_type count,
+        CharT ch);
 
     /// Assign from another `fixed_string`
     fixed_string&
-    assign(fixed_string const& str);
-
-    // VFALCO NOTE this could come in two flavors,
-    //             N>M and N<M, and skip the exception
-    //             check when N>M
+    assign(
+        fixed_string const& s);
 
     /// Assign from another `fixed_string`
     template<std::size_t M>
     fixed_string&
-    assign(fixed_string<M, CharT, Traits> const& str)
+    assign(
+        fixed_string<M, CharT, Traits> const& s)
     {
-        return assign(str.data(), str.size());
+        // VFALCO this could come in two flavors,
+        //        N>M and N<M, and skip the exception
+        //        check when N>M
+        return assign(s.data(), s.size());
     }
 
-    /// Assign `count` characterss starting at `npos` from `other`.
+    /// Assign `count` characters starting at `npos` from `other`.
     template<std::size_t M>
     fixed_string&
-    assign(fixed_string<M, CharT, Traits> const& str,
-        size_type pos, size_type count = npos);
+    assign(
+        fixed_string<M, CharT, Traits> const& s,
+        size_type pos,
+        size_type count = npos);
 
     /// Assign the first `count` characters of `s`, including nulls.
     fixed_string&
-    assign(CharT const* s, size_type count);
+    assign(
+        CharT const* s,
+        size_type count);
 
     /// Assign a null terminated string.
     fixed_string&
-    assign(CharT const* s)
+    assign(
+        CharT const* s)
     {
         return assign(s, Traits::length(s));
     }
 
     /// Assign from an iterator range of characters.
-    template<class InputIt>
+    template<typename InputIt>
+#ifdef GENERATING_DOCUMENTATION
     fixed_string&
-    assign(InputIt first, InputIt last);
+#else
+    typename std::enable_if<
+        detail::is_input_iterator<InputIt>::value,
+            fixed_string&>::type
+#endif
+    assign(
+        InputIt first,
+        InputIt last);
 
     /// Assign from initializer list.
     fixed_string&
-    assign(std::initializer_list<CharT> init)
+    assign(
+        std::initializer_list<CharT> init)
     {
         return assign(init.begin(), init.end());
     }
 
     /// Assign from `string_view_type`.
     fixed_string&
-    assign(string_view_type str)
+    assign(
+        string_view_type s)
     {
-        return assign(str.data(), str.size());
+        return assign(s.data(), s.size());
     }
 
     /** Assign from any object convertible to `string_view_type`.
@@ -256,18 +312,22 @@ public:
         and used to assign the string.
     */
     template<class T>
-#if BOOST_BEAST_DOXYGEN
+#if GENERATING_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<std::is_convertible<T,
         string_view_type>::value, fixed_string&>::type
 #endif
-    assign(T const& t,
-        size_type pos, size_type count = npos);
+    assign(
+        T const& t,
+        size_type pos,
+        size_type count = npos);
 
+    //--------------------------------------------------------------------------
     //
     // Element access
     //
+    //--------------------------------------------------------------------------
 
     /// Access specified character with bounds checking.
     reference
@@ -347,9 +407,11 @@ public:
             CharT, Traits>{data(), size()};
     }
 
+    //--------------------------------------------------------------------------
     //
     // Iterators
     //
+    //--------------------------------------------------------------------------
 
     /// Returns an iterator to the beginning.
     iterator
@@ -435,9 +497,11 @@ public:
         return const_reverse_iterator{cbegin()};
     }
 
+    //--------------------------------------------------------------------------
     //
     // Capacity
     //
+    //--------------------------------------------------------------------------
 
     /// Returns `true` if the string is empty.
     bool
@@ -491,73 +555,97 @@ public:
     {
     }
 
+    //--------------------------------------------------------------------------
     //
     // Operations
     //
+    //--------------------------------------------------------------------------
 
     /// Clears the contents.
     void
     clear();
 
     fixed_string&
-    insert(size_type index, size_type count, CharT ch);
+    insert(
+        size_type index,
+        size_type count,
+        CharT ch);
 
     fixed_string&
-    insert(size_type index, CharT const* s)
+    insert(
+        size_type index,
+        CharT const* s)
     {
         return insert(index, s, Traits::length(s));
     }
 
     fixed_string&
-    insert(size_type index, CharT const* s, size_type count);
+    insert(
+        size_type index,
+        CharT const* s,
+        size_type count);
 
     template<std::size_t M>
     fixed_string&
-    insert(size_type index,
-        fixed_string<M, CharT, Traits> const& str)
+    insert(
+        size_type index,
+        fixed_string<M, CharT, Traits> const& s)
     {
-        return insert(index, str.data(), str.size());
+        return insert(index, s.data(), s.size());
     }
 
     template<std::size_t M>
     fixed_string&
-    insert(size_type index,
-        fixed_string<M, CharT, Traits> const& str,
-            size_type index_str, size_type count = npos);
+    insert(
+        size_type index,
+        fixed_string<M, CharT, Traits> const& s,
+        size_type index_str,
+        size_type count = npos);
 
     iterator
-    insert(const_iterator pos, CharT ch)
+    insert(
+        const_iterator pos,
+        CharT ch)
     {
         return insert(pos, 1, ch);
     }
 
     iterator
-    insert(const_iterator pos, size_type count, CharT ch);
+    insert(
+        const_iterator pos,
+        size_type count, CharT ch);
 
     template<class InputIt>
-#if BOOST_BEAST_DOXYGEN
+#if GENERATING_DOCUMENTATION
     iterator
 #else
     typename std::enable_if<
         detail::is_input_iterator<InputIt>::value,
             iterator>::type
 #endif
-    insert(const_iterator pos, InputIt first, InputIt last);
+    insert(
+        const_iterator pos,
+        InputIt first,
+        InputIt last);
 
     iterator
-    insert(const_iterator pos, std::initializer_list<CharT> init)
+    insert(
+        const_iterator pos,
+        std::initializer_list<CharT> init)
     {
         return insert(pos, init.begin(), init.end());
     }
 
     fixed_string&
-    insert(size_type index, string_view_type str)
+    insert(
+        size_type index,
+        string_view_type s)
     {
-        return insert(index, str.data(), str.size());
+        return insert(index, s.data(), s.size());
     }
 
     template<class T>
-#if BOOST_BEAST_DOXYGEN
+#if GENERATING_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<
@@ -565,20 +653,29 @@ public:
         ! std::is_convertible<T const&, CharT const*>::value,
             fixed_string&>::type
 #endif
-    insert(size_type index, T const& t,
-        size_type index_str, size_type count = npos);
+    insert(
+        size_type index,
+        T const& t,
+        size_type index_str,
+        size_type count = npos);
 
     fixed_string&
-    erase(size_type index = 0, size_type count = npos);
+    erase(
+        size_type index = 0,
+        size_type count = npos);
 
     iterator
-    erase(const_iterator pos);
+    erase(
+        const_iterator pos);
 
     iterator
-    erase(const_iterator first, const_iterator last);
+    erase(
+        const_iterator first,
+        const_iterator last);
 
     void
-    push_back(CharT ch);
+    push_back(
+        CharT ch);
 
     void
     pop_back()
@@ -587,7 +684,9 @@ public:
     }
 
     fixed_string&
-    append(size_type count, CharT ch)
+    append(
+        size_type count,
+        CharT ch)
     {
         insert(end(), count, ch);
         return *this;
@@ -595,65 +694,82 @@ public:
 
     template<std::size_t M>
     fixed_string&
-    append(fixed_string<M, CharT, Traits> const& str)
+    append(
+        fixed_string<M, CharT, Traits> const& s)
     {
-        insert(size(), str);
+        insert(size(), s);
         return *this;
     }
 
     template<std::size_t M>
     fixed_string&
-    append(fixed_string<M, CharT, Traits> const& str,
-        size_type pos, size_type count = npos);
+    append(
+        fixed_string<M, CharT, Traits> const& s,
+        size_type pos,
+        size_type count = npos);
 
     fixed_string&
-    append(CharT const* s, size_type count)
+    append(
+        CharT const* s,
+        size_type count)
     {
         insert(size(), s, count);
         return *this;
     }
 
     fixed_string&
-    append(CharT const* s)
+    append(
+        CharT const* s)
     {
         insert(size(), s);
         return *this;
     }
 
     template<class InputIt>
-#if BOOST_BEAST_DOXYGEN
+#if GENERATING_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<
         detail::is_input_iterator<InputIt>::value,
             fixed_string&>::type
 #endif
-    append(InputIt first, InputIt last)
+    append(
+        InputIt first,
+        InputIt last)
     {
         insert(end(), first, last);
         return *this;
     }
 
     fixed_string&
-    append(std::initializer_list<CharT> init)
+    append(
+        std::initializer_list<CharT> init)
     {
         insert(end(), init);
         return *this;
     }
 
     fixed_string&
-    append(string_view_type sv)
+    append(
+        string_view_type sv)
     {
         insert(size(), sv);
         return *this;
     }
 
     template<class T>
+#if GENERATING_DOCUMENTATION
+    fixed_string&
+#else
     typename std::enable_if<
         std::is_convertible<T const&, string_view_type>::value &&
         ! std::is_convertible<T const&, CharT const*>::value,
             fixed_string&>::type
-    append(T const& t, size_type pos, size_type count = npos)
+#endif
+    append(
+        T const& t,
+        size_type pos,
+        size_type count = npos)
     {
         insert(size(), t, pos, count);
         return *this;
@@ -661,72 +777,86 @@ public:
 
     template<std::size_t M>
     fixed_string&
-    operator+=(fixed_string<M, CharT, Traits> const& str)
+    operator+=(
+        fixed_string<M, CharT, Traits> const& s)
     {
-        return append(str.data(), str.size());
+        return append(s.data(), s.size());
     }
 
     fixed_string&
-    operator+=(CharT ch)
+    operator+=(
+        CharT ch)
     {
         push_back(ch);
         return *this;
     }
 
     fixed_string&
-    operator+=(CharT const* s)
+    operator+=(
+        CharT const* s)
     {
         return append(s);
     }
 
     fixed_string&
-    operator+=(std::initializer_list<CharT> init)
+    operator+=(
+        std::initializer_list<CharT> init)
     {
         return append(init);
     }
 
     fixed_string&
-    operator+=(string_view_type const& str)
+    operator+=(
+        string_view_type const& s)
     {
-        return append(str);
+        return append(s);
     }
 
     template<std::size_t M>
     int
-    compare(fixed_string<M, CharT, Traits> const& str) const
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            &s_[0], n_, &str.s_[0], str.n_);
-    }
-
-    template<std::size_t M>
-    int
-    compare(size_type pos1, size_type count1,
-        fixed_string<M, CharT, Traits> const& str) const
+    compare(
+        fixed_string<M, CharT, Traits> const& s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), str.data(), str.size());
+            &s_[0], n_, &s.s_[0], s.n_);
     }
 
     template<std::size_t M>
     int
-    compare(size_type pos1, size_type count1,
-        fixed_string<M, CharT, Traits> const& str,
-            size_type pos2, size_type count2 = npos) const
+    compare(
+        size_type pos1,
+        size_type count1,
+        fixed_string<M, CharT, Traits> const& s) const
+    {
+        return detail::lexicographical_compare<CharT, Traits>(
+            substr(pos1, count1), s.data(), s.size());
+    }
+
+    template<std::size_t M>
+    int
+    compare(
+        size_type pos1,
+        size_type count1,
+        fixed_string<M, CharT, Traits> const& s,
+        size_type pos2,
+        size_type count2 = npos) const
     {
         return detail::lexicographical_compare(
-            substr(pos1, count1), str.substr(pos2, count2));
+            substr(pos1, count1), s.substr(pos2, count2));
     }
 
     int
-    compare(CharT const* s) const
+    compare(
+        CharT const* s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
             &s_[0], n_, s, Traits::length(s));
     }
 
     int
-    compare(size_type pos1, size_type count1,
+    compare(
+        size_type pos1,
+        size_type count1,
         CharT const* s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
@@ -734,30 +864,36 @@ public:
     }
 
     int
-    compare(size_type pos1, size_type count1,
-        CharT const*s, size_type count2) const
+    compare(
+        size_type pos1,
+        size_type count1,
+        CharT const*s,
+        size_type count2) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
             substr(pos1, count1), s, count2);
     }
 
     int
-    compare(string_view_type str) const
+    compare(
+        string_view_type s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            &s_[0], n_, str.data(), str.size());
+            &s_[0], n_, s.data(), s.size());
     }
 
     int
-    compare(size_type pos1, size_type count1,
-        string_view_type str) const
+    compare(
+        size_type pos1,
+        size_type count1,
+        string_view_type s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), str);
+            substr(pos1, count1), s);
     }
 
     template<class T>
-#if BOOST_BEAST_DOXYGEN
+#if GENERATING_DOCUMENTATION
     int
 #else
     typename std::enable_if<
@@ -765,20 +901,28 @@ public:
         ! std::is_convertible<T const&, CharT const*>::value,
             int>::type
 #endif
-    compare(size_type pos1, size_type count1,
-        T const& t, size_type pos2,
-            size_type count2 = npos) const
+    compare(
+        size_type pos1,
+        size_type count1,
+        T const& t,
+        size_type pos2,
+        size_type count2 = npos) const
     {
         return compare(pos1, count1,
             string_view_type(t).substr(pos2, count2));
     }
 
     string_view_type
-    substr(size_type pos = 0, size_type count = npos) const;
+    substr(
+        size_type pos = 0,
+        size_type count = npos) const;
 
     /// Copy a substring (pos, pos+count) to character string pointed to by `dest`.
     size_type
-    copy(CharT* dest, size_type count, size_type pos = 0) const;
+    copy(
+        CharT* dest,
+        size_type count,
+        size_type pos = 0) const;
 
     /** Changes the number of characters stored.
 
@@ -786,7 +930,8 @@ public:
         characters are uninitialized.
     */
     void
-    resize(std::size_t n);
+    resize(
+        std::size_t n);
 
     /** Changes the number of characters stored.
 
@@ -794,20 +939,26 @@ public:
         characters are initialized to the value of `c`.
     */
     void
-    resize(std::size_t n, CharT c);
+    resize(
+        std::size_t n,
+        CharT c);
 
     /// Exchange the contents of this string with another.
     void
-    swap(fixed_string& str);
+    swap(
+        fixed_string& s);
 
     /// Exchange the contents of this string with another.
     template<std::size_t M>
     void
-    swap(fixed_string<M, CharT, Traits>& str);
+    swap(
+        fixed_string<M, CharT, Traits>& s);
 
+    //--------------------------------------------------------------------------
     //
     // Search
     //
+    //--------------------------------------------------------------------------
 
 private:
     fixed_string&
@@ -817,45 +968,54 @@ private:
     assign_char(CharT ch, std::false_type);
 };
 
+//------------------------------------------------------------------------------
 //
 // Disallowed operations
 //
+//------------------------------------------------------------------------------
 
 // These operations are explicitly deleted since
 // there is no reasonable implementation possible.
 
-template<std::size_t N, std::size_t M, class CharT, class Traits>
+template<std::size_t N, std::size_t M, typename CharT, typename Traits>
 void
 operator+(
     fixed_string<N, CharT, Traits>const& lhs,
     fixed_string<M, CharT, Traits>const& rhs) = delete;
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
-operator+(CharT const* lhs,
+operator+(
+    CharT const* lhs,
     fixed_string<N, CharT, Traits>const& rhs) = delete;
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
-operator+(CharT lhs,
+operator+(
+    CharT lhs,
     fixed_string<N, CharT, Traits> const& rhs) = delete;
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
-operator+(fixed_string<N, CharT, Traits> const& lhs,
+operator+(
+    fixed_string<N, CharT, Traits> const& lhs,
     CharT const* rhs) = delete;
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
-operator+(fixed_string<N, CharT, Traits> const& lhs,
+operator+(
+    fixed_string<N, CharT, Traits> const& lhs,
     CharT rhs) = delete;
 
+//------------------------------------------------------------------------------
 //
 // Non-member functions
 //
+//------------------------------------------------------------------------------
 
-template<std::size_t N, std::size_t M,
-    class CharT, class Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 bool
 operator==(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -864,8 +1024,9 @@ operator==(
     return lhs.compare(rhs) == 0;
 }
 
-template<std::size_t N, std::size_t M,
-    class CharT, class Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 bool
 operator!=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -874,8 +1035,9 @@ operator!=(
     return lhs.compare(rhs) != 0;
 }
 
-template<std::size_t N, std::size_t M,
-    class CharT, class Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 bool
 operator<(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -884,8 +1046,9 @@ operator<(
     return lhs.compare(rhs) < 0;
 }
 
-template<std::size_t N, std::size_t M,
-    class CharT, class Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 bool
 operator<=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -894,8 +1057,9 @@ operator<=(
     return lhs.compare(rhs) <= 0;
 }
 
-template<std::size_t N, std::size_t M,
-    class CharT, class Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 bool
 operator>(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -904,8 +1068,9 @@ operator>(
     return lhs.compare(rhs) > 0;
 }
 
-template<std::size_t N, std::size_t M,
-    class CharT, class Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 bool
 operator>=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -914,7 +1079,7 @@ operator>=(
     return lhs.compare(rhs) >= 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator==(
     CharT const* lhs,
@@ -925,7 +1090,7 @@ operator==(
         rhs.data(), rhs.size()) == 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator==(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -936,7 +1101,7 @@ operator==(
         rhs, Traits::length(rhs)) == 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator!=(
     CharT const* lhs,
@@ -947,7 +1112,7 @@ operator!=(
         rhs.data(), rhs.size()) != 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator!=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -958,7 +1123,7 @@ operator!=(
         rhs, Traits::length(rhs)) != 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator<(
     CharT const* lhs,
@@ -969,7 +1134,7 @@ operator<(
         rhs.data(), rhs.size()) < 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator<(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -980,7 +1145,7 @@ operator<(
         rhs, Traits::length(rhs)) < 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator<=(
     CharT const* lhs,
@@ -991,7 +1156,7 @@ operator<=(
         rhs.data(), rhs.size()) <= 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator<=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -1002,7 +1167,7 @@ operator<=(
         rhs, Traits::length(rhs)) <= 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator>(
     CharT const* lhs,
@@ -1013,7 +1178,7 @@ operator>(
         rhs.data(), rhs.size()) > 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator>(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -1024,7 +1189,7 @@ operator>(
         rhs, Traits::length(rhs)) > 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator>=(
     CharT const* lhs,
@@ -1035,7 +1200,7 @@ operator>=(
         rhs.data(), rhs.size()) >= 0;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 bool
 operator>=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -1046,11 +1211,13 @@ operator>=(
         rhs, Traits::length(rhs)) >= 0;
 }
 
+//------------------------------------------------------------------------------
 //
 // swap
 //
+//------------------------------------------------------------------------------
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
 swap(
     fixed_string<N, CharT, Traits>& lhs,
@@ -1059,8 +1226,9 @@ swap(
     lhs.swap(rhs);
 }
 
-template<std::size_t N, std::size_t M,
-    class CharT, class Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 void
 swap(
     fixed_string<N, CharT, Traits>& lhs,
@@ -1069,22 +1237,26 @@ swap(
     lhs.swap(rhs);
 }
 
+//------------------------------------------------------------------------------
 //
 // Input/Output
 //
+//------------------------------------------------------------------------------
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits>& 
 operator<<(std::basic_ostream<CharT, Traits>& os, 
-    fixed_string<N, CharT, Traits> const& str)
+    fixed_string<N, CharT, Traits> const& s)
 {
     return os << static_cast<
-        basic_string_view<CharT, Traits>>(str);
+        basic_string_view<CharT, Traits>>(s);
 }
 
+//------------------------------------------------------------------------------
 //
 // Numeric conversions
 //
+//------------------------------------------------------------------------------
 
 /** Returns a static string representing an integer as a decimal.
 
@@ -1092,13 +1264,13 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
     This must be an integral type.
 
     @return A @ref fixed_string with an implementation defined
-    maximum size large enough to hold the longest possible decimal
-    representation of any integer of the given type.
+    maximum size at least as large enough to hold the longest
+    possible decimal representation of any integer of the given type.
 */
 template<
     class Integer
-#ifndef BOOST_BEAST_DOXYGEN
-    ,class = typename std::enable_if<
+#ifndef GENERATING_DOCUMENTATION
+    , class = typename std::enable_if<
         std::is_integral<Integer>::value>::type
 #endif
 >

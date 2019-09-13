@@ -21,7 +21,7 @@ namespace fixed_string {
 // (constructor)
 //
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string()
 {
@@ -29,14 +29,14 @@ fixed_string()
     term();
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(size_type count, CharT ch)
 {
     assign(count, ch);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 fixed_string<N, CharT, Traits>::
 fixed_string(fixed_string<M, CharT, Traits> const& other,
@@ -45,23 +45,25 @@ fixed_string(fixed_string<M, CharT, Traits> const& other,
     assign(other, pos);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 fixed_string<N, CharT, Traits>::
-fixed_string(fixed_string<M, CharT, Traits> const& other,
-    size_type pos, size_type count)
+fixed_string(
+    fixed_string<M, CharT, Traits> const& other,
+    size_type pos,
+    size_type count)
 {
     assign(other, pos, count);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(CharT const* s, size_type count)
 {
     assign(s, count);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(CharT const* s)
 {
@@ -73,44 +75,51 @@ fixed_string(CharT const* s)
     Traits::copy(&s_[0], s, n_ + 1);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<class InputIt>
 fixed_string<N, CharT, Traits>::
-fixed_string(InputIt first, InputIt last)
+fixed_string(
+    InputIt first,
+    InputIt last,
+    typename std::enable_if<
+        detail::is_input_iterator<InputIt>::value,
+            iterator>::type*)
 {
     assign(first, last);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
-fixed_string(fixed_string const& s)
+fixed_string(
+    fixed_string const& s)
 {
     assign(s);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 fixed_string<N, CharT, Traits>::
-fixed_string(fixed_string<M, CharT, Traits> const& s)
+fixed_string(
+    fixed_string<M, CharT, Traits> const& s)
 {
     assign(s);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(std::initializer_list<CharT> init)
 {
     assign(init.begin(), init.end());
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(string_view_type sv)
 {
     assign(sv);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
 fixed_string<N, CharT, Traits>::
 fixed_string(T const& t, size_type pos, size_type n)
@@ -122,7 +131,7 @@ fixed_string(T const& t, size_type pos, size_type n)
 // (assignment)
 //
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 operator=(CharT const* s) ->
@@ -137,7 +146,7 @@ operator=(CharT const* s) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 assign(size_type count, CharT ch) ->
@@ -152,33 +161,33 @@ assign(size_type count, CharT ch) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-assign(fixed_string const& str) ->
+assign(fixed_string const& s) ->
     fixed_string&
 {
-    n_ = str.n_;
+    n_ = s.n_;
     auto const n = n_ + 1;
     // VFALCO I can't remember the thinking behind this
     //BOOST_BEAST_ASSUME(n != 0);
-    Traits::copy(&s_[0], &str.s_[0], n);
+    Traits::copy(&s_[0], &s.s_[0], n);
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 auto
 fixed_string<N, CharT, Traits>::
-assign(fixed_string<M, CharT, Traits> const& str,
+assign(fixed_string<M, CharT, Traits> const& s,
         size_type pos, size_type count) ->
     fixed_string&
 {
-    auto const ss = str.substr(pos, count);
+    auto const ss = s.substr(pos, count);
     return assign(ss.data(), ss.size());
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 assign(CharT const* s, size_type count) ->
@@ -193,12 +202,14 @@ assign(CharT const* s, size_type count) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<class InputIt>
 auto
 fixed_string<N, CharT, Traits>::
 assign(InputIt first, InputIt last) ->
-    fixed_string&
+    typename std::enable_if<
+        detail::is_input_iterator<InputIt>::value,
+            fixed_string&>::type
 {
     std::size_t const n = std::distance(first, last);
     if(n > max_size())
@@ -211,7 +222,7 @@ assign(InputIt first, InputIt last) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<class T>
 auto
 fixed_string<N, CharT, Traits>::
@@ -233,7 +244,7 @@ assign(T const& t, size_type pos, size_type count) ->
 // Element access
 //
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 at(size_type pos) ->
@@ -245,7 +256,7 @@ at(size_type pos) ->
     return s_[pos];
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 at(size_type pos) const ->
@@ -261,7 +272,7 @@ at(size_type pos) const ->
 // Capacity
 //
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
 reserve(std::size_t n)
@@ -275,7 +286,7 @@ reserve(std::size_t n)
 // Operations
 //
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
 clear()
@@ -284,7 +295,7 @@ clear()
     term();
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 insert(size_type index, size_type count, CharT ch) ->
@@ -297,7 +308,7 @@ insert(size_type index, size_type count, CharT ch) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 insert(size_type index, CharT const* s, size_type count) ->
@@ -317,20 +328,20 @@ insert(size_type index, CharT const* s, size_type count) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 auto
 fixed_string<N, CharT, Traits>::
 insert(size_type index,
-    fixed_string<M, CharT, Traits> const& str,
+    fixed_string<M, CharT, Traits> const& s,
         size_type index_str, size_type count) ->
     fixed_string&
 {
-    auto const ss = str.substr(index_str, count);
+    auto const ss = s.substr(index_str, count);
     return insert(index, ss.data(), ss.size());
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 insert(const_iterator pos, size_type count, CharT ch) ->
@@ -348,7 +359,7 @@ insert(const_iterator pos, size_type count, CharT ch) ->
     return &s_[index];
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<class InputIt>
 auto
 fixed_string<N, CharT, Traits>::
@@ -372,7 +383,7 @@ insert(const_iterator pos, InputIt first, InputIt last) ->
     return begin() + index;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<class T>
 auto
 fixed_string<N, CharT, Traits>::
@@ -383,12 +394,12 @@ insert(size_type index, const T& t,
         ! std::is_convertible<T const&, CharT const*>::value,
             fixed_string&>::type
 {
-    auto const str =
+    auto const s =
         string_view_type(t).substr(index_str, count);
-    return insert(index, str.data(), str.size());
+    return insert(index, s.data(), s.size());
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 erase(size_type index, size_type count) ->
@@ -404,7 +415,7 @@ erase(size_type index, size_type count) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 erase(const_iterator pos) ->
@@ -414,7 +425,7 @@ erase(const_iterator pos) ->
     return begin() + (pos - begin());
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 erase(const_iterator first, const_iterator last) ->
@@ -425,7 +436,7 @@ erase(const_iterator first, const_iterator last) ->
     return begin() + (first - begin());
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
 push_back(CharT ch)
@@ -437,25 +448,25 @@ push_back(CharT ch)
     term();
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 auto
 fixed_string<N, CharT, Traits>::
-append(fixed_string<M, CharT, Traits> const& str,
+append(fixed_string<M, CharT, Traits> const& s,
         size_type pos, size_type count) ->
     fixed_string&
 {
     // Valid range is [0, size)
-    if(pos >= str.size())
+    if(pos >= s.size())
         BOOST_THROW_EXCEPTION(std::out_of_range{
-            "pos > str.size()"});
-    string_view_type const ss{&str.s_[pos],
-        (std::min)(count, str.size() - pos)};
+            "pos > s.size()"});
+    string_view_type const ss{&s.s_[pos],
+        (std::min)(count, s.size() - pos)};
     insert(size(), ss.data(), ss.size());
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
@@ -467,18 +478,18 @@ substr(size_type pos, size_type count) const ->
     return{&s_[pos], (std::min)(count, size() - pos)};
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 copy(CharT* dest, size_type count, size_type pos) const ->
     size_type
 {
-    auto const str = substr(pos, count);
-    Traits::copy(dest, str.data(), str.size());
-    return str.size();
+    auto const s = substr(pos, count);
+    Traits::copy(dest, s.data(), s.size());
+    return s.size();
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
 resize(std::size_t n)
@@ -492,7 +503,7 @@ resize(std::size_t n)
     term();
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
 resize(std::size_t n, CharT c)
@@ -506,39 +517,39 @@ resize(std::size_t n, CharT c)
     term();
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
-swap(fixed_string& str)
+swap(fixed_string& s)
 {
-    fixed_string tmp(str);
-    str.n_ = n_;
-    Traits::copy(&str.s_[0], &s_[0], n_ + 1);
+    fixed_string tmp(s);
+    s.n_ = n_;
+    Traits::copy(&s.s_[0], &s_[0], n_ + 1);
     n_ = tmp.n_;
     Traits::copy(&s_[0], &tmp.s_[0], n_ + 1);
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 void
 fixed_string<N, CharT, Traits>::
-swap(fixed_string<M, CharT, Traits>& str)
+swap(fixed_string<M, CharT, Traits>& s)
 {
-    if(size() > str.max_size())
+    if(size() > s.max_size())
         BOOST_THROW_EXCEPTION(std::length_error{
-            "size() > str.max_size()"});
-    if(str.size() > max_size())
+            "size() > s.max_size()"});
+    if(s.size() > max_size())
         BOOST_THROW_EXCEPTION(std::length_error{
-            "str.size() > max_size()"});
-    fixed_string tmp(str);
-    str.n_ = n_;
-    Traits::copy(&str.s_[0], &s_[0], n_ + 1);
+            "s.size() > max_size()"});
+    fixed_string tmp(s);
+    s.n_ = n_;
+    Traits::copy(&s.s_[0], &s_[0], n_ + 1);
     n_ = tmp.n_;
     Traits::copy(&s_[0], &tmp.s_[0], n_ + 1);
 }
 
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 assign_char(CharT ch, std::true_type) ->
@@ -550,7 +561,7 @@ assign_char(CharT ch, std::true_type) ->
     return *this;
 }
 
-template<std::size_t N, class CharT, class Traits>
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 assign_char(CharT, std::false_type) ->
