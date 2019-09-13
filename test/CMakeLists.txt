@@ -13,7 +13,6 @@ GroupSources (test "/")
 add_executable (tests
     ${PROJECT_FILES}
     Jamfile
-    lib.cpp
     fixed_string.cpp
 )
 
