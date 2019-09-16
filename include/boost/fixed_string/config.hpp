@@ -23,6 +23,10 @@ template<typename CharT, typename Traits>
 using basic_string_view =
     boost::basic_string_view<CharT, Traits>;
 
+#ifndef BOOST_NODISCARD
+#define BOOST_NODISCARD
+#endif
+
 } // fixed_string
 } // boost
 

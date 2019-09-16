@@ -90,7 +90,7 @@ public:
     static std::size_t constexpr static_capacity = N;
 
     /// A special index
-    static constexpr size_type npos = size_type(-1);
+    static constexpr size_type npos = string_view_type::npos;
 
     //--------------------------------------------------------------------------
     //
@@ -98,10 +98,10 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /// Default constructor (empty string).
+    /// Construct an empty string
     fixed_string();
 
-    /** Construct with count copies of character `ch`.
+    /** Construct the string with `count` copies of character `ch`.
     
         The behavior is undefined if `count >= npos`
     */
@@ -167,7 +167,7 @@ public:
         obtained by converting `t` to `string_view_type`,
         and used to construct the string.
     */
-    template<class T
+    template<typename T
 #ifndef GENERATING_DOCUMENTATION
     , class = typename std::enable_if<
         std::is_convertible<T, string_view_type>::value>::type
@@ -184,15 +184,22 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /// Copy assignment.
+    /** Copy assignment
+
+        If `*this` and `s` are the same object,
+        this function has no effect.
+    */
     fixed_string&
     operator=(
-        fixed_string const& s)
+        fixed_string const& s) noexcept
     {
         return assign(s);
     }
 
-    /// Copy assignment.
+    /** Replace the contents with a copy of `s`
+
+        @throw std::length_error if `s.size() > max_size()`
+    */
     template<std::size_t M>
     fixed_string&
     operator=(
@@ -201,10 +208,16 @@ public:
         return assign(s);
     }
 
-    /// Assign from null-terminated string.
+    /** Replace the contents with those of the null-terminated string `s`
+
+        @throw std::length_error if `Traits::length(s) > max_size()`
+    */
     fixed_string&
     operator=(
-        CharT const* s);
+        CharT const* s)
+    {
+        return assign(s);
+    }
 
     /// Assign from single character.
     fixed_string&
@@ -218,9 +231,9 @@ public:
     /// Assign from initializer list.
     fixed_string&
     operator=(
-        std::initializer_list<CharT> init)
+        std::initializer_list<CharT> ilist)
     {
-        return assign(init);
+        return assign(ilist);
     }
 
     /// Assign from `string_view_type`.
@@ -231,18 +244,29 @@ public:
         return assign(sv);
     }
 
-    /// Assign `count` copies of `ch`.
+    /** Replace the contents with `count` copies of character `ch`
+
+        @throw std::length_error if `count > max_size()`
+        @return `*this`
+    */
     fixed_string&
     assign(
         size_type count,
         CharT ch);
 
-    /// Assign from another `fixed_string`
+    /** Replace the contents with a copy of another `fixed_string`
+
+        @return `*this`
+    */
     fixed_string&
     assign(
-        fixed_string const& s);
+        fixed_string const& s) noexcept;
 
-    /// Assign from another `fixed_string`
+    /** Replace the contents with a copy of another `fixed_string`
+
+        @throw std::length_error if `s.size() > max_size()`
+        @return `*this`
+    */
     template<std::size_t M>
     fixed_string&
     assign(
@@ -254,7 +278,11 @@ public:
         return assign(s.data(), s.size());
     }
 
-    /// Assign `count` characters starting at `npos` from `other`.
+    /** Replace the contents with a copy of `count` characters starting at `npos` from `s`.
+
+        @throw std::length_error if `count > max_size()`
+        @return `*this`
+    */
     template<std::size_t M>
     fixed_string&
     assign(
@@ -262,13 +290,21 @@ public:
         size_type pos,
         size_type count = npos);
 
-    /// Assign the first `count` characters of `s`, including nulls.
+    /** Replace the contents with the first `count` characters of `s`, including nulls.
+
+        @throw std::length_error if `count > max_size()`
+        @return `*this`
+    */
     fixed_string&
     assign(
         CharT const* s,
         size_type count);
 
-    /// Assign a null terminated string.
+    /** Replace the contents with a copy of a null terminated string `s`
+
+        @throw std::length_error if `Traits::length(s) > max_size()`
+        @return `*this`
+    */
     fixed_string&
     assign(
         CharT const* s)
@@ -276,7 +312,11 @@ public:
         return assign(s, Traits::length(s));
     }
 
-    /// Assign from an iterator range of characters.
+    /** Replace the contents with a copy of characters from the range `[first, last)`
+      
+        @throw std::length_error if `std::distance(first, last) > max_size()`
+        @return `*this`
+    */
     template<typename InputIt>
 #ifdef GENERATING_DOCUMENTATION
     fixed_string&
@@ -289,39 +329,62 @@ public:
         InputIt first,
         InputIt last);
 
-    /// Assign from initializer list.
-    fixed_string&
-    assign(
-        std::initializer_list<CharT> init)
-    {
-        return assign(init.begin(), init.end());
-    }
+    /** Replace the contents with the characters in an initializer list
 
-    /// Assign from `string_view_type`.
-    fixed_string&
-    assign(
-        string_view_type s)
-    {
-        return assign(s.data(), s.size());
-    }
-
-    /** Assign from any object convertible to `string_view_type`.
-
-        The range (pos, n) is extracted from the value
-        obtained by converting `t` to `string_view_type`,
-        and used to assign the string.
+        @throw std::length_error if `ilist.size() > max_size()`
+        @return `*this`
     */
-    template<class T>
+    fixed_string&
+    assign(
+        std::initializer_list<CharT> ilist)
+    {
+        return assign(ilist.begin(), ilist.end());
+    }
+
+    /** Replace the contents with a copy of the characters from `string_view_type{t}`
+
+        @throw std::length_error if `string_view_type{t}.size() > max_size()`
+    */
+    template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
-    typename std::enable_if<std::is_convertible<T,
-        string_view_type>::value, fixed_string&>::type
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            fixed_string&>::type
+#endif
+    assign(T const& t)
+    {
+        string_view_type ss{t};
+        return assign(ss.data(), ss.size());
+    }
+
+    /** Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
+
+        The range `[pos, count)` is extracted from the value
+        obtained by converting `t` to `string_view_type`,
+        and used to assign the string.
+
+        @throw std::out_of_range if `pos > string_view_type{t}.size()`
+        @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size()`
+    */
+    template<typename T>
+#if GENERATING_DOCUMENTATION
+    fixed_string&
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            fixed_string&>::type
 #endif
     assign(
         T const& t,
         size_type pos,
-        size_type count = npos);
+        size_type count = npos)
+    {
+        return assign(string_view_type{t}.substr(pos, count));
+    }
 
     //--------------------------------------------------------------------------
     //
@@ -329,79 +392,103 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /// Access specified character with bounds checking.
+    /** Access specified character with bounds checking.
+
+        @throw std::out_of_range if `pos >= size()`
+    */
     reference
     at(size_type pos);
 
-    /// Access specified character with bounds checking.
+    /** Access specified character with bounds checking.
+
+        @throw std::out_of_range if `pos >= size()`
+    */
     const_reference
     at(size_type pos) const;
 
-    /// Access specified character.
+    /** Access specified character
+
+        Undefined behavior if `pos > size()`
+    */
     reference
     operator[](size_type pos)
     {
         return s_[pos];
     }
 
-    /// Access specified character.
+    /** Access specified character.
+
+        Undefined behavior if `pos > size()`
+    */
     const_reference
     operator[](size_type pos) const
     {
         return s_[pos];
     }
 
-    /// Accesses the first character.
+    /** Accesses the first character.
+
+        Undefined behavior if `empty() == true`
+    */
     CharT&
     front()
     {
         return s_[0];
     }
 
-    /// Accesses the first character.
+    /** Accesses the first character.
+
+        Undefined behavior if `empty() == true`
+    */
     CharT const&
     front() const
     {
         return s_[0];
     }
 
-    /// Accesses the last character.
+    /** Accesses the last character.
+
+        Undefined behavior if `empty() == true`
+    */
     CharT&
     back()
     {
         return s_[n_-1];
     }
 
-    /// Accesses the last character.
+    /** Accesses the last character.
+
+        Undefined behavior if `empty() == true`
+    */
     CharT const&
-    back() const
+    back() const 
     {
         return s_[n_-1];
     }
 
-    /// Returns a pointer to the first character of a string.
+    /// Returns a pointer to the first character of the string.
     CharT*
-    data()
+    data() noexcept
     {
         return &s_[0];
     }
 
     /// Returns a pointer to the first character of a string.
     CharT const*
-    data() const
+    data() const noexcept
     {
         return &s_[0];
     }
 
     /// Returns a non-modifiable standard C character array version of the string.
     CharT const*
-    c_str() const
+    c_str() const noexcept
     {
         return data();
     }
 
     /// Convert a static string to a `string_view_type`
-    operator string_view_type() const
+    operator string_view_type() const noexcept
     {
         return basic_string_view<
             CharT, Traits>{data(), size()};
@@ -415,84 +502,84 @@ public:
 
     /// Returns an iterator to the beginning.
     iterator
-    begin()
+    begin() noexcept
     {
         return &s_[0];
     }
 
     /// Returns an iterator to the beginning.
     const_iterator
-    begin() const
+    begin() const noexcept
     {
         return &s_[0];
     }
 
     /// Returns an iterator to the beginning.
     const_iterator
-    cbegin() const
+    cbegin() const noexcept
     {
         return &s_[0];
     }
 
     /// Returns an iterator to the end.
     iterator
-    end()
+    end() noexcept
     {
         return &s_[n_];
     }
 
     /// Returns an iterator to the end.
     const_iterator
-    end() const
+    end() const noexcept
     {
         return &s_[n_];
     }
 
     /// Returns an iterator to the end.
     const_iterator
-    cend() const
+    cend() const noexcept
     {
         return &s_[n_];
     }
 
     /// Returns a reverse iterator to the beginning.
     reverse_iterator
-    rbegin()
+    rbegin() noexcept
     {
         return reverse_iterator{end()};
     }
 
     /// Returns a reverse iterator to the beginning.
     const_reverse_iterator
-    rbegin() const
+    rbegin() const noexcept
     {
         return const_reverse_iterator{cend()};
     }
 
     /// Returns a reverse iterator to the beginning.
     const_reverse_iterator
-    crbegin() const
+    crbegin() const noexcept
     {
         return const_reverse_iterator{cend()};
     }
 
     /// Returns a reverse iterator to the end.
     reverse_iterator
-    rend()
+    rend() noexcept
     {
         return reverse_iterator{begin()};
     }
 
     /// Returns a reverse iterator to the end.
     const_reverse_iterator
-    rend() const
+    rend() const noexcept
     {
         return const_reverse_iterator{cbegin()};
     }
 
     /// Returns a reverse iterator to the end.
     const_reverse_iterator
-    crend() const
+    crend() const noexcept
     {
         return const_reverse_iterator{cbegin()};
     }
@@ -504,6 +591,7 @@ public:
     //--------------------------------------------------------------------------
 
     /// Returns `true` if the string is empty.
+    BOOST_NODISCARD
     bool
     empty() const
     {
@@ -517,7 +605,10 @@ public:
         return n_;
     }
 
-    /// Returns the number of characters, excluding the null terminator.
+    /** Returns the number of characters, excluding the null terminator
+
+        Equivalent to calling `size()`.
+    */
     size_type
     length() const
     {
@@ -531,15 +622,19 @@ public:
         return N;
     }
 
-    /** Reserves storage.
+    /** Reserve space for `n` characters, excluding the null terminator
 
-        This actually just throws an exception if `n > N`,
-        otherwise does nothing since the storage is fixed.
+        This function has no effect when `n <= max_size()`.
+
+        @throw std::length_error if `n > max_size()`
     */
     void
     reserve(std::size_t n);
 
-    /// Returns the number of characters that can be held in currently allocated storage.
+    /** Returns the number of characters that can be held in currently allocated storage.
+
+        This function always returns `max_size()`.
+    */
     size_type constexpr
     capacity() const
     {
@@ -548,10 +643,10 @@ public:
     
     /** Reduces memory usage by freeing unused memory.
 
-        This actually does nothing, since the storage is fixed.
+        This function call has no effect.
     */
     void
-    shrink_to_fit()
+    shrink_to_fit() noexcept
     {
     }
 
@@ -561,16 +656,28 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /// Clears the contents.
+    /// Clears the contents
     void
     clear();
 
+    /** Inserts `count` copies of character `ch` at the position `index`
+
+        @throw std::out_of_range if `index > size()`
+        @throw std::length_error if `size() + count > max_size()`
+        @return `*this`
+    */
     fixed_string&
     insert(
         size_type index,
         size_type count,
         CharT ch);
+    
+    /** Inserts null-terminated string pointed to by `s` at the position `index`
 
+        @throw std::out_of_range if `index > size()`
+        @throw std::length_error if `size() + count > max_size()`
+        @return `*this`
+    */
     fixed_string&
     insert(
         size_type index,
@@ -579,29 +686,61 @@ public:
         return insert(index, s, Traits::length(s));
     }
 
+    /** Inserts the characters in the range `[s, s+count]` at the position `index`
+
+        The inserted string can contain null characters.
+
+        @throw std::out_of_range if `index > size()`
+        @throw std::length_error if ` size() + count> max_size()`
+        @return `*this`
+    */
     fixed_string&
     insert(
         size_type index,
         CharT const* s,
         size_type count);
 
-    template<std::size_t M>
+    /** Inserts the contents of string view `sv` at the position `index`
+
+        The inserted string can contain null characters.
+
+        @throw std::out_of_range if `index > size()`
+        @throw std::length_error if `size() + sv.size() > max_size()`
+        @return `*this`
+    */
     fixed_string&
     insert(
         size_type index,
-        fixed_string<M, CharT, Traits> const& s)
+        string_view_type sv)
     {
-        return insert(index, s.data(), s.size());
+        return insert(index, sv.data(), sv.size());
     }
 
-    template<std::size_t M>
+    /** Inserts the string `sv.substr(index_str, count)` at the position `index`
+
+        The inserted string can contain null characters.
+
+        @throw std::out_of_range if `index > size() || index_str > sv.size()`
+        @throw std::length_error if `size() + sv.substr(index_str, count).size() > max_size()`
+        @return `*this`
+    */
     fixed_string&
     insert(
         size_type index,
-        fixed_string<M, CharT, Traits> const& s,
+        string_view_type sv,
         size_type index_str,
-        size_type count = npos);
+        size_type count = npos)
+    {
+        return insert(index, sv.substr(index_str, count));
+    }
 
+    /** Inserts character `ch` before the character (if any) pointed by `pos`
+
+        The inserted character can be null.
+
+        @throw std::length_error if `size() + 1> max_size()`
+        @return An iterator to the first inserted character or pos if no insertion took place
+    */
     iterator
     insert(
         const_iterator pos,
@@ -610,12 +749,29 @@ public:
         return insert(pos, 1, ch);
     }
 
+    /** Inserts `count` copies of character `ch` before the character (if any) pointed by `pos`
+
+        The inserted characters can be null.
+
+        @throw std::length_error if `size() + count > max_size()`
+        @return An iterator to the first inserted character or pos if no insertion took place
+    */
     iterator
     insert(
         const_iterator pos,
-        size_type count, CharT ch);
+        size_type count,
+        CharT ch);
 
-    template<class InputIt>
+    /** Inserts characters from the range `[first, last)` before the element (if any) pointed by `pos`
+
+        The inserted string can contain null characters.
+        This function does not participate in overload resolution if
+        `InputIt` does not satisfy <em>LegacyInputIterator</em>
+
+        @throw std::length_error if `size() + std::distance(first, last) > max_size()`
+        @return An iterator to the first inserted character or pos if no insertion took place
+    */
+    template<typename InputIt>
 #if GENERATING_DOCUMENTATION
     iterator
 #else
@@ -628,23 +784,58 @@ public:
         InputIt first,
         InputIt last);
 
+    /** Inserts elements from initializer list `ilist` before the element (if any) pointed by `pos`
+
+        The inserted string can contain null characters.
+
+        @throw std::length_error if `size() + ilist.size() > max_size()`
+        @return An iterator to the first inserted character or pos if no insertion took place
+    */
     iterator
     insert(
         const_iterator pos,
-        std::initializer_list<CharT> init)
+        std::initializer_list<CharT> ilist)
     {
-        return insert(pos, init.begin(), init.end());
+        return insert(pos, ilist.begin(), ilist.end());
     }
 
+    /** Inserts elements from `string_view{t}` at the position `index`
+
+        The inserted string can contain null characters.
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
+        @return `*this`
+    */
+    template<typename T>
+#if GENERATING_DOCUMENTATION
     fixed_string&
+#else
+    typename std::enable_if<
+        std::is_convertible<
+            T const&, string_view_type>::value &&
+        ! std::is_convertible<
+            T const&, CharT const*>::value,
+                fixed_string&>::type
+#endif
     insert(
         size_type index,
-        string_view_type s)
-    {
-        return insert(index, s.data(), s.size());
-    }
+        T const& t);
 
-    template<class T>
+    /** Inserts elements from `string_view{t}.substr(index_str, count)` at the position `index`
+
+        The inserted string can contain null characters.
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::out_of_range if `index_str > string_view{t}.size()`
+        @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
+        @return `*this`
+    */
+    template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -659,73 +850,135 @@ public:
         size_type index_str,
         size_type count = npos);
 
+    /** Removes `min(count, size() - index)` characters starting at `index`
+
+        @throw std::out_of_range if `index > size()`
+        @return `*this`
+    */
     fixed_string&
     erase(
         size_type index = 0,
         size_type count = npos);
 
+    /** Removes the character at `pos`
+
+        @return iterator pointing to the character immediately following the character erased, or `end()` if no such character exists
+    */
     iterator
     erase(
         const_iterator pos);
 
+    /** Removes the characters in the range [first, last).
+
+        @return iterator pointing to the character last pointed to before the erase, or `end()` if no such character exists
+    */
     iterator
     erase(
         const_iterator first,
         const_iterator last);
 
+    /** Appends the given character `ch` to the end of the string.
+
+        @throw std::length_error if `size() + 1 > max_size()`
+    */
     void
     push_back(
         CharT ch);
 
+    /** Removes the last character from the string
+
+        The behavior is undefined if the string is empty.
+    */
     void
     pop_back()
     {
+        BOOST_ASSERT(n_ > 0);
         Traits::assign(s_[--n_], 0);
     }
 
+    /** Appends `count` copies of character `ch`
+
+        The appended characters may be null.
+
+        @throw std::length_error if `size() + count > max_size()`
+        @return `*this`
+    */
     fixed_string&
     append(
         size_type count,
         CharT ch)
     {
-        insert(end(), count, ch);
-        return *this;
+        return insert(n_, count, ch);
     }
 
-    template<std::size_t M>
+    /** Appends the contents of string view `sv`
+
+        The appended string can contain null characters.
+
+        @throw std::length_error if `size() + sv.size() > max_size()`
+        @return `*this`
+    */
     fixed_string&
     append(
-        fixed_string<M, CharT, Traits> const& s)
+        string_view_type sv)
     {
-        insert(size(), s);
-        return *this;
+        return append(sv.data(), sv.size());
     }
 
-    template<std::size_t M>
+    /** Appends the contents of `sv.substr(pos, count)`
+
+        The appended string can contain null characters.
+
+        @throw std::out_of_range if `pos > sv.size()`
+        @throw std::length_error if `size() + sv.substr(pos, count).size() > max_size()`
+        @return `*this`
+    */
     fixed_string&
     append(
-        fixed_string<M, CharT, Traits> const& s,
+        string_view_type sv,
         size_type pos,
-        size_type count = npos);
+        size_type count = npos)
+    {
+        return append(sv.substr(pos, count));
+    }
 
+    /** Appends characters in the range [s, s + count)
+    
+        The appended string can contain null characters.
+
+        @throw std::length_error if `size() + count > max_size()`
+        @return `*this`
+    */
     fixed_string&
     append(
         CharT const* s,
-        size_type count)
-    {
-        insert(size(), s, count);
-        return *this;
-    }
+        size_type count);
 
+    /** Appends the null-terminated character string pointed to by `s`
+    
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`.
+
+        @throw std::length_error if `size() + Traits::length(s) > max_size()`
+        @return `*this`
+    */
     fixed_string&
     append(
         CharT const* s)
     {
-        insert(size(), s);
-        return *this;
+        return append(s, Traits::length(s));
     }
 
-    template<class InputIt>
+    /** Appends characters from the range `[first, last)`
+
+        The inserted string can contain null characters.
+        This function does not participate in overload resolution if
+        `InputIt` does not satisfy <em>LegacyInputIterator</em>
+
+        @throw std::length_error if `size() + std::distance(first, last) > max_size()`
+        @return `*this`
+    */
+    template<typename InputIt>
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -741,38 +994,76 @@ public:
         return *this;
     }
 
+    /** Appends characters from initializer list `ilist`
+
+        The appended string can contain null characters.
+
+        @throw std::length_error if `size() + ilist.size() > max_size()`
+        @return `*this`
+    */
     fixed_string&
     append(
-        std::initializer_list<CharT> init)
+        std::initializer_list<CharT> ilist)
     {
-        insert(end(), init);
+        insert(end(), ilist);
         return *this;
     }
 
-    fixed_string&
-    append(
-        string_view_type sv)
-    {
-        insert(size(), sv);
-        return *this;
-    }
+    /** Appends characters from `string_view{t}`
 
-    template<class T>
+        The appended string can contain null characters.
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::length_error if `size() + string_view{t} > max_size()`
+        @return `*this`
+    */
+    template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<
-        std::is_convertible<T const&, string_view_type>::value &&
-        ! std::is_convertible<T const&, CharT const*>::value,
-            fixed_string&>::type
+        std::is_convertible<
+            T const&, string_view_type>::value &&
+        ! std::is_convertible<
+            T const&, CharT const*>::value,
+                fixed_string&>::type
+#endif
+    append(
+        T const& t)
+    {
+        return append(string_view{t});
+    }
+
+    /** Appends characters from `string_view{t}.substr{pos, count}`
+
+        The appended string can contain null characters.
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::out_of_range if `pos > string_view{t}.size()`
+        @throw std::length_error if `size() + string_view{t}.substr(pos, count).size() > max_size()`
+        @return `*this`
+    */
+    template<typename T>
+#if GENERATING_DOCUMENTATION
+    fixed_string&
+#else
+    typename std::enable_if<
+        std::is_convertible<
+            T const&, string_view_type>::value &&
+        ! std::is_convertible<
+            T const&, CharT const*>::value,
+                fixed_string&>::type
 #endif
     append(
         T const& t,
         size_type pos,
         size_type count = npos)
     {
-        insert(size(), t, pos, count);
-        return *this;
+        return append(string_view{t}.substr(pos, count));
     }
 
     template<std::size_t M>
@@ -783,6 +1074,10 @@ public:
         return append(s.data(), s.size());
     }
 
+    /** Appends the given character `ch` to the end of the string.
+
+        @throw std::length_error if `size() + 1 > max_size()`
+    */
     fixed_string&
     operator+=(
         CharT ch)
@@ -791,6 +1086,14 @@ public:
         return *this;
     }
 
+    /** Appends the null-terminated character string pointed to by `s`
+    
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`.
+
+        @throw std::length_error if `size() + Traits::length(s) > max_size()`
+        @return `*this`
+    */
     fixed_string&
     operator+=(
         CharT const* s)
@@ -798,18 +1101,42 @@ public:
         return append(s);
     }
 
+    /** Appends characters from initializer list `ilist`
+
+        The appended string can contain null characters.
+
+        @throw std::length_error if `size() + ilist.size() > max_size()`
+        @return `*this`
+    */
     fixed_string&
     operator+=(
-        std::initializer_list<CharT> init)
+        std::initializer_list<CharT> ilist)
     {
-        return append(init);
+        return append(ilist);
     }
 
+    /** Appends a copy of the characters from `string_view_type{t}`
+
+        The appended string can contain null characters.
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::length_error if `string_view_type{t}.size() > max_size()`
+    */
+    template<typename T>
+#if GENERATING_DOCUMENTATION
     fixed_string&
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            fixed_string&>::type
+#endif
     operator+=(
-        string_view_type const& s)
+        T const& t)
     {
-        return append(s);
+        return append(t);
     }
 
     template<std::size_t M>
@@ -892,7 +1219,7 @@ public:
             substr(pos1, count1), s);
     }
 
-    template<class T>
+    template<typename T>
 #if GENERATING_DOCUMENTATION
     int
 #else
@@ -977,7 +1304,9 @@ private:
 // These operations are explicitly deleted since
 // there is no reasonable implementation possible.
 
-template<std::size_t N, std::size_t M, typename CharT, typename Traits>
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
 void
 operator+(
     fixed_string<N, CharT, Traits>const& lhs,

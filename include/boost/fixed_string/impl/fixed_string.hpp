@@ -11,15 +11,18 @@
 #define BOOST_FIXED_STRING_IMPL_FIXED_STRING_HPP
 
 #include <boost/fixed_string/detail/fixed_string.hpp>
+#include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/throw_exception.hpp>
 
 namespace boost {
 namespace fixed_string {
 
+//------------------------------------------------------------------------------
 //
-// (constructor)
+// Construction
 //
+//------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
@@ -127,30 +130,19 @@ fixed_string(T const& t, size_type pos, size_type n)
     assign(t, pos, n);
 }
 
+//------------------------------------------------------------------------------
 //
-// (assignment)
+// Assignment
 //
+//------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-operator=(CharT const* s) ->
-    fixed_string&
-{
-    auto const count = Traits::length(s);
-    if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "count > max_size()"});
-    n_ = count;
-    Traits::copy(&s_[0], s, n_ + 1);
-    return *this;
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-auto
-fixed_string<N, CharT, Traits>::
-assign(size_type count, CharT ch) ->
-    fixed_string&
+assign(
+    size_type count,
+    CharT ch) ->
+        fixed_string&
 {
     if(count > max_size())
         BOOST_THROW_EXCEPTION(std::length_error{
@@ -164,12 +156,15 @@ assign(size_type count, CharT ch) ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-assign(fixed_string const& s) ->
-    fixed_string&
+assign(
+    fixed_string const& s) noexcept ->
+        fixed_string&
 {
+    if(this == &s)
+        return *this;
     n_ = s.n_;
     auto const n = n_ + 1;
-    // VFALCO I can't remember the thinking behind this
+    // VFALCO This informs the static analyzer
     //BOOST_BEAST_ASSUME(n != 0);
     Traits::copy(&s_[0], &s.s_[0], n);
     return *this;
@@ -179,8 +174,10 @@ template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 auto
 fixed_string<N, CharT, Traits>::
-assign(fixed_string<M, CharT, Traits> const& s,
-        size_type pos, size_type count) ->
+assign(
+    fixed_string<M, CharT, Traits> const& s,
+    size_type pos,
+    size_type count) ->
     fixed_string&
 {
     auto const ss = s.substr(pos, count);
@@ -190,8 +187,10 @@ assign(fixed_string<M, CharT, Traits> const& s,
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-assign(CharT const* s, size_type count) ->
-    fixed_string&
+assign(
+    CharT const* s,
+    size_type count) ->
+        fixed_string&
 {
     if(count > max_size())
         BOOST_THROW_EXCEPTION(std::length_error{
@@ -206,10 +205,12 @@ template<std::size_t N, typename CharT, typename Traits>
 template<class InputIt>
 auto
 fixed_string<N, CharT, Traits>::
-assign(InputIt first, InputIt last) ->
-    typename std::enable_if<
-        detail::is_input_iterator<InputIt>::value,
-            fixed_string&>::type
+assign(
+    InputIt first,
+    InputIt last) ->
+        typename std::enable_if<
+            detail::is_input_iterator<InputIt>::value,
+                fixed_string&>::type
 {
     std::size_t const n = std::distance(first, last);
     if(n > max_size())
@@ -222,27 +223,11 @@ assign(InputIt first, InputIt last) ->
     return *this;
 }
 
-template<std::size_t N, typename CharT, typename Traits>
-template<class T>
-auto
-fixed_string<N, CharT, Traits>::
-assign(T const& t, size_type pos, size_type count) ->
-    typename std::enable_if<std::is_convertible<T,
-        string_view_type>::value, fixed_string&>::type
-{
-    auto const sv = string_view_type(t).substr(pos, count);
-    if(sv.size() > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "sv.size() > max_size()"});
-    n_ = sv.size();
-    Traits::copy(&s_[0], &sv[0], n_);
-    term();
-    return *this;
-}
-
+//------------------------------------------------------------------------------
 //
 // Element access
 //
+//------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
 auto
@@ -268,9 +253,11 @@ at(size_type pos) const ->
     return s_[pos];
 }
 
+//------------------------------------------------------------------------------
 //
 // Capacity
 //
+//------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
 void
@@ -282,9 +269,11 @@ reserve(std::size_t n)
             "n > max_size()"});
 }
 
+//------------------------------------------------------------------------------
 //
 // Operations
 //
+//------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
 void
@@ -295,11 +284,16 @@ clear()
     term();
 }
 
+//------------------------------------------------------------------------------
+
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-insert(size_type index, size_type count, CharT ch) ->
-    fixed_string&
+insert(
+    size_type index,
+    size_type count,
+    CharT ch) ->
+        fixed_string&
 {
     if(index > size())
         BOOST_THROW_EXCEPTION(std::out_of_range{
@@ -311,8 +305,11 @@ insert(size_type index, size_type count, CharT ch) ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-insert(size_type index, CharT const* s, size_type count) ->
-    fixed_string&
+insert(
+    size_type index,
+    CharT const* s,
+    size_type count) ->
+        fixed_string&
 {
     if(index > size())
         BOOST_THROW_EXCEPTION(std::out_of_range{
@@ -329,23 +326,13 @@ insert(size_type index, CharT const* s, size_type count) ->
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<std::size_t M>
 auto
 fixed_string<N, CharT, Traits>::
-insert(size_type index,
-    fixed_string<M, CharT, Traits> const& s,
-        size_type index_str, size_type count) ->
-    fixed_string&
-{
-    auto const ss = s.substr(index_str, count);
-    return insert(index, ss.data(), ss.size());
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-auto
-fixed_string<N, CharT, Traits>::
-insert(const_iterator pos, size_type count, CharT ch) ->
-    iterator
+insert(
+    const_iterator pos,
+    size_type count,
+    CharT ch) ->
+        iterator
 {
     if(size() + count > max_size())
         BOOST_THROW_EXCEPTION(std::length_error{
@@ -363,10 +350,13 @@ template<std::size_t N, typename CharT, typename Traits>
 template<class InputIt>
 auto
 fixed_string<N, CharT, Traits>::
-insert(const_iterator pos, InputIt first, InputIt last) ->
-    typename std::enable_if<
-        detail::is_input_iterator<InputIt>::value,
-            iterator>::type
+insert(
+    const_iterator pos,
+    InputIt first,
+    InputIt last) ->
+        typename std::enable_if<
+            detail::is_input_iterator<
+                InputIt>::value, iterator>::type
 {
     std::size_t const count = std::distance(first, last);
     if(size() + count > max_size())
@@ -387,23 +377,49 @@ template<std::size_t N, typename CharT, typename Traits>
 template<class T>
 auto
 fixed_string<N, CharT, Traits>::
-insert(size_type index, const T& t,
-        size_type index_str, size_type count) ->
-    typename std::enable_if<std::is_convertible<
-        T const&, string_view_type>::value &&
-        ! std::is_convertible<T const&, CharT const*>::value,
-            fixed_string&>::type
+insert(
+    size_type index,
+    T const & t) ->
+        typename std::enable_if<
+            std::is_convertible<
+                T const&, string_view_type>::value &&
+            ! std::is_convertible<
+                T const&, CharT const*>::value, fixed_string&
+                    >::type
+{
+    return insert(index, t, 0, npos);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<class T>
+auto
+fixed_string<N, CharT, Traits>::
+insert(
+    size_type index,
+    T const & t,
+    size_type index_str,
+    size_type count) ->
+        typename std::enable_if<
+            std::is_convertible<
+                T const&, string_view_type>::value &&
+            ! std::is_convertible<
+                T const&, CharT const*>::value, fixed_string&
+                    >::type
 {
     auto const s =
         string_view_type(t).substr(index_str, count);
     return insert(index, s.data(), s.size());
 }
 
+//------------------------------------------------------------------------------
+
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-erase(size_type index, size_type count) ->
-    fixed_string&
+erase(
+    size_type index,
+    size_type count) ->
+        fixed_string&
 {
     if(index > size())
         BOOST_THROW_EXCEPTION(std::out_of_range{
@@ -418,8 +434,9 @@ erase(size_type index, size_type count) ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-erase(const_iterator pos) ->
-    iterator
+erase(
+    const_iterator pos) ->
+        iterator
 {
     erase(pos - begin(), 1);
     return begin() + (pos - begin());
@@ -428,8 +445,10 @@ erase(const_iterator pos) ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-erase(const_iterator first, const_iterator last) ->
-    iterator
+erase(
+    const_iterator first,
+    const_iterator last) ->
+        iterator
 {
     erase(first - begin(),
         std::distance(first, last));
@@ -439,7 +458,8 @@ erase(const_iterator first, const_iterator last) ->
 template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
-push_back(CharT ch)
+push_back(
+    CharT ch)
 {
     if(size() >= max_size())
         BOOST_THROW_EXCEPTION(std::length_error{
@@ -449,20 +469,21 @@ push_back(CharT ch)
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<std::size_t M>
 auto
 fixed_string<N, CharT, Traits>::
-append(fixed_string<M, CharT, Traits> const& s,
-        size_type pos, size_type count) ->
-    fixed_string&
+append(
+    CharT const* s,
+    size_type count) ->
+        fixed_string&
 {
-    // Valid range is [0, size)
-    if(pos >= s.size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "pos > s.size()"});
-    string_view_type const ss{&s.s_[pos],
-        (std::min)(count, s.size() - pos)};
-    insert(size(), ss.data(), ss.size());
+    if(size() + count > max_size())
+        BOOST_THROW_EXCEPTION(std::length_error{
+            "size() + count > max_size()"});
+    Traits::move(
+        &s_[n_ + count], &s_[n_], size() - n_);
+    Traits::copy(&s_[n_], s, count);
+    n_ += count;
+    term();
     return *this;
 }
 
