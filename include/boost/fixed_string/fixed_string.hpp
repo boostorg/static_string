@@ -312,7 +312,7 @@ public:
         return assign(s, Traits::length(s));
     }
 
-    /** Replace the contents with a copy of characters from the range `[first, last)`
+    /** Replace the contents with a copy of characters from the range `(first, last)`
       
         @throw std::length_error if `std::distance(first, last) > max_size()`
         @return `*this`
@@ -762,7 +762,7 @@ public:
         size_type count,
         CharT ch);
 
-    /** Inserts characters from the range `[first, last)` before the element (if any) pointed by `pos`
+    /** Inserts characters from the range `(first, last)` before the element (if any) pointed by `pos`
 
         The inserted string can contain null characters.
         This function does not participate in overload resolution if
@@ -868,7 +868,7 @@ public:
     erase(
         const_iterator pos);
 
-    /** Removes the characters in the range [first, last).
+    /** Removes the characters in the range `(first, last)`
 
         @return iterator pointing to the character last pointed to before the erase, or `end()` if no such character exists
     */
@@ -942,7 +942,7 @@ public:
         return append(sv.substr(pos, count));
     }
 
-    /** Appends characters in the range [s, s + count)
+    /** Appends characters in the range `(s, s + count)`
     
         The appended string can contain null characters.
 
@@ -969,7 +969,7 @@ public:
         return append(s, Traits::length(s));
     }
 
-    /** Appends characters from the range `[first, last)`
+    /** Appends characters from the range `(first, last)`
 
         The inserted string can contain null characters.
         This function does not participate in overload resolution if
