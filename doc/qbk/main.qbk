@@ -30,16 +30,66 @@
 [template include_file[path][^<'''<ulink url="../../../../'''[path]'''">'''[path]'''</ulink>'''>]]
 [template issue[n] '''<ulink url="https://github.com/boostorg/beast/issues/'''[n]'''">#'''[n]'''</ulink>''']
 
-[section:quickref Reference]
+[/-----------------------------------------------------------------------------]
 
-[xinclude quickref.xml]
+[section Introduction]
+
+This library provides a dynamically resizable string of characters with
+compile-time fixed capacity and contiguous embedded storage in which the
+characters are placed within the string object itself. Its API closely
+resembles that of `std::string`
+
 [endsect]
-[block'''<reference id="json_hidden"><title>This Page Intentionally Left Blank 1/2</title>''']
-[section:ref This Page Intentionally Left Blank 2/2]
+
+[/-----------------------------------------------------------------------------]
+
+[section Motivation]
+
+A fixed capacity string is useful when:
+
+* Memory allocation is not possible, e.g., embedded environments without a free
+  store, where only a stack and the static memory segment are available.
+* Memory allocation imposes an unacceptable performance penalty.
+  e.g., with respect to latency.
+* Allocation of objects with complex lifetimes in the static-memory
+  segment is required.
+* A dynamically-resizable string is required within `constexpr` functions.
+* The storage location of the static_vector elements is required to be
+  within the string object itself (e.g. to support memcopy for serialization
+  purposes).
+
+[endsect]
+
+[/-----------------------------------------------------------------------------]
+
+[section Design]
+
+The over-arching design goal is to resemble the interface and behavior of
+`std::string` as much as possible. When any operation would exceed the
+maximum allowed size of the string, `std::length_error` is thrown. All
+algorithms which throw exceptions provide the strong exception safety
+guarantee.
+
+[endsect]
+
+[/-----------------------------------------------------------------------------]
+
+[section Iterators]
+
+The iterator invalidation rules are different than those for `std::string`,
+since:
+
+* Moving a string invalidates all iterators
+* Swapping two strings invalidates all iterators
+
+[endsect]
+
+[/-----------------------------------------------------------------------------]
+
+[section:ref Reference]
 [include reference.qbk]
 [endsect]
-[block'''</reference>''']
 
-This is the main file
+[/-----------------------------------------------------------------------------]
 
 [xinclude index.xml]
