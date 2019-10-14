@@ -1305,7 +1305,8 @@ public:
           t, pos);
     }
     
-    template<std::size_t N>
+    // overload for later use
+    /*template<std::size_t N>
     size_type
       find(
         const fixed_string<N, CharT, Traits>& str,
@@ -1314,7 +1315,7 @@ public:
       return string_view_type(
         *this).find(
           str, pos);
-    }
+    }*/
 
     size_type
       find(
@@ -1366,7 +1367,8 @@ public:
           t, pos);
     }
 
-    template<std::size_t N>
+    // overload for later use
+    /*template<std::size_t N>
     size_type
       rfind(
         const fixed_string<N, CharT, Traits>& str,
@@ -1375,7 +1377,7 @@ public:
       return string_view_type(
         *this).rfind(
           str, pos);
-    }
+    }*/
 
     size_type
       rfind(
@@ -1427,7 +1429,8 @@ public:
           t, pos);
     }
 
-    template<std::size_t N>
+    // overload for later use
+    /*template<std::size_t N>
     size_type
       find_first_of(
         const fixed_string<N, CharT, Traits>& str,
@@ -1436,7 +1439,7 @@ public:
       return string_view_type(
         *this).find_first_of(
           str, pos);
-    }
+    }*/
 
     size_type
       find_first_of(
@@ -1486,8 +1489,9 @@ public:
         *this).find_last_of(
           t, pos);
     }
-      
-    template<std::size_t N>
+     
+    // overload for later use
+    /*template<std::size_t N>
     size_type
       find_last_of(
         const fixed_string<N, CharT, Traits>& str,
@@ -1496,7 +1500,7 @@ public:
       return string_view_type(
         *this).find_last_of(
           str, pos);
-    }
+    }*/
 
     size_type
       find_last_of(
@@ -1547,7 +1551,8 @@ public:
           t, pos);
     }
 
-    template<std::size_t N>
+    // overload for later use
+    /*template<std::size_t N>
     size_type
       find_first_not_of(
         const fixed_string<N, CharT, Traits>& str,
@@ -1556,7 +1561,7 @@ public:
       return string_view_type(
         *this).find_first_not_of(
           str, pos);
-    }
+    }*/
 
     size_type
       find_first_not_of(
@@ -1607,7 +1612,8 @@ public:
           t, pos);
     }
 
-    template<size_t N>
+    // overload for later use
+    /*template<size_t N>
     size_type
       find_last_not_of(
         const fixed_string<N, CharT, Traits>& str,
@@ -1616,7 +1622,7 @@ public:
       return string_view_type(
         *this).find_last_not_of(
           str, pos);
-    }
+    }*/
 
     size_type
       find_last_not_of(
