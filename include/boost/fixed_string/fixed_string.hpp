@@ -1287,6 +1287,368 @@ public:
     //
     //--------------------------------------------------------------------------
 
+    template<class T>
+#if GENERATING_DOCUMENTATION
+    size_type
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            size_type>::type
+#endif
+      find(
+        const T& t,
+        size_type pos = 0) const 
+    {
+      return string_view_type(
+        *this).find(
+          t, pos);
+    }
+    
+    template<std::size_t N>
+    size_type
+      find(
+        const fixed_string<N, CharT, Traits>& str,
+        size_type pos = 0) const noexcept
+    {
+      return string_view_type(
+        *this).find(
+          str, pos);
+    }
+
+    size_type
+      find(
+        const CharT* s, 
+        size_type pos,
+        size_type n) const
+    {
+      return string_view_type(
+        *this).find(
+          s, pos, n);
+    }
+
+    size_type
+      find(
+        const CharT* s,
+        size_type pos = 0) const
+    {
+      return string_view_type(
+        *this).find(
+          s, pos);
+    }
+
+    size_type
+      find(
+        CharT c,
+        size_type pos = 0) const noexcept
+    {
+      return string_view_type(
+        *this).find(
+          c, pos);
+    }
+
+
+    template<class T>
+#if GENERATING_DOCUMENTATION
+    size_type
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            size_type>::type
+#endif
+      rfind(
+        const T& t,
+        size_type pos = npos) const
+    {
+      return string_view_type(
+        *this).rfind(
+          t, pos);
+    }
+
+    template<std::size_t N>
+    size_type
+      rfind(
+        const fixed_string<N, CharT, Traits>& str,
+        size_type pos = npos) const noexcept
+    {
+      return string_view_type(
+        *this).rfind(
+          str, pos);
+    }
+
+    size_type
+      rfind(
+        const CharT* s, 
+        size_type pos,
+        size_type n) const
+    {
+      return string_view_type(
+        *this).rfind(
+          s, pos);
+    }
+
+    size_type
+      rfind(
+        const CharT* s,
+        size_type pos = npos) const
+    {
+      return string_view_type(
+        *this).rfind(
+          s, pos);
+    }
+
+    size_type
+      rfind(
+        CharT c,
+        size_type pos = npos) const noexcept
+    {
+      return string_view_type(
+        *this).rfind(
+          c, pos);
+    }
+
+
+    template<class T>
+#if GENERATING_DOCUMENTATION
+    size_type
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            size_type>::type
+#endif
+      find_first_of(
+        const T& t,
+        size_type pos = 0) const
+    {
+      return string_view_type(
+        *this).find_first_of(
+          t, pos);
+    }
+
+    template<std::size_t N>
+    size_type
+      find_first_of(
+        const fixed_string<N, CharT, Traits>& str,
+        size_type pos = 0) const noexcept
+    {
+      return string_view_type(
+        *this).find_first_of(
+          str, pos);
+    }
+
+    size_type
+      find_first_of(
+        const CharT* s,
+        size_type pos,
+        size_type n) const
+    {
+      return string_view_type(
+        *this).find_first_of(
+          s, pos, n);
+    }
+
+    size_type
+      find_first_of(
+        const CharT* s,
+        size_type pos = 0) const
+    {
+      return string_view_type(
+        *this).find_first_of(
+          s, pos);
+    }
+
+    size_type
+      find_first_of(
+        CharT c,
+        size_type pos = 0) const noexcept
+    {
+      return string_view_type(
+        *this).find_first_of(
+          c, pos);
+    }
+
+    template<class T>
+#if GENERATING_DOCUMENTATION
+    size_type
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            size_type>::type
+#endif
+      find_last_of(
+        const T& t,
+        size_type pos = npos) const
+    {
+      return string_view_type(
+        *this).find_last_of(
+          t, pos);
+    }
+      
+    template<std::size_t N>
+    size_type
+      find_last_of(
+        const fixed_string<N, CharT, Traits>& str,
+        size_type pos = npos) const noexcept
+    {
+      return string_view_type(
+        *this).find_last_of(
+          str, pos);
+    }
+
+    size_type
+      find_last_of(
+        const CharT* s,
+        size_type pos,
+        size_type n) const
+    {
+      return string_view_type(
+        *this).find_last_of(
+          s, pos, n);
+    }
+
+    size_type
+      find_last_of(
+        const CharT* s,
+        size_type pos = npos) const
+    {
+      return string_view_type(
+        *this).find_last_of(
+          s, pos);
+    }
+
+    size_type
+      find_last_of(
+        CharT c,
+        size_type pos = npos) const noexcept
+    {
+      return string_view_type(
+        *this).find_last_of(
+          c, pos);
+    }
+
+    template<class T>
+#if GENERATING_DOCUMENTATION
+    size_type
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            size_type>::type
+#endif
+      find_first_not_of(
+        const T& t,
+        size_type pos = 0) const
+    {
+      return string_view_type(
+        *this).find_first_not_of(
+          t, pos);
+    }
+
+    template<std::size_t N>
+    size_type
+      find_first_not_of(
+        const fixed_string<N, CharT, Traits>& str,
+        size_type pos = 0) const noexcept
+    {
+      return string_view_type(
+        *this).find_first_not_of(
+          str, pos);
+    }
+
+    size_type
+      find_first_not_of(
+        const CharT* s,
+        size_type pos, 
+        size_type n) const
+    {
+      return string_view_type(
+        *this).find_first_not_of(
+          s, pos, n);
+    }
+
+    size_type
+      find_first_not_of(
+        const CharT* s,
+        size_type pos = 0) const
+    {
+      return string_view_type(
+        *this).find_first_not_of(
+          s, pos);
+    }
+
+    size_type
+      find_first_not_of(
+        CharT c,
+        size_type pos = 0) const noexcept
+    {
+      return string_view_type(
+        *this).find_first_not_of(
+          c, pos);
+    }
+
+    template<class T>
+#if GENERATING_DOCUMENTATION
+    size_type
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            size_type>::type
+#endif
+      find_last_not_of(
+        const T& t,
+        size_type pos = npos) const
+    {
+      return string_view_type(
+        *this).find_last_not_of(
+          t, pos);
+    }
+
+    template<size_t N>
+    size_type
+      find_last_not_of(
+        const fixed_string<N, CharT, Traits>& str,
+        size_type pos = npos) const noexcept
+    {
+      return string_view_type(
+        *this).find_last_not_of(
+          str, pos);
+    }
+
+    size_type
+      find_last_not_of(
+        const CharT* s,
+        size_type pos,
+        size_type n) const
+    {
+      return string_view_type(
+        *this).find_last_not_of(
+          s, pos, n);
+    }
+
+    size_type
+      find_last_not_of(
+        const CharT* s,
+        size_type pos = npos) const
+    {
+      return string_view_type(
+        *this).find_last_not_of(
+          s, pos);
+    }
+
+    size_type
+      find_last_not_of(
+        CharT c,
+        size_type pos = npos) const noexcept
+    {
+      return string_view_type(
+        *this).find_last_not_of(
+          c, pos);
+    }
+
 private:
     fixed_string&
     assign_char(CharT ch, std::true_type);
