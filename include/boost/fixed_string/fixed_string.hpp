@@ -1283,101 +1283,142 @@ public:
 
 
     fixed_string&
-      replace(
+    replace(
         size_type pos1,
         size_type n1,
-        const fixed_string& str);
+        const fixed_string& str)
+    {
+      return replace(pos1, n1, str.data(), str.size());
+    }
 
     fixed_string&
-      replace(
+    replace(
         size_type pos1,
         size_type n1,
         const fixed_string& str,
         size_type pos2,
-        size_type n2 = npos);
+        size_type n2 = npos)
+    {
+      return replace(pos1, n1, string_view_type(str).substr(pos2, n2));
+    }
 
     template<typename T>
     fixed_string&
-      replace(
+    replace(
         size_type pos1,
         size_type n1,
-        const T& t);
+        const T& t)
+    {
+      string_view_type sv = t;
+      return replace(pos1, n1, sv.data(), sv.size());
+    }
 
     template<typename T>
     fixed_string&
-      replace(
+    replace(
         size_type pos1,
         size_type n1,
         const T& t,
         size_type pos2,
-        size_type n2 = npos);
+        size_type n2 = npos)
+    {
+      string_view_type sv = t;
+      return replace(pos1, n1, sv.substr(pos2, n2));
+    }
 
+    // impl
     fixed_string&
-      replace(
+    replace(
         size_type pos,
         size_type n1,
         const CharT* s,
         size_type n2);
 
     fixed_string&
-      replace(
+    replace(
         size_type pos,
         size_type n1,
-        const CharT* s);
+        const CharT* s)
+    {
+      return replace(pos, n, s, Traits::length(s));
+    }
 
+    // impl 
     fixed_string&
-      replace(
+    replace(
         size_type pos,
         size_type n1,
         size_type n2,
         CharT c);
 
     fixed_string&
-      replace(
+    replace(
         const_iterator i1,
         const_iterator i2,
-        const fixed_string& str);
+        const fixed_string& str)
+    {
+      return replace(i1, i2, string_view_type(str));
+    }
 
     template<typename T>
     fixed_string&
-      replace(
+    replace(
         const_iterator i1,
         const_iterator i2,
-        const T& t);
+        const T& t)
+    {
+      string_view_type sv = t;
+      return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
+    }
 
     fixed_string&
-      replace(
+    replace(
         const_iterator i1,
         const_iterator i2,
         const CharT* s,
-        size_type n);
+        size_type n)
+    {
+      return replace(i1, i2, string_view_type(s, n));
+    }
 
     fixed_string&
-      replace(
+    replace(
         const_iterator i1,
         const_iterator i2,
-        const CharT* s);
+        const CharT* s)
+    {
+      return replace(i1, i2, string_view_type(s));
+    }
 
     fixed_string&
-      replace(
+    replace(
         const_iterator i1,
         const_iterator i2,
         size_type n,
-        CharT c);
+        CharT c)
+    {
+      return replace(i1 - begin(), i2 - i1, n, c);
+    }
 
     template<typename InputIterator>
     fixed_string&
-      replace(
+    replace(
         const_iterator i1,
         const_iterator i2,
         InputIterator j1,
-        InputIterator j2);
+        InputIterator j2)
+    {
+      return replace(i1, i2, fixed_string(j1, j2));
+    }
 
     fixed_string&
-      replace(
+    replace(
         const_iterator,
         const_iterator,
-        std::initializer_list<CharT>);
+        std::initializer_list<CharT>)
+    {
+      return replace(i1, i2, il.begin(), il.size());
+    }
 
     //--------------------------------------------------------------------------
     //
@@ -1400,7 +1441,7 @@ public:
         ! std::is_convertible<T, CharT const*>::value,
             size_type>::type
 #endif
-      find(
+    find(
         const T& t,
         size_type pos = 0) const 
     {
@@ -1423,7 +1464,7 @@ public:
 
     // Finds the first substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
-      find(
+    find(
         const CharT* s, 
         size_type pos,
         size_type n) const
@@ -1440,7 +1481,7 @@ public:
         null character using `Traits::length(s)`
     */
     size_type
-      find(
+    find(
         const CharT* s,
         size_type pos = 0) const
     {
@@ -1451,7 +1492,7 @@ public:
 
     // Finds the first character `c`
     size_type
-      find(
+    find(
         CharT c,
         size_type pos = 0) const noexcept
     {
@@ -1476,7 +1517,7 @@ public:
         ! std::is_convertible<T, CharT const*>::value,
             size_type>::type
 #endif
-      rfind(
+    rfind(
         const T& t,
         size_type pos = npos) const
     {
@@ -1499,7 +1540,7 @@ public:
 
     // Finds the last substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
-      rfind(
+    rfind(
         const CharT* s, 
         size_type pos,
         size_type n) const
@@ -1516,7 +1557,7 @@ public:
         null character using `Traits::length(s)`
     */
     size_type
-      rfind(
+    rfind(
         const CharT* s,
         size_type pos = npos) const
     {
@@ -1527,7 +1568,7 @@ public:
 
     // Finds the last character `c`
     size_type
-      rfind(
+    rfind(
         CharT c,
         size_type pos = npos) const noexcept
     {
@@ -1551,7 +1592,7 @@ public:
         ! std::is_convertible<T, CharT const*>::value,
             size_type>::type
 #endif
-      find_first_of(
+    find_first_of(
         const T& t,
         size_type pos = 0) const
     {
@@ -1574,7 +1615,7 @@ public:
 
     // Finds the first character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
-      find_first_of(
+    find_first_of(
         const CharT* s,
         size_type pos,
         size_type n) const
@@ -1591,7 +1632,7 @@ public:
         null character using `Traits::length(s)`
     */
     size_type
-      find_first_of(
+    find_first_of(
         const CharT* s,
         size_type pos = 0) const
     {
@@ -1602,7 +1643,7 @@ public:
 
     // Finds the first character equal to `c`.
     size_type
-      find_first_of(
+    find_first_of(
         CharT c,
         size_type pos = 0) const noexcept
     {
@@ -1626,7 +1667,7 @@ public:
         ! std::is_convertible<T, CharT const*>::value,
             size_type>::type
 #endif
-      find_last_of(
+    find_last_of(
         const T& t,
         size_type pos = npos) const
     {
@@ -1649,7 +1690,7 @@ public:
 
     // Finds the last character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
-      find_last_of(
+    find_last_of(
         const CharT* s,
         size_type pos,
         size_type n) const
@@ -1666,7 +1707,7 @@ public:
         null character using `Traits::length(s)`
     */
     size_type
-      find_last_of(
+    find_last_of(
         const CharT* s,
         size_type pos = npos) const
     {
@@ -1677,7 +1718,7 @@ public:
 
     // Finds the last character equal to `c`.
     size_type
-      find_last_of(
+    find_last_of(
         CharT c,
         size_type pos = npos) const noexcept
     {
@@ -1701,7 +1742,7 @@ public:
         ! std::is_convertible<T, CharT const*>::value,
             size_type>::type
 #endif
-      find_first_not_of(
+    find_first_not_of(
         const T& t,
         size_type pos = 0) const
     {
@@ -1724,7 +1765,7 @@ public:
 
     // Finds the first character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
-      find_first_not_of(
+    find_first_not_of(
         const CharT* s,
         size_type pos, 
         size_type n) const
@@ -1741,7 +1782,7 @@ public:
         null character using `Traits::length(s)`
     */
     size_type
-      find_first_not_of(
+    find_first_not_of(
         const CharT* s,
         size_type pos = 0) const
     {
@@ -1752,7 +1793,7 @@ public:
 
     // Finds the first character not equal to `c`.
     size_type
-      find_first_not_of(
+    find_first_not_of(
         CharT c,
         size_type pos = 0) const noexcept
     {
@@ -1776,7 +1817,7 @@ public:
         ! std::is_convertible<T, CharT const*>::value,
             size_type>::type
 #endif
-      find_last_not_of(
+    find_last_not_of(
         const T& t,
         size_type pos = npos) const
     {
@@ -1799,7 +1840,7 @@ public:
 
     // Finds the last character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
-      find_last_not_of(
+    find_last_not_of(
         const CharT* s,
         size_type pos,
         size_type n) const
@@ -1817,7 +1858,7 @@ public:
         null character using `Traits::length(s)`
     */
     size_type
-      find_last_not_of(
+    find_last_not_of(
         const CharT* s,
         size_type pos = npos) const
     {
@@ -1828,7 +1869,7 @@ public:
 
     // Finds the last character not equal to `c`.
     size_type
-      find_last_not_of(
+    find_last_not_of(
         CharT c,
         size_type pos = npos) const noexcept
     {
