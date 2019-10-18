@@ -1281,6 +1281,104 @@ public:
     swap(
         fixed_string<M, CharT, Traits>& s);
 
+
+    fixed_string&
+      replace(
+        size_type pos1,
+        size_type n1,
+        const fixed_string& str);
+
+    fixed_string&
+      replace(
+        size_type pos1,
+        size_type n1,
+        const fixed_string& str,
+        size_type pos2,
+        size_type n2 = npos);
+
+    template<typename T>
+    fixed_string&
+      replace(
+        size_type pos1,
+        size_type n1,
+        const T& t);
+
+    template<typename T>
+    fixed_string&
+      replace(
+        size_type pos1,
+        size_type n1,
+        const T& t,
+        size_type pos2,
+        size_type n2 = npos);
+
+    fixed_string&
+      replace(
+        size_type pos,
+        size_type n1,
+        const CharT* s,
+        size_type n2);
+
+    fixed_string&
+      replace(
+        size_type pos,
+        size_type n1,
+        const CharT* s);
+
+    fixed_string&
+      replace(
+        size_type pos,
+        size_type n1,
+        size_type n2,
+        CharT c);
+
+    fixed_string&
+      replace(
+        const_iterator i1,
+        const_iterator i2,
+        const fixed_string& str);
+
+    template<typename T>
+    fixed_string&
+      replace(
+        const_iterator i1,
+        const_iterator i2,
+        const T& t);
+
+    fixed_string&
+      replace(
+        const_iterator i1,
+        const_iterator i2,
+        const CharT* s,
+        size_type n);
+
+    fixed_string&
+      replace(
+        const_iterator i1,
+        const_iterator i2,
+        const CharT* s);
+
+    fixed_string&
+      replace(
+        const_iterator i1,
+        const_iterator i2,
+        size_type n,
+        CharT c);
+
+    template<typename InputIterator>
+    fixed_string&
+      replace(
+        const_iterator i1,
+        const_iterator i2,
+        InputIterator j1,
+        InputIterator j2);
+
+    fixed_string&
+      replace(
+        const_iterator,
+        const_iterator,
+        std::initializer_list<CharT>);
+
     //--------------------------------------------------------------------------
     //
     // Search
