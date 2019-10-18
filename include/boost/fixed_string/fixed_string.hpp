@@ -1287,6 +1287,12 @@ public:
     //
     //--------------------------------------------------------------------------
 
+    /** Finds the first substring equal to `t`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+    */
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1317,6 +1323,7 @@ public:
           str, pos);
     }*/
 
+    // Finds the first substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
       find(
         const CharT* s, 
@@ -1328,6 +1335,12 @@ public:
           s, pos, n);
     }
 
+    /** Finds the first substring equal to the character
+        string pointed to by `s`.
+    
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`
+    */
     size_type
       find(
         const CharT* s,
@@ -1338,6 +1351,7 @@ public:
           s, pos);
     }
 
+    // Finds the first character `c`
     size_type
       find(
         CharT c,
@@ -1349,6 +1363,12 @@ public:
     }
 
 
+    /** Finds the last substring equal to `t`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+    */
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1379,6 +1399,7 @@ public:
           str, pos);
     }*/
 
+    // Finds the last substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
       rfind(
         const CharT* s, 
@@ -1390,6 +1411,12 @@ public:
           s, pos);
     }
 
+    /** Finds the last substring equal to the character
+        string pointed to by `s`.
+
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`
+    */
     size_type
       rfind(
         const CharT* s,
@@ -1400,6 +1427,7 @@ public:
           s, pos);
     }
 
+    // Finds the last character `c`
     size_type
       rfind(
         CharT c,
@@ -1410,7 +1438,12 @@ public:
           c, pos);
     }
 
+    /** Finds the first character equal to one of the characters in `t`.
 
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+    */
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1441,6 +1474,7 @@ public:
           str, pos);
     }*/
 
+    // Finds the first character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
       find_first_of(
         const CharT* s,
@@ -1452,6 +1486,12 @@ public:
           s, pos, n);
     }
 
+    /** Finds the first character equal to one of the characters
+        in character string pointed to by `s`. 
+     
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`
+    */
     size_type
       find_first_of(
         const CharT* s,
@@ -1462,6 +1502,7 @@ public:
           s, pos);
     }
 
+    // Finds the first character equal to `c`.
     size_type
       find_first_of(
         CharT c,
@@ -1472,6 +1513,12 @@ public:
           c, pos);
     }
 
+    /** Finds the last character equal to one of the characters in `t`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+    */
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1502,6 +1549,7 @@ public:
           str, pos);
     }*/
 
+    // Finds the last character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
       find_last_of(
         const CharT* s,
@@ -1513,6 +1561,12 @@ public:
           s, pos, n);
     }
 
+    /** Finds the last character equal to one of the characters
+        in character string pointed to by `s`.
+
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`
+    */
     size_type
       find_last_of(
         const CharT* s,
@@ -1523,6 +1577,7 @@ public:
           s, pos);
     }
 
+    // Finds the last character equal to `c`.
     size_type
       find_last_of(
         CharT c,
@@ -1533,6 +1588,12 @@ public:
           c, pos);
     }
 
+    /** Finds the first character equal to none of characters in `t`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+    */
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1563,6 +1624,7 @@ public:
           str, pos);
     }*/
 
+    // Finds the first character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
       find_first_not_of(
         const CharT* s,
@@ -1574,6 +1636,12 @@ public:
           s, pos, n);
     }
 
+    /** Finds the first character equal to none of characters in
+        character string pointed to by `s`.
+
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`
+    */
     size_type
       find_first_not_of(
         const CharT* s,
@@ -1584,6 +1652,7 @@ public:
           s, pos);
     }
 
+    // Finds the first character not equal to `c`.
     size_type
       find_first_not_of(
         CharT c,
@@ -1594,6 +1663,12 @@ public:
           c, pos);
     }
 
+    /** Finds the last character equal to none of characters in `t`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+    */
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1624,6 +1699,7 @@ public:
           str, pos);
     }*/
 
+    // Finds the last character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
       find_last_not_of(
         const CharT* s,
@@ -1635,6 +1711,13 @@ public:
           s, pos, n);
     }
 
+
+    /** Finds the last character equal to none of characters in
+        character string pointed to by `s`.
+
+        The length of the string is determined by the first
+        null character using `Traits::length(s)`
+    */
     size_type
       find_last_not_of(
         const CharT* s,
@@ -1645,6 +1728,7 @@ public:
           s, pos);
     }
 
+    // Finds the last character not equal to `c`.
     size_type
       find_last_not_of(
         CharT c,
