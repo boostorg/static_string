@@ -1340,7 +1340,6 @@ public:
       return replace(pos1, n1, sv.substr(pos2, n2));
     }
 
-    // impl
     fixed_string&
     replace(
         size_type pos,
@@ -1357,7 +1356,6 @@ public:
       return replace(pos, n1, s, Traits::length(s));
     }
 
-    // impl 
     fixed_string&
     replace(
         size_type pos,
@@ -1422,7 +1420,13 @@ public:
     }
 
     template<typename InputIterator>
+#if GENERATING_DOCUMENTATION
     fixed_string&
+#else
+    typename std::enable_if<
+        detail::is_input_iterator<InputIterator>::value,
+            fixed_string&>::type
+#endif
     replace(
         const_iterator i1,
         const_iterator i2,
@@ -1568,7 +1572,7 @@ public:
     {
       return string_view_type(
         *this).rfind(
-          s, pos);
+          s, pos, n);
     }
 
     /** Finds the last substring equal to the character

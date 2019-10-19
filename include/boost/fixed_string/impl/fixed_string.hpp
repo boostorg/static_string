@@ -317,10 +317,28 @@ insert(
     if(size() + count > max_size())
         BOOST_THROW_EXCEPTION(std::length_error{
             "size() + count > max_size()"});
-    Traits::move(
-        &s_[index + count], &s_[index], size() - index);
+    const bool inside = s <= &s_[size()] && s >= &s_[0];
+    if (!inside || (inside && (&s[count - 1] < &s_[index])))
+    {
+      Traits::move(&s_[index + count], &s_[index], size() - index);
+      Traits::copy(&s_[index], s, count);
+    }
+    else
+    {
+      const size_type offset = s - &s_[0];
+      Traits::move(&s_[index + count], &s_[index], size() - index);
+      if (offset < index)
+      {
+        const size_type diff = index - offset;
+        Traits::copy(&s_[index], &s_[offset], diff);
+        Traits::copy(&s_[index + diff], &s_[index + count], count - diff);
+      }
+      else
+      {
+        Traits::copy(&s_[index], &s_[index + count + offset], count);
+      }
+    }
     n_ += count;
-    Traits::copy(&s_[index], s, count);
     term();
     return *this;
 }
@@ -363,12 +381,13 @@ insert(
         BOOST_THROW_EXCEPTION(std::length_error{
             "size() + count > max_size()"});
     std::size_t const index = pos - begin();
-    Traits::move(
-        &s_[index + count], &s_[index], size() - index);
-    n_ += count;
+    if (&*first <= &s_[size()] && &*first >= &s_[0])
+      return insert(index, &*first, count).begin() + index;
+    Traits::move(&s_[index + count], &s_[index], size() - index);
     for(auto it = begin() + index;
             first != last; ++it, ++first)
         Traits::assign(*it, *first);
+    n_ += count;
     term();
     return begin() + index;
 }
