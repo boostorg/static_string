@@ -320,13 +320,13 @@ insert(
     const bool inside = s <= &s_[size()] && s >= &s_[0];
     if (!inside || (inside && (&s[count - 1] < &s_[index])))
     {
-      Traits::move(&s_[index + count], &s_[index], size() - index);
+      Traits::move(&s_[index + count], &s_[index], size() - index + 1);
       Traits::copy(&s_[index], s, count);
     }
     else
     {
       const size_type offset = s - &s_[0];
-      Traits::move(&s_[index + count], &s_[index], size() - index);
+      Traits::move(&s_[index + count], &s_[index], size() - index + 1);
       if (offset < index)
       {
         const size_type diff = index - offset;
@@ -335,11 +335,10 @@ insert(
       }
       else
       {
-        Traits::copy(&s_[index], &s_[index + count + offset], count);
+        Traits::copy(&s_[index], &s_[offset + count], count);
       }
     }
     n_ += count;
-    term();
     return *this;
 }
 
@@ -602,9 +601,31 @@ replace(
            "pos > size()"});
   if ((size() - n1 + n2) > max_size())
     BOOST_THROW_EXCEPTION(std::length_error{
-           "replaced string exceeds max_size()"});
-  Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
-  Traits::copy(&s_[pos], s, n2);
+           "size() - n1 + n2 > max_size()"});
+  const bool inside = s <= &s_[size()] && s >= &s_[0];
+  if (inside && (s - &s_[0]) == pos && n1 == n2)
+    return *this;
+  if (!inside || (inside && (&s[n2 - 1] < &s_[pos])))
+  {
+    Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
+    Traits::copy(&s_[pos], s, n2);
+  }
+  else
+  {
+    const size_type offset = s - &s_[0];
+    if (n2 >= n1)
+    {
+      Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
+      const size_type diff = ((pos + n1) - offset) > n2 ? n2 : ((pos + n1) - offset);
+      Traits::move(&s_[pos], &s_[offset], diff);
+      Traits::move(&s_[pos + diff], &s_[pos + n2], n2 - diff);
+    }
+    else
+    {
+      Traits::move(&s_[pos], &s_[offset], n2);
+      Traits::copy(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
+    }
+  }
   n_ += (n2 - n1);
   return *this;
 }
