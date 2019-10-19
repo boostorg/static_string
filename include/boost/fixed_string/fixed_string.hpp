@@ -2260,6 +2260,18 @@ template<
 fixed_string<detail::max_digits(sizeof(Integer))>
 to_fixed_string(Integer x);
 
+//------------------------------------------------------------------------------
+//
+// Deduction Guides
+//
+//------------------------------------------------------------------------------
+
+#if __cplusplus >= 201703L 
+template<std::size_t N, typename CharT>
+fixed_string(CharT(&)[N]) -> 
+    fixed_string<N, CharT, std::char_traits<CharT>>;
+#endif
+
 } // fixed_string
 } // boost
 
