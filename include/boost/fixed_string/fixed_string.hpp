@@ -1303,7 +1303,14 @@ public:
     }
 
     template<typename T>
+#if GENERATING_DOCUMENTATION
     fixed_string&
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            fixed_string&>::type
+#endif
     replace(
         size_type pos1,
         size_type n1,
@@ -1314,7 +1321,14 @@ public:
     }
 
     template<typename T>
+#if GENERATING_DOCUMENTATION
     fixed_string&
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            fixed_string&>::type
+#endif
     replace(
         size_type pos1,
         size_type n1,
@@ -1340,7 +1354,7 @@ public:
         size_type n1,
         const CharT* s)
     {
-      return replace(pos, n, s, Traits::length(s));
+      return replace(pos, n1, s, Traits::length(s));
     }
 
     // impl 
@@ -1361,7 +1375,14 @@ public:
     }
 
     template<typename T>
+#if GENERATING_DOCUMENTATION
     fixed_string&
+#else
+    typename std::enable_if<
+        std::is_convertible<T, string_view_type>::value &&
+        ! std::is_convertible<T, CharT const*>::value,
+            fixed_string&>::type
+#endif
     replace(
         const_iterator i1,
         const_iterator i2,
@@ -1413,9 +1434,9 @@ public:
 
     fixed_string&
     replace(
-        const_iterator,
-        const_iterator,
-        std::initializer_list<CharT>)
+        const_iterator i1,
+        const_iterator i2,
+        std::initializer_list<CharT> il)
     {
       return replace(i1, i2, il.begin(), il.size());
     }

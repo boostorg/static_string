@@ -569,6 +569,47 @@ swap(fixed_string<M, CharT, Traits>& s)
     Traits::copy(&s_[0], &tmp.s_[0], n_ + 1);
 }
 
+auto
+fixed_string<N, CharT, Traits>::
+replace(
+    size_type pos,
+    size_type n1,
+    const CharT* s,
+    size_type n2) -> fixed_string<N, CharT, Traits>&
+{
+  if (pos > size())
+    BOOST_THROW_EXCEPTION(std::out_of_range{
+           "pos > size()"});
+  if ((size() - n1 + n2) > max_size())
+    BOOST_THROW_EXCEPTION(std::length_error{
+           "replaced string exceeds max_size()"});
+  Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
+  Traits::copy(&s_[pos], s, n2);
+  n_ += (n2 - n1);
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
+replace(
+    size_type pos,
+    size_type n1,
+    size_type n2,
+    CharT c) -> fixed_string<N, CharT, Traits> &
+{
+  if (pos > size())
+    BOOST_THROW_EXCEPTION(std::out_of_range{
+           "pos > size()"});
+  if ((size() - n1 + n2) > max_size())
+    BOOST_THROW_EXCEPTION(std::length_error{
+           "replaced string exceeds max_size()"});
+  Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
+  Traits::assign(&s_[pos], n2, c);
+  n_ += (n2 - n1);
+  return *this;
+}
+
 
 template<std::size_t N, typename CharT, typename Traits>
 auto
