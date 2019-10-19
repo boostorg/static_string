@@ -1899,6 +1899,48 @@ public:
           c, pos);
     }
 
+    bool 
+    starts_with(
+        string_view_type s) const noexcept
+    {
+      return string_view_type(*this).starts_with(s);
+    }
+    
+    bool 
+    starts_with(
+        CharT c) const noexcept
+    {
+      return string_view_type(*this).starts_with(c);
+    }
+    
+    bool 
+    starts_with(
+        const CharT* s) const
+    {
+      return string_view_type(*this).starts_with(s);
+    }
+    
+    bool 
+    ends_with(
+        string_view_type s) const noexcept
+    {
+      return string_view_type(*this).ends_with(s);
+    }
+    
+    bool
+    ends_with(
+        CharT c) const noexcept
+    {
+      return string_view_type(*this).ends_with(c);
+    }
+    
+    bool 
+    ends_with(
+        const CharT* s) const
+    {
+      return string_view_type(*this).ends_with(s);
+    }
+
 private:
     fixed_string&
     assign_char(CharT ch, std::true_type);
