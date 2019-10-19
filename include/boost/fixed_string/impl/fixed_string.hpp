@@ -569,6 +569,7 @@ swap(fixed_string<M, CharT, Traits>& s)
     Traits::copy(&s_[0], &tmp.s_[0], n_ + 1);
 }
 
+template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 replace(
