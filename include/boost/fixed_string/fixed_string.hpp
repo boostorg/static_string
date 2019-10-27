@@ -607,7 +607,7 @@ public:
     //--------------------------------------------------------------------------
 
     /// Returns `true` if the string is empty.
-    BOOST_NODISCARD
+    BOOST_FIXED_STRING_NODISCARD
     bool
     empty() const
     {
@@ -916,12 +916,8 @@ public:
     void
     pop_back()
     {
-#ifdef BOOST_FIXED_STRING_USE_BOOST
-        BOOST_ASSERT(n_ > 0);
-#else
-        assert(n > 0);
-#endif
-        Traits::assign(s_[--n_], 0);
+      BOOST_FIXED_STRING_ASSERT(n_ > 0);
+      Traits::assign(s_[--n_], 0);
     }
 
     /** Appends `count` copies of character `ch`
@@ -1326,16 +1322,17 @@ public:
     swap(
         fixed_string<M, CharT, Traits>& s);
 
-
+    template<size_t N>
     fixed_string&
     replace(
         size_type pos1,
         size_type n1,
-        const fixed_string& str)
+        const fixed_string<N, CharT, Traits>& str)
     {
       return replace(pos1, n1, str.data(), str.size());
     }
 
+    
     fixed_string&
     replace(
         size_type pos1,
@@ -1344,7 +1341,7 @@ public:
         size_type pos2,
         size_type n2 = npos)
     {
-      return replace(pos1, n1, string_view_type(str).substr(pos2, n2));
+      return replace(pos1, n1, str.substr(pos2, n2));
     }
 
 #ifdef BOOST_FIXED_STRING_STRING_VIEW
@@ -1369,7 +1366,8 @@ public:
 
 #ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
-#if GENERATING_DOCUMENTATION
+#if GENERATI
+    NG_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<

@@ -12,9 +12,6 @@
 
 #include <boost/fixed_string/config.hpp>
 #include <boost/fixed_string/detail/fixed_string.hpp>
-#include <boost/assert.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/throw_exception.hpp>
 
 namespace boost {
 namespace fixed_string {
@@ -795,11 +792,7 @@ to_fixed_string(Integer x)
 {
     using CharT = char;
     using Traits = std::char_traits<CharT>;
-#ifdef BOOST_FIXED_STRING_USE_BOOST
-    BOOST_STATIC_ASSERT(std::is_integral<Integer>::value);
-#else
-    static_assert(std::is_integral<Integer>::value);
-#endif
+    BOOST_FIXED_STRING_STATIC_ASSERT(std::is_integral<Integer>::value, "Integer must be an integral type");
     char buf[detail::max_digits(sizeof(Integer))];
     auto last = buf + sizeof(buf);
     auto it = detail::raw_to_string<
