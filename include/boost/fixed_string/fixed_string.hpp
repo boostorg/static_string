@@ -1518,10 +1518,8 @@ public:
         const T& t,
         size_type pos = 0) const 
     {
-      return string_view_type(
-        *this).find(
-          t, pos);
-
+      string_view_type sv = t;
+      return find(sv.data(), pos, sv.size());
     }
 #endif
     
@@ -1585,9 +1583,8 @@ public:
         const T& t,
         size_type pos = npos) const
     {
-      return string_view_type(
-        *this).rfind(
-          t, pos);
+      string_view_type sv = t;
+      return rfind(sv.data(), pos, sv.size());
     }
 #endif
 
@@ -1650,9 +1647,8 @@ public:
         const T& t,
         size_type pos = 0) const
     {
-      return string_view_type(
-        *this).find_first_of(
-          t, pos);
+      string_view_type sv = t;
+      return find_first_of(sv.data(), pos, sv.size());
     }
 #endif
 
@@ -1715,9 +1711,8 @@ public:
         const T& t,
         size_type pos = npos) const
     {
-      return string_view_type(
-        *this).find_last_of(
-          t, pos);
+      string_view_type sv = t;
+      return find_last_of(sv.data(), pos, sv.size());
     }
 #endif
      
@@ -1780,9 +1775,8 @@ public:
         const T& t,
         size_type pos = 0) const
     {
-      return string_view_type(
-        *this).find_first_not_of(
-          t, pos);
+      string_view_type sv = t;
+      return find_first_not_of(sv.data(), pos, sv.size());
     }
 #endif
 
@@ -1845,9 +1839,8 @@ public:
         const T& t,
         size_type pos = npos) const
     {
-      return string_view_type(
-        *this).find_last_not_of(
-          t, pos);
+      string_view_type sv = t;
+      return find_last_not_of(sv.data(), pos, sv.size());
     }
 #endif
 

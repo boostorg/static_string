@@ -667,12 +667,10 @@ find(
     size_type n) const -> 
         size_type
 {
-  if (pos > n_)
+  if (pos > n_ || n > n_ - pos)
     return npos;
   if (!n)
     return pos;
-  if (n > n_ - pos)
-    return npos;
   const auto res = std::search(&s_[pos], &s_[n_], s, &s[n], Traits::eq);
   return res == end() ? npos : std::distance(s_, res);
 }
