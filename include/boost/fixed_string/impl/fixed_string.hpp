@@ -795,7 +795,11 @@ to_fixed_string(Integer x)
 {
     using CharT = char;
     using Traits = std::char_traits<CharT>;
+#ifdef BOOST_FIXED_STRING_USE_BOOST
     BOOST_STATIC_ASSERT(std::is_integral<Integer>::value);
+#else
+    static_assert(std::is_integral<Integer>::value);
+#endif
     char buf[detail::max_digits(sizeof(Integer))];
     auto last = buf + sizeof(buf);
     auto it = detail::raw_to_string<

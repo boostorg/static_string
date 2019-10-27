@@ -916,7 +916,11 @@ public:
     void
     pop_back()
     {
+#ifdef BOOST_FIXED_STRING_USE_BOOST
         BOOST_ASSERT(n_ > 0);
+#else
+        assert(n > 0);
+#endif
         Traits::assign(s_[--n_], 0);
     }
 

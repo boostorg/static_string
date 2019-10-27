@@ -126,7 +126,11 @@ CharT*
 raw_to_string(CharT* last, std::size_t size, Integer i)
 {
     boost::ignore_unused(size);
+#ifdef BOOST_FIXED_STRING_USE_BOOST
     BOOST_ASSERT(size >= max_digits(sizeof(Integer)));
+#else
+    assert(size >= max_digits(sizeof(Integer)));
+#endif
     return raw_to_string<CharT, Integer, Traits>(
         last, i, std::is_signed<Integer>{});
 }
