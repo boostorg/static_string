@@ -10,6 +10,7 @@
 #ifndef BOOST_FIXED_STRING_IMPL_FIXED_STRING_HPP
 #define BOOST_FIXED_STRING_IMPL_FIXED_STRING_HPP
 
+#include <boost/fixed_string/config.hpp>
 #include <boost/fixed_string/detail/fixed_string.hpp>
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
@@ -72,7 +73,7 @@ fixed_string(CharT const* s)
 {
     auto const count = Traits::length(s);
     if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
     n_ = count;
     Traits::copy(&s_[0], s, n_ + 1);
@@ -115,12 +116,14 @@ fixed_string(std::initializer_list<CharT> init)
     assign(init.begin(), init.end());
 }
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(string_view_type sv)
 {
     assign(sv);
 }
+#endif
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
@@ -145,7 +148,7 @@ assign(
         fixed_string&
 {
     if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
     n_ = count;
     Traits::assign(&s_[0], n_, ch);
@@ -193,7 +196,7 @@ assign(
         fixed_string&
 {
     if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
     n_ = count;
     Traits::copy(&s_[0], s, n_);
@@ -214,7 +217,7 @@ assign(
 {
     std::size_t const n = std::distance(first, last);
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
     n_ = n;
     for(auto it = &s_[0]; first != last; ++it, ++first)
@@ -236,7 +239,7 @@ at(size_type pos) ->
     reference
 {
     if(pos >= size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
+        BOOST_FIXED_STRING_THROW(std::out_of_range{
             "pos >= size()"});
     return s_[pos];
 }
@@ -248,7 +251,7 @@ at(size_type pos) const ->
     const_reference
 {
     if(pos >= size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
+        BOOST_FIXED_STRING_THROW(std::out_of_range{
             "pos >= size()"});
     return s_[pos];
 }
@@ -265,7 +268,7 @@ fixed_string<N, CharT, Traits>::
 reserve(std::size_t n)
 {
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
 }
 
@@ -296,7 +299,7 @@ insert(
         fixed_string&
 {
     if(index > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
+        BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
     insert(begin() + index, count, ch);
     return *this;
@@ -312,10 +315,10 @@ insert(
         fixed_string&
 {
     if(index > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
+        BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
     if(size() + count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     const bool inside = s <= &s_[size()] && s >= &s_[0];
     if (!inside || (inside && (&s[count - 1] < &s_[index])))
@@ -352,7 +355,7 @@ insert(
         iterator
 {
     if(size() + count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count() > max_size()"});
     auto const index = pos - &s_[0];
     Traits::move(
@@ -377,7 +380,7 @@ insert(
 {
     std::size_t const count = std::distance(first, last);
     if(size() + count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     std::size_t const index = pos - begin();
     if (&*first <= &s_[size()] && &*first >= &s_[0])
@@ -391,6 +394,7 @@ insert(
     return begin() + index;
 }
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
 auto
@@ -407,7 +411,9 @@ insert(
 {
     return insert(index, t, 0, npos);
 }
+#endif
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
 auto
@@ -428,6 +434,7 @@ insert(
         string_view_type(t).substr(index_str, count);
     return insert(index, s.data(), s.size());
 }
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -440,7 +447,7 @@ erase(
         fixed_string&
 {
     if(index > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
+        BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
     auto const n = (std::min)(count, size() - index);
     Traits::move(
@@ -480,7 +487,7 @@ push_back(
     CharT ch)
 {
     if(size() >= max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "size() >= max_size()"});
     Traits::assign(s_[n_++], ch);
     term();
@@ -495,7 +502,7 @@ append(
         fixed_string&
 {
     if(size() + count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     Traits::move(
         &s_[n_ + count], &s_[n_], size() - n_);
@@ -509,12 +516,12 @@ template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
-    string_view_type
+    fixed_string<N, CharT, Traits>
 {
     if(pos > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
+        BOOST_FIXED_STRING_THROW(std::out_of_range{
             "pos > size()"});
-    return{&s_[pos], (std::min)(count, size() - pos)};
+    return {&s_[pos], (std::min)(count, size() - pos)};
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -534,7 +541,7 @@ fixed_string<N, CharT, Traits>::
 resize(std::size_t n)
 {
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
     if(n > n_)
         Traits::assign(&s_[n_], n - n_, CharT{});
@@ -548,7 +555,7 @@ fixed_string<N, CharT, Traits>::
 resize(std::size_t n, CharT c)
 {
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
     if(n > n_)
         Traits::assign(&s_[n_], n - n_, c);
@@ -575,10 +582,10 @@ fixed_string<N, CharT, Traits>::
 swap(fixed_string<M, CharT, Traits>& s)
 {
     if(size() > s.max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "size() > s.max_size()"});
     if(s.size() > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
+        BOOST_FIXED_STRING_THROW(std::length_error{
             "s.size() > max_size()"});
     fixed_string tmp(s);
     s.n_ = n_;
@@ -597,10 +604,10 @@ replace(
     size_type n2) -> fixed_string<N, CharT, Traits>&
 {
   if (pos > size())
-    BOOST_THROW_EXCEPTION(std::out_of_range{
+    BOOST_FIXED_STRING_THROW(std::out_of_range{
            "pos > size()"});
   if ((size() - n1 + n2) > max_size())
-    BOOST_THROW_EXCEPTION(std::length_error{
+    BOOST_FIXED_STRING_THROW(std::length_error{
            "size() - n1 + n2 > max_size()"});
   const bool inside = s <= &s_[size()] && s >= &s_[0];
   if (inside && (s - &s_[0]) == pos && n1 == n2)
@@ -640,10 +647,10 @@ replace(
     CharT c) -> fixed_string<N, CharT, Traits> &
 {
   if (pos > size())
-    BOOST_THROW_EXCEPTION(std::out_of_range{
+    BOOST_FIXED_STRING_THROW(std::out_of_range{
            "pos > size()"});
   if ((size() - n1 + n2) > max_size())
-    BOOST_THROW_EXCEPTION(std::length_error{
+    BOOST_FIXED_STRING_THROW(std::length_error{
            "replaced string exceeds max_size()"});
   Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
   Traits::assign(&s_[pos], n2, c);
@@ -651,6 +658,114 @@ replace(
   return *this;
 }
 
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
+find(
+    const CharT* s,
+    size_type pos,
+    size_type n) const -> 
+        size_type
+{
+  if (pos > n_)
+    return npos;
+  if (!n)
+    return pos;
+  if (n > n_ - pos)
+    return npos;
+  const auto res = std::search(&s_[pos], &s_[n_], s, &s[n], Traits::eq);
+  return res == end() ? npos : std::distance(s_, res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
+rfind(
+    const CharT* s,
+    size_type pos,
+    size_type n) const -> 
+        size_type
+{
+  if (n > n_)
+    return npos;
+  if (n == 0)
+    return pos;
+  if (pos > n_ - n)
+    pos = n_ - n;
+  for (auto sub = &s_[pos]; sub >= s_; --sub)
+    if (!Traits::compare(sub, s, n))
+      return std::distance(s_, sub);
+  return npos;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
+find_first_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const -> 
+        size_type
+{
+  if (pos >= n_ || !n)
+    return npos;
+  const auto res = std::find_first_of(&s_[pos], &s_[n_], s, &s[n], Traits::eq);
+  return res == end() ? npos : std::distance(s_, res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
+find_last_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const -> 
+        size_type
+{
+  if (!n)
+    return npos;
+  if (pos >= n_)
+    pos = 0;
+  else
+    pos = n_ - (pos + 1);
+  const auto res = std::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
+  return res == rend() ? npos : n_ - 1 - std::distance(rbegin(), res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
+find_first_not_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const -> 
+        size_type
+{
+  if (pos >= n_)
+    return npos;
+  if (!n)
+    return pos;
+  const auto res = detail::find_not_of<Traits>(&s_[pos], &s_[n_], s, n);
+  return res == end() ? npos : std::distance(s_, res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
+find_last_not_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const -> 
+        size_type
+{
+  if (pos >= n_)
+    pos = n_ - 1;
+  if (!n)
+    return pos;
+  pos = n_ - (pos + 1);
+  const auto res = detail::find_not_of<Traits>(rbegin() + pos, rend(), s, n);
+  return res == rend() ? npos : n_ - 1 - std::distance(rbegin(), res);
+}
 
 template<std::size_t N, typename CharT, typename Traits>
 auto
@@ -670,7 +785,7 @@ fixed_string<N, CharT, Traits>::
 assign_char(CharT, std::false_type) ->
     fixed_string&
 {
-    BOOST_THROW_EXCEPTION(std::length_error{
+    BOOST_FIXED_STRING_THROW(std::length_error{
         "max_size() == 0"});
 }
 

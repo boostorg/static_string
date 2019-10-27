@@ -126,6 +126,20 @@ raw_to_string(CharT* last, std::size_t size, Integer i)
         last, i, std::is_signed<Integer>{});
 }
 
+template<
+  typename Traits,
+  typename CharT,
+  typename ForwardIt>
+  ForwardIt
+find_not_of(
+  ForwardIt first, ForwardIt last, const CharT* str, std::size_t n) noexcept
+{
+  for (; first != last; ++first)
+    if (!Traits::find(str, n, *first))
+      return first;
+  return last;
+}
+
 } // detail
 } // fixed_string
 } // boost

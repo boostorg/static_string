@@ -77,8 +77,10 @@ public:
         std::reverse_iterator<const_iterator>;
 
     /// The type of `string_view` returned by the interface
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     using string_view_type =
-        basic_string_view<CharT, Traits>;
+        string_view;
+#endif
 
     //--------------------------------------------------------------------------
     //
@@ -90,7 +92,7 @@ public:
     static std::size_t constexpr static_capacity = N;
 
     /// A special index
-    static constexpr size_type npos = string_view_type::npos;
+    static constexpr size_type npos = size_type(-1);
 
     //--------------------------------------------------------------------------
     //
@@ -157,9 +159,12 @@ public:
         std::initializer_list<CharT> init);
 
     /// Construct from a `string_view`
+
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     explicit
     fixed_string(
         string_view_type sv);
+#endif
 
     /** Construct from any object convertible to `string_view_type`.
 
@@ -167,6 +172,7 @@ public:
         obtained by converting `t` to `string_view_type`,
         and used to construct the string.
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T
 #ifndef GENERATING_DOCUMENTATION
     , class = typename std::enable_if<
@@ -177,6 +183,7 @@ public:
         T const& t,
         size_type pos,
         size_type n);
+#endif
 
     //--------------------------------------------------------------------------
     //
@@ -237,12 +244,14 @@ public:
     }
 
     /// Assign from `string_view_type`.
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     operator=(
         string_view_type sv)
     {
         return assign(sv);
     }
+#endif
 
     /** Replace the contents with `count` copies of character `ch`
 
@@ -345,6 +354,7 @@ public:
 
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -359,6 +369,7 @@ public:
         string_view_type ss{t};
         return assign(ss.data(), ss.size());
     }
+#endif
 
     /** Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
 
@@ -369,6 +380,8 @@ public:
         @throw std::out_of_range if `pos > string_view_type{t}.size()`
         @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size()`
     */
+
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -385,6 +398,7 @@ public:
     {
         return assign(string_view_type{t}.substr(pos, count));
     }
+#endif
 
     //--------------------------------------------------------------------------
     //
@@ -488,11 +502,13 @@ public:
     }
 
     /// Convert a static string to a `string_view_type`
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     operator string_view_type() const noexcept
     {
         return basic_string_view<
             CharT, Traits>{data(), size()};
     }
+#endif
 
     //--------------------------------------------------------------------------
     //
@@ -708,6 +724,7 @@ public:
         @throw std::length_error if `size() + sv.size() > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     insert(
         size_type index,
@@ -715,6 +732,7 @@ public:
     {
         return insert(index, sv.data(), sv.size());
     }
+#endif
 
     /** Inserts the string `sv.substr(index_str, count)` at the position `index`
 
@@ -724,6 +742,7 @@ public:
         @throw std::length_error if `size() + sv.substr(index_str, count).size() > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     insert(
         size_type index,
@@ -733,6 +752,7 @@ public:
     {
         return insert(index, sv.substr(index_str, count));
     }
+#endif
 
     /** Inserts character `ch` before the character (if any) pointed by `pos`
 
@@ -809,6 +829,7 @@ public:
         @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -823,6 +844,7 @@ public:
     insert(
         size_type index,
         T const& t);
+#endif
 
     /** Inserts elements from `string_view{t}.substr(index_str, count)` at the position `index`
 
@@ -835,6 +857,7 @@ public:
         @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -849,6 +872,7 @@ public:
         T const& t,
         size_type index_str,
         size_type count = npos);
+#endif
 
     /** Removes `min(count, size() - index)` characters starting at `index`
 
@@ -918,12 +942,14 @@ public:
         @throw std::length_error if `size() + sv.size() > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     append(
         string_view_type sv)
     {
         return append(sv.data(), sv.size());
     }
+#endif
 
     /** Appends the contents of `sv.substr(pos, count)`
 
@@ -933,6 +959,7 @@ public:
         @throw std::length_error if `size() + sv.substr(pos, count).size() > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     append(
         string_view_type sv,
@@ -941,6 +968,7 @@ public:
     {
         return append(sv.substr(pos, count));
     }
+#endif
 
     /** Appends characters in the range `(s, s + count)`
     
@@ -1019,6 +1047,7 @@ public:
         @throw std::length_error if `size() + string_view{t} > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1035,6 +1064,7 @@ public:
     {
         return append(string_view{t});
     }
+#endif
 
     /** Appends characters from `string_view{t}.substr{pos, count}`
 
@@ -1047,6 +1077,7 @@ public:
         @throw std::length_error if `size() + string_view{t}.substr(pos, count).size() > max_size()`
         @return `*this`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1065,6 +1096,7 @@ public:
     {
         return append(string_view{t}.substr(pos, count));
     }
+#endif
 
     template<std::size_t M>
     fixed_string&
@@ -1124,6 +1156,7 @@ public:
 
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1138,6 +1171,7 @@ public:
     {
         return append(t);
     }
+#endif
 
     template<std::size_t M>
     int
@@ -1201,6 +1235,7 @@ public:
             substr(pos1, count1), s, count2);
     }
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     int
     compare(
         string_view_type s) const
@@ -1209,6 +1244,9 @@ public:
             &s_[0], n_, s.data(), s.size());
     }
 
+#endif
+
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     int
     compare(
         size_type pos1,
@@ -1218,7 +1256,9 @@ public:
         return detail::lexicographical_compare<CharT, Traits>(
             substr(pos1, count1), s);
     }
+#endif
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     int
@@ -1238,8 +1278,9 @@ public:
         return compare(pos1, count1,
             string_view_type(t).substr(pos2, count2));
     }
+#endif
 
-    string_view_type
+    fixed_string
     substr(
         size_type pos = 0,
         size_type count = npos) const;
@@ -1302,6 +1343,7 @@ public:
       return replace(pos1, n1, string_view_type(str).substr(pos2, n2));
     }
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1319,7 +1361,9 @@ public:
       string_view_type sv = t;
       return replace(pos1, n1, sv.data(), sv.size());
     }
+#endif
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1339,6 +1383,7 @@ public:
       string_view_type sv = t;
       return replace(pos1, n1, sv.substr(pos2, n2));
     }
+#endif
 
     fixed_string&
     replace(
@@ -1372,6 +1417,7 @@ public:
       return replace(i1, i2, string_view_type(str));
     }
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1389,6 +1435,7 @@ public:
       string_view_type sv = t;
       return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
     }
+#endif
 
     fixed_string&
     replace(
@@ -1457,6 +1504,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1473,31 +1521,25 @@ public:
       return string_view_type(
         *this).find(
           t, pos);
+
     }
+#endif
     
-    // overload for later use
-    /*template<std::size_t N>
+    template<std::size_t N>
     size_type
       find(
         const fixed_string<N, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {
-      return string_view_type(
-        *this).find(
-          str, pos);
-    }*/
+      return find(str.data(), pos, str.size());
+    }
 
     // Finds the first substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
     find(
         const CharT* s, 
         size_type pos,
-        size_type n) const
-    {
-      return string_view_type(
-        *this).find(
-          s, pos, n);
-    }
+        size_type n) const;
 
     /** Finds the first substring equal to the character
         string pointed to by `s`.
@@ -1510,9 +1552,7 @@ public:
         const CharT* s,
         size_type pos = 0) const
     {
-      return string_view_type(
-        *this).find(
-          s, pos);
+      return find(s, pos, Traits::length(s));
     }
 
     // Finds the first character `c`
@@ -1521,9 +1561,7 @@ public:
         CharT c,
         size_type pos = 0) const noexcept
     {
-      return string_view_type(
-        *this).find(
-          c, pos);
+      return find(&c, pos, 1);
     }
 
 
@@ -1533,6 +1571,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1550,30 +1589,23 @@ public:
         *this).rfind(
           t, pos);
     }
+#endif
 
-    // overload for later use
-    /*template<std::size_t N>
+    template<std::size_t N>
     size_type
       rfind(
         const fixed_string<N, CharT, Traits>& str,
         size_type pos = npos) const noexcept
     {
-      return string_view_type(
-        *this).rfind(
-          str, pos);
-    }*/
+      return rfind(str.data(), pos, str.size());
+    }
 
     // Finds the last substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
     rfind(
         const CharT* s, 
         size_type pos,
-        size_type n) const
-    {
-      return string_view_type(
-        *this).rfind(
-          s, pos, n);
-    }
+        size_type n) const;
 
     /** Finds the last substring equal to the character
         string pointed to by `s`.
@@ -1586,9 +1618,7 @@ public:
         const CharT* s,
         size_type pos = npos) const
     {
-      return string_view_type(
-        *this).rfind(
-          s, pos);
+      return rfind(s, pos, Traits::length(s));
     }
 
     // Finds the last character `c`
@@ -1597,9 +1627,7 @@ public:
         CharT c,
         size_type pos = npos) const noexcept
     {
-      return string_view_type(
-        *this).rfind(
-          c, pos);
+      return rfind(&c, pos, 1);
     }
 
     /** Finds the first character equal to one of the characters in `t`.
@@ -1608,6 +1636,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1625,30 +1654,23 @@ public:
         *this).find_first_of(
           t, pos);
     }
+#endif
 
-    // overload for later use
-    /*template<std::size_t N>
+    template<std::size_t N>
     size_type
       find_first_of(
         const fixed_string<N, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {
-      return string_view_type(
-        *this).find_first_of(
-          str, pos);
-    }*/
+      return find_first_of(str.data(), pos, str.size());
+    }
 
     // Finds the first character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
     find_first_of(
         const CharT* s,
         size_type pos,
-        size_type n) const
-    {
-      return string_view_type(
-        *this).find_first_of(
-          s, pos, n);
-    }
+        size_type n) const;
 
     /** Finds the first character equal to one of the characters
         in character string pointed to by `s`. 
@@ -1661,9 +1683,7 @@ public:
         const CharT* s,
         size_type pos = 0) const
     {
-      return string_view_type(
-        *this).find_first_of(
-          s, pos);
+      return find_first_of(s, pos, Traits::length(s));
     }
 
     // Finds the first character equal to `c`.
@@ -1672,9 +1692,7 @@ public:
         CharT c,
         size_type pos = 0) const noexcept
     {
-      return string_view_type(
-        *this).find_first_of(
-          c, pos);
+      return find_first_of(&c, pos, 1);
     }
 
     /** Finds the last character equal to one of the characters in `t`.
@@ -1683,6 +1701,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1700,30 +1719,23 @@ public:
         *this).find_last_of(
           t, pos);
     }
+#endif
      
-    // overload for later use
-    /*template<std::size_t N>
+    template<std::size_t N>
     size_type
       find_last_of(
         const fixed_string<N, CharT, Traits>& str,
         size_type pos = npos) const noexcept
     {
-      return string_view_type(
-        *this).find_last_of(
-          str, pos);
-    }*/
+      return find_last_of(str.data(), pos, str.size());
+    }
 
     // Finds the last character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
     find_last_of(
         const CharT* s,
         size_type pos,
-        size_type n) const
-    {
-      return string_view_type(
-        *this).find_last_of(
-          s, pos, n);
-    }
+        size_type n) const;
 
     /** Finds the last character equal to one of the characters
         in character string pointed to by `s`.
@@ -1736,9 +1748,7 @@ public:
         const CharT* s,
         size_type pos = npos) const
     {
-      return string_view_type(
-        *this).find_last_of(
-          s, pos);
+      return find_last_of(s, pos, Traits::length(s));
     }
 
     // Finds the last character equal to `c`.
@@ -1747,9 +1757,7 @@ public:
         CharT c,
         size_type pos = npos) const noexcept
     {
-      return string_view_type(
-        *this).find_last_of(
-          c, pos);
+      return find_last_of(&c, pos, 1);
     }
 
     /** Finds the first character equal to none of characters in `t`.
@@ -1758,6 +1766,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1775,30 +1784,23 @@ public:
         *this).find_first_not_of(
           t, pos);
     }
+#endif
 
-    // overload for later use
-    /*template<std::size_t N>
+    template<std::size_t N>
     size_type
       find_first_not_of(
         const fixed_string<N, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {
-      return string_view_type(
-        *this).find_first_not_of(
-          str, pos);
-    }*/
+      return find_first_not_of(str.data(), pos, str.size());
+    }
 
     // Finds the first character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
     find_first_not_of(
         const CharT* s,
         size_type pos, 
-        size_type n) const
-    {
-      return string_view_type(
-        *this).find_first_not_of(
-          s, pos, n);
-    }
+        size_type n) const;
 
     /** Finds the first character equal to none of characters in
         character string pointed to by `s`.
@@ -1811,9 +1813,7 @@ public:
         const CharT* s,
         size_type pos = 0) const
     {
-      return string_view_type(
-        *this).find_first_not_of(
-          s, pos);
+      return find_first_not_of(s, pos, Traits::length(s));
     }
 
     // Finds the first character not equal to `c`.
@@ -1822,9 +1822,7 @@ public:
         CharT c,
         size_type pos = 0) const noexcept
     {
-      return string_view_type(
-        *this).find_first_not_of(
-          c, pos);
+      return find_first_not_of(&c, pos, 1);
     }
 
     /** Finds the last character equal to none of characters in `t`.
@@ -1833,6 +1831,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1850,30 +1849,23 @@ public:
         *this).find_last_not_of(
           t, pos);
     }
+#endif
 
-    // overload for later use
-    /*template<size_t N>
+    template<size_t N>
     size_type
       find_last_not_of(
         const fixed_string<N, CharT, Traits>& str,
         size_type pos = npos) const noexcept
     {
-      return string_view_type(
-        *this).find_last_not_of(
-          str, pos);
-    }*/
+      return find_last_not_of(str.data(), pos, str.size());
+    }
 
     // Finds the last character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
     find_last_not_of(
         const CharT* s,
         size_type pos,
-        size_type n) const
-    {
-      return string_view_type(
-        *this).find_last_not_of(
-          s, pos, n);
-    }
+        size_type n) const;
 
 
     /** Finds the last character equal to none of characters in
@@ -1887,9 +1879,7 @@ public:
         const CharT* s,
         size_type pos = npos) const
     {
-      return string_view_type(
-        *this).find_last_not_of(
-          s, pos);
+      return find_last_not_of(s, pos, Traits::length(s));
     }
 
     // Finds the last character not equal to `c`.
@@ -1898,17 +1888,17 @@ public:
         CharT c,
         size_type pos = npos) const noexcept
     {
-      return string_view_type(
-        *this).find_last_not_of(
-          c, pos);
+      return find_last_not_of(&c, pos, 1);
     }
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     bool 
     starts_with(
         string_view_type s) const noexcept
     {
       return string_view_type(*this).starts_with(s);
     }
+#endif
     
     bool 
     starts_with(
@@ -1924,12 +1914,14 @@ public:
       return string_view_type(*this).starts_with(s);
     }
     
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
     bool 
     ends_with(
         string_view_type s) const noexcept
     {
       return string_view_type(*this).ends_with(s);
     }
+#endif
     
     bool
     ends_with(
@@ -2236,7 +2228,7 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
     fixed_string<N, CharT, Traits> const& s)
 {
     return os << static_cast<
-        basic_string_view<CharT, Traits>>(s);
+        string_view>(s);
 }
 
 //------------------------------------------------------------------------------
@@ -2270,7 +2262,7 @@ to_fixed_string(Integer x);
 //
 //------------------------------------------------------------------------------
 
-#if __cplusplus >= 201703L 
+#ifdef BOOST_FIXED_STRING_CPP17
 template<std::size_t N, typename CharT>
 fixed_string(CharT(&)[N]) -> 
     fixed_string<N, CharT, std::char_traits<CharT>>;
