@@ -125,6 +125,7 @@ fixed_string(string_view_type sv)
 }
 #endif
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
 fixed_string<N, CharT, Traits>::
@@ -132,6 +133,7 @@ fixed_string(T const& t, size_type pos, size_type n)
 {
     assign(t, pos, n);
 }
+#endif
 
 //------------------------------------------------------------------------------
 //

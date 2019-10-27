@@ -50,7 +50,7 @@ class fixed_string
     }
 
     std::size_t n_;
-    CharT s_[N+1];
+    CharT s_[N + 1];
 
 public:
     //--------------------------------------------------------------------------
@@ -1414,7 +1414,7 @@ public:
         const_iterator i2,
         const fixed_string& str)
     {
-      return replace(i1, i2, string_view_type(str));
+      return replace(i1, i2, str.data(), str.size());
     }
 
 #ifdef BOOST_FIXED_STRING_STRING_VIEW
@@ -1444,7 +1444,7 @@ public:
         const CharT* s,
         size_type n)
     {
-      return replace(i1, i2, string_view_type(s, n));
+      return replace(i1 - begin(), i2 - i1, s, n);
     }
 
     fixed_string&
@@ -1453,7 +1453,7 @@ public:
         const_iterator i2,
         const CharT* s)
     {
-      return replace(i1, i2, string_view_type(s));
+      return replace(i1, i2, s, Traits::length(s));
     }
 
     fixed_string&
@@ -1889,7 +1889,7 @@ public:
     starts_with(
         string_view_type s) const noexcept
     {
-      return string_view_type(*this).starts_with(s);
+      return starts_with(s.data());
     }
 #endif
     
@@ -1897,14 +1897,15 @@ public:
     starts_with(
         CharT c) const noexcept
     {
-      return string_view_type(*this).starts_with(c);
+      return !empty() && Traits::eq(front(), c);
     }
     
     bool 
     starts_with(
         const CharT* s) const
     {
-      return string_view_type(*this).starts_with(s);
+      const size_type len = Traits::length(s);
+      return n_ >= len && !Traits::compare(s_, s, len);
     }
     
 #ifdef BOOST_FIXED_STRING_STRING_VIEW
@@ -1912,7 +1913,7 @@ public:
     ends_with(
         string_view_type s) const noexcept
     {
-      return string_view_type(*this).ends_with(s);
+      return ends_with(s.data());
     }
 #endif
     
@@ -1920,14 +1921,15 @@ public:
     ends_with(
         CharT c) const noexcept
     {
-      return string_view_type(*this).ends_with(c);
+      return !empty() && Traits::eq(back(), c);
     }
     
     bool 
     ends_with(
         const CharT* s) const
     {
-      return string_view_type(*this).ends_with(s);
+      const size_type len = Traits::length(s);
+      return n_ >= len && !Traits::compare(s_ + (n_ - len), s, len);
     }
 
 private:
@@ -2215,6 +2217,7 @@ swap(
 //
 //------------------------------------------------------------------------------
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits>& 
 operator<<(std::basic_ostream<CharT, Traits>& os, 
@@ -2223,6 +2226,7 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
     return os << static_cast<
         string_view>(s);
 }
+#endif
 
 //------------------------------------------------------------------------------
 //

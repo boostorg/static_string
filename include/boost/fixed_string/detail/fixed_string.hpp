@@ -40,6 +40,8 @@ lexicographical_compare(
     return Traits::compare(s1, s2, n1);
 }
 
+
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<typename CharT, typename Traits>
 int
 lexicographical_compare(
@@ -49,7 +51,9 @@ lexicographical_compare(
     return detail::lexicographical_compare<
         CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
+#endif
 
+#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<typename CharT, typename Traits>
 int
 lexicographical_compare(
@@ -59,6 +63,7 @@ lexicographical_compare(
     return detail::lexicographical_compare<CharT, Traits>(
         s1.data(), s1.size(), s2.data(), s2.size());
 }
+#endif
 
 // Maximum number of characters in the decimal
 // representation of a binary number. This includes
