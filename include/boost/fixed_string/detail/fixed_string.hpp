@@ -19,6 +19,9 @@ namespace boost {
 namespace fixed_string {
 namespace detail {
 
+template<std::size_t, typename, typename>
+class fixed_string;
+
 // Because k-ballo said so
 template<class T>
 using is_input_iterator =
@@ -26,6 +29,7 @@ using is_input_iterator =
         ! std::is_integral<T>::value>;
 
 template<typename CharT, typename Traits>
+inline
 int
 lexicographical_compare(
     CharT const* s1, std::size_t n1,
@@ -43,6 +47,7 @@ lexicographical_compare(
 
 #ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<typename CharT, typename Traits>
+inline
 int
 lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
@@ -53,8 +58,20 @@ lexicographical_compare(
 }
 #endif
 
+template<std::size_t N, typename CharT, typename Traits >
+inline
+int
+lexicographical_compare(
+    const fixed_string<N, CharT, Traits>& s1,
+    CharT const* s2, std::size_t n2)
+{
+    return detail::lexicographical_compare<
+        CharT, Traits>(s1.data(), s1.size(), s2, n2);
+}
+
 #ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<typename CharT, typename Traits>
+inline
 int
 lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
@@ -64,6 +81,17 @@ lexicographical_compare(
         s1.data(), s1.size(), s2.data(), s2.size());
 }
 #endif
+
+template<std::size_t N, std::size_t M, typename CharT, typename Traits>
+inline
+int 
+lexicographical_compare(
+    const fixed_string<N, CharT, Traits>& s1, 
+    const fixed_string<M, CharT, Traits>& s2)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    s1.data(), s1.size(), s2.data(), s2.size());
+}
 
 // Maximum number of characters in the decimal
 // representation of a binary number. This includes
@@ -78,6 +106,7 @@ max_digits(std::size_t bytes)
 }
 
 template<typename CharT, class Integer, typename Traits>
+inline
 CharT*
 raw_to_string(
     CharT* buf, Integer x, std::true_type)
@@ -103,6 +132,7 @@ raw_to_string(
 }
 
 template<typename CharT, class Integer, typename Traits>
+inline
 CharT*
 raw_to_string(
     CharT* buf, Integer x, std::false_type)
@@ -122,6 +152,7 @@ template<
     typename CharT,
     class Integer,
     typename Traits = std::char_traits<CharT>>
+inline
 CharT*
 raw_to_string(CharT* last, std::size_t size, Integer i)
 {
@@ -132,10 +163,11 @@ raw_to_string(CharT* last, std::size_t size, Integer i)
 }
 
 template<
-  typename Traits,
-  typename CharT,
-  typename ForwardIt>
-  ForwardIt
+    typename Traits,
+    typename CharT,
+    typename ForwardIt>
+inline
+ForwardIt
 find_not_of(
   ForwardIt first, ForwardIt last, const CharT* str, std::size_t n) noexcept
 {

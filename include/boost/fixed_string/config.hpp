@@ -11,7 +11,7 @@
 #define BOOST_FIXED_STRING_CONFIG_HPP
 
 // Are we dependent on Boost?
-//#define BOOST_FIXED_STRING_USE_BOOST
+#define BOOST_FIXED_STRING_USE_BOOST
 
 // C++ version
 #if __cplusplus >= 201703L

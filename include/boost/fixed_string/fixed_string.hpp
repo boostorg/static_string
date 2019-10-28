@@ -1954,30 +1954,35 @@ private:
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 void
 operator+(
     fixed_string<N, CharT, Traits>const& lhs,
     fixed_string<M, CharT, Traits>const& rhs) = delete;
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 void
 operator+(
     CharT const* lhs,
     fixed_string<N, CharT, Traits>const& rhs) = delete;
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 void
 operator+(
     CharT lhs,
     fixed_string<N, CharT, Traits> const& rhs) = delete;
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 void
 operator+(
     fixed_string<N, CharT, Traits> const& lhs,
     CharT const* rhs) = delete;
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 void
 operator+(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -1992,6 +1997,7 @@ operator+(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 bool
 operator==(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2003,6 +2009,7 @@ operator==(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 bool
 operator!=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2014,6 +2021,7 @@ operator!=(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 bool
 operator<(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2025,6 +2033,7 @@ operator<(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 bool
 operator<=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2036,6 +2045,7 @@ operator<=(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 bool
 operator>(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2047,6 +2057,7 @@ operator>(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 bool
 operator>=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2056,6 +2067,7 @@ operator>=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator==(
     CharT const* lhs,
@@ -2067,6 +2079,7 @@ operator==(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator==(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2078,6 +2091,7 @@ operator==(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator!=(
     CharT const* lhs,
@@ -2089,6 +2103,7 @@ operator!=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator!=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2100,6 +2115,7 @@ operator!=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator<(
     CharT const* lhs,
@@ -2111,6 +2127,7 @@ operator<(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator<(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2122,6 +2139,7 @@ operator<(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator<=(
     CharT const* lhs,
@@ -2133,6 +2151,7 @@ operator<=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator<=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2144,6 +2163,7 @@ operator<=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator>(
     CharT const* lhs,
@@ -2155,6 +2175,7 @@ operator>(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator>(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2166,6 +2187,7 @@ operator>(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator>=(
     CharT const* lhs,
@@ -2177,6 +2199,7 @@ operator>=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+inline
 bool
 operator>=(
     fixed_string<N, CharT, Traits> const& lhs,
@@ -2193,7 +2216,11 @@ operator>=(
 //
 //------------------------------------------------------------------------------
 
-template<std::size_t N, typename CharT, typename Traits>
+template<
+    std::size_t N, 
+    typename CharT, 
+    typename Traits>
+inline
 void
 swap(
     fixed_string<N, CharT, Traits>& lhs,
@@ -2205,6 +2232,7 @@ swap(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+inline
 void
 swap(
     fixed_string<N, CharT, Traits>& lhs,
@@ -2219,16 +2247,17 @@ swap(
 //
 //------------------------------------------------------------------------------
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
+inline
 std::basic_ostream<CharT, Traits>& 
 operator<<(std::basic_ostream<CharT, Traits>& os, 
     fixed_string<N, CharT, Traits> const& s)
 {
-    return os << static_cast<
-        string_view>(s);
+  // for the non-trivial CharT
+  for (const CharT& c : s)
+    os << c;
+  return os;
 }
-#endif
 
 //------------------------------------------------------------------------------
 //
@@ -2252,6 +2281,7 @@ template<
         std::is_integral<Integer>::value>::type
 #endif
 >
+inline
 fixed_string<detail::max_digits(sizeof(Integer))>
 to_fixed_string(Integer x);
 

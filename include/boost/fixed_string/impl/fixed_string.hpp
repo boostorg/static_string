@@ -787,6 +787,7 @@ assign_char(CharT, std::false_type) ->
 }
 
 template<class Integer, class>
+inline
 fixed_string<detail::max_digits(sizeof(Integer))>
 to_fixed_string(Integer x)
 {
