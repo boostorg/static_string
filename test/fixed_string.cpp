@@ -15,6 +15,187 @@
 namespace boost {
 namespace fixed_string {
   
+
+template <class S>
+bool
+testS(const S& s, typename S::size_type pos, typename S::size_type n)
+{
+  if (pos <= s.size())
+  {
+    typename S::string_view_type str = s.substr(pos, n);
+    typename S::size_type rlen = std::min(n, s.size() - pos);
+    return (S::traits_type::compare(s.data() + pos, str.data(), rlen) == 0);
+  }
+  else
+  {
+    BOOST_TEST_THROWS((s.substr(pos, n)), std::out_of_range);
+    return true;
+  }
+}
+
+template <class S>
+bool
+testAS(S s, const typename S::value_type* str, typename S::size_type n, S expected)
+{
+  s.assign(str, n);
+  return s == expected;
+}
+
+template <class S>
+bool
+testI(S s, typename S::size_type pos, const typename S::value_type* str, typename S::size_type n, S expected)
+{
+  const typename S::size_type old_size = s.size();
+  S s0 = s;
+  if (pos <= old_size)
+  {
+    s.insert(pos, str, n);
+    return s == expected;
+  }
+  else
+  {
+    BOOST_TEST_THROWS((s.insert(pos, str, n)), std::out_of_range);
+    return true;
+  }
+}
+
+template <class S>
+bool
+testE(S s, typename S::size_type pos, typename S::size_type n, S expected)
+{
+  const typename S::size_type old_size = s.size();
+  S s0 = s;
+  if (pos <= old_size)
+  {
+    s.erase(pos, n);
+    return s[s.size()] == typename S::value_type() && s == expected;
+  }
+  else
+  {
+    BOOST_TEST_THROWS(s.erase(pos, n), std::out_of_range);
+    return true;
+  }
+}
+
+template <class S>
+bool
+testA(S s, const typename S::value_type* str, typename S::size_type n, S expected)
+{
+  return s.append(str, n) == expected;
+}
+
+int 
+sign(int x)
+{
+  if (x == 0)
+    return 0;
+  if (x < 0)
+    return -1;
+  return 1;
+}
+
+template <class S>
+bool
+testC(const S& s, typename S::size_type pos, typename S::size_type n1, const typename S::value_type* str, typename S::size_type n2, int x)
+{
+  if (pos <= s.size())
+    return sign(s.compare(pos, n1, str, n2)) == sign(x);
+  else
+  {
+    BOOST_TEST_THROWS(s.compare(pos, n1, str, n2), std::out_of_range);
+    return true;
+  }
+}
+
+template <class S>
+bool
+testF(const S& s, const typename S::value_type* str, typename S::size_type pos, typename S::size_type n, typename S::size_type x)
+{
+  return s.find(str, pos, n) == x;
+}
+
+template <class S>
+bool
+testRF(const S& s, const typename S::value_type* str, typename S::size_type pos, typename S::size_type n, typename S::size_type x)
+{
+  return s.rfind(str, pos, n) == x;
+}
+
+template <class S>
+bool
+testFF(const S& s, const typename S::value_type* str, typename S::size_type pos, typename S::size_type n, typename S::size_type x)
+{
+  return s.find_first_of(str, pos, n) == x;
+}
+
+template <class S>
+bool
+testFL(const S& s, const typename S::value_type* str, typename S::size_type pos, typename S::size_type n, typename S::size_type x)
+{
+  return s.find_last_of(str, pos, n) == x;
+}
+
+template <class S>
+bool
+testFFN(const S& s, const typename S::value_type* str, typename S::size_type pos, typename S::size_type n, typename S::size_type x)
+{
+  return s.find_first_not_of(str, pos, n) == x;
+}
+
+template <class S>
+bool
+testFLN(const S& s, const typename S::value_type* str, typename S::size_type pos, typename S::size_type n, typename S::size_type x)
+{
+  return s.find_last_not_of(str, pos, n) == x;
+}
+
+template <class S>
+bool
+testR(S s, typename S::size_type pos1, typename S::size_type n1, const typename S::value_type* str, S expected)
+{
+  typename S::const_iterator first = s.begin() + pos1;
+  typename S::const_iterator last = s.begin() + pos1 + n1;
+  s.replace(first, last, str);
+  return s == expected;
+}
+
+template <class S>
+bool
+testR(S s, typename S::size_type pos, typename S::size_type n1, typename S::size_type n2, typename S::value_type c, S expected)
+{
+  const typename S::size_type old_size = s.size();
+  S s0 = s;
+  if (pos <= old_size)
+  {
+    s.replace(pos, n1, n2, c);
+    return s == expected;
+  }
+  else
+  {
+    BOOST_TEST_THROWS((s.replace(pos, n1, n2, c)), std::out_of_range);
+    return true;
+  }
+}
+
+template <class S>
+bool
+testR(S s, typename S::size_type pos, typename S::size_type n1, const typename S::value_type* str, typename S::size_type n2, S expected)
+{
+  const typename S::size_type old_size = s.size();
+  S s0 = s;
+  if (pos <= old_size)
+  {
+    s.replace(pos, n1, str, n2);
+    return s == expected;
+  }
+  else
+  {
+    BOOST_TEST_THROWS((s.replace(pos, n1, str, n2)), std::out_of_range);
+    return true;
+  }
+}
+
+// dpne
 static
 void
 testConstruct()
@@ -118,14 +299,7 @@ testConstruct()
     }
 }
 
-template <class S>
-bool
-testAS(S s, const typename S::value_type* str, typename S::size_type n, S expected)
-{
-  s.assign(str, n);
-  return s == expected;
-}
-
+//done
 static
 void
 testAssignment()
@@ -432,6 +606,7 @@ testAssignment()
     BOOST_TEST(s_long == "rem ipsu");
 }
 
+// done
 static
 void
 testElements()
@@ -550,6 +725,7 @@ testElements()
     }
 }
 
+// done
 static
 void
 testIterators()
@@ -571,6 +747,7 @@ testIterators()
     }
 }
 
+// done
 static
 void
 testCapacity()
@@ -640,6 +817,7 @@ testCapacity()
     BOOST_TEST(*s.end() == 0);
 }
 
+// done
 static
 void
 testClear()
@@ -651,25 +829,7 @@ testClear()
     BOOST_TEST(*s.end() == 0);
 }
 
-template <class S>
-bool
-testI(S s, typename S::size_type pos, const typename S::value_type* str,
-     typename S::size_type n, S expected)
-{
-  const typename S::size_type old_size = s.size();
-  S s0 = s;
-  if (pos <= old_size)
-  {
-    s.insert(pos, str, n);
-    return s == expected;
-  }
-  else
-  {
-    BOOST_TEST_THROWS((s.insert(pos, str, n)), std::out_of_range);
-    return true;
-  }
-}
-
+// done
 static
 void
 testInsert()
@@ -1389,6 +1549,7 @@ testInsert()
     BOOST_TEST(testI(S("abcdefghijklmnopqrst"), 21, "12345678901234567890", 20, S("can't happen")));
 }
 
+// done 
 static
 void
 testErase()
@@ -1449,8 +1610,161 @@ testErase()
         BOOST_TEST(s1 == "1234589");
         BOOST_TEST(*s1.end() == 0);
     }
+
+    using S = fixed_string<400>;
+
+    BOOST_TEST(testE(S(""), 0, 0, S("")));
+    BOOST_TEST(testE(S(""), 0, 1, S("")));
+    BOOST_TEST(testE(S(""), 1, 0, S("can't happen")));
+    BOOST_TEST(testE(S("abcde"), 0, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 0, 1, S("bcde")));
+    BOOST_TEST(testE(S("abcde"), 0, 2, S("cde")));
+    BOOST_TEST(testE(S("abcde"), 0, 4, S("e")));
+    BOOST_TEST(testE(S("abcde"), 0, 5, S("")));
+    BOOST_TEST(testE(S("abcde"), 0, 6, S("")));
+    BOOST_TEST(testE(S("abcde"), 1, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 1, 1, S("acde")));
+    BOOST_TEST(testE(S("abcde"), 1, 2, S("ade")));
+    BOOST_TEST(testE(S("abcde"), 1, 3, S("ae")));
+    BOOST_TEST(testE(S("abcde"), 1, 4, S("a")));
+    BOOST_TEST(testE(S("abcde"), 1, 5, S("a")));
+    BOOST_TEST(testE(S("abcde"), 2, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 2, 1, S("abde")));
+    BOOST_TEST(testE(S("abcde"), 2, 2, S("abe")));
+    BOOST_TEST(testE(S("abcde"), 2, 3, S("ab")));
+    BOOST_TEST(testE(S("abcde"), 2, 4, S("ab")));
+    BOOST_TEST(testE(S("abcde"), 4, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 4, 1, S("abcd")));
+    BOOST_TEST(testE(S("abcde"), 4, 2, S("abcd")));
+    BOOST_TEST(testE(S("abcde"), 5, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 5, 1, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 6, 0, S("can't happen")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 1, S("bcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 5, S("fghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 9, S("j")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 10, S("")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 11, S("")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 1, S("acdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 4, S("afghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 8, S("aj")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 9, S("a")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 10, S("a")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 1, S("abcdeghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 2, S("abcdehij")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 4, S("abcdej")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 5, S("abcde")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 6, S("abcde")));
+    BOOST_TEST(testE(S("abcdefghij"), 9, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 9, 1, S("abcdefghi")));
+    BOOST_TEST(testE(S("abcdefghij"), 9, 2, S("abcdefghi")));
+    BOOST_TEST(testE(S("abcdefghij"), 10, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 10, 1, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 11, 0, S("can't happen")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 1, S("bcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 10, S("klmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 19, S("t")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 20, S("")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 21, S("")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 1, S("acdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 9, S("aklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 18, S("at")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 19, S("a")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 20, S("a")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 1, S("abcdefghijlmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 5, S("abcdefghijpqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 9, S("abcdefghijt")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 10, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 11, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 19, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 19, 1, S("abcdefghijklmnopqrs")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 19, 2, S("abcdefghijklmnopqrs")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 20, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 20, 1, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 21, 0, S("can't happen")));
+
+    BOOST_TEST(testE(S(""), 0, 0, S("")));
+    BOOST_TEST(testE(S(""), 0, 1, S("")));
+    BOOST_TEST(testE(S(""), 1, 0, S("can't happen")));
+    BOOST_TEST(testE(S("abcde"), 0, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 0, 1, S("bcde")));
+    BOOST_TEST(testE(S("abcde"), 0, 2, S("cde")));
+    BOOST_TEST(testE(S("abcde"), 0, 4, S("e")));
+    BOOST_TEST(testE(S("abcde"), 0, 5, S("")));
+    BOOST_TEST(testE(S("abcde"), 0, 6, S("")));
+    BOOST_TEST(testE(S("abcde"), 1, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 1, 1, S("acde")));
+    BOOST_TEST(testE(S("abcde"), 1, 2, S("ade")));
+    BOOST_TEST(testE(S("abcde"), 1, 3, S("ae")));
+    BOOST_TEST(testE(S("abcde"), 1, 4, S("a")));
+    BOOST_TEST(testE(S("abcde"), 1, 5, S("a")));
+    BOOST_TEST(testE(S("abcde"), 2, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 2, 1, S("abde")));
+    BOOST_TEST(testE(S("abcde"), 2, 2, S("abe")));
+    BOOST_TEST(testE(S("abcde"), 2, 3, S("ab")));
+    BOOST_TEST(testE(S("abcde"), 2, 4, S("ab")));
+    BOOST_TEST(testE(S("abcde"), 4, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 4, 1, S("abcd")));
+    BOOST_TEST(testE(S("abcde"), 4, 2, S("abcd")));
+    BOOST_TEST(testE(S("abcde"), 5, 0, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 5, 1, S("abcde")));
+    BOOST_TEST(testE(S("abcde"), 6, 0, S("can't happen")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 1, S("bcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 5, S("fghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 9, S("j")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 10, S("")));
+    BOOST_TEST(testE(S("abcdefghij"), 0, 11, S("")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 1, S("acdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 4, S("afghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 8, S("aj")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 9, S("a")));
+    BOOST_TEST(testE(S("abcdefghij"), 1, 10, S("a")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 1, S("abcdeghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 2, S("abcdehij")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 4, S("abcdej")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 5, S("abcde")));
+    BOOST_TEST(testE(S("abcdefghij"), 5, 6, S("abcde")));
+    BOOST_TEST(testE(S("abcdefghij"), 9, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 9, 1, S("abcdefghi")));
+    BOOST_TEST(testE(S("abcdefghij"), 9, 2, S("abcdefghi")));
+    BOOST_TEST(testE(S("abcdefghij"), 10, 0, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 10, 1, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghij"), 11, 0, S("can't happen")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 1, S("bcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 10, S("klmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 19, S("t")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 20, S("")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 0, 21, S("")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 1, S("acdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 9, S("aklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 18, S("at")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 19, S("a")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 1, 20, S("a")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 1, S("abcdefghijlmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 5, S("abcdefghijpqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 9, S("abcdefghijt")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 10, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 10, 11, S("abcdefghij")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 19, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 19, 1, S("abcdefghijklmnopqrs")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 19, 2, S("abcdefghijklmnopqrs")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 20, 0, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 20, 1, S("abcdefghijklmnopqrst")));
+    BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 21, 0, S("can't happen")));
 }
 
+// done
 static
 void
 testPushBack()
@@ -1481,6 +1795,7 @@ testPushBack()
     }
 }
 
+// done
 static
 void
 testPopBack()
@@ -1516,13 +1831,7 @@ testPopBack()
     }
 }
 
-template <class S>
-bool
-testA(S s, const typename S::value_type* str, typename S::size_type n, S expected)
-{
-  return s.append(str, n) == expected;
-}
-
+// done
 static
 void
 testAppend()
@@ -1733,6 +2042,7 @@ testAppend()
     BOOST_TEST(s_short == "123/123/123/123/123/123/123/123/");
 }
 
+// done
 static
 void
 testPlusEquals()
@@ -1803,29 +2113,7 @@ testPlusEquals()
     }
 }
 
-int sign(int x)
-{
-  if (x == 0)
-    return 0;
-  if (x < 0)
-    return -1;
-  return 1;
-}
-
-template <class S>
-bool
-testC(const S& s, typename S::size_type pos, typename S::size_type n1,
-      const typename S::value_type* str, typename S::size_type n2, int x)
-{
-  if (pos <= s.size())
-    return sign(s.compare(pos, n1, str, n2)) == sign(x);
-  else
-  {
-      BOOST_TEST_THROWS(s.compare(pos, n1, str, n2), std::out_of_range);
-      return true;
-  }
-}
-
+// done
 void
 testCompare()
 {
@@ -3106,6 +3394,7 @@ testCompare()
     BOOST_TEST(testC(S("abcdefghijklmnopqrst"), 21, 0, "abcdefghijklmnopqrst", 20, 0));
 }
 
+// done
 void
 testSwap()
 {
@@ -3266,8 +3555,7 @@ testGeneral()
     }
 }
 
-
-
+// done
 void
 testToStaticString()
 {
@@ -3289,54 +3577,7 @@ testToStaticString()
     BOOST_TEST(to_fixed_string<unsigned long>(0xffffffff) == "4294967295");
 }
 
-template <class S>
-bool
-testF(const S& s, const typename S::value_type* str, typename S::size_type pos,
-     typename S::size_type n, typename S::size_type x)
-{
-  return s.find(str, pos, n) == x;
-}
-
-template <class S>
-bool
-testRF(const S& s, const typename S::value_type* str, typename S::size_type pos,
-     typename S::size_type n, typename S::size_type x)
-{
-  return s.rfind(str, pos, n) == x;
-}
-
-template <class S>
-bool
-testFF(const S& s, const typename S::value_type* str, typename S::size_type pos,
-     typename S::size_type n, typename S::size_type x)
-{
-  return s.find_first_of(str, pos, n) == x;
-}
-
-template <class S>
-bool
-testFL(const S& s, const typename S::value_type* str, typename S::size_type pos,
-       typename S::size_type n, typename S::size_type x)
-{
-  return s.find_last_of(str, pos, n) == x;
-}
-
-template <class S>
-bool
-testFFN(const S& s, const typename S::value_type* str, typename S::size_type pos,
-       typename S::size_type n, typename S::size_type x)
-{
-  return s.find_first_not_of(str, pos, n) == x;
-}
-
-template <class S>
-bool
-testFLN(const S& s, const typename S::value_type* str, typename S::size_type pos,
-        typename S::size_type n, typename S::size_type x)
-{
-  return s.find_last_not_of(str, pos, n) == x;
-}
-
+// done
 void
 testFind()
 {
@@ -5391,58 +5632,11 @@ testFind()
   BOOST_TEST(testFLN(S("hnbrcplsjfgiktoedmaq"), "qprlsfojamgndekthibc", 21, 20, S::npos));
 }
 
-template <class S>
-bool
-testR(S s, typename S::size_type pos1, typename S::size_type n1, const typename S::value_type* str, S expected)
-{
-  typename S::const_iterator first = s.begin() + pos1;
-  typename S::const_iterator last = s.begin() + pos1 + n1;
-  s.replace(first, last, str);
-  return s == expected;
-}
-
-template <class S>
-bool
-testR(S s, typename S::size_type pos, typename S::size_type n1,
-     typename S::size_type n2, typename S::value_type c,
-     S expected)
-{
-  const typename S::size_type old_size = s.size();
-  S s0 = s;
-  if (pos <= old_size)
-  {
-    s.replace(pos, n1, n2, c);
-    return s == expected;
-  }
-  else
-  {
-    BOOST_TEST_THROWS((s.replace(pos, n1, n2, c)), std::out_of_range);
-  }
-}
-
-template <class S>
-bool
-testR(S s, typename S::size_type pos, typename S::size_type n1,
-     const typename S::value_type* str, typename S::size_type n2,
-     S expected)
-{
-  const typename S::size_type old_size = s.size();
-  S s0 = s;
-  if (pos <= old_size)
-  {
-    s.replace(pos, n1, str, n2);
-    return s == expected;
-  }
-  else
-  {
-    BOOST_TEST_THROWS((s.replace(pos, n1, str, n2)), std::out_of_range);
-    return true;
-  }
-}
-
+// done
 void
 testReplace()
 {
+  // replace(size_type pos1, size_type n1, const charT* s, size_type n2);
   {
     fixed_string<20> fs1 = "helloworld";
     BOOST_TEST(fs1.replace(5, 2, fs1.data() + 1, 8) == "helloelloworlrld");
@@ -5491,9 +5685,74 @@ testReplace()
     fixed_string<20> fs2 = "0123456789";
     BOOST_TEST(fs2.replace(0, 10, fs2.data(), 5) == "01234");
   }
+
+  // replace(size_type pos1, size_type n1, const basic_string& str);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), fs1) == "helloworld");
+  }
+  // replace(size_type pos1, size_type n1, const basic_string& str, size_type pos2, size_type n2 = npos);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), fs1, 0, fs1.size()) == "helloworld");
+  }
+  // replace(size_type pos1, size_type n1, const T& t);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), string_view(fs1)) == "helloworld");
+  }
+  // replace(size_type pos1, size_type n1, const T& t, size_type pos2, size_type n2 = npos);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), string_view(fs1), 0, fs1.size()) == "helloworld");
+  }
+  // replace(size_type pos, size_type n, const charT * s);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), fs1.data()) == "helloworld");
+  }
+  // replace(size_type pos1, size_type n1, size_type n2, charT c);]
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), fs1.size(), 'a') == "aaaaaaaaaa");
+  }
+  // replace(const_iterator i1, const_iterator i2, const basic_string& str);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs1) == "helloworld");
+  }
+  // replace(const_iterator i1, const_iterator i2, const T& t);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), string_view(fs1)) == "helloworld");
+  }
+  // replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs1.data(), fs1.size()) == "helloworld");
+  }
+  // replace(const_iterator i1, const_iterator i2, const charT* s);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs1.data()) == "helloworld");
+  }
+  // replace(const_iterator i1, const_iterator i2, size_type n, charT c);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs1.size(), 'a') == "aaaaaaaaaa");
+  }
+  // replace(const_iterator i1, const_iterator i2, InputIterator j1, InputIterator j2);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs1.begin(), fs1.end()) == "helloworld");
+  }
+  // replace(const_iterator i1, const_iterator i2, initializer_list<charT> il);
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'}) == "helloworld");
+  }
+
   using S = fixed_string<400>;
-
-
   S s_short = "123/";
   S s_long = "Lorem ipsum dolor sit amet, consectetur/";
 
@@ -6335,23 +6594,7 @@ testReplace()
   BOOST_TEST(testR(S("abcdefghijklmnopqrst"), 20, 1, "12345678901234567890", 20, S("abcdefghijklmnopqrst12345678901234567890")));
 }
 
-template <class S>
-bool
-testS(const S& s, typename S::size_type pos, typename S::size_type n)
-{
-  if (pos <= s.size())
-  {
-    typename S::string_view_type str = s.substr(pos, n);
-    typename S::size_type rlen = std::min(n, s.size() - pos);
-    return (S::traits_type::compare(s.data() + pos, str.data(), rlen) == 0);
-  }
-  else
-  {
-    BOOST_TEST_THROWS((s.substr(pos, n)), std::out_of_range);
-    return true;
-  }
-}
-
+// done
 void
 testSubstr()
 {
@@ -6474,6 +6717,7 @@ testSubstr()
   BOOST_TEST(testS(S("dplqartnfgejichmoskb"), 21, 0));
 }
 
+// done
 void
 testStartsEnds()
 {
@@ -6483,47 +6727,48 @@ testStartsEnds()
   BOOST_TEST(S("1234567890").starts_with("1234567890"));
   BOOST_TEST(!S("1234567890").starts_with("234"));
   BOOST_TEST(!S("1234567890").starts_with("12345678900"));
+  BOOST_TEST(S("1234567890").starts_with(string_view("1234567890")));
 
   BOOST_TEST(S("1234567890").ends_with('0'));
   BOOST_TEST(S("1234567890").ends_with("890"));
   BOOST_TEST(S("1234567890").ends_with("1234567890"));
   BOOST_TEST(!S("1234567890").ends_with("234"));
   BOOST_TEST(!S("1234567890").ends_with("12345678900"));
+  BOOST_TEST(S("1234567890").ends_with(string_view("1234567890")));
 }
-
-
 
 int
 runTests()
 {
-    testConstruct();
+  testConstruct();
     
-    testAssignment();
+  testAssignment();
     
-    testElements();
+  testElements();
 
-    testIterators();
+  testIterators();
     
-    testCapacity();
+  testCapacity();
 
-    testClear();
-    testInsert();
-    testErase();
-    testPushBack();
-    testPopBack();
-    testAppend();
-    testPlusEquals();
+  testClear();
+  testInsert();
+  testErase();
+  testPushBack();
+  testPopBack();
+  testAppend();
+  testPlusEquals();
 
-    testCompare();
-    testSwap();
-    testGeneral();
-    testToStaticString();
+  testCompare();
+  testSwap();
+  testGeneral();
+  testToStaticString();
 
-    testFind();
+  testFind();
 
-    testReplace();
-    testSubstr();
-    testStartsEnds();
+  testReplace();
+  testSubstr();
+  testStartsEnds();
+
   return report_errors();
 }
 
