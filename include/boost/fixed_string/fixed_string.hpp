@@ -1477,10 +1477,10 @@ public:
       return find(sv.data(), pos, sv.size());
     }
     
-    template<std::size_t N>
+    template<std::size_t M>
     size_type
       find(
-        const fixed_string<N, CharT, Traits>& str,
+        const fixed_string<M, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {
       return find(str.data(), pos, str.size());
@@ -1540,10 +1540,10 @@ public:
       return rfind(sv.data(), pos, sv.size());
     }
 
-    template<std::size_t N>
+    template<std::size_t M>
     size_type
       rfind(
-        const fixed_string<N, CharT, Traits>& str,
+        const fixed_string<M, CharT, Traits>& str,
         size_type pos = npos) const noexcept
     {
       return rfind(str.data(), pos, str.size());
@@ -1602,7 +1602,7 @@ public:
       return find_first_of(sv.data(), pos, sv.size());
     }
 
-    template<std::size_t N>
+    template<std::size_t M>
     size_type
       find_first_of(
         const fixed_string<N, CharT, Traits>& str,
@@ -1664,10 +1664,10 @@ public:
       return find_last_of(sv.data(), pos, sv.size());
     }
      
-    template<std::size_t N>
+    template<std::size_t M>
     size_type
       find_last_of(
-        const fixed_string<N, CharT, Traits>& str,
+        const fixed_string<M, CharT, Traits>& str,
         size_type pos = npos) const noexcept
     {
       return find_last_of(str.data(), pos, str.size());
@@ -1726,10 +1726,10 @@ public:
       return find_first_not_of(sv.data(), pos, sv.size());
     }
 
-    template<std::size_t N>
+    template<std::size_t M>
     size_type
       find_first_not_of(
-        const fixed_string<N, CharT, Traits>& str,
+        const fixed_string<M, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {
       return find_first_not_of(str.data(), pos, str.size());
