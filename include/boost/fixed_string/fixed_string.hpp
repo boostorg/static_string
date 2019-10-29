@@ -1283,12 +1283,12 @@ public:
     swap(
         fixed_string<M, CharT, Traits>& s);
 
-    template<size_t N>
+    template<size_t M>
     fixed_string&
     replace(
         size_type pos1,
         size_type n1,
-        const fixed_string<N, CharT, Traits>& str)
+        const fixed_string<M, CharT, Traits>& str)
     {
       return replace(pos1, n1, str.data(), str.size());
     }
@@ -1605,7 +1605,7 @@ public:
     template<std::size_t M>
     size_type
       find_first_of(
-        const fixed_string<N, CharT, Traits>& str,
+        const fixed_string<M, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {
       return find_first_of(str.data(), pos, str.size());
@@ -1788,10 +1788,10 @@ public:
       return find_last_not_of(sv.data(), pos, sv.size());
     }
 
-    template<size_t N>
+    template<size_t M>
     size_type
       find_last_not_of(
-        const fixed_string<N, CharT, Traits>& str,
+        const fixed_string<M, CharT, Traits>& str,
         size_type pos = npos) const noexcept
     {
       return find_last_not_of(str.data(), pos, str.size());
