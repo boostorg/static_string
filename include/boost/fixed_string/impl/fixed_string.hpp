@@ -597,9 +597,11 @@ replace(
   if (pos > size())
     BOOST_FIXED_STRING_THROW(std::out_of_range{
            "pos > size()"});
-  if ((size() - n1 + n2) > max_size())
+  if (size() - std::min(n1, size() - pos) >= max_size() - n2)
     BOOST_FIXED_STRING_THROW(std::length_error{
-           "size() - n1 + n2 > max_size()"});
+           "replaced string exceeds max_size()"});
+  if (pos + n1 >= size())
+    n1 = size() - pos;
   const bool inside = s <= &s_[size()] && s >= &s_[0];
   if (inside && (s - &s_[0]) == pos && n1 == n2)
     return *this;
@@ -640,9 +642,11 @@ replace(
   if (pos > size())
     BOOST_FIXED_STRING_THROW(std::out_of_range{
            "pos > size()"});
-  if ((size() - n1 + n2) > max_size())
+  if (size() - std::min(n1, size() - pos) >= max_size() - n2)
     BOOST_FIXED_STRING_THROW(std::length_error{
            "replaced string exceeds max_size()"});
+  if (pos + n1 >= size())
+    n1 = size() - pos;
   Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
   Traits::assign(&s_[pos], n2, c);
   n_ += (n2 - n1);
@@ -675,12 +679,12 @@ rfind(
     size_type n) const -> 
         size_type
 {
-  if (n > n_)
+  if (n_ < n)
     return npos;
-  if (n == 0)
-    return pos;
   if (pos > n_ - n)
     pos = n_ - n;
+  if (!n)
+    return pos;
   for (auto sub = &s_[pos]; sub >= s_; --sub)
     if (!Traits::compare(sub, s, n))
       return std::distance(s_, sub);

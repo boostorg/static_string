@@ -1832,7 +1832,8 @@ public:
     starts_with(
         string_view_type s) const noexcept
     {
-      return starts_with(s.data());
+      const size_type len = s.size();
+      return n_ >= len && !Traits::compare(s_, s.data(), len);
     }
     
     bool 
@@ -1854,7 +1855,8 @@ public:
     ends_with(
         string_view_type s) const noexcept
     {
-      return ends_with(s.data());
+      const size_type len = s.size();
+      return n_ >= len && !Traits::compare(s_ + (n_ - len), s.data(), len);
     }
     
     bool
