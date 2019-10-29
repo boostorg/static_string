@@ -77,10 +77,8 @@ public:
         std::reverse_iterator<const_iterator>;
 
     /// The type of `string_view` returned by the interface
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     using string_view_type =
         string_view;
-#endif
 
     //--------------------------------------------------------------------------
     //
@@ -160,11 +158,9 @@ public:
 
     /// Construct from a `string_view`
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     explicit
     fixed_string(
         string_view_type sv);
-#endif
 
     /** Construct from any object convertible to `string_view_type`.
 
@@ -172,7 +168,6 @@ public:
         obtained by converting `t` to `string_view_type`,
         and used to construct the string.
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T
 #ifndef GENERATING_DOCUMENTATION
     , class = typename std::enable_if<
@@ -183,7 +178,6 @@ public:
         T const& t,
         size_type pos,
         size_type n);
-#endif
 
     //--------------------------------------------------------------------------
     //
@@ -244,14 +238,12 @@ public:
     }
 
     /// Assign from `string_view_type`.
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     operator=(
         string_view_type sv)
     {
         return assign(sv);
     }
-#endif
 
     /** Replace the contents with `count` copies of character `ch`
 
@@ -354,7 +346,6 @@ public:
 
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -369,7 +360,6 @@ public:
         string_view_type ss{t};
         return assign(ss.data(), ss.size());
     }
-#endif
 
     /** Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
 
@@ -381,7 +371,6 @@ public:
         @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size()`
     */
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -398,7 +387,6 @@ public:
     {
         return assign(string_view_type{t}.substr(pos, count));
     }
-#endif
 
     //--------------------------------------------------------------------------
     //
@@ -502,13 +490,11 @@ public:
     }
 
     /// Convert a static string to a `string_view_type`
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     operator string_view_type() const noexcept
     {
         return basic_string_view<
             CharT, Traits>{data(), size()};
     }
-#endif
 
     //--------------------------------------------------------------------------
     //
@@ -724,7 +710,6 @@ public:
         @throw std::length_error if `size() + sv.size() > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     insert(
         size_type index,
@@ -732,7 +717,6 @@ public:
     {
         return insert(index, sv.data(), sv.size());
     }
-#endif
 
     /** Inserts the string `sv.substr(index_str, count)` at the position `index`
 
@@ -742,7 +726,6 @@ public:
         @throw std::length_error if `size() + sv.substr(index_str, count).size() > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     insert(
         size_type index,
@@ -752,7 +735,6 @@ public:
     {
         return insert(index, sv.substr(index_str, count));
     }
-#endif
 
     /** Inserts character `ch` before the character (if any) pointed by `pos`
 
@@ -829,7 +811,6 @@ public:
         @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -844,7 +825,6 @@ public:
     insert(
         size_type index,
         T const& t);
-#endif
 
     /** Inserts elements from `string_view{t}.substr(index_str, count)` at the position `index`
 
@@ -857,7 +837,6 @@ public:
         @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -872,7 +851,6 @@ public:
         T const& t,
         size_type index_str,
         size_type count = npos);
-#endif
 
     /** Removes `min(count, size() - index)` characters starting at `index`
 
@@ -942,14 +920,12 @@ public:
         @throw std::length_error if `size() + sv.size() > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     append(
         string_view_type sv)
     {
         return append(sv.data(), sv.size());
     }
-#endif
 
     /** Appends the contents of `sv.substr(pos, count)`
 
@@ -959,7 +935,6 @@ public:
         @throw std::length_error if `size() + sv.substr(pos, count).size() > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     fixed_string&
     append(
         string_view_type sv,
@@ -968,7 +943,6 @@ public:
     {
         return append(sv.substr(pos, count));
     }
-#endif
 
     /** Appends characters in the range `(s, s + count)`
     
@@ -1047,7 +1021,6 @@ public:
         @throw std::length_error if `size() + string_view{t} > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1064,7 +1037,6 @@ public:
     {
         return append(string_view{t});
     }
-#endif
 
     /** Appends characters from `string_view{t}.substr{pos, count}`
 
@@ -1077,7 +1049,6 @@ public:
         @throw std::length_error if `size() + string_view{t}.substr(pos, count).size() > max_size()`
         @return `*this`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1096,7 +1067,6 @@ public:
     {
         return append(string_view{t}.substr(pos, count));
     }
-#endif
 
     template<std::size_t M>
     fixed_string&
@@ -1156,7 +1126,6 @@ public:
 
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1171,7 +1140,6 @@ public:
     {
         return append(t);
     }
-#endif
 
     template<std::size_t M>
     int
@@ -1235,7 +1203,6 @@ public:
             substr(pos1, count1), s, count2);
     }
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     int
     compare(
         string_view_type s) const
@@ -1244,9 +1211,6 @@ public:
             &s_[0], n_, s.data(), s.size());
     }
 
-#endif
-
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     int
     compare(
         size_type pos1,
@@ -1256,9 +1220,7 @@ public:
         return detail::lexicographical_compare<CharT, Traits>(
             substr(pos1, count1), s);
     }
-#endif
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     int
@@ -1278,9 +1240,8 @@ public:
         return compare(pos1, count1,
             string_view_type(t).substr(pos2, count2));
     }
-#endif
 
-    fixed_string
+    string_view_type
     substr(
         size_type pos = 0,
         size_type count = npos) const;
@@ -1344,7 +1305,6 @@ public:
       return replace(pos1, n1, str.substr(pos2, n2));
     }
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1362,12 +1322,9 @@ public:
       string_view_type sv = t;
       return replace(pos1, n1, sv.data(), sv.size());
     }
-#endif
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
-#if GENERATI
-    NG_DOCUMENTATION
+#if GENERATING_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<
@@ -1385,7 +1342,6 @@ public:
       string_view_type sv = t;
       return replace(pos1, n1, sv.substr(pos2, n2));
     }
-#endif
 
     fixed_string&
     replace(
@@ -1419,7 +1375,6 @@ public:
       return replace(i1, i2, str.data(), str.size());
     }
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1437,7 +1392,6 @@ public:
       string_view_type sv = t;
       return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
     }
-#endif
 
     fixed_string&
     replace(
@@ -1506,7 +1460,6 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1523,7 +1476,6 @@ public:
       string_view_type sv = t;
       return find(sv.data(), pos, sv.size());
     }
-#endif
     
     template<std::size_t N>
     size_type
@@ -1571,7 +1523,6 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1588,7 +1539,6 @@ public:
       string_view_type sv = t;
       return rfind(sv.data(), pos, sv.size());
     }
-#endif
 
     template<std::size_t N>
     size_type
@@ -1635,7 +1585,6 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1652,7 +1601,6 @@ public:
       string_view_type sv = t;
       return find_first_of(sv.data(), pos, sv.size());
     }
-#endif
 
     template<std::size_t N>
     size_type
@@ -1699,7 +1647,6 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1716,7 +1663,6 @@ public:
       string_view_type sv = t;
       return find_last_of(sv.data(), pos, sv.size());
     }
-#endif
      
     template<std::size_t N>
     size_type
@@ -1763,7 +1709,6 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1780,7 +1725,6 @@ public:
       string_view_type sv = t;
       return find_first_not_of(sv.data(), pos, sv.size());
     }
-#endif
 
     template<std::size_t N>
     size_type
@@ -1827,7 +1771,6 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
     */
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     template<class T>
 #if GENERATING_DOCUMENTATION
     size_type
@@ -1844,7 +1787,6 @@ public:
       string_view_type sv = t;
       return find_last_not_of(sv.data(), pos, sv.size());
     }
-#endif
 
     template<size_t N>
     size_type
@@ -1886,14 +1828,12 @@ public:
       return find_last_not_of(&c, pos, 1);
     }
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     bool 
     starts_with(
         string_view_type s) const noexcept
     {
       return starts_with(s.data());
     }
-#endif
     
     bool 
     starts_with(
@@ -1910,14 +1850,12 @@ public:
       return n_ >= len && !Traits::compare(s_, s, len);
     }
     
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
     bool 
     ends_with(
         string_view_type s) const noexcept
     {
       return ends_with(s.data());
     }
-#endif
     
     bool
     ends_with(
@@ -2253,10 +2191,7 @@ std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, 
     fixed_string<N, CharT, Traits> const& s)
 {
-  // for the non-trivial CharT
-  for (const CharT& c : s)
-    os << c;
-  return os;
+  return os << string_view(s);
 }
 
 //------------------------------------------------------------------------------
@@ -2291,7 +2226,7 @@ to_fixed_string(Integer x);
 //
 //------------------------------------------------------------------------------
 
-#ifdef BOOST_FIXED_STRING_CPP17
+#ifdef BOOST_FIXED_STRING_USE_DEDUCT
 template<std::size_t N, typename CharT>
 fixed_string(CharT(&)[N]) -> 
     fixed_string<N, CharT, std::char_traits<CharT>>;

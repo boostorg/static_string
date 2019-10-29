@@ -113,16 +113,13 @@ fixed_string(std::initializer_list<CharT> init)
     assign(init.begin(), init.end());
 }
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(string_view_type sv)
 {
     assign(sv);
 }
-#endif
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
 fixed_string<N, CharT, Traits>::
@@ -130,7 +127,6 @@ fixed_string(T const& t, size_type pos, size_type n)
 {
     assign(t, pos, n);
 }
-#endif
 
 //------------------------------------------------------------------------------
 //
@@ -393,7 +389,6 @@ insert(
     return begin() + index;
 }
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
 auto
@@ -410,9 +405,7 @@ insert(
 {
     return insert(index, t, 0, npos);
 }
-#endif
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
 auto
@@ -433,7 +426,6 @@ insert(
         string_view_type(t).substr(index_str, count);
     return insert(index, s.data(), s.size());
 }
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -515,7 +507,7 @@ template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
-    fixed_string<N, CharT, Traits>
+    string_view
 {
     if(pos > size())
         BOOST_FIXED_STRING_THROW(std::out_of_range{

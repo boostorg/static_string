@@ -44,8 +44,6 @@ lexicographical_compare(
     return Traits::compare(s1, s2, n1);
 }
 
-
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<typename CharT, typename Traits>
 inline
 int
@@ -56,7 +54,6 @@ lexicographical_compare(
     return detail::lexicographical_compare<
         CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
-#endif
 
 template<std::size_t N, typename CharT, typename Traits >
 inline
@@ -69,7 +66,6 @@ lexicographical_compare(
         CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
 
-#ifdef BOOST_FIXED_STRING_STRING_VIEW
 template<typename CharT, typename Traits>
 inline
 int
@@ -80,7 +76,6 @@ lexicographical_compare(
     return detail::lexicographical_compare<CharT, Traits>(
         s1.data(), s1.size(), s2.data(), s2.size());
 }
-#endif
 
 template<std::size_t N, std::size_t M, typename CharT, typename Traits>
 inline
