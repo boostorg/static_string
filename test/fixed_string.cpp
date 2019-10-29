@@ -5436,6 +5436,7 @@ testR(S s, typename S::size_type pos, typename S::size_type n1,
   else
   {
     BOOST_TEST_THROWS((s.replace(pos, n1, str, n2)), std::out_of_range);
+    return true;
   }
 }
 
