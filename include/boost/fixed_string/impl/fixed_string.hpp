@@ -589,7 +589,7 @@ replace(
   if (pos > size())
     BOOST_FIXED_STRING_THROW(std::out_of_range{
            "pos > size()"});
-  if (size() - std::min(n1, size() - pos) >= max_size() - n2)
+  if (size() - (std::min)(n1, size() - pos) >= max_size() - n2)
     BOOST_FIXED_STRING_THROW(std::length_error{
            "replaced string exceeds max_size()"});
   if (pos + n1 >= size())
@@ -638,7 +638,7 @@ replace(
   if (pos > size())
     BOOST_FIXED_STRING_THROW(std::out_of_range{
            "pos > size()"});
-  if (size() - std::min(n1, size() - pos) >= max_size() - n2)
+  if (size() - (std::min)(n1, size() - pos) >= max_size() - n2)
     BOOST_FIXED_STRING_THROW(std::length_error{
            "replaced string exceeds max_size()"});
   if (pos + n1 >= size())

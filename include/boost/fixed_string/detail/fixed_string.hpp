@@ -11,7 +11,6 @@
 #define BOOST_FIXED_STRING_DETAIL_FIXED_STRING_HPP
 
 #include <boost/fixed_string/config.hpp>
-#include <boost/core/ignore_unused.hpp>
 #include <iterator>
 #include <type_traits>
 
@@ -151,7 +150,6 @@ inline
 CharT*
 raw_to_string(CharT* last, std::size_t size, Integer i)
 {
-    boost::ignore_unused(size);
     BOOST_FIXED_STRING_ASSERT(size >= max_digits(sizeof(Integer)));
     return raw_to_string<CharT, Integer, Traits>(
         last, i, std::is_signed<Integer>{});
