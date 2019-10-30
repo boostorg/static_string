@@ -19,8 +19,12 @@
 #endif
 
 // Can we use [[nodiscard]]?
+#ifdef __has_attribute
 #if __has_attribute(nodiscard)
 #define BOOST_FIXED_STRING_NODISCARD [[nodiscard]]
+#else
+#define BOOST_FIXED_STRING_NODISCARD
+#endif
 #else
 #define BOOST_FIXED_STRING_NODISCARD
 #endif

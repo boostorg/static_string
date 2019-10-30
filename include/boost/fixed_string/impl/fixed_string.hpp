@@ -194,7 +194,11 @@ assign(
         BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
     n_ = count;
-    Traits::copy(&s_[0], s, n_);
+    // check for overlap, then move if needed
+    if (s <= &s_[size()] && s >= &s_[0])
+      Traits::move(&s_[0], s, n_);
+    else
+      Traits::copy(&s_[0], s, n_);
     term();
     return *this;
 }
@@ -373,20 +377,8 @@ insert(
             detail::is_input_iterator<
                 InputIt>::value, iterator>::type
 {
-    std::size_t const count = std::distance(first, last);
-    if(size() + count > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
-            "size() + count > max_size()"});
-    std::size_t const index = pos - begin();
-    if (&*first <= &s_[size()] && &*first >= &s_[0])
-      return insert(index, &*first, count).begin() + index;
-    Traits::move(&s_[index + count], &s_[index], size() - index);
-    for(auto it = begin() + index;
-            first != last; ++it, ++first)
-        Traits::assign(*it, *first);
-    n_ += count;
-    term();
-    return begin() + index;
+  const size_type index = pos - begin();
+  return insert(index, &*first, std::distance(first, last)).begin() + index;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -607,14 +599,17 @@ replace(
     return *this;
   if (!inside || (inside && (&s[n2 - 1] < &s_[pos])))
   {
+    // source outside
     Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
     Traits::copy(&s_[pos], s, n2);
   }
   else
   {
+    // source inside
     const size_type offset = s - &s_[0];
     if (n2 >= n1)
     {
+      // grow/unchanged
       Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
       const size_type diff = ((pos + n1) - offset) > n2 ? n2 : ((pos + n1) - offset);
       Traits::move(&s_[pos], &s_[offset], diff);
@@ -622,8 +617,9 @@ replace(
     }
     else
     {
+      // shrink
       Traits::move(&s_[pos], &s_[offset], n2);
-      Traits::copy(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
+      Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
     }
   }
   n_ += (n2 - n1);
