@@ -23,7 +23,7 @@ testS(const S& s, typename S::size_type pos, typename S::size_type n)
   if (pos <= s.size())
   {
     typename S::string_view_type str = s.substr(pos, n);
-    typename S::size_type rlen = std::min(n, s.size() - pos);
+    typename S::size_type rlen = (std::min)(n, s.size() - pos);
     return (S::traits_type::compare(s.data() + pos, str.data(), rlen) == 0);
   }
   else
@@ -319,6 +319,10 @@ testAssignment()
     BOOST_TEST(fixed_string<3>{}.assign(fixed_string<5>{"abc"}) == "abc");
     BOOST_TEST(fixed_string<3>{"*"}.assign(fixed_string<5>{"abc"}) == "abc");
     BOOST_TEST(fixed_string<3>{"***"}.assign(fixed_string<5>{"abc"}) == "abc");
+    {
+      fixed_string<3> s("***");
+      BOOST_TEST(s.assign(s) == s);
+    }
     BOOST_TEST_THROWS(fixed_string<3>{}.assign(fixed_string<5>{"abcde"}), std::length_error);
 
     // assign(fixed_string<M, CharT, Traits> const& s, size_type pos, size_type count = npos)
@@ -5684,6 +5688,10 @@ testReplace()
   {
     fixed_string<20> fs2 = "0123456789";
     BOOST_TEST(fs2.replace(0, 10, fs2.data(), 5) == "01234");
+  }
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST(fs1.replace(4, 3, fs1.data() + 1, 3) == "hellellrld");
   }
 
   // replace(size_type pos1, size_type n1, const basic_string& str);

@@ -320,7 +320,7 @@ insert(
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     const bool inside = s <= &s_[size()] && s >= &s_[0];
-    if (!inside || (inside && (&s[count - 1] < &s_[index])))
+    if (!inside || (inside && ((s - s_) + count <= index)))
     {
       Traits::move(&s_[index + count], &s_[index], size() - index + 1);
       Traits::copy(&s_[index], s, count);
@@ -597,7 +597,7 @@ replace(
   const bool inside = s <= &s_[size()] && s >= &s_[0];
   if (inside && (s - &s_[0]) == pos && n1 == n2)
     return *this;
-  if (!inside || (inside && (&s[n2 - 1] < &s_[pos])))
+  if (!inside || (inside && ((s - s_) + n2 <= pos)))
   {
     // source outside
     Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
