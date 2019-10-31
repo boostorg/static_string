@@ -73,7 +73,7 @@ fixed_string(CharT const* s)
         BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
     n_ = count;
-    Traits::copy(&s_[0], s, n_ + 1);
+    Traits::copy(s_, s, n_ + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -146,7 +146,7 @@ assign(
         BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
     n_ = count;
-    Traits::assign(&s_[0], n_, ch);
+    Traits::assign(s_, n_, ch);
     term();
     return *this;
 }
@@ -164,7 +164,7 @@ assign(
     auto const n = n_ + 1;
     // VFALCO This informs the static analyzer
     //BOOST_BEAST_ASSUME(n != 0);
-    Traits::copy(&s_[0], &s.s_[0], n);
+    Traits::copy(s_, &s.s_[0], n);
     return *this;
 }
 
@@ -195,10 +195,10 @@ assign(
             "count > max_size()"});
     n_ = count;
     // check for overlap, then move if needed
-    if (s <= &s_[size()] && s >= &s_[0])
-      Traits::move(&s_[0], s, n_);
+    if (s <= &s_[size()] && s >= s_)
+      Traits::move(s_, s, n_);
     else
-      Traits::copy(&s_[0], s, n_);
+      Traits::copy(s_, s, n_);
     term();
     return *this;
 }
@@ -219,7 +219,7 @@ assign(
         BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
     n_ = n;
-    for(auto it = &s_[0]; first != last; ++it, ++first)
+    for(auto it = s_; first != last; ++it, ++first)
         Traits::assign(*it, *first);
     term();
     return *this;
@@ -319,7 +319,7 @@ insert(
     if(size() + count > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
-    const bool inside = s <= &s_[size()] && s >= &s_[0];
+    const bool inside = s <= &s_[size()] && s >= s_;
     if (!inside || (inside && ((s - s_) + count <= index)))
     {
       Traits::move(&s_[index + count], &s_[index], size() - index + 1);
@@ -327,7 +327,7 @@ insert(
     }
     else
     {
-      const size_type offset = s - &s_[0];
+      const size_type offset = s - s_;
       Traits::move(&s_[index + count], &s_[index], size() - index + 1);
       if (offset < index)
       {
@@ -356,7 +356,7 @@ insert(
     if(size() + count > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count() > max_size()"});
-    auto const index = pos - &s_[0];
+    auto const index = pos - s_;
     Traits::move(
         &s_[index + count], &s_[index], size() - index);
     n_ += count;
@@ -553,9 +553,9 @@ swap(fixed_string& s)
 {
     fixed_string tmp(s);
     s.n_ = n_;
-    Traits::copy(&s.s_[0], &s_[0], n_ + 1);
+    Traits::copy(&s.s_[0], s_, n_ + 1);
     n_ = tmp.n_;
-    Traits::copy(&s_[0], &tmp.s_[0], n_ + 1);
+    Traits::copy(s_, &tmp.s_[0], n_ + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -572,9 +572,9 @@ swap(fixed_string<M, CharT, Traits>& s)
             "s.size() > max_size()"});
     fixed_string tmp(s);
     s.n_ = n_;
-    Traits::copy(&s.s_[0], &s_[0], n_ + 1);
+    Traits::copy(&s.s_[0], s_, n_ + 1);
     n_ = tmp.n_;
-    Traits::copy(&s_[0], &tmp.s_[0], n_ + 1);
+    Traits::copy(s_, &tmp.s_[0], n_ + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -594,8 +594,8 @@ replace(
            "replaced string exceeds max_size()"});
   if (pos + n1 >= size())
     n1 = size() - pos;
-  const bool inside = s <= &s_[size()] && s >= &s_[0];
-  if (inside && (s - &s_[0]) == pos && n1 == n2)
+  const bool inside = s <= &s_[size()] && s >= s_;
+  if (inside && size_type(s - s_) == pos && n1 == n2)
     return *this;
   if (!inside || (inside && ((s - s_) + n2 <= pos)))
   {
@@ -606,19 +606,24 @@ replace(
   else
   {
     // source inside
-    const size_type offset = s - &s_[0];
+    const size_type offset = s - s_;
     if (n2 >= n1)
     {
       // grow/unchanged
+      // shift all right of splice point by n2 - n1 to the right
       Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
-      const size_type diff = ((pos + n1) - offset) > n2 ? n2 : ((pos + n1) - offset);
+      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
+      // copy all before splice point
       Traits::move(&s_[pos], &s_[offset], diff);
-      Traits::move(&s_[pos + diff], &s_[pos + n2], n2 - diff);
+      // copy all after splice point
+      Traits::move(&s_[pos + diff], &s_[offset + (n2 - n1) + diff], n2 - diff);
     }
     else
     {
       // shrink
+      // copy all elements into place
       Traits::move(&s_[pos], &s_[offset], n2);
+      // shift all elements after splice point left
       Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
     }
   }

@@ -297,6 +297,9 @@ testConstruct()
             (fixed_string<2>(std::string("12345"), 1, 3)),
             std::length_error);
     }
+    {
+      BOOST_TEST_THROWS(fixed_string<5>("12345678"), std::length_error);
+    }
 }
 
 //done
@@ -5640,7 +5643,7 @@ testFind()
 void
 testReplace()
 {
-  // replace(size_type pos1, size_type n1, const charT* s, size_type n2);
+  // replace(size_type pos1, size_type n1, const charT* s, size_type n2); 
   {
     fixed_string<20> fs1 = "helloworld";
     BOOST_TEST(fs1.replace(5, 2, fs1.data() + 1, 8) == "helloelloworlrld");
@@ -5693,7 +5696,10 @@ testReplace()
     fixed_string<20> fs1 = "helloworld";
     BOOST_TEST(fs1.replace(4, 3, fs1.data() + 1, 3) == "hellellrld");
   }
-
+  {
+    fixed_string<20> fs1 = "helloworld";
+    BOOST_TEST_EQ(fs1.replace(0, 1, fs1.data() + 4, 4), fixed_string<20>("oworelloworld"));
+  }
   // replace(size_type pos1, size_type n1, const basic_string& str);
   {
     fixed_string<20> fs1 = "helloworld";

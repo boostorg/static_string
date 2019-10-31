@@ -472,14 +472,14 @@ public:
     CharT*
     data() noexcept
     {
-        return &s_[0];
+        return s_;
     }
 
     /// Returns a pointer to the first character of a string.
     CharT const*
     data() const noexcept
     {
-        return &s_[0];
+        return s_;
     }
 
     /// Returns a non-modifiable standard C character array version of the string.
@@ -506,21 +506,21 @@ public:
     iterator
     begin() noexcept
     {
-        return &s_[0];
+        return s_;
     }
 
     /// Returns an iterator to the beginning.
     const_iterator
     begin() const noexcept
     {
-        return &s_[0];
+        return s_;
     }
 
     /// Returns an iterator to the beginning.
     const_iterator
     cbegin() const noexcept
     {
-        return &s_[0];
+        return s_;
     }
 
     /// Returns an iterator to the end.
@@ -1147,7 +1147,7 @@ public:
         fixed_string<M, CharT, Traits> const& s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            &s_[0], n_, &s.s_[0], s.n_);
+            s_, n_, &s.s_[0], s.n_);
     }
 
     template<std::size_t M>
@@ -1179,7 +1179,7 @@ public:
         CharT const* s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            &s_[0], n_, s, Traits::length(s));
+            s_, n_, s, Traits::length(s));
     }
 
     int
@@ -1208,7 +1208,7 @@ public:
         string_view_type s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            &s_[0], n_, s.data(), s.size());
+            s_, n_, s.data(), s.size());
     }
 
     int
