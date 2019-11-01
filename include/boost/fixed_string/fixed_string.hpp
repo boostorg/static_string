@@ -1283,6 +1283,12 @@ public:
     swap(
         fixed_string<M, CharT, Traits>& s);
 
+    /** Replaces the part of the string indicated by [pos1, pos1 + n1) with `s`
+        
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     template<size_t M>
     fixed_string&
     replace(
@@ -1293,7 +1299,13 @@ public:
       return replace(pos1, n1, str.data(), str.size());
     }
 
-    
+    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `str`
+        except that if `n2` is greater than `str.size()`, `[pos2, pos2 + str.size())` is used.
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         size_type pos1,
@@ -1305,6 +1317,16 @@ public:
       return replace(pos1, n1, str.substr(pos2, n2));
     }
 
+    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `t` after converting to `string_view_type`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1323,6 +1345,17 @@ public:
       return replace(pos1, n1, sv.data(), sv.size());
     }
 
+    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `t`
+        after converting to `string_view_type`, except that if `n2` is greater than `t.size()`, `[pos2, pos2 + t.size())` is used.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1343,6 +1376,12 @@ public:
       return replace(pos1, n1, sv.substr(pos2, n2));
     }
 
+    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + n2)`.
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         size_type pos,
@@ -1350,6 +1389,13 @@ public:
         const CharT* s,
         size_type n2);
 
+
+    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + Traits::length(s))`.
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         size_type pos,
@@ -1359,6 +1405,12 @@ public:
       return replace(pos, n1, s, Traits::length(s));
     }
 
+    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `n2` copies of `c`.
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         size_type pos,
@@ -1366,6 +1418,12 @@ public:
         size_type n2,
         CharT c);
 
+    /** Replaces the part of the string indicated by [i1, i2) with `s`
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         const_iterator i1,
@@ -1375,6 +1433,16 @@ public:
       return replace(i1, i2, str.data(), str.size());
     }
 
+    /** Replaces the part of the string indicated by `[i1, i2)` with `t` after converting to `string_view_type`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     template<typename T>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1393,6 +1461,12 @@ public:
       return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
     }
 
+    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + n)`.
+
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         const_iterator i1,
@@ -1403,6 +1477,12 @@ public:
       return replace(i1 - begin(), i2 - i1, s, n);
     }
 
+    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + Traits::length(s))`.
+
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         const_iterator i1,
@@ -1412,6 +1492,12 @@ public:
       return replace(i1, i2, s, Traits::length(s));
     }
 
+    /** Replaces the part of the string indicated by `[i1, i2)` with `n` copies of `c`.
+
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         const_iterator i1,
@@ -1422,6 +1508,12 @@ public:
       return replace(i1 - begin(), i2 - i1, n, c);
     }
 
+    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[j1, j2)`.
+
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     template<typename InputIterator>
 #if GENERATING_DOCUMENTATION
     fixed_string&
@@ -1439,6 +1531,12 @@ public:
       return replace(i1, i2, fixed_string(j1, j2));
     }
 
+    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the initializer list `il`.
+
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
     fixed_string&
     replace(
         const_iterator i1,
@@ -1477,6 +1575,7 @@ public:
       return find(sv.data(), pos, sv.size());
     }
     
+    /// Finds the first substring equal to `str`.
     template<std::size_t M>
     size_type
       find(
@@ -1486,7 +1585,7 @@ public:
       return find(str.data(), pos, str.size());
     }
 
-    // Finds the first substring equal to the range `[s, s + count)`. This range may contain null characters.
+    /// Finds the first substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
     find(
         const CharT* s, 
@@ -1507,7 +1606,7 @@ public:
       return find(s, pos, Traits::length(s));
     }
 
-    // Finds the first character `c`
+    /// Finds the first character `c`
     size_type
     find(
         CharT c,
@@ -1540,6 +1639,7 @@ public:
       return rfind(sv.data(), pos, sv.size());
     }
 
+    /// Finds the last substring equal to `str`.
     template<std::size_t M>
     size_type
       rfind(
@@ -1549,7 +1649,7 @@ public:
       return rfind(str.data(), pos, str.size());
     }
 
-    // Finds the last substring equal to the range `[s, s + count)`. This range may contain null characters.
+    /// Finds the last substring equal to the range `[s, s + count)`. This range may contain null characters.
     size_type
     rfind(
         const CharT* s, 
@@ -1570,7 +1670,7 @@ public:
       return rfind(s, pos, Traits::length(s));
     }
 
-    // Finds the last character `c`
+    /// Finds the last character `c`
     size_type
     rfind(
         CharT c,
@@ -1602,6 +1702,7 @@ public:
       return find_first_of(sv.data(), pos, sv.size());
     }
 
+    /// Finds the first character equal to one of the characters in `str`.
     template<std::size_t M>
     size_type
       find_first_of(
@@ -1611,7 +1712,7 @@ public:
       return find_first_of(str.data(), pos, str.size());
     }
 
-    // Finds the first character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
+    /// Finds the first character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
     find_first_of(
         const CharT* s,
@@ -1632,7 +1733,7 @@ public:
       return find_first_of(s, pos, Traits::length(s));
     }
 
-    // Finds the first character equal to `c`.
+    /// Finds the first character equal to `c`.
     size_type
     find_first_of(
         CharT c,
@@ -1664,6 +1765,7 @@ public:
       return find_last_of(sv.data(), pos, sv.size());
     }
      
+    /// Finds the last character equal to one of the characters in `str`.
     template<std::size_t M>
     size_type
       find_last_of(
@@ -1673,7 +1775,7 @@ public:
       return find_last_of(str.data(), pos, str.size());
     }
 
-    // Finds the last character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
+    /// Finds the last character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
     size_type
     find_last_of(
         const CharT* s,
@@ -1694,7 +1796,7 @@ public:
       return find_last_of(s, pos, Traits::length(s));
     }
 
-    // Finds the last character equal to `c`.
+    /// Finds the last character equal to `c`.
     size_type
     find_last_of(
         CharT c,
@@ -1726,6 +1828,7 @@ public:
       return find_first_not_of(sv.data(), pos, sv.size());
     }
 
+    /// Finds the first character equal to none of the characters in `str`.
     template<std::size_t M>
     size_type
       find_first_not_of(
@@ -1735,7 +1838,7 @@ public:
       return find_first_not_of(str.data(), pos, str.size());
     }
 
-    // Finds the first character equal to none of characters in range `[s, s + count)`. This range can include null characters.
+    /// Finds the first character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
     find_first_not_of(
         const CharT* s,
@@ -1756,7 +1859,7 @@ public:
       return find_first_not_of(s, pos, Traits::length(s));
     }
 
-    // Finds the first character not equal to `c`.
+    /// Finds the first character not equal to `c`.
     size_type
     find_first_not_of(
         CharT c,
@@ -1765,7 +1868,7 @@ public:
       return find_first_not_of(&c, pos, 1);
     }
 
-    /** Finds the last character equal to none of characters in `t`.
+    /** Finds the last character equal to none of the characters in `t`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1788,6 +1891,7 @@ public:
       return find_last_not_of(sv.data(), pos, sv.size());
     }
 
+    /// Finds the last character equal to none of the characters in `str`.
     template<size_t M>
     size_type
       find_last_not_of(
@@ -1797,7 +1901,7 @@ public:
       return find_last_not_of(str.data(), pos, str.size());
     }
 
-    // Finds the last character equal to none of characters in range `[s, s + count)`. This range can include null characters.
+    /// Finds the last character equal to none of characters in range `[s, s + count)`. This range can include null characters.
     size_type
     find_last_not_of(
         const CharT* s,
@@ -1819,7 +1923,7 @@ public:
       return find_last_not_of(s, pos, Traits::length(s));
     }
 
-    // Finds the last character not equal to `c`.
+    /// Finds the last character not equal to `c`.
     size_type
     find_last_not_of(
         CharT c,
@@ -1828,6 +1932,7 @@ public:
       return find_last_not_of(&c, pos, 1);
     }
 
+    /// Returns whether the string begins with `s` 
     bool 
     starts_with(
         string_view_type s) const noexcept
@@ -1836,6 +1941,7 @@ public:
       return n_ >= len && !Traits::compare(s_, s.data(), len);
     }
     
+    /// Returns whether the string begins with `c`
     bool 
     starts_with(
         CharT c) const noexcept
@@ -1843,14 +1949,16 @@ public:
       return !empty() && Traits::eq(front(), c);
     }
     
+    /// Returns whether the string begins with `s`
     bool 
     starts_with(
-        const CharT* s) const
+        const CharT* s) const noexcept
     {
       const size_type len = Traits::length(s);
       return n_ >= len && !Traits::compare(s_, s, len);
     }
     
+    /// Returns whether the string ends with `s`
     bool 
     ends_with(
         string_view_type s) const noexcept
@@ -1859,6 +1967,7 @@ public:
       return n_ >= len && !Traits::compare(s_ + (n_ - len), s.data(), len);
     }
     
+    /// Returns whether the string ends with `c`
     bool
     ends_with(
         CharT c) const noexcept
@@ -1866,9 +1975,10 @@ public:
       return !empty() && Traits::eq(back(), c);
     }
     
+    /// Returns whether the string begins with `s`
     bool 
     ends_with(
-        const CharT* s) const
+        const CharT* s) const noexcept
     {
       const size_type len = Traits::length(s);
       return n_ >= len && !Traits::compare(s_ + (n_ - len), s, len);
@@ -2193,7 +2303,7 @@ std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, 
     fixed_string<N, CharT, Traits> const& s)
 {
-  return os << string_view(s);
+  return os << string_view(s.data(), s.size());
 }
 
 //------------------------------------------------------------------------------
