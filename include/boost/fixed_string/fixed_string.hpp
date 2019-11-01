@@ -1241,6 +1241,10 @@ public:
             string_view_type(t).substr(pos2, count2));
     }
 
+    /** Returns a substring `[pos, pos + count)`. If the requested substring is greater than the size of the string, the returned substring is [pos, size()).
+
+        @throw std::out_of_range if `pos > size()`
+    */
     string_view_type
     substr(
         size_type pos = 0,
