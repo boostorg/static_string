@@ -688,7 +688,7 @@ public:
         return insert(index, s, Traits::length(s));
     }
 
-    /** Inserts the characters in the range `[s, s+count]` at the position `index`
+    /** Inserts the characters in the range `(s, s+count)` at the position `index`
 
         The inserted string can contain null characters.
 
@@ -1141,6 +1141,10 @@ public:
         return append(t);
     }
 
+    /** Compare the string with another
+        
+        Compares this string to `s`.
+    */
     template<std::size_t M>
     int
     compare(
@@ -1150,6 +1154,10 @@ public:
             s_, n_, &s.s_[0], s.n_);
     }
 
+    /** Compare the string with another
+        
+        Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+    */
     template<std::size_t M>
     int
     compare(
@@ -1161,6 +1169,12 @@ public:
             substr(pos1, count1), s.data(), s.size());
     }
 
+    /** Compare the string with another
+        
+        Compares a `[pos1, pos1+count1)` substring of this string to a substring `[pos2, pos2+count2)` of `s`. 
+        If `count1 > size() - pos1` the first substring is `[pos1, size())`. Likewise, if `count2 > s.size() - pos2` the
+        second substring is `[pos2, s.size())`.
+    */
     template<std::size_t M>
     int
     compare(
@@ -1174,6 +1188,10 @@ public:
             substr(pos1, count1), s.substr(pos2, count2));
     }
 
+    /** Compare the string with another
+        
+        Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `Traits::length(s)`.
+    */
     int
     compare(
         CharT const* s) const
@@ -1182,6 +1200,11 @@ public:
             s_, n_, s, Traits::length(s));
     }
 
+    /** Compare the string with another
+        
+        Compares a `[pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
+        length `Traits::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+    */
     int
     compare(
         size_type pos1,
@@ -1192,17 +1215,25 @@ public:
             substr(pos1, count1), s, Traits::length(s));
     }
 
+    /** Compare the string with another
+        
+        Compares a `[pos1, pos1+count1)` substring of this string to the characters in the range `[s, s + count2)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+    */
     int
     compare(
         size_type pos1,
         size_type count1,
-        CharT const*s,
+        CharT const* s,
         size_type count2) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
             substr(pos1, count1), s, count2);
     }
 
+    /** Compare the string with another
+      
+        Compares this string to `s`.
+    */
     int
     compare(
         string_view_type s) const
@@ -1211,6 +1242,10 @@ public:
             s_, n_, s.data(), s.size());
     }
 
+    /** Compare the string with another
+
+        Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+    */
     int
     compare(
         size_type pos1,
@@ -1221,6 +1256,14 @@ public:
             substr(pos1, count1), s);
     }
 
+    /** Compare the string with another
+        
+        Replaces the part of the string indicated by `[pos1, pos1 + count1)` with a substring `[pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
+
+        This function participates in overload resolution if
+        `T` is convertible to `string_view` and `T` is not
+        convertible to `CharT const*`.
+    */
     template<typename T>
 #if GENERATING_DOCUMENTATION
     int
@@ -1241,7 +1284,7 @@ public:
             string_view_type(t).substr(pos2, count2));
     }
 
-    /** Returns a substring `[pos, pos + count)`. If the requested substring is greater than the size of the string, the returned substring is [pos, size()).
+    /** Returns a substring `(pos, pos + count)`. If the requested substring is greater than the size of the string, the returned substring is `[pos, size())`.
 
         @throw std::out_of_range if `pos > size()`
     */
@@ -1250,7 +1293,7 @@ public:
         size_type pos = 0,
         size_type count = npos) const;
 
-    /// Copy a substring (pos, pos+count) to character string pointed to by `dest`.
+    /// Copy a substring `(pos, pos+count)` to character string pointed to by `dest`.
     size_type
     copy(
         CharT* dest,
@@ -1287,7 +1330,9 @@ public:
     swap(
         fixed_string<M, CharT, Traits>& s);
 
-    /** Replaces the part of the string indicated by [pos1, pos1 + n1) with `s`
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `s`
         
         @throw std::out_of_range if `pos1 > size()`
         @throw std::length_error if the resulting string exceeds `max_size()`
@@ -1303,7 +1348,9 @@ public:
       return replace(pos1, n1, str.data(), str.size());
     }
 
-    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `str`
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `str`
         except that if `n2` is greater than `str.size()`, `[pos2, pos2 + str.size())` is used.
 
         @throw std::out_of_range if `pos1 > size()`
@@ -1321,7 +1368,9 @@ public:
       return replace(pos1, n1, str.substr(pos2, n2));
     }
 
-    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `t` after converting to `string_view_type`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `t` after converting to `string_view_type`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1349,7 +1398,9 @@ public:
       return replace(pos1, n1, sv.data(), sv.size());
     }
 
-    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `t`
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `t`
         after converting to `string_view_type`, except that if `n2` is greater than `t.size()`, `[pos2, pos2 + t.size())` is used.
 
         This function participates in overload resolution if
@@ -1380,7 +1431,9 @@ public:
       return replace(pos1, n1, sv.substr(pos2, n2));
     }
 
-    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + n2)`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + n2)`.
 
         @throw std::out_of_range if `pos1 > size()`
         @throw std::length_error if the resulting string exceeds `max_size()`
@@ -1394,7 +1447,9 @@ public:
         size_type n2);
 
 
-    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + Traits::length(s))`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + Traits::length(s))`.
 
         @throw std::out_of_range if `pos1 > size()`
         @throw std::length_error if the resulting string exceeds `max_size()`
@@ -1409,7 +1464,9 @@ public:
       return replace(pos, n1, s, Traits::length(s));
     }
 
-    /** Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `n2` copies of `c`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `n2` copies of `c`.
 
         @throw std::out_of_range if `pos1 > size()`
         @throw std::length_error if the resulting string exceeds `max_size()`
@@ -1422,7 +1479,9 @@ public:
         size_type n2,
         CharT c);
 
-    /** Replaces the part of the string indicated by [i1, i2) with `s`
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[i1, i2)` with `s`
 
         @throw std::out_of_range if `pos1 > size()`
         @throw std::length_error if the resulting string exceeds `max_size()`
@@ -1437,13 +1496,15 @@ public:
       return replace(i1, i2, str.data(), str.size());
     }
 
-    /** Replaces the part of the string indicated by `[i1, i2)` with `t` after converting to `string_view_type`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[i1, i2)` with `t` after converting to `string_view_type`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
@@ -1465,9 +1526,11 @@ public:
       return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
     }
 
-    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + n)`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + n)`.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
@@ -1481,9 +1544,11 @@ public:
       return replace(i1 - begin(), i2 - i1, s, n);
     }
 
-    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + Traits::length(s))`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + Traits::length(s))`.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
@@ -1496,9 +1561,11 @@ public:
       return replace(i1, i2, s, Traits::length(s));
     }
 
-    /** Replaces the part of the string indicated by `[i1, i2)` with `n` copies of `c`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[i1, i2)` with `n` copies of `c`.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
@@ -1512,9 +1579,11 @@ public:
       return replace(i1 - begin(), i2 - i1, n, c);
     }
 
-    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[j1, j2)`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[j1, j2)`.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
@@ -1535,9 +1604,11 @@ public:
       return replace(i1, i2, fixed_string(j1, j2));
     }
 
-    /** Replaces the part of the string indicated by `[i1, i2)` with the characters in the initializer list `il`.
+    /** Replace a subset of the string
+    
+        Replaces the part of the string indicated by `[i1, i2)` with the characters in the initializer list `il`.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size()]`
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
@@ -1589,7 +1660,7 @@ public:
       return find(str.data(), pos, str.size());
     }
 
-    /// Finds the first substring equal to the range `[s, s + count)`. This range may contain null characters.
+    /// Finds the first substring equal to the range `(s, s + count)`. This range may contain null characters.
     size_type
     find(
         const CharT* s, 
@@ -1653,7 +1724,7 @@ public:
       return rfind(str.data(), pos, str.size());
     }
 
-    /// Finds the last substring equal to the range `[s, s + count)`. This range may contain null characters.
+    /// Finds the last substring equal to the range `(s, s + count)`. This range may contain null characters.
     size_type
     rfind(
         const CharT* s, 
@@ -1716,7 +1787,7 @@ public:
       return find_first_of(str.data(), pos, str.size());
     }
 
-    /// Finds the first character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
+    /// Finds the first character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
     size_type
     find_first_of(
         const CharT* s,
@@ -1779,7 +1850,7 @@ public:
       return find_last_of(str.data(), pos, str.size());
     }
 
-    /// Finds the last character equal to one of the characters in the range `[s, s + count)`. This range can include null characters.
+    /// Finds the last character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
     size_type
     find_last_of(
         const CharT* s,
@@ -1842,7 +1913,7 @@ public:
       return find_first_not_of(str.data(), pos, str.size());
     }
 
-    /// Finds the first character equal to none of characters in range `[s, s + count)`. This range can include null characters.
+    /// Finds the first character equal to none of characters in range `(s, s + count)`. This range can include null characters.
     size_type
     find_first_not_of(
         const CharT* s,
@@ -1905,7 +1976,7 @@ public:
       return find_last_not_of(str.data(), pos, str.size());
     }
 
-    /// Finds the last character equal to none of characters in range `[s, s + count)`. This range can include null characters.
+    /// Finds the last character equal to none of characters in range `(s, s + count)`. This range can include null characters.
     size_type
     find_last_not_of(
         const CharT* s,
