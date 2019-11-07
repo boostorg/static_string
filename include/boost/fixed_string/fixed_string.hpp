@@ -17,8 +17,6 @@
 #include <cstdint>
 #include <initializer_list>
 #include <iosfwd>
-#include <stdexcept>
-#include <string>
 #include <type_traits>
 
 namespace boost {
