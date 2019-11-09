@@ -159,11 +159,11 @@ raw_to_string(CharT* last, std::size_t size, Integer i)
 template<
     typename Traits,
     typename CharT,
-    typename ForwardIt>
+    typename ForwardIterator>
 inline
-ForwardIt
+ForwardIterator
 find_not_of(
-  ForwardIt first, ForwardIt last, const CharT* str, std::size_t n) noexcept
+  ForwardIterator first, ForwardIterator last, const CharT* str, std::size_t n) noexcept
 {
   for (; first != last; ++first)
     if (!Traits::find(str, n, *first))

@@ -78,13 +78,13 @@ fixed_string(CharT const* s)
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIt>
+template<class InputIterator>
 fixed_string<N, CharT, Traits>::
 fixed_string(
-    InputIt first,
-    InputIt last,
+    InputIterator first,
+    InputIterator last,
     typename std::enable_if<
-        detail::is_input_iterator<InputIt>::value,
+        detail::is_input_iterator<InputIterator>::value,
             iterator>::type*)
 {
     assign(first, last);
@@ -205,14 +205,14 @@ assign(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIt>
+template<class InputIterator>
 auto
 fixed_string<N, CharT, Traits>::
 assign(
-    InputIt first,
-    InputIt last) ->
+    InputIterator first,
+    InputIterator last) ->
         typename std::enable_if<
-            detail::is_input_iterator<InputIt>::value,
+            detail::is_input_iterator<InputIterator>::value,
                 fixed_string&>::type
 {
     std::size_t const n = std::distance(first, last);
@@ -367,16 +367,16 @@ insert(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIt>
+template<class InputIterator>
 auto
 fixed_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
-    InputIt first,
-    InputIt last) ->
+    InputIterator first,
+    InputIterator last) ->
         typename std::enable_if<
             detail::is_input_iterator<
-                InputIt>::value, iterator>::type
+                InputIterator>::value, iterator>::type
 {
   const size_type index = pos - begin();
   return insert(index, &*first, std::distance(first, last)).begin() + index;

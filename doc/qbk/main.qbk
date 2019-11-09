@@ -5,11 +5,11 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-    Official repository: https://github.com/vinniefalco/fixed_string
+    Official repository: https://github.com/boostorg/fixed_string
 ]
 
 [library Boost.FixedString
-    [id json]
+    [id fixed_string]
     [quickbook 1.6]
     [copyright 2016 - 2019 Vinnie Falco]
 	[copyright 2019 Krystian Stasiowski]
@@ -31,6 +31,8 @@
 [template path_link[path name] '''<ulink url="../../'''[path]'''">'''[name]'''</ulink>''']
 [template include_file[path][^<'''<ulink url="../../../../'''[path]'''">'''[path]'''</ulink>'''>]]
 [template issue[n] '''<ulink url="https://github.com/boostorg/beast/issues/'''[n]'''">#'''[n]'''</ulink>''']
+
+[def __InputIterator__          [@https://en.cppreference.com/w/cpp/named_req/InputIterator ['InputIterator]]]
 
 [/-----------------------------------------------------------------------------]
 

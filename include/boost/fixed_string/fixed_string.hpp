@@ -131,13 +131,13 @@ public:
         CharT const* s);
 
     /// Construct from a range of characters
-    template<class InputIt>
+    template<class InputIterator>
     fixed_string(
-        InputIt first,
-        InputIt last
+        InputIterator first,
+        InputIterator last
     #ifndef GENERATING_DOCUMENTATION
         , typename std::enable_if<
-            detail::is_input_iterator<InputIt>::value,
+            detail::is_input_iterator<InputIterator>::value,
                 iterator>::type* = 0
     #endif
     );
@@ -184,7 +184,7 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /** Copy assignment
+    /** Assign to the string.
 
         If `*this` and `s` are the same object,
         this function has no effect.
@@ -196,7 +196,9 @@ public:
         return assign(s);
     }
 
-    /** Replace the contents with a copy of `s`
+    /** Assign to the string.
+    
+        Replace the contents with a copy of `s`
 
         @throw std::length_error if `s.size() > max_size()`
     */
@@ -208,7 +210,9 @@ public:
         return assign(s);
     }
 
-    /** Replace the contents with those of the null-terminated string `s`
+    /** Assign to the string.
+    
+        Replace the contents with those of the null-terminated string `s`
 
         @throw std::length_error if `Traits::length(s) > max_size()`
     */
@@ -219,7 +223,10 @@ public:
         return assign(s);
     }
 
-    /// Assign from single character.
+    /** Assign to the string.
+    
+        Assign from single character.
+    */
     fixed_string&
     operator=(
         CharT ch)
@@ -228,7 +235,10 @@ public:
             std::integral_constant<bool, (N>0)>{});
     }
 
-    /// Assign from initializer list.
+    /** Assign to the string.
+
+        Assign from initializer list.
+    */
     fixed_string&
     operator=(
         std::initializer_list<CharT> ilist)
@@ -236,7 +246,10 @@ public:
         return assign(ilist);
     }
 
-    /// Assign from `string_view_type`.
+    /** Assign to the string.
+    
+        Assign from `string_view_type`.
+    */
     fixed_string&
     operator=(
         string_view_type sv)
@@ -244,7 +257,9 @@ public:
         return assign(sv);
     }
 
-    /** Replace the contents with `count` copies of character `ch`
+    /** Replace the contents.
+    
+        Replace the contents with `count` copies of character `ch`
 
         @throw std::length_error if `count > max_size()`
         @return `*this`
@@ -254,7 +269,9 @@ public:
         size_type count,
         CharT ch);
 
-    /** Replace the contents with a copy of another `fixed_string`
+    /** Replace the contents.
+    
+        Replace the contents with a copy of another `fixed_string`
 
         @return `*this`
     */
@@ -262,7 +279,9 @@ public:
     assign(
         fixed_string const& s) noexcept;
 
-    /** Replace the contents with a copy of another `fixed_string`
+    /** Replace the contents.
+    
+        Replace the contents with a copy of another `fixed_string`
 
         @throw std::length_error if `s.size() > max_size()`
         @return `*this`
@@ -278,7 +297,9 @@ public:
         return assign(s.data(), s.size());
     }
 
-    /** Replace the contents with a copy of `count` characters starting at `npos` from `s`.
+    /** Replace the contents.
+    
+        Replace the contents with a copy of `count` characters starting at `npos` from `s`.
 
         @throw std::length_error if `count > max_size()`
         @return `*this`
@@ -290,7 +311,9 @@ public:
         size_type pos,
         size_type count = npos);
 
-    /** Replace the contents with the first `count` characters of `s`, including nulls.
+    /** Replace the contents.
+    
+        Replace the contents with the first `count` characters of `s`, including nulls.
 
         @throw std::length_error if `count > max_size()`
         @return `*this`
@@ -300,7 +323,9 @@ public:
         CharT const* s,
         size_type count);
 
-    /** Replace the contents with a copy of a null terminated string `s`
+    /** Replace the contents.
+    
+        Replace the contents with a copy of a null terminated string `s`
 
         @throw std::length_error if `Traits::length(s) > max_size()`
         @return `*this`
@@ -312,24 +337,28 @@ public:
         return assign(s, Traits::length(s));
     }
 
-    /** Replace the contents with a copy of characters from the range `(first, last)`
+    /** Replace the contents.
+    
+        Replace the contents with a copy of characters from the range `(first, last)`
       
         @throw std::length_error if `std::distance(first, last) > max_size()`
         @return `*this`
     */
-    template<typename InputIt>
+    template<typename InputIterator>
 #ifdef GENERATING_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<
-        detail::is_input_iterator<InputIt>::value,
+        detail::is_input_iterator<InputIterator>::value,
             fixed_string&>::type
 #endif
     assign(
-        InputIt first,
-        InputIt last);
+        InputIterator first,
+        InputIterator last);
 
-    /** Replace the contents with the characters in an initializer list
+    /** Replace the contents.
+    
+        Replace the contents with the characters in an initializer list
 
         @throw std::length_error if `ilist.size() > max_size()`
         @return `*this`
@@ -341,7 +370,9 @@ public:
         return assign(ilist.begin(), ilist.end());
     }
 
-    /** Replace the contents with a copy of the characters from `string_view_type{t}`
+    /** Replace the contents.
+    
+        Replace the contents with a copy of the characters from `string_view_type{t}`
 
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
     */
@@ -360,7 +391,9 @@ public:
         return assign(ss.data(), ss.size());
     }
 
-    /** Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
+    /** Replace the contents.
+    
+        Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
 
         The range `[pos, count)` is extracted from the value
         obtained by converting `t` to `string_view_type`,
@@ -661,7 +694,9 @@ public:
     void
     clear();
 
-    /** Inserts `count` copies of character `ch` at the position `index`
+    /** Insert into the string.
+    
+        Inserts `count` copies of character `ch` at the position `index`
 
         @throw std::out_of_range if `index > size()`
         @throw std::length_error if `size() + count > max_size()`
@@ -673,7 +708,9 @@ public:
         size_type count,
         CharT ch);
     
-    /** Inserts null-terminated string pointed to by `s` at the position `index`
+    /** Insert into the string.
+    
+        Inserts null-terminated string pointed to by `s` at the position `index`
 
         @throw std::out_of_range if `index > size()`
         @throw std::length_error if `size() + count > max_size()`
@@ -687,7 +724,9 @@ public:
         return insert(index, s, Traits::length(s));
     }
 
-    /** Inserts the characters in the range `(s, s+count)` at the position `index`
+    /** Insert into the string.
+    
+        Inserts the characters in the range `(s, s+count)` at the position `index`
 
         The inserted string can contain null characters.
 
@@ -701,7 +740,9 @@ public:
         CharT const* s,
         size_type count);
 
-    /** Inserts the contents of string view `sv` at the position `index`
+    /** Insert into the string.
+    
+        Inserts the contents of string view `sv` at the position `index`
 
         The inserted string can contain null characters.
 
@@ -717,7 +758,9 @@ public:
         return insert(index, sv.data(), sv.size());
     }
 
-    /** Inserts the string `sv.substr(index_str, count)` at the position `index`
+    /** Insert into the string.
+    
+        Inserts the string `sv.substr(index_str, count)` at the position `index`
 
         The inserted string can contain null characters.
 
@@ -735,7 +778,9 @@ public:
         return insert(index, sv.substr(index_str, count));
     }
 
-    /** Inserts character `ch` before the character (if any) pointed by `pos`
+    /** Insert into the string.
+    
+        Inserts character `ch` before the character (if any) pointed by `pos`
 
         The inserted character can be null.
 
@@ -750,7 +795,9 @@ public:
         return insert(pos, 1, ch);
     }
 
-    /** Inserts `count` copies of character `ch` before the character (if any) pointed by `pos`
+    /** Insert into the string.
+
+        Inserts `count` copies of character `ch` before the character (if any) pointed by `pos`
 
         The inserted characters can be null.
 
@@ -763,29 +810,33 @@ public:
         size_type count,
         CharT ch);
 
-    /** Inserts characters from the range `(first, last)` before the element (if any) pointed by `pos`
+    /** Insert into the string.
+    
+        Inserts characters from the range `(first, last)` before the element (if any) pointed by `pos`
 
         The inserted string can contain null characters.
         This function does not participate in overload resolution if
-        `InputIt` does not satisfy <em>LegacyInputIterator</em>
+        `InputIterator` does not satisfy <em>LegacyInputIterator</em>
 
         @throw std::length_error if `size() + std::distance(first, last) > max_size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
-    template<typename InputIt>
+    template<typename InputIterator>
 #if GENERATING_DOCUMENTATION
     iterator
 #else
     typename std::enable_if<
-        detail::is_input_iterator<InputIt>::value,
+        detail::is_input_iterator<InputIterator>::value,
             iterator>::type
 #endif
     insert(
         const_iterator pos,
-        InputIt first,
-        InputIt last);
+        InputIterator first,
+        InputIterator last);
 
-    /** Inserts elements from initializer list `ilist` before the element (if any) pointed by `pos`
+    /** Insert into the string.
+    
+        Inserts elements from initializer list `ilist` before the element (if any) pointed by `pos`
 
         The inserted string can contain null characters.
 
@@ -800,7 +851,9 @@ public:
         return insert(pos, ilist.begin(), ilist.end());
     }
 
-    /** Inserts elements from `string_view{t}` at the position `index`
+    /** Insert into the string.
+    
+        Inserts elements from `string_view{t}` at the position `index`
 
         The inserted string can contain null characters.
         This function participates in overload resolution if
@@ -825,7 +878,9 @@ public:
         size_type index,
         T const& t);
 
-    /** Inserts elements from `string_view{t}.substr(index_str, count)` at the position `index`
+    /** Insert into the string.
+
+        Inserts elements from `string_view{t}.substr(index_str, count)` at the position `index`
 
         The inserted string can contain null characters.
         This function participates in overload resolution if
@@ -912,7 +967,9 @@ public:
         return insert(n_, count, ch);
     }
 
-    /** Appends the contents of string view `sv`
+    /** Append to the string.
+    
+        Appends the contents of string view `sv`
 
         The appended string can contain null characters.
 
@@ -926,7 +983,9 @@ public:
         return append(sv.data(), sv.size());
     }
 
-    /** Appends the contents of `sv.substr(pos, count)`
+    /** Append to the string.
+    
+        Appends the contents of `sv.substr(pos, count)`
 
         The appended string can contain null characters.
 
@@ -943,7 +1002,9 @@ public:
         return append(sv.substr(pos, count));
     }
 
-    /** Appends characters in the range `(s, s + count)`
+    /** Append to the string.
+    
+        Appends characters in the range `(s, s + count)`
     
         The appended string can contain null characters.
 
@@ -955,7 +1016,9 @@ public:
         CharT const* s,
         size_type count);
 
-    /** Appends the null-terminated character string pointed to by `s`
+    /** Append to the string.
+    
+        Appends the null-terminated character string pointed to by `s`
     
         The length of the string is determined by the first
         null character using `Traits::length(s)`.
@@ -970,32 +1033,36 @@ public:
         return append(s, Traits::length(s));
     }
 
-    /** Appends characters from the range `(first, last)`
+    /** Append to the string.
+    
+        Appends characters from the range `(first, last)`
 
         The inserted string can contain null characters.
         This function does not participate in overload resolution if
-        `InputIt` does not satisfy <em>LegacyInputIterator</em>
+        `InputIterator` does not satisfy <em>LegacyInputIterator</em>
 
         @throw std::length_error if `size() + std::distance(first, last) > max_size()`
         @return `*this`
     */
-    template<typename InputIt>
+    template<typename InputIterator>
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
     typename std::enable_if<
-        detail::is_input_iterator<InputIt>::value,
+        detail::is_input_iterator<InputIterator>::value,
             fixed_string&>::type
 #endif
     append(
-        InputIt first,
-        InputIt last)
+        InputIterator first,
+        InputIterator last)
     {
         insert(end(), first, last);
         return *this;
     }
 
-    /** Appends characters from initializer list `ilist`
+    /** Append to the string.
+    
+        Appends characters from initializer list `ilist`
 
         The appended string can contain null characters.
 
@@ -1010,7 +1077,9 @@ public:
         return *this;
     }
 
-    /** Appends characters from `string_view{t}`
+    /** Append to the string.
+    
+        Appends characters from `string_view{t}`
 
         The appended string can contain null characters.
         This function participates in overload resolution if
@@ -1037,7 +1106,9 @@ public:
         return append(string_view{t});
     }
 
-    /** Appends characters from `string_view{t}.substr{pos, count}`
+    /** Append to the string.
+    
+        Appends characters from `string_view{t}.substr{pos, count}`
 
         The appended string can contain null characters.
         This function participates in overload resolution if
@@ -1067,6 +1138,10 @@ public:
         return append(string_view{t}.substr(pos, count));
     }
 
+    /** Append to the string.
+
+        @throw std::length_error if `size() + s.size() > max_size()`
+    */
     template<std::size_t M>
     fixed_string&
     operator+=(
@@ -1075,7 +1150,9 @@ public:
         return append(s.data(), s.size());
     }
 
-    /** Appends the given character `ch` to the end of the string.
+    /** Append to the string.
+    
+        Appends the given character `ch` to the end of the string.
 
         @throw std::length_error if `size() + 1 > max_size()`
     */
@@ -1087,7 +1164,9 @@ public:
         return *this;
     }
 
-    /** Appends the null-terminated character string pointed to by `s`
+    /** Append to the string.
+    
+        Appends the null-terminated character string pointed to by `s`
     
         The length of the string is determined by the first
         null character using `Traits::length(s)`.
@@ -1102,7 +1181,9 @@ public:
         return append(s);
     }
 
-    /** Appends characters from initializer list `ilist`
+    /** Append to the string.
+    
+        Appends characters from initializer list `ilist`
 
         The appended string can contain null characters.
 
@@ -1116,7 +1197,9 @@ public:
         return append(ilist);
     }
 
-    /** Appends a copy of the characters from `string_view_type{t}`
+    /** Append to the string.
+    
+        Appends a copy of the characters from `string_view_type{t}`
 
         The appended string can contain null characters.
         This function participates in overload resolution if
@@ -1140,7 +1223,7 @@ public:
         return append(t);
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
         
         Compares this string to `s`.
     */
@@ -1153,7 +1236,7 @@ public:
             s_, n_, &s.s_[0], s.n_);
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
         
         Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
     */
@@ -1168,7 +1251,7 @@ public:
             substr(pos1, count1), s.data(), s.size());
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
         
         Compares a `[pos1, pos1+count1)` substring of this string to a substring `[pos2, pos2+count2)` of `s`. 
         If `count1 > size() - pos1` the first substring is `[pos1, size())`. Likewise, if `count2 > s.size() - pos2` the
@@ -1187,7 +1270,7 @@ public:
             substr(pos1, count1), s.substr(pos2, count2));
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
         
         Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `Traits::length(s)`.
     */
@@ -1199,7 +1282,7 @@ public:
             s_, n_, s, Traits::length(s));
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
         
         Compares a `[pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
         length `Traits::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
@@ -1214,7 +1297,7 @@ public:
             substr(pos1, count1), s, Traits::length(s));
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
         
         Compares a `[pos1, pos1+count1)` substring of this string to the characters in the range `[s, s + count2)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
     */
@@ -1229,7 +1312,7 @@ public:
             substr(pos1, count1), s, count2);
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
       
         Compares this string to `s`.
     */
@@ -1241,7 +1324,7 @@ public:
             s_, n_, s.data(), s.size());
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
 
         Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
     */
@@ -1255,7 +1338,7 @@ public:
             substr(pos1, count1), s);
     }
 
-    /** Compare the string with another
+    /** Compare the string with another.
         
         Replaces the part of the string indicated by `[pos1, pos1 + count1)` with a substring `[pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
 
@@ -1283,7 +1366,9 @@ public:
             string_view_type(t).substr(pos2, count2));
     }
 
-    /** Returns a substring `(pos, pos + count)`. If the requested substring is greater than the size of the string, the returned substring is `[pos, size())`.
+    /** Returns a substring.
+    
+        Returns a substring `(pos, pos + count)`. If the requested substring is greater than the size of the string, the returned substring is `[pos, size())`.
 
         @throw std::out_of_range if `pos > size()`
     */
@@ -1292,7 +1377,10 @@ public:
         size_type pos = 0,
         size_type count = npos) const;
 
-    /// Copy a substring `(pos, pos+count)` to character string pointed to by `dest`.
+    /** Copy a substring.
+
+        Copy a substring `(pos, pos+count)` to character string pointed to by `dest`.
+    */
     size_type
     copy(
         CharT* dest,
@@ -1329,7 +1417,7 @@ public:
     swap(
         fixed_string<M, CharT, Traits>& s);
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `s`
         
@@ -1347,7 +1435,7 @@ public:
       return replace(pos1, n1, str.data(), str.size());
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `str`
         except that if `n2` is greater than `str.size()`, `[pos2, pos2 + str.size())` is used.
@@ -1367,7 +1455,7 @@ public:
       return replace(pos1, n1, str.substr(pos2, n2));
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `t` after converting to `string_view_type`.
 
@@ -1397,7 +1485,7 @@ public:
       return replace(pos1, n1, sv.data(), sv.size());
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `t`
         after converting to `string_view_type`, except that if `n2` is greater than `t.size()`, `[pos2, pos2 + t.size())` is used.
@@ -1430,7 +1518,7 @@ public:
       return replace(pos1, n1, sv.substr(pos2, n2));
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + n2)`.
 
@@ -1446,7 +1534,7 @@ public:
         size_type n2);
 
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + Traits::length(s))`.
 
@@ -1463,7 +1551,7 @@ public:
       return replace(pos, n1, s, Traits::length(s));
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `n2` copies of `c`.
 
@@ -1478,7 +1566,7 @@ public:
         size_type n2,
         CharT c);
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[i1, i2)` with `s`
 
@@ -1495,7 +1583,7 @@ public:
       return replace(i1, i2, str.data(), str.size());
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[i1, i2)` with `t` after converting to `string_view_type`.
 
@@ -1525,7 +1613,7 @@ public:
       return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + n)`.
 
@@ -1543,7 +1631,7 @@ public:
       return replace(i1 - begin(), i2 - i1, s, n);
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + Traits::length(s))`.
 
@@ -1560,7 +1648,7 @@ public:
       return replace(i1, i2, s, Traits::length(s));
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[i1, i2)` with `n` copies of `c`.
 
@@ -1578,7 +1666,7 @@ public:
       return replace(i1 - begin(), i2 - i1, n, c);
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[j1, j2)`.
 
@@ -1603,7 +1691,7 @@ public:
       return replace(i1, i2, fixed_string(j1, j2));
     }
 
-    /** Replace a subset of the string
+    /** Replace a subset of the string.
     
         Replaces the part of the string indicated by `[i1, i2)` with the characters in the initializer list `il`.
 
@@ -1626,7 +1714,9 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /** Finds the first substring equal to `t`.
+    /** Finds the first substring.
+    
+        Finds the first substring equal to `t`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1649,7 +1739,10 @@ public:
       return find(sv.data(), pos, sv.size());
     }
     
-    /// Finds the first substring equal to `str`.
+    /** Finds the first substring.
+
+        Finds the first substring equal to `str`.
+    */
     template<std::size_t M>
     size_type
       find(
@@ -1659,14 +1752,19 @@ public:
       return find(str.data(), pos, str.size());
     }
 
-    /// Finds the first substring equal to the range `(s, s + count)`. This range may contain null characters.
+    /** Finds the first substring.
+    
+        Finds the first substring equal to the range `(s, s + count)`. This range may contain null characters.
+    */
     size_type
     find(
         const CharT* s, 
         size_type pos,
         size_type n) const;
 
-    /** Finds the first substring equal to the character
+    /** Finds the first substring.
+    
+        Finds the first substring equal to the character
         string pointed to by `s`.
     
         The length of the string is determined by the first
@@ -1680,7 +1778,7 @@ public:
       return find(s, pos, Traits::length(s));
     }
 
-    /// Finds the first character `c`
+    /// Finds the first character `c`.
     size_type
     find(
         CharT c,
@@ -1690,7 +1788,9 @@ public:
     }
 
 
-    /** Finds the last substring equal to `t`.
+    /** Finds the last substring.
+    
+        Finds the last substring equal to `t`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1713,7 +1813,10 @@ public:
       return rfind(sv.data(), pos, sv.size());
     }
 
-    /// Finds the last substring equal to `str`.
+    /** Finds the last substring.
+    
+        Finds the last substring equal to `str`.
+    */
     template<std::size_t M>
     size_type
       rfind(
@@ -1723,14 +1826,19 @@ public:
       return rfind(str.data(), pos, str.size());
     }
 
-    /// Finds the last substring equal to the range `(s, s + count)`. This range may contain null characters.
+    /** Finds the last substring.
+    
+        Finds the last substring equal to the range `(s, s + count)`. This range may contain null characters.
+    */
     size_type
     rfind(
         const CharT* s, 
         size_type pos,
         size_type n) const;
 
-    /** Finds the last substring equal to the character
+    /** Finds the last substring.
+    
+        Finds the last substring equal to the character
         string pointed to by `s`.
 
         The length of the string is determined by the first
@@ -1744,7 +1852,7 @@ public:
       return rfind(s, pos, Traits::length(s));
     }
 
-    /// Finds the last character `c`
+    /// Finds the last character `c`.
     size_type
     rfind(
         CharT c,
@@ -1753,7 +1861,9 @@ public:
       return rfind(&c, pos, 1);
     }
 
-    /** Finds the first character equal to one of the characters in `t`.
+    /** Finds the first character equal to any character in the string.
+    
+        Finds the first character equal to one of the characters in `t`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1776,7 +1886,10 @@ public:
       return find_first_of(sv.data(), pos, sv.size());
     }
 
-    /// Finds the first character equal to one of the characters in `str`.
+    /** Finds the first character equal to any character in the string.
+    
+        Finds the first character equal to one of the characters in `str`.
+    */
     template<std::size_t M>
     size_type
       find_first_of(
@@ -1786,14 +1899,19 @@ public:
       return find_first_of(str.data(), pos, str.size());
     }
 
-    /// Finds the first character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
+    /** Finds the first character equal to any character in the string.
+
+        Finds the first character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
+    */
     size_type
     find_first_of(
         const CharT* s,
         size_type pos,
         size_type n) const;
 
-    /** Finds the first character equal to one of the characters
+    /** Finds the first character equal to any character in the string.
+    
+        Finds the first character equal to one of the characters
         in character string pointed to by `s`. 
      
         The length of the string is determined by the first
@@ -1816,7 +1934,9 @@ public:
       return find_first_of(&c, pos, 1);
     }
 
-    /** Finds the last character equal to one of the characters in `t`.
+    /** Finds the last character equal to any character in the string.
+    
+        Finds the last character equal to one of the characters in `t`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1839,7 +1959,10 @@ public:
       return find_last_of(sv.data(), pos, sv.size());
     }
      
-    /// Finds the last character equal to one of the characters in `str`.
+    /** Finds the last character equal to any character in the string.
+    
+        Finds the last character equal to one of the characters in `str`.
+    */
     template<std::size_t M>
     size_type
       find_last_of(
@@ -1849,14 +1972,19 @@ public:
       return find_last_of(str.data(), pos, str.size());
     }
 
-    /// Finds the last character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
+    /** Finds the last character equal to any character in the string.
+    
+        Finds the last character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
+    */
     size_type
     find_last_of(
         const CharT* s,
         size_type pos,
         size_type n) const;
 
-    /** Finds the last character equal to one of the characters
+    /** Finds the last character equal to any character in the string.
+    
+        Finds the last character equal to one of the characters
         in character string pointed to by `s`.
 
         The length of the string is determined by the first
@@ -1879,7 +2007,9 @@ public:
       return find_last_of(&c, pos, 1);
     }
 
-    /** Finds the first character equal to none of characters in `t`.
+    /** Finds the first character equal to none the characters in the string.
+    
+        Finds the first character equal to none of the characters in `t`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1902,7 +2032,10 @@ public:
       return find_first_not_of(sv.data(), pos, sv.size());
     }
 
-    /// Finds the first character equal to none of the characters in `str`.
+    /** Finds the first character equal to none the characters in the string.
+    
+        Finds the first character equal to none of the characters in `str`.
+    */
     template<std::size_t M>
     size_type
       find_first_not_of(
@@ -1912,14 +2045,19 @@ public:
       return find_first_not_of(str.data(), pos, str.size());
     }
 
-    /// Finds the first character equal to none of characters in range `(s, s + count)`. This range can include null characters.
+    /** Finds the first character equal to none the characters in the string.
+        
+        Finds the first character equal to none of characters in range `(s, s + count)`. This range can include null characters.
+    */
     size_type
     find_first_not_of(
         const CharT* s,
         size_type pos, 
         size_type n) const;
 
-    /** Finds the first character equal to none of characters in
+    /** Finds the first character equal to none the characters in the string.
+    
+        Finds the first character equal to none of the characters in
         character string pointed to by `s`.
 
         The length of the string is determined by the first
@@ -1942,7 +2080,9 @@ public:
       return find_first_not_of(&c, pos, 1);
     }
 
-    /** Finds the last character equal to none of the characters in `t`.
+    /** Finds the last character equal to none the characters in the string.
+    
+        Finds the last character equal to none of the characters in `t`.
 
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
@@ -1965,7 +2105,10 @@ public:
       return find_last_not_of(sv.data(), pos, sv.size());
     }
 
-    /// Finds the last character equal to none of the characters in `str`.
+    /** Finds the last character equal to none the characters in the string.
+    
+        Finds the last character equal to none of the characters in `str`.
+    */
     template<size_t M>
     size_type
       find_last_not_of(
@@ -1975,7 +2118,10 @@ public:
       return find_last_not_of(str.data(), pos, str.size());
     }
 
-    /// Finds the last character equal to none of characters in range `(s, s + count)`. This range can include null characters.
+    /** Finds the last character equal to none the characters in the string.
+        
+        Finds the last character equal to none of the characters in range `(s, s + count)`. This range can include null characters.
+    */
     size_type
     find_last_not_of(
         const CharT* s,
@@ -1983,7 +2129,9 @@ public:
         size_type n) const;
 
 
-    /** Finds the last character equal to none of characters in
+    /** Finds the last character equal to none the characters in the string.
+    
+        Finds the last character equal to none of the characters in
         character string pointed to by `s`.
 
         The length of the string is determined by the first
