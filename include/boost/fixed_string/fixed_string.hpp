@@ -97,10 +97,15 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /// Construct an empty string
+    /** Construct a `fixed_string`.
+
+        Construct an empty string
+    */
     fixed_string();
 
-    /** Construct the string with `count` copies of character `ch`.
+    /** Construct a `fixed_string`.
+    
+        Construct the string with `count` copies of character `ch`.
     
         The behavior is undefined if `count >= npos`
     */
@@ -108,29 +113,44 @@ public:
         size_type count,
         CharT ch);
 
-    /// Construct with a substring (pos, other.size()) of `other`.
+    /** Construct a `fixed_string`.
+        
+        Construct with a substring (pos, other.size()) of `other`.
+    */
     template<std::size_t M>
     fixed_string(
         fixed_string<M, CharT, Traits> const& other,
         size_type pos);
 
-    /// Construct with a substring (pos, count) of `other`.
+    /** Construct a `fixed_string`.
+    
+        Construct with a substring (pos, count) of `other`.
+    */
     template<std::size_t M>
     fixed_string(
         fixed_string<M, CharT, Traits> const& other,
         size_type pos,
         size_type count);
 
-    /// Construct with the first `count` characters of `s`, including nulls.
+    /** Construct a `fixed_string`.
+        
+        Construct with the first `count` characters of `s`, including nulls.
+     */
     fixed_string(
         CharT const* s,
         size_type count);
 
-    /// Construct from a null terminated string.
+    /** Construct a `fixed_string`.
+        
+        Construct from a null terminated string.
+    */
     fixed_string(
         CharT const* s);
 
-    /// Construct from a range of characters
+    /** Construct a `fixed_string`.
+    
+        Construct from a range of characters
+    */
     template<class InputIterator>
     fixed_string(
         InputIterator first,
@@ -142,26 +162,39 @@ public:
     #endif
     );
 
-    /// Copy constructor.
+    /** Construct a `fixed_string`.
+        
+        Copy constructor.
+    */
     fixed_string(
         fixed_string const& other);
 
-    /// Copy constructor.
+    /** Construct a `fixed_string`.
+        
+        Copy constructor.
+    */
     template<std::size_t M>
     fixed_string(
         fixed_string<M, CharT, Traits> const& other);
 
-    /// Construct from an initializer list
+    /** Construct a `fixed_string`.
+        
+        Construct from an initializer list
+    */
     fixed_string(
         std::initializer_list<CharT> init);
 
-    /// Construct from a `string_view`
-
+    /** Construct a `fixed_string`.
+    
+        Construct from a `string_view`
+    */
     explicit
     fixed_string(
         string_view_type sv);
 
-    /** Construct from any object convertible to `string_view_type`.
+    /** Construct a `fixed_string`.
+    
+        Construct from any object convertible to `string_view_type`.
 
         The range (pos, n) is extracted from the value
         obtained by converting `t` to `string_view_type`,

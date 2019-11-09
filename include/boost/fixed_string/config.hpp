@@ -42,13 +42,25 @@
 
 // Boost and non-Boost versions of utilities
 #ifdef BOOST_FIXED_STRING_USE_BOOST
+#ifndef BOOST_FIXED_STRING_THROW
 #define BOOST_FIXED_STRING_THROW(ex) BOOST_THROW_EXCEPTION(ex)
+#endif
+#ifndef BOOST_FIXED_STRING_STATIC_ASSERT
 #define BOOST_FIXED_STRING_STATIC_ASSERT(cond, msg) BOOST_STATIC_ASSERT_MSG(cond, msg)
+#endif
+#ifndef BOOST_FIXED_STRING_ASSERT
 #define BOOST_FIXED_STRING_ASSERT(cond) BOOST_ASSERT(cond)
+#endif
 #else
+#ifndef BOOST_FIXED_STRING_THROW
 #define BOOST_FIXED_STRING_THROW(ex) throw ex
+#endif
+#ifndef BOOST_FIXED_STRING_STATIC_ASSERT
 #define BOOST_FIXED_STRING_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
+#endif
+#ifndef BOOST_FIXED_STRING_ASSERT
 #define BOOST_FIXED_STRING_ASSERT(cond) assert(cond)
+#endif
 #endif
 
 namespace boost {
