@@ -2634,7 +2634,7 @@ namespace std
 #ifndef BOOST_FIXED_STRING_STANDALONE
         return boost::hash_range(str.begin(), str.end());
 #else
-        using sv = boost::fixed_string::string_view;
+        using sv = boost::fixed_string::basic_string_view<CharT, Traits>;
         return std::hash<sv>()(sv(str.data(), str.size()));
 #endif
     }

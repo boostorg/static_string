@@ -67,14 +67,6 @@
 namespace boost {
 namespace fixed_string {
 
-/// The type of `string_view` used by the library
-using string_view = 
-#ifndef BOOST_FIXED_STRING_STANDALONE
-    boost::string_view;
-#else
-    std::string_view;
-#endif
-
 /// The type of `basic_string_view` used by the library
 template<typename CharT, typename Traits>
 using basic_string_view =
