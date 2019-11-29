@@ -35,16 +35,16 @@ struct priority : priority<N - 1> { };
 template<>
 struct priority<0> { };
 
-template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned char>::max()>* = nullptr>
+template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned char>::max)()>::type* = nullptr>
 constexpr unsigned char smallest_width_impl(priority<3>);
 
-template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned short>::max()>* = nullptr>
+template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned short>::max)()>::type* = nullptr>
 constexpr unsigned short smallest_width_impl(priority<2>);
 
-template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned long>::max()>* = nullptr>
+template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned long>::max)()>::type* = nullptr>
 constexpr unsigned long smallest_width_impl(priority<1>);
 
-template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned long long>::max()>* = nullptr>
+template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned long long>::max)()>::type* = nullptr>
 constexpr unsigned long long smallest_width_impl(priority<0>);
 
 template<std::size_t N>
@@ -56,7 +56,7 @@ struct smallest_width
 template<std::size_t N>
 using smallest_width_t = typename smallest_width<N>::type;
 
-template<std::size_t N, typename CharT>
+template<std::size_t N, typename CharT, typename Traits>
 class fixed_string_base
 {
 public:
@@ -84,22 +84,21 @@ public:
     return n_ = n;
   }
 
+  void
+  term_impl()
+  {
+    Traits::assign(s_[n_], 0);
+  }
+
   smallest_width_t<N> n_;
   CharT s_[N + 1];
 };
 
-template<typename CharT>
-class fixed_string_base<0, CharT>
+template<typename CharT, typename Traits>
+class fixed_string_base<0, CharT, Traits>
 {
 public:
   CharT*
-  data_impl() noexcept
-  {
-    static CharT null{};
-    return &null;
-  }
-
-  CharT const*
   data_impl() const noexcept
   {
     static CharT null{};
@@ -116,6 +115,12 @@ public:
   set_size(std::size_t n)
   {
     return 0;
+  }
+
+  void
+  term_impl()
+  {
+
   }
 };
 

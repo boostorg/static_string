@@ -37,7 +37,10 @@ template<
     std::size_t N,
     typename CharT = char,
     typename Traits = std::char_traits<CharT>>
-class fixed_string : public detail::fixed_string_base<N, CharT>
+class fixed_string 
+#ifndef GENERATING_DOCUMENTATION
+  : private detail::fixed_string_base<N, CharT, Traits>
+#endif
 {
     template<std::size_t, class, class>
     friend class fixed_string;
@@ -45,7 +48,7 @@ class fixed_string : public detail::fixed_string_base<N, CharT>
     void
     term()
     {
-        Traits::assign(data()[size()], 0);
+        this->term_impl();
     }
 
 public:

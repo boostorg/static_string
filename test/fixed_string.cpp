@@ -6787,6 +6787,9 @@ runTests()
   return report_errors();
 }
 
+BOOST_FIXED_STRING_STATIC_ASSERT(sizeof(fixed_string<0>) == 1, "size shall be 1 for N < 255");
+BOOST_FIXED_STRING_STATIC_ASSERT(alignof(fixed_string<254>) == 1, "alignment shall be 1 for N < 255");
+
 } // fixed_string
 } // boost
 
