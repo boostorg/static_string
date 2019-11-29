@@ -1405,7 +1405,7 @@ public:
 
         @throw std::out_of_range if `pos > size()`
     */
-    string_view_type
+    fixed_string
     substr(
         size_type pos = 0,
         size_type count = npos) const;
@@ -2599,9 +2599,52 @@ fixed_string(CharT(&)[N]) ->
     fixed_string<N, CharT, std::char_traits<CharT>>;
 #endif
 
+//------------------------------------------------------------------------------
+//
+// Hashing
+//
+//------------------------------------------------------------------------------
+
+#ifndef BOOST_FIXED_STRING_STANDALONE
+// hash_value overload for Boost.Container_Hash
+template <std::size_t N, 
+    typename CharT, 
+    typename Traits>
+std::size_t 
+hash_value(
+  const fixed_string<N, CharT, Traits>& str)
+{
+#ifndef BOOST_FIXED_STRING_STANDALONE
+  return boost::hash_range(str.begin(), str.end());
+#else
+  using sv = boost::fixed_string::string_view;
+  return std::hash<sv>()(sv(str.data(), str.size()));
+#endif
+}
+#endif
+
 } // fixed_string
 } // boost
 
-#include <boost/fixed_string/impl/fixed_string.hpp>
+// std::hash partial specialization for fixed_string
+namespace std
+{
+  template <std::size_t N, typename CharT, typename Traits>
+  struct hash<boost::fixed_string::fixed_string<N, CharT, Traits>> 
+  {
+    std::size_t 
+    operator()(
+        const boost::fixed_string::fixed_string<N, CharT, Traits>& str) const
+    {
+#ifndef BOOST_FIXED_STRING_STANDALONE
+      return boost::hash_range(str.begin(), str.end());
+#else
+      using sv = boost::fixed_string::string_view;
+      return std::hash<sv>()(sv(str.data(), str.size()));
+#endif
+    }
+  };
+} // std
 
+#include <boost/fixed_string/impl/fixed_string.hpp>
 #endif

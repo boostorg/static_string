@@ -498,7 +498,7 @@ template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
-    string_view
+    fixed_string
 {
     if(pos > size())
         BOOST_FIXED_STRING_THROW(std::out_of_range{

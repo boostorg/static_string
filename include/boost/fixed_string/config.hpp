@@ -12,7 +12,7 @@
 #define BOOST_FIXED_STRING_CONFIG_HPP
 
 // Are we dependent on Boost?
-#define BOOST_FIXED_STRING_USE_BOOST
+// #define BOOST_FIXED_STRING_STANDALONE
 
 // Can we have deduction guides?
 #ifdef __cpp_deduction_guides
@@ -30,8 +30,9 @@
 #define BOOST_FIXED_STRING_NODISCARD
 #endif
 
-#ifdef BOOST_FIXED_STRING_USE_BOOST
+#ifndef BOOST_FIXED_STRING_STANDALONE
 #include <boost/utility/string_view.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/throw_exception.hpp>
@@ -41,7 +42,7 @@
 #endif
 
 // Boost and non-Boost versions of utilities
-#ifdef BOOST_FIXED_STRING_USE_BOOST
+#ifndef BOOST_FIXED_STRING_STANDALONE
 #ifndef BOOST_FIXED_STRING_THROW
 #define BOOST_FIXED_STRING_THROW(ex) BOOST_THROW_EXCEPTION(ex)
 #endif
@@ -68,7 +69,7 @@ namespace fixed_string {
 
 /// The type of `string_view` used by the library
 using string_view = 
-#ifdef BOOST_FIXED_STRING_USE_BOOST
+#ifndef BOOST_FIXED_STRING_STANDALONE
     boost::string_view;
 #else
     std::string_view;
@@ -77,7 +78,7 @@ using string_view =
 /// The type of `basic_string_view` used by the library
 template<typename CharT, typename Traits>
 using basic_string_view =
-#ifdef BOOST_FIXED_STRING_USE_BOOST
+#ifndef BOOST_FIXED_STRING_STANDALONE
     boost::basic_string_view<CharT, Traits>;
 #else
     std::basic_string_view<CharT, Traits>;

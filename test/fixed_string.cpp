@@ -6752,6 +6752,14 @@ testStartsEnds()
   BOOST_TEST(S("1234567890").ends_with(string_view("1234567890")));
 }
 
+void testHash()
+{
+  using U = fixed_string<30>;
+  std::hash<U> hasher;
+  BOOST_TEST(hasher(U("1")) != hasher(U("123456789")));
+  BOOST_TEST(hasher(U("1234567890")) == hasher(U("1234567890")));
+}
+
 int
 runTests()
 {
@@ -6783,6 +6791,8 @@ runTests()
   testReplace();
   testSubstr();
   testStartsEnds();
+
+  testHash();
 
   return report_errors();
 }

@@ -1,0 +1,17 @@
+{
+    "key": "fixedstring",
+    "name": "FixedString",
+    "authors": [
+        "Vinnie Falco",
+		"Krystian Stasiowski"
+    ],
+    "description": "Fixed capacity dynamically sized string",
+    "category": [
+        "Container",
+        "Strings"
+    ],
+    "maintainers": [
+        "Vinnie Falco <vinnie.falco@gmail.com>",
+		"Krystian Stasiowski <sdkrystian@gmail.com>"
+    ]
+}

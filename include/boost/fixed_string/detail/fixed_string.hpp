@@ -14,7 +14,7 @@
 #include <boost/fixed_string/config.hpp>
 #include <iterator>
 #include <type_traits>
-#include <numeric>
+#include <limits>
 
 namespace boost {
 namespace fixed_string {
@@ -29,32 +29,14 @@ using is_input_iterator =
     std::integral_constant<bool,
         ! std::is_integral<T>::value>;
 
+// glen put my impl to shame >:(
 template<std::size_t N>
-struct priority : priority<N - 1> { };
-
-template<>
-struct priority<0> { };
-
-template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned char>::max)()>::type* = nullptr>
-constexpr unsigned char smallest_width_impl(priority<3>);
-
-template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned short>::max)()>::type* = nullptr>
-constexpr unsigned short smallest_width_impl(priority<2>);
-
-template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned long>::max)()>::type* = nullptr>
-constexpr unsigned long smallest_width_impl(priority<1>);
-
-template<std::size_t N, typename std::enable_if<N < (std::numeric_limits<unsigned long long>::max)()>::type* = nullptr>
-constexpr unsigned long long smallest_width_impl(priority<0>);
-
-template<std::size_t N>
-struct smallest_width
-{
-  using type = decltype(smallest_width_impl<N>(priority<3>{}));
-};
-
-template<std::size_t N>
-using smallest_width_t = typename smallest_width<N>::type;
+using smallest_width_t =
+    typename std::conditional<N <= (std::numeric_limits<unsigned char>::max)(), unsigned char,
+    typename std::conditional<N <= (std::numeric_limits<unsigned short>::max)(), unsigned short,
+    typename std::conditional<N <= (std::numeric_limits<unsigned long>::max)(), unsigned long,
+    typename std::conditional<N <= (std::numeric_limits<unsigned long long>::max)(), unsigned long long,
+    void>::type>::type>::type>::type;
 
 template<std::size_t N, typename CharT, typename Traits>
 class fixed_string_base
