@@ -14,6 +14,7 @@
 #include <boost/fixed_string/config.hpp>
 #include <iterator>
 #include <type_traits>
+#include <numeric>
 
 namespace boost {
 namespace fixed_string {
@@ -27,6 +28,96 @@ template<class T>
 using is_input_iterator =
     std::integral_constant<bool,
         ! std::is_integral<T>::value>;
+
+template<std::size_t N>
+struct priority : priority<N - 1> { };
+
+template<>
+struct priority<0> { };
+
+template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned char>::max()>* = nullptr>
+constexpr unsigned char smallest_width_impl(priority<3>);
+
+template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned short>::max()>* = nullptr>
+constexpr unsigned short smallest_width_impl(priority<2>);
+
+template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned long>::max()>* = nullptr>
+constexpr unsigned long smallest_width_impl(priority<1>);
+
+template<std::size_t N, std::enable_if_t<N < std::numeric_limits<unsigned long long>::max()>* = nullptr>
+constexpr unsigned long long smallest_width_impl(priority<0>);
+
+template<std::size_t N>
+struct smallest_width
+{
+  using type = decltype(smallest_width_impl<N>(priority<3>{}));
+};
+
+template<std::size_t N>
+using smallest_width_t = typename smallest_width<N>::type;
+
+template<std::size_t N, typename CharT>
+class fixed_string_base
+{
+public:
+  CharT*
+  data_impl() noexcept
+  {
+    return s_;
+  }
+
+  CharT const*
+  data_impl() const noexcept
+  {
+    return s_;
+  }
+
+  std::size_t
+  size_impl() const
+  {
+    return n_;
+  }
+
+  std::size_t
+  set_size(std::size_t n)
+  {
+    return n_ = n;
+  }
+
+  smallest_width_t<N> n_;
+  CharT s_[N + 1];
+};
+
+template<typename CharT>
+class fixed_string_base<0, CharT>
+{
+public:
+  CharT*
+  data_impl() noexcept
+  {
+    static CharT null{};
+    return &null;
+  }
+
+  CharT const*
+  data_impl() const noexcept
+  {
+    static CharT null{};
+    return &null;
+  }
+
+  std::size_t
+  size_impl() const
+  {
+    return 0;
+  }
+
+  std::size_t
+  set_size(std::size_t n)
+  {
+    return 0;
+  }
+};
 
 template<typename CharT, typename Traits>
 inline

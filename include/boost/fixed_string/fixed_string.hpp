@@ -37,7 +37,7 @@ template<
     std::size_t N,
     typename CharT = char,
     typename Traits = std::char_traits<CharT>>
-class fixed_string
+class fixed_string : public detail::fixed_string_base<N, CharT>
 {
     template<std::size_t, class, class>
     friend class fixed_string;
@@ -45,11 +45,8 @@ class fixed_string
     void
     term()
     {
-        Traits::assign(s_[n_], 0);
+        Traits::assign(data()[size()], 0);
     }
-
-    std::size_t n_;
-    CharT s_[N + 1];
 
 public:
     //--------------------------------------------------------------------------
@@ -86,7 +83,7 @@ public:
     //--------------------------------------------------------------------------
 
     /// Maximum size of the string excluding any null terminator
-    static std::size_t constexpr static_capacity = N;
+    static size_type constexpr static_capacity = N;
 
     /// A special index
     static constexpr size_type npos = size_type(-1);
@@ -480,7 +477,7 @@ public:
     reference
     operator[](size_type pos)
     {
-        return s_[pos];
+        return data()[pos];
     }
 
     /** Access specified character.
@@ -490,7 +487,7 @@ public:
     const_reference
     operator[](size_type pos) const
     {
-        return s_[pos];
+        return data()[pos];
     }
 
     /** Accesses the first character.
@@ -500,7 +497,7 @@ public:
     CharT&
     front()
     {
-        return s_[0];
+        return data()[0];
     }
 
     /** Accesses the first character.
@@ -510,7 +507,7 @@ public:
     CharT const&
     front() const
     {
-        return s_[0];
+        return data()[0];
     }
 
     /** Accesses the last character.
@@ -520,7 +517,7 @@ public:
     CharT&
     back()
     {
-        return s_[n_-1];
+        return data()[size()-1];
     }
 
     /** Accesses the last character.
@@ -530,21 +527,21 @@ public:
     CharT const&
     back() const 
     {
-        return s_[n_-1];
+        return data()[size()-1];
     }
 
     /// Returns a pointer to the first character of the string.
     CharT*
     data() noexcept
     {
-        return s_;
+        return this->data_impl();
     }
 
     /// Returns a pointer to the first character of a string.
     CharT const*
     data() const noexcept
     {
-        return s_;
+        return this->data_impl();
     }
 
     /// Returns a non-modifiable standard C character array version of the string.
@@ -571,42 +568,42 @@ public:
     iterator
     begin() noexcept
     {
-        return s_;
+        return data();
     }
 
     /// Returns an iterator to the beginning.
     const_iterator
     begin() const noexcept
     {
-        return s_;
+        return data();
     }
 
     /// Returns an iterator to the beginning.
     const_iterator
     cbegin() const noexcept
     {
-        return s_;
+        return data();
     }
 
     /// Returns an iterator to the end.
     iterator
     end() noexcept
     {
-        return &s_[n_];
+        return &data()[size()];
     }
 
     /// Returns an iterator to the end.
     const_iterator
     end() const noexcept
     {
-        return &s_[n_];
+        return &data()[size()];
     }
 
     /// Returns an iterator to the end.
     const_iterator
     cend() const noexcept
     {
-        return &s_[n_];
+        return &data()[size()];
     }
 
     /// Returns a reverse iterator to the beginning.
@@ -662,14 +659,14 @@ public:
     bool
     empty() const
     {
-        return n_ == 0;
+        return size() == 0;
     }
 
     /// Returns the number of characters, excluding the null terminator.
     size_type
     size() const
     {
-        return n_;
+        return this->size_impl();
     }
 
     /** Returns the number of characters, excluding the null terminator
@@ -981,8 +978,8 @@ public:
     void
     pop_back()
     {
-      BOOST_FIXED_STRING_ASSERT(n_ > 0);
-      Traits::assign(s_[--n_], 0);
+      BOOST_FIXED_STRING_ASSERT(size() > 0);
+      Traits::assign(data()[this->set_size(size() - 1)], 0);
     }
 
     /** Appends `count` copies of character `ch`
@@ -997,7 +994,7 @@ public:
         size_type count,
         CharT ch)
     {
-        return insert(n_, count, ch);
+        return insert(size(), count, ch);
     }
 
     /** Append to the string.
@@ -1266,7 +1263,7 @@ public:
         fixed_string<M, CharT, Traits> const& s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            s_, n_, &s.s_[0], s.n_);
+            data(), size(), s.data(), s.size());
     }
 
     /** Compare the string with another.
@@ -1312,7 +1309,7 @@ public:
         CharT const* s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            s_, n_, s, Traits::length(s));
+            data(), size(), s, Traits::length(s));
     }
 
     /** Compare the string with another.
@@ -1354,7 +1351,7 @@ public:
         string_view_type s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            s_, n_, s.data(), s.size());
+            data(), size(), s.data(), s.size());
     }
 
     /** Compare the string with another.
@@ -2193,7 +2190,7 @@ public:
         string_view_type s) const noexcept
     {
       const size_type len = s.size();
-      return n_ >= len && !Traits::compare(s_, s.data(), len);
+      return size() >= len && !Traits::compare(data(), s.data(), len);
     }
     
     /// Returns whether the string begins with `c`
@@ -2210,7 +2207,7 @@ public:
         const CharT* s) const noexcept
     {
       const size_type len = Traits::length(s);
-      return n_ >= len && !Traits::compare(s_, s, len);
+      return size() >= len && !Traits::compare(data(), s, len);
     }
     
     /// Returns whether the string ends with `s`
@@ -2219,7 +2216,7 @@ public:
         string_view_type s) const noexcept
     {
       const size_type len = s.size();
-      return n_ >= len && !Traits::compare(s_ + (n_ - len), s.data(), len);
+      return size() >= len && !Traits::compare(data() + (size() - len), s.data(), len);
     }
     
     /// Returns whether the string ends with `c`
@@ -2236,7 +2233,7 @@ public:
         const CharT* s) const noexcept
     {
       const size_type len = Traits::length(s);
-      return n_ >= len && !Traits::compare(s_ + (n_ - len), s, len);
+      return size() >= len && !Traits::compare(data() + (size() - len), s, len);
     }
 
 private:
