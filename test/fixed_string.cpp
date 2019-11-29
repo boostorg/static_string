@@ -23,7 +23,7 @@ testS(const S& s, typename S::size_type pos, typename S::size_type n)
 {
   if (pos <= s.size())
   {
-    typename S::string_view_type str = s.substr(pos, n);
+    S str = s.substr(pos, n);
     typename S::size_type rlen = (std::min)(n, s.size() - pos);
     return (S::traits_type::compare(s.data() + pos, str.data(), rlen) == 0);
   }

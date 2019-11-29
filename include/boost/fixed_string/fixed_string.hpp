@@ -2558,7 +2558,7 @@ std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, 
     fixed_string<N, CharT, Traits> const& s)
 {
-  return os << string_view(s.data(), s.size());
+    return os << string_view(s.data(), s.size());
 }
 
 //------------------------------------------------------------------------------
@@ -2614,12 +2614,7 @@ std::size_t
 hash_value(
   const fixed_string<N, CharT, Traits>& str)
 {
-#ifndef BOOST_FIXED_STRING_STANDALONE
-  return boost::hash_range(str.begin(), str.end());
-#else
-  using sv = boost::fixed_string::string_view;
-  return std::hash<sv>()(sv(str.data(), str.size()));
-#endif
+    return boost::hash_range(str.begin(), str.end());
 }
 #endif
 
@@ -2637,10 +2632,10 @@ namespace std
         const boost::fixed_string::fixed_string<N, CharT, Traits>& str) const
     {
 #ifndef BOOST_FIXED_STRING_STANDALONE
-      return boost::hash_range(str.begin(), str.end());
+        return boost::hash_range(str.begin(), str.end());
 #else
-      using sv = boost::fixed_string::string_view;
-      return std::hash<sv>()(sv(str.data(), str.size()));
+        using sv = boost::fixed_string::string_view;
+        return std::hash<sv>()(sv(str.data(), str.size()));
 #endif
     }
   };
