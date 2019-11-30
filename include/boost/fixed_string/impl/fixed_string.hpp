@@ -25,7 +25,7 @@ namespace fixed_string {
 
 template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
-fixed_string()
+fixed_string() noexcept
 {
     this->set_size(0);
     term();
@@ -93,7 +93,7 @@ fixed_string(
 template<std::size_t N, typename CharT, typename Traits>
 fixed_string<N, CharT, Traits>::
 fixed_string(
-    fixed_string const& s)
+    fixed_string const& s) noexcept
 {
     assign(s);
 }
@@ -281,7 +281,7 @@ reserve(std::size_t n)
 template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
-clear()
+clear() noexcept
 {
     this->set_size(0);
     term();
@@ -317,7 +317,7 @@ insert(
     if(index > size())
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
-    if(size() + count > max_size())
+    if(count > max_size() - size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     const bool inside = s <= &data()[size()] && s >= data();
@@ -354,7 +354,7 @@ insert(
     CharT ch) ->
         iterator
 {
-    if(size() + count > max_size())
+    if(count > max_size() - size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count() > max_size()"});
     auto const index = pos - data();
@@ -484,7 +484,7 @@ append(
     size_type count) ->
         fixed_string&
 {
-    if(size() + count > max_size())
+    if(count > max_size() - size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     Traits::move(&data()[size() + count], &data()[size()], size() - size());
@@ -509,7 +509,7 @@ substr(size_type pos, size_type count) const ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-copy(CharT* dest, size_type count, size_type pos) const ->
+copy(CharT* dest, size_type count, size_type pos) const noexcept ->
     size_type
 {
     auto const s = substr(pos, count);
@@ -548,7 +548,7 @@ resize(std::size_t n, CharT c)
 template<std::size_t N, typename CharT, typename Traits>
 void
 fixed_string<N, CharT, Traits>::
-swap(fixed_string& s)
+swap(fixed_string& s) noexcept
 {
     fixed_string tmp(s);
     s.set_size(size());
@@ -659,7 +659,7 @@ fixed_string<N, CharT, Traits>::
 find(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
   if (pos > size() || n > size() - pos)
@@ -676,7 +676,7 @@ fixed_string<N, CharT, Traits>::
 rfind(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
   if (size() < n)
@@ -697,7 +697,7 @@ fixed_string<N, CharT, Traits>::
 find_first_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
   if (pos >= size() || !n)
@@ -712,7 +712,7 @@ fixed_string<N, CharT, Traits>::
 find_last_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
   if (!n)
@@ -731,7 +731,7 @@ fixed_string<N, CharT, Traits>::
 find_first_not_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
   if (pos >= size())
@@ -748,7 +748,7 @@ fixed_string<N, CharT, Traits>::
 find_last_not_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
   if (pos >= size())
@@ -763,7 +763,7 @@ find_last_not_of(
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
-assign_char(CharT ch, std::true_type) ->
+assign_char(CharT ch, std::true_type) noexcept ->
     fixed_string&
 {
     this->set_size(1);

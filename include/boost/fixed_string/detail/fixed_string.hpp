@@ -55,19 +55,19 @@ public:
   }
 
   std::size_t
-  size_impl() const
+  size_impl() const noexcept
   {
     return n_;
   }
 
   std::size_t
-  set_size(std::size_t n)
+  set_size(std::size_t n) noexcept
   {
     return n_ = n;
   }
 
   void
-  term_impl()
+  term_impl() noexcept
   {
     Traits::assign(s_[n_], 0);
   }
@@ -88,19 +88,19 @@ public:
   }
 
   std::size_t
-  size_impl() const
+  size_impl() const noexcept
   {
     return 0;
   }
 
   std::size_t
-  set_size(std::size_t n)
+  set_size(std::size_t n) noexcept
   {
     return 0;
   }
 
   void
-  term_impl()
+  term_impl() noexcept
   {
 
   }

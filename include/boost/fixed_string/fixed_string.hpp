@@ -46,7 +46,7 @@ class fixed_string
     friend class fixed_string;
 
     void
-    term()
+    term() noexcept
     {
         this->term_impl();
     }
@@ -101,7 +101,7 @@ public:
 
         Construct an empty string
     */
-    fixed_string();
+    fixed_string() noexcept;
 
     /** Construct a `fixed_string`.
     
@@ -167,7 +167,7 @@ public:
         Copy constructor.
     */
     fixed_string(
-        fixed_string const& other);
+        fixed_string const& other) noexcept;
 
     /** Construct a `fixed_string`.
         
@@ -478,7 +478,7 @@ public:
         Undefined behavior if `pos > size()`
     */
     reference
-    operator[](size_type pos)
+    operator[](size_type pos) noexcept
     {
         return data()[pos];
     }
@@ -488,7 +488,7 @@ public:
         Undefined behavior if `pos > size()`
     */
     const_reference
-    operator[](size_type pos) const
+    operator[](size_type pos) const noexcept
     {
         return data()[pos];
     }
@@ -498,7 +498,7 @@ public:
         Undefined behavior if `empty() == true`
     */
     CharT&
-    front()
+    front() noexcept
     {
         return data()[0];
     }
@@ -508,7 +508,7 @@ public:
         Undefined behavior if `empty() == true`
     */
     CharT const&
-    front() const
+    front() const noexcept
     {
         return data()[0];
     }
@@ -518,7 +518,7 @@ public:
         Undefined behavior if `empty() == true`
     */
     CharT&
-    back()
+    back() noexcept
     {
         return data()[size()-1];
     }
@@ -528,7 +528,7 @@ public:
         Undefined behavior if `empty() == true`
     */
     CharT const&
-    back() const 
+    back() const noexcept
     {
         return data()[size()-1];
     }
@@ -557,8 +557,7 @@ public:
     /// Convert a static string to a `string_view_type`
     operator string_view_type() const noexcept
     {
-        return basic_string_view<
-            CharT, Traits>{data(), size()};
+        return string_view_type{data(), size()};
     }
 
     //--------------------------------------------------------------------------
@@ -660,14 +659,14 @@ public:
     /// Returns `true` if the string is empty.
     BOOST_FIXED_STRING_NODISCARD
     bool
-    empty() const
+    empty() const noexcept
     {
         return size() == 0;
     }
 
     /// Returns the number of characters, excluding the null terminator.
     size_type
-    size() const
+    size() const noexcept
     {
         return this->size_impl();
     }
@@ -677,14 +676,14 @@ public:
         Equivalent to calling `size()`.
     */
     size_type
-    length() const
+    length() const noexcept
     {
         return size();
     }
 
     /// Returns the maximum number of characters that can be stored, excluding the null terminator.
     size_type constexpr
-    max_size() const
+    max_size() const noexcept
     {
         return N;
     }
@@ -703,7 +702,7 @@ public:
         This function always returns `max_size()`.
     */
     size_type constexpr
-    capacity() const
+    capacity() const noexcept
     {
         return max_size();
     }
@@ -725,7 +724,7 @@ public:
 
     /// Clears the contents
     void
-    clear();
+    clear() noexcept;
 
     /** Insert into the string.
     
@@ -979,7 +978,7 @@ public:
         The behavior is undefined if the string is empty.
     */
     void
-    pop_back()
+    pop_back() noexcept
     {
       BOOST_FIXED_STRING_ASSERT(size() > 0);
       Traits::assign(data()[this->set_size(size() - 1)], 0);
@@ -1263,7 +1262,7 @@ public:
     template<std::size_t M>
     int
     compare(
-        fixed_string<M, CharT, Traits> const& s) const
+        fixed_string<M, CharT, Traits> const& s) const noexcept
     {
         return detail::lexicographical_compare<CharT, Traits>(
             data(), size(), s.data(), s.size());
@@ -1309,7 +1308,7 @@ public:
     */
     int
     compare(
-        CharT const* s) const
+        CharT const* s) const noexcept
     {
         return detail::lexicographical_compare<CharT, Traits>(
             data(), size(), s, Traits::length(s));
@@ -1351,7 +1350,7 @@ public:
     */
     int
     compare(
-        string_view_type s) const
+        string_view_type s) const noexcept
     {
         return detail::lexicographical_compare<CharT, Traits>(
             data(), size(), s.data(), s.size());
@@ -1418,7 +1417,7 @@ public:
     copy(
         CharT* dest,
         size_type count,
-        size_type pos = 0) const;
+        size_type pos = 0) const noexcept;
 
     /** Changes the number of characters stored.
 
@@ -1442,7 +1441,7 @@ public:
     /// Exchange the contents of this string with another.
     void
     swap(
-        fixed_string& s);
+        fixed_string& s) noexcept;
 
     /// Exchange the contents of this string with another.
     template<std::size_t M>
@@ -1766,7 +1765,7 @@ public:
 #endif
     find(
         const T& t,
-        size_type pos = 0) const 
+        size_type pos = 0) const
     {
       string_view_type sv = t;
       return find(sv.data(), pos, sv.size());
@@ -1793,7 +1792,7 @@ public:
     find(
         const CharT* s, 
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the first substring.
     
@@ -1806,7 +1805,7 @@ public:
     size_type
     find(
         const CharT* s,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept
     {
       return find(s, pos, Traits::length(s));
     }
@@ -1867,7 +1866,7 @@ public:
     rfind(
         const CharT* s, 
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the last substring.
     
@@ -1880,7 +1879,7 @@ public:
     size_type
     rfind(
         const CharT* s,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept
     {
       return rfind(s, pos, Traits::length(s));
     }
@@ -1940,7 +1939,7 @@ public:
     find_first_of(
         const CharT* s,
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the first character equal to any character in the string.
     
@@ -1953,7 +1952,7 @@ public:
     size_type
     find_first_of(
         const CharT* s,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept
     {
       return find_first_of(s, pos, Traits::length(s));
     }
@@ -2013,7 +2012,7 @@ public:
     find_last_of(
         const CharT* s,
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the last character equal to any character in the string.
     
@@ -2026,7 +2025,7 @@ public:
     size_type
     find_last_of(
         const CharT* s,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept
     {
       return find_last_of(s, pos, Traits::length(s));
     }
@@ -2086,7 +2085,7 @@ public:
     find_first_not_of(
         const CharT* s,
         size_type pos, 
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the first character equal to none the characters in the string.
     
@@ -2099,7 +2098,7 @@ public:
     size_type
     find_first_not_of(
         const CharT* s,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept
     {
       return find_first_not_of(s, pos, Traits::length(s));
     }
@@ -2159,7 +2158,7 @@ public:
     find_last_not_of(
         const CharT* s,
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
 
     /** Finds the last character equal to none the characters in the string.
@@ -2173,7 +2172,7 @@ public:
     size_type
     find_last_not_of(
         const CharT* s,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept
     {
       return find_last_not_of(s, pos, Traits::length(s));
     }
@@ -2241,7 +2240,7 @@ public:
 
 private:
     fixed_string&
-    assign_char(CharT ch, std::true_type);
+    assign_char(CharT ch, std::true_type) noexcept;
 
     fixed_string&
     assign_char(CharT ch, std::false_type);
