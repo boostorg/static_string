@@ -1280,7 +1280,7 @@ public:
         fixed_string<M, CharT, Traits> const& s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s.data(), s.size());
+            subview(pos1, count1), s.data(), s.size());
     }
 
     /** Compare the string with another.
@@ -1299,7 +1299,7 @@ public:
         size_type count2 = npos) const
     {
         return detail::lexicographical_compare(
-            substr(pos1, count1), s.substr(pos2, count2));
+            subview(pos1, count1), s.subview(pos2, count2));
     }
 
     /** Compare the string with another.
@@ -1326,7 +1326,7 @@ public:
         CharT const* s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s, Traits::length(s));
+            subview(pos1, count1), s, Traits::length(s));
     }
 
     /** Compare the string with another.
@@ -1341,7 +1341,7 @@ public:
         size_type count2) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s, count2);
+            subview(pos1, count1), s, count2);
     }
 
     /** Compare the string with another.
@@ -1367,7 +1367,7 @@ public:
         string_view_type s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s);
+            subview(pos1, count1), s);
     }
 
     /** Compare the string with another.
@@ -1406,6 +1406,17 @@ public:
     */
     fixed_string
     substr(
+        size_type pos = 0,
+        size_type count = npos) const;
+
+    /** Returns a view of a substring.
+
+        Returns a view of a substring `(pos, pos + count)`. If the requested view is greater than the size of the string, the returned view is `[pos, size())`.
+
+        @throw std::out_of_range if `pos > size()`
+    */
+    string_view_type
+    subview(
         size_type pos = 0,
         size_type count = npos) const;
 
@@ -1484,7 +1495,7 @@ public:
         size_type pos2,
         size_type n2 = npos)
     {
-      return replace(pos1, n1, str.substr(pos2, n2));
+      return replace(pos1, n1, str.subview(pos2, n2));
     }
 
     /** Replace a subset of the string.
@@ -2611,7 +2622,7 @@ template <std::size_t N,
     typename Traits>
 std::size_t 
 hash_value(
-  const fixed_string<N, CharT, Traits>& str)
+    const fixed_string<N, CharT, Traits>& str)
 {
     return boost::hash_range(str.begin(), str.end());
 }

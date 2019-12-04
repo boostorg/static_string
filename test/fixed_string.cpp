@@ -9,7 +9,7 @@
 //
 
 // Test that header file is self-contained.
-#include <boost/fixed_string/fixed_string.hpp>
+#include "boost/fixed_string/fixed_string.hpp"
 
 #include <boost/core/lightweight_test.hpp>
 
@@ -30,6 +30,23 @@ testS(const S& s, typename S::size_type pos, typename S::size_type n)
   else
   {
     BOOST_TEST_THROWS((s.substr(pos, n)), std::out_of_range);
+    return true;
+  }
+}
+
+template <class S>
+bool
+testSV(const S& s, typename S::size_type pos, typename S::size_type n)
+{
+  if (pos <= s.size())
+  {
+    typename S::string_view_type str = s.subview(pos, n);
+    typename S::size_type rlen = (std::min)(n, s.size() - pos);
+    return (S::traits_type::compare(s.data() + pos, str.data(), rlen) == 0);
+  }
+  else
+  {
+    BOOST_TEST_THROWS((s.subview(pos, n)), std::out_of_range);
     return true;
   }
 }
@@ -392,7 +409,7 @@ testAssignment()
         BOOST_TEST_THROWS(fixed_string<2>{"**"}.assign(T{}, 6, 3), std::out_of_range);
         BOOST_TEST_THROWS(fixed_string<2>{"**"}.assign(T{}, 1, 3), std::length_error);
     }
-
+    
     //---
 
     {
@@ -413,6 +430,7 @@ testAssignment()
             s3 = s1,
             std::length_error);
     }
+    
     {
         fixed_string<3> s1;
         s1 = "123";
@@ -6730,6 +6748,129 @@ testSubstr()
   BOOST_TEST(testS(S("ktsrmnqagdecfhijpobl"), 19, 1));
   BOOST_TEST(testS(S("lsaijeqhtrbgcdmpfkno"), 20, 0));
   BOOST_TEST(testS(S("dplqartnfgejichmoskb"), 21, 0));
+}
+
+// done
+void
+testSubview()
+{
+  using S = fixed_string<400>;
+  BOOST_TEST(testSV(S(""), 0, 0));
+  BOOST_TEST(testSV(S(""), 1, 0));
+  BOOST_TEST(testSV(S("pniot"), 0, 0));
+  BOOST_TEST(testSV(S("htaob"), 0, 1));
+  BOOST_TEST(testSV(S("fodgq"), 0, 2));
+  BOOST_TEST(testSV(S("hpqia"), 0, 4));
+  BOOST_TEST(testSV(S("qanej"), 0, 5));
+  BOOST_TEST(testSV(S("dfkap"), 1, 0));
+  BOOST_TEST(testSV(S("clbao"), 1, 1));
+  BOOST_TEST(testSV(S("ihqrf"), 1, 2));
+  BOOST_TEST(testSV(S("mekdn"), 1, 3));
+  BOOST_TEST(testSV(S("ngtjf"), 1, 4));
+  BOOST_TEST(testSV(S("srdfq"), 2, 0));
+  BOOST_TEST(testSV(S("qkdrs"), 2, 1));
+  BOOST_TEST(testSV(S("ikcrq"), 2, 2));
+  BOOST_TEST(testSV(S("cdaih"), 2, 3));
+  BOOST_TEST(testSV(S("dmajb"), 4, 0));
+  BOOST_TEST(testSV(S("karth"), 4, 1));
+  BOOST_TEST(testSV(S("lhcdo"), 5, 0));
+  BOOST_TEST(testSV(S("acbsj"), 6, 0));
+  BOOST_TEST(testSV(S("pbsjikaole"), 0, 0));
+  BOOST_TEST(testSV(S("pcbahntsje"), 0, 1));
+  BOOST_TEST(testSV(S("mprdjbeiak"), 0, 5));
+  BOOST_TEST(testSV(S("fhepcrntko"), 0, 9));
+  BOOST_TEST(testSV(S("eqmpaidtls"), 0, 10));
+  BOOST_TEST(testSV(S("joidhalcmq"), 1, 0));
+  BOOST_TEST(testSV(S("omigsphflj"), 1, 1));
+  BOOST_TEST(testSV(S("kocgbphfji"), 1, 4));
+  BOOST_TEST(testSV(S("onmjekafbi"), 1, 8));
+  BOOST_TEST(testSV(S("fbslrjiqkm"), 1, 9));
+  BOOST_TEST(testSV(S("oqmrjahnkg"), 5, 0));
+  BOOST_TEST(testSV(S("jeidpcmalh"), 5, 1));
+  BOOST_TEST(testSV(S("schfalibje"), 5, 2));
+  BOOST_TEST(testSV(S("crliponbqe"), 5, 4));
+  BOOST_TEST(testSV(S("igdscopqtm"), 5, 5));
+  BOOST_TEST(testSV(S("qngpdkimlc"), 9, 0));
+  BOOST_TEST(testSV(S("thdjgafrlb"), 9, 1));
+  BOOST_TEST(testSV(S("hcjitbfapl"), 10, 0));
+  BOOST_TEST(testSV(S("mgojkldsqh"), 11, 0));
+  BOOST_TEST(testSV(S("gfshlcmdjreqipbontak"), 0, 0));
+  BOOST_TEST(testSV(S("nadkhpfemgclosibtjrq"), 0, 1));
+  BOOST_TEST(testSV(S("nkodajteqplrbifhmcgs"), 0, 10));
+  BOOST_TEST(testSV(S("ofdrqmkeblthacpgijsn"), 0, 19));
+  BOOST_TEST(testSV(S("gbmetiprqdoasckjfhln"), 0, 20));
+  BOOST_TEST(testSV(S("bdfjqgatlksriohemnpc"), 1, 0));
+  BOOST_TEST(testSV(S("crnklpmegdqfiashtojb"), 1, 1));
+  BOOST_TEST(testSV(S("ejqcnahdrkfsmptilgbo"), 1, 9));
+  BOOST_TEST(testSV(S("jsbtafedocnirgpmkhql"), 1, 18));
+  BOOST_TEST(testSV(S("prqgnlbaejsmkhdctoif"), 1, 19));
+  BOOST_TEST(testSV(S("qnmodrtkebhpasifgcjl"), 10, 0));
+  BOOST_TEST(testSV(S("pejafmnokrqhtisbcdgl"), 10, 1));
+  BOOST_TEST(testSV(S("cpebqsfmnjdolhkratgi"), 10, 5));
+  BOOST_TEST(testSV(S("odnqkgijrhabfmcestlp"), 10, 9));
+  BOOST_TEST(testSV(S("lmofqdhpkibagnrcjste"), 10, 10));
+  BOOST_TEST(testSV(S("lgjqketopbfahrmnsicd"), 19, 0));
+  BOOST_TEST(testSV(S("ktsrmnqagdecfhijpobl"), 19, 1));
+  BOOST_TEST(testSV(S("lsaijeqhtrbgcdmpfkno"), 20, 0));
+  BOOST_TEST(testSV(S("dplqartnfgejichmoskb"), 21, 0));
+  BOOST_TEST(testSV(S(""), 0, 0));
+  BOOST_TEST(testSV(S(""), 1, 0));
+  BOOST_TEST(testSV(S("pniot"), 0, 0));
+  BOOST_TEST(testSV(S("htaob"), 0, 1));
+  BOOST_TEST(testSV(S("fodgq"), 0, 2));
+  BOOST_TEST(testSV(S("hpqia"), 0, 4));
+  BOOST_TEST(testSV(S("qanej"), 0, 5));
+  BOOST_TEST(testSV(S("dfkap"), 1, 0));
+  BOOST_TEST(testSV(S("clbao"), 1, 1));
+  BOOST_TEST(testSV(S("ihqrf"), 1, 2));
+  BOOST_TEST(testSV(S("mekdn"), 1, 3));
+  BOOST_TEST(testSV(S("ngtjf"), 1, 4));
+  BOOST_TEST(testSV(S("srdfq"), 2, 0));
+  BOOST_TEST(testSV(S("qkdrs"), 2, 1));
+  BOOST_TEST(testSV(S("ikcrq"), 2, 2));
+  BOOST_TEST(testSV(S("cdaih"), 2, 3));
+  BOOST_TEST(testSV(S("dmajb"), 4, 0));
+  BOOST_TEST(testSV(S("karth"), 4, 1));
+  BOOST_TEST(testSV(S("lhcdo"), 5, 0));
+  BOOST_TEST(testSV(S("acbsj"), 6, 0));
+  BOOST_TEST(testSV(S("pbsjikaole"), 0, 0));
+  BOOST_TEST(testSV(S("pcbahntsje"), 0, 1));
+  BOOST_TEST(testSV(S("mprdjbeiak"), 0, 5));
+  BOOST_TEST(testSV(S("fhepcrntko"), 0, 9));
+  BOOST_TEST(testSV(S("eqmpaidtls"), 0, 10));
+  BOOST_TEST(testSV(S("joidhalcmq"), 1, 0));
+  BOOST_TEST(testSV(S("omigsphflj"), 1, 1));
+  BOOST_TEST(testSV(S("kocgbphfji"), 1, 4));
+  BOOST_TEST(testSV(S("onmjekafbi"), 1, 8));
+  BOOST_TEST(testSV(S("fbslrjiqkm"), 1, 9));
+  BOOST_TEST(testSV(S("oqmrjahnkg"), 5, 0));
+  BOOST_TEST(testSV(S("jeidpcmalh"), 5, 1));
+  BOOST_TEST(testSV(S("schfalibje"), 5, 2));
+  BOOST_TEST(testSV(S("crliponbqe"), 5, 4));
+  BOOST_TEST(testSV(S("igdscopqtm"), 5, 5));
+  BOOST_TEST(testSV(S("qngpdkimlc"), 9, 0));
+  BOOST_TEST(testSV(S("thdjgafrlb"), 9, 1));
+  BOOST_TEST(testSV(S("hcjitbfapl"), 10, 0));
+  BOOST_TEST(testSV(S("mgojkldsqh"), 11, 0));
+  BOOST_TEST(testSV(S("gfshlcmdjreqipbontak"), 0, 0));
+  BOOST_TEST(testSV(S("nadkhpfemgclosibtjrq"), 0, 1));
+  BOOST_TEST(testSV(S("nkodajteqplrbifhmcgs"), 0, 10));
+  BOOST_TEST(testSV(S("ofdrqmkeblthacpgijsn"), 0, 19));
+  BOOST_TEST(testSV(S("gbmetiprqdoasckjfhln"), 0, 20));
+  BOOST_TEST(testSV(S("bdfjqgatlksriohemnpc"), 1, 0));
+  BOOST_TEST(testSV(S("crnklpmegdqfiashtojb"), 1, 1));
+  BOOST_TEST(testSV(S("ejqcnahdrkfsmptilgbo"), 1, 9));
+  BOOST_TEST(testSV(S("jsbtafedocnirgpmkhql"), 1, 18));
+  BOOST_TEST(testSV(S("prqgnlbaejsmkhdctoif"), 1, 19));
+  BOOST_TEST(testSV(S("qnmodrtkebhpasifgcjl"), 10, 0));
+  BOOST_TEST(testSV(S("pejafmnokrqhtisbcdgl"), 10, 1));
+  BOOST_TEST(testSV(S("cpebqsfmnjdolhkratgi"), 10, 5));
+  BOOST_TEST(testSV(S("odnqkgijrhabfmcestlp"), 10, 9));
+  BOOST_TEST(testSV(S("lmofqdhpkibagnrcjste"), 10, 10));
+  BOOST_TEST(testSV(S("lgjqketopbfahrmnsicd"), 19, 0));
+  BOOST_TEST(testSV(S("ktsrmnqagdecfhijpobl"), 19, 1));
+  BOOST_TEST(testSV(S("lsaijeqhtrbgcdmpfkno"), 20, 0));
+  BOOST_TEST(testSV(S("dplqartnfgejichmoskb"), 21, 0));
 }
 
 // done

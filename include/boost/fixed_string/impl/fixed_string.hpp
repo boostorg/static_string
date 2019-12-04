@@ -179,7 +179,7 @@ assign(
     size_type count) ->
     fixed_string&
 {
-    auto const ss = s.substr(pos, count);
+    auto const ss = s.subview(pos, count);
     return assign(ss.data(), ss.size());
 }
 
@@ -509,10 +509,22 @@ substr(size_type pos, size_type count) const ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 fixed_string<N, CharT, Traits>::
+subview(size_type pos, size_type count) const ->
+    string_view_type
+{
+  if (pos > size())
+    BOOST_FIXED_STRING_THROW(std::out_of_range{
+        "pos > size()"});
+  return {&data()[pos], (std::min)(count, size() - pos)};
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+fixed_string<N, CharT, Traits>::
 copy(CharT* dest, size_type count, size_type pos) const noexcept ->
     size_type
 {
-    auto const s = substr(pos, count);
+    auto const s = subview(pos, count);
     Traits::copy(dest, s.data(), s.size());
     return s.size();
 }
