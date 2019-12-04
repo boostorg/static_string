@@ -34,9 +34,10 @@ template<std::size_t N>
 using smallest_width_t =
     typename std::conditional<N <= (std::numeric_limits<unsigned char>::max)(), unsigned char,
     typename std::conditional<N <= (std::numeric_limits<unsigned short>::max)(), unsigned short,
+    typename std::conditional<N <= (std::numeric_limits<unsigned int>::max)(), unsigned int,
     typename std::conditional<N <= (std::numeric_limits<unsigned long>::max)(), unsigned long,
     typename std::conditional<N <= (std::numeric_limits<unsigned long long>::max)(), unsigned long long,
-    void>::type>::type>::type>::type;
+    void>::type>::type>::type>::type>::type;
 
 template<std::size_t N, typename CharT, typename Traits>
 class fixed_string_base
