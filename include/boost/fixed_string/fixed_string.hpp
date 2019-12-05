@@ -37,19 +37,22 @@ template<
     std::size_t N,
     typename CharT = char,
     typename Traits = std::char_traits<CharT>>
-class fixed_string
+class fixed_string 
+#ifndef GENERATING_DOCUMENTATION
+  : detail::optimization_base<N, CharT, Traits>
+#endif
 {
     template<std::size_t, class, class>
     friend class fixed_string;
 
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
-    term()
+    term() noexcept
     {
-        Traits::assign(s_[n_], 0);
+        this->term_impl();
     }
 
-    std::size_t n_;
-    CharT s_[N + 1];
+    using base = detail::optimization_base<N, CharT, Traits>;
 
 public:
     //--------------------------------------------------------------------------
@@ -86,7 +89,7 @@ public:
     //--------------------------------------------------------------------------
 
     /// Maximum size of the string excluding any null terminator
-    static std::size_t constexpr static_capacity = N;
+    static constexpr size_type static_capacity = N;
 
     /// A special index
     static constexpr size_type npos = size_type(-1);
@@ -101,7 +104,8 @@ public:
 
         Construct an empty string
     */
-    fixed_string();
+    BOOST_FIXED_STRING_CPP14_CXPER
+    fixed_string() noexcept;
 
     /** Construct a `fixed_string`.
     
@@ -109,6 +113,7 @@ public:
     
         The behavior is undefined if `count >= npos`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         size_type count,
         CharT ch);
@@ -118,6 +123,7 @@ public:
         Construct with a substring (pos, other.size()) of `other`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         fixed_string<M, CharT, Traits> const& other,
         size_type pos);
@@ -127,6 +133,7 @@ public:
         Construct with a substring (pos, count) of `other`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         fixed_string<M, CharT, Traits> const& other,
         size_type pos,
@@ -136,6 +143,7 @@ public:
         
         Construct with the first `count` characters of `s`, including nulls.
      */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         CharT const* s,
         size_type count);
@@ -144,6 +152,7 @@ public:
         
         Construct from a null terminated string.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         CharT const* s);
 
@@ -152,6 +161,7 @@ public:
         Construct from a range of characters
     */
     template<class InputIterator>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         InputIterator first,
         InputIterator last
@@ -166,14 +176,16 @@ public:
         
         Copy constructor.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
-        fixed_string const& other);
+        fixed_string const& other) noexcept;
 
     /** Construct a `fixed_string`.
         
         Copy constructor.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         fixed_string<M, CharT, Traits> const& other);
 
@@ -181,6 +193,7 @@ public:
         
         Construct from an initializer list
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         std::initializer_list<CharT> init);
 
@@ -189,6 +202,7 @@ public:
         Construct from a `string_view`
     */
     explicit
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         string_view_type sv);
 
@@ -206,6 +220,7 @@ public:
         std::is_convertible<T, string_view_type>::value>::type
 #endif
     >
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string(
         T const& t,
         size_type pos,
@@ -222,6 +237,7 @@ public:
         If `*this` and `s` are the same object,
         this function has no effect.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator=(
         fixed_string const& s) noexcept
@@ -236,6 +252,7 @@ public:
         @throw std::length_error if `s.size() > max_size()`
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator=(
         fixed_string<M, CharT, Traits> const& s)
@@ -249,6 +266,7 @@ public:
 
         @throw std::length_error if `Traits::length(s) > max_size()`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator=(
         CharT const* s)
@@ -260,6 +278,7 @@ public:
     
         Assign from single character.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator=(
         CharT ch)
@@ -272,6 +291,7 @@ public:
 
         Assign from initializer list.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator=(
         std::initializer_list<CharT> ilist)
@@ -283,6 +303,7 @@ public:
     
         Assign from `string_view_type`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator=(
         string_view_type sv)
@@ -297,6 +318,7 @@ public:
         @throw std::length_error if `count > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     assign(
         size_type count,
@@ -308,6 +330,7 @@ public:
 
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     assign(
         fixed_string const& s) noexcept;
@@ -320,6 +343,7 @@ public:
         @return `*this`
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     assign(
         fixed_string<M, CharT, Traits> const& s)
@@ -338,6 +362,7 @@ public:
         @return `*this`
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     assign(
         fixed_string<M, CharT, Traits> const& s,
@@ -351,6 +376,7 @@ public:
         @throw std::length_error if `count > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     assign(
         CharT const* s,
@@ -363,6 +389,7 @@ public:
         @throw std::length_error if `Traits::length(s) > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     assign(
         CharT const* s)
@@ -378,6 +405,7 @@ public:
         @return `*this`
     */
     template<typename InputIterator>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #ifdef GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -410,6 +438,7 @@ public:
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -437,6 +466,7 @@ public:
     */
 
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -463,6 +493,7 @@ public:
 
         @throw std::out_of_range if `pos >= size()`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     reference
     at(size_type pos);
 
@@ -470,6 +501,7 @@ public:
 
         @throw std::out_of_range if `pos >= size()`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     const_reference
     at(size_type pos) const;
 
@@ -477,77 +509,86 @@ public:
 
         Undefined behavior if `pos > size()`
     */
+    BOOST_FIXED_STRING_CPP11_CXPER
     reference
-    operator[](size_type pos)
+    operator[](size_type pos) noexcept
     {
-        return s_[pos];
+        return data()[pos];
     }
 
     /** Access specified character.
 
         Undefined behavior if `pos > size()`
     */
+    BOOST_FIXED_STRING_CPP11_CXPER
     const_reference
-    operator[](size_type pos) const
+    operator[](size_type pos) const noexcept
     {
-        return s_[pos];
+        return data()[pos];
     }
 
     /** Accesses the first character.
 
         Undefined behavior if `empty() == true`
     */
+    BOOST_FIXED_STRING_CPP11_CXPER
     CharT&
-    front()
+    front() noexcept
     {
-        return s_[0];
+        return data()[0];
     }
 
     /** Accesses the first character.
 
         Undefined behavior if `empty() == true`
     */
+    BOOST_FIXED_STRING_CPP11_CXPER
     CharT const&
-    front() const
+    front() const noexcept
     {
-        return s_[0];
+        return data()[0];
     }
 
     /** Accesses the last character.
 
         Undefined behavior if `empty() == true`
     */
+    BOOST_FIXED_STRING_CPP11_CXPER
     CharT&
-    back()
+    back() noexcept
     {
-        return s_[n_-1];
+        return data()[size()-1];
     }
 
     /** Accesses the last character.
 
         Undefined behavior if `empty() == true`
     */
+    BOOST_FIXED_STRING_CPP11_CXPER
     CharT const&
-    back() const 
+    back() const noexcept
     {
-        return s_[n_-1];
+        return data()[size()-1];
     }
 
     /// Returns a pointer to the first character of the string.
+    BOOST_FIXED_STRING_CPP11_CXPER
     CharT*
     data() noexcept
     {
-        return s_;
+        return this->data_impl();
     }
 
     /// Returns a pointer to the first character of a string.
+    BOOST_FIXED_STRING_CPP11_CXPER
     CharT const*
     data() const noexcept
     {
-        return s_;
+        return this->data_impl();
     }
 
     /// Returns a non-modifiable standard C character array version of the string.
+    BOOST_FIXED_STRING_CPP11_CXPER
     CharT const*
     c_str() const noexcept
     {
@@ -555,10 +596,10 @@ public:
     }
 
     /// Convert a static string to a `string_view_type`
+    BOOST_FIXED_STRING_CPP11_CXPER
     operator string_view_type() const noexcept
     {
-        return basic_string_view<
-            CharT, Traits>{data(), size()};
+        return string_view_type{data(), size()};
     }
 
     //--------------------------------------------------------------------------
@@ -568,45 +609,51 @@ public:
     //--------------------------------------------------------------------------
 
     /// Returns an iterator to the beginning.
+    BOOST_FIXED_STRING_CPP11_CXPER
     iterator
     begin() noexcept
     {
-        return s_;
+        return data();
     }
 
     /// Returns an iterator to the beginning.
+    BOOST_FIXED_STRING_CPP11_CXPER
     const_iterator
     begin() const noexcept
     {
-        return s_;
+        return data();
     }
 
     /// Returns an iterator to the beginning.
+    BOOST_FIXED_STRING_CPP11_CXPER
     const_iterator
     cbegin() const noexcept
     {
-        return s_;
+        return data();
     }
 
     /// Returns an iterator to the end.
+    BOOST_FIXED_STRING_CPP11_CXPER
     iterator
     end() noexcept
     {
-        return &s_[n_];
+        return &data()[size()];
     }
 
     /// Returns an iterator to the end.
+    BOOST_FIXED_STRING_CPP11_CXPER
     const_iterator
     end() const noexcept
     {
-        return &s_[n_];
+        return &data()[size()];
     }
 
     /// Returns an iterator to the end.
+    BOOST_FIXED_STRING_CPP11_CXPER
     const_iterator
     cend() const noexcept
     {
-        return &s_[n_];
+        return &data()[size()];
     }
 
     /// Returns a reverse iterator to the beginning.
@@ -659,32 +706,36 @@ public:
 
     /// Returns `true` if the string is empty.
     BOOST_FIXED_STRING_NODISCARD
+    BOOST_FIXED_STRING_CPP11_CXPER
     bool
-    empty() const
+    empty() const noexcept
     {
-        return n_ == 0;
+        return size() == 0;
     }
 
     /// Returns the number of characters, excluding the null terminator.
+    BOOST_FIXED_STRING_CPP11_CXPER
     size_type
-    size() const
+    size() const noexcept
     {
-        return n_;
+        return this->size_impl();
     }
 
     /** Returns the number of characters, excluding the null terminator
 
         Equivalent to calling `size()`.
     */
+    BOOST_FIXED_STRING_CPP11_CXPER
     size_type
-    length() const
+    length() const noexcept
     {
         return size();
     }
 
     /// Returns the maximum number of characters that can be stored, excluding the null terminator.
-    size_type constexpr
-    max_size() const
+    BOOST_FIXED_STRING_CPP11_CXPER
+    size_type
+    max_size() const noexcept
     {
         return N;
     }
@@ -695,6 +746,7 @@ public:
 
         @throw std::length_error if `n > max_size()`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
     reserve(std::size_t n);
 
@@ -702,8 +754,9 @@ public:
 
         This function always returns `max_size()`.
     */
-    size_type constexpr
-    capacity() const
+    BOOST_FIXED_STRING_CPP11_CXPER
+    size_type
+    capacity() const noexcept
     {
         return max_size();
     }
@@ -712,6 +765,7 @@ public:
 
         This function call has no effect.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
     shrink_to_fit() noexcept
     {
@@ -724,8 +778,9 @@ public:
     //--------------------------------------------------------------------------
 
     /// Clears the contents
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
-    clear();
+    clear() noexcept;
 
     /** Insert into the string.
     
@@ -735,6 +790,7 @@ public:
         @throw std::length_error if `size() + count > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     insert(
         size_type index,
@@ -749,6 +805,7 @@ public:
         @throw std::length_error if `size() + count > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     insert(
         size_type index,
@@ -767,6 +824,7 @@ public:
         @throw std::length_error if ` size() + count> max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     insert(
         size_type index,
@@ -783,6 +841,7 @@ public:
         @throw std::length_error if `size() + sv.size() > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     insert(
         size_type index,
@@ -801,6 +860,7 @@ public:
         @throw std::length_error if `size() + sv.substr(index_str, count).size() > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     insert(
         size_type index,
@@ -820,6 +880,7 @@ public:
         @throw std::length_error if `size() + 1> max_size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     iterator
     insert(
         const_iterator pos,
@@ -837,6 +898,7 @@ public:
         @throw std::length_error if `size() + count > max_size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     iterator
     insert(
         const_iterator pos,
@@ -855,6 +917,7 @@ public:
         @return An iterator to the first inserted character or pos if no insertion took place
     */
     template<typename InputIterator>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     iterator
 #else
@@ -876,6 +939,7 @@ public:
         @throw std::length_error if `size() + ilist.size() > max_size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     iterator
     insert(
         const_iterator pos,
@@ -897,6 +961,7 @@ public:
         @return `*this`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -925,6 +990,7 @@ public:
         @return `*this`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -944,6 +1010,7 @@ public:
         @throw std::out_of_range if `index > size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     erase(
         size_type index = 0,
@@ -953,6 +1020,7 @@ public:
 
         @return iterator pointing to the character immediately following the character erased, or `end()` if no such character exists
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     iterator
     erase(
         const_iterator pos);
@@ -961,6 +1029,7 @@ public:
 
         @return iterator pointing to the character last pointed to before the erase, or `end()` if no such character exists
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     iterator
     erase(
         const_iterator first,
@@ -970,6 +1039,7 @@ public:
 
         @throw std::length_error if `size() + 1 > max_size()`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
     push_back(
         CharT ch);
@@ -978,11 +1048,13 @@ public:
 
         The behavior is undefined if the string is empty.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
-    pop_back()
+    pop_back() noexcept
     {
-      BOOST_FIXED_STRING_ASSERT(n_ > 0);
-      Traits::assign(s_[--n_], 0);
+      BOOST_FIXED_STRING_ASSERT(size() > 0);
+      this->set_size(size() - 1);
+      term();
     }
 
     /** Appends `count` copies of character `ch`
@@ -992,12 +1064,13 @@ public:
         @throw std::length_error if `size() + count > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     append(
         size_type count,
         CharT ch)
     {
-        return insert(n_, count, ch);
+        return insert(size(), count, ch);
     }
 
     /** Append to the string.
@@ -1009,6 +1082,7 @@ public:
         @throw std::length_error if `size() + sv.size() > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     append(
         string_view_type sv)
@@ -1026,6 +1100,7 @@ public:
         @throw std::length_error if `size() + sv.substr(pos, count).size() > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     append(
         string_view_type sv,
@@ -1044,6 +1119,7 @@ public:
         @throw std::length_error if `size() + count > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     append(
         CharT const* s,
@@ -1059,6 +1135,7 @@ public:
         @throw std::length_error if `size() + Traits::length(s) > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     append(
         CharT const* s)
@@ -1078,6 +1155,7 @@ public:
         @return `*this`
     */
     template<typename InputIterator>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1102,6 +1180,7 @@ public:
         @throw std::length_error if `size() + ilist.size() > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     append(
         std::initializer_list<CharT> ilist)
@@ -1123,6 +1202,7 @@ public:
         @return `*this`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1153,6 +1233,7 @@ public:
         @return `*this`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1176,6 +1257,7 @@ public:
         @throw std::length_error if `size() + s.size() > max_size()`
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator+=(
         fixed_string<M, CharT, Traits> const& s)
@@ -1189,6 +1271,7 @@ public:
 
         @throw std::length_error if `size() + 1 > max_size()`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator+=(
         CharT ch)
@@ -1207,6 +1290,7 @@ public:
         @throw std::length_error if `size() + Traits::length(s) > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator+=(
         CharT const* s)
@@ -1223,6 +1307,7 @@ public:
         @throw std::length_error if `size() + ilist.size() > max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     operator+=(
         std::initializer_list<CharT> ilist)
@@ -1242,6 +1327,7 @@ public:
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1261,12 +1347,13 @@ public:
         Compares this string to `s`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
-        fixed_string<M, CharT, Traits> const& s) const
+        fixed_string<M, CharT, Traits> const& s) const noexcept
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            s_, n_, &s.s_[0], s.n_);
+            data(), size(), s.data(), s.size());
     }
 
     /** Compare the string with another.
@@ -1274,6 +1361,7 @@ public:
         Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
         size_type pos1,
@@ -1281,7 +1369,7 @@ public:
         fixed_string<M, CharT, Traits> const& s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s.data(), s.size());
+            subview(pos1, count1), s.data(), s.size());
     }
 
     /** Compare the string with another.
@@ -1291,6 +1379,7 @@ public:
         second substring is `[pos2, s.size())`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
         size_type pos1,
@@ -1300,19 +1389,20 @@ public:
         size_type count2 = npos) const
     {
         return detail::lexicographical_compare(
-            substr(pos1, count1), s.substr(pos2, count2));
+            subview(pos1, count1), s.subview(pos2, count2));
     }
 
     /** Compare the string with another.
         
         Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `Traits::length(s)`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
-        CharT const* s) const
+        CharT const* s) const noexcept
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            s_, n_, s, Traits::length(s));
+            data(), size(), s, Traits::length(s));
     }
 
     /** Compare the string with another.
@@ -1320,6 +1410,7 @@ public:
         Compares a `[pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
         length `Traits::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
         size_type pos1,
@@ -1327,13 +1418,14 @@ public:
         CharT const* s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s, Traits::length(s));
+            subview(pos1, count1), s, Traits::length(s));
     }
 
     /** Compare the string with another.
         
         Compares a `[pos1, pos1+count1)` substring of this string to the characters in the range `[s, s + count2)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
         size_type pos1,
@@ -1342,25 +1434,27 @@ public:
         size_type count2) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s, count2);
+            subview(pos1, count1), s, count2);
     }
 
     /** Compare the string with another.
       
         Compares this string to `s`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
-        string_view_type s) const
+        string_view_type s) const noexcept
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            s_, n_, s.data(), s.size());
+            data(), size(), s.data(), s.size());
     }
 
     /** Compare the string with another.
 
         Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     int
     compare(
         size_type pos1,
@@ -1368,7 +1462,7 @@ public:
         string_view_type s) const
     {
         return detail::lexicographical_compare<CharT, Traits>(
-            substr(pos1, count1), s);
+            subview(pos1, count1), s);
     }
 
     /** Compare the string with another.
@@ -1380,6 +1474,7 @@ public:
         convertible to `CharT const*`.
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     int
 #else
@@ -1405,8 +1500,21 @@ public:
 
         @throw std::out_of_range if `pos > size()`
     */
-    string_view_type
+    BOOST_FIXED_STRING_CPP14_CXPER
+    fixed_string
     substr(
+        size_type pos = 0,
+        size_type count = npos) const;
+
+    /** Returns a view of a substring.
+
+        Returns a view of a substring `(pos, pos + count)`. If the requested view is greater than the size of the string, the returned view is `[pos, size())`.
+
+        @throw std::out_of_range if `pos > size()`
+    */
+    BOOST_FIXED_STRING_CPP14_CXPER
+    string_view_type
+    subview(
         size_type pos = 0,
         size_type count = npos) const;
 
@@ -1414,17 +1522,19 @@ public:
 
         Copy a substring `(pos, pos+count)` to character string pointed to by `dest`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     copy(
         CharT* dest,
         size_type count,
-        size_type pos = 0) const;
+        size_type pos = 0) const noexcept;
 
     /** Changes the number of characters stored.
 
         If the resulting string is larger, the new
         characters are uninitialized.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
     resize(
         std::size_t n);
@@ -1434,18 +1544,21 @@ public:
         If the resulting string is larger, the new
         characters are initialized to the value of `c`.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
     resize(
         std::size_t n,
         CharT c);
 
     /// Exchange the contents of this string with another.
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
     swap(
-        fixed_string& s);
+        fixed_string& s) noexcept;
 
     /// Exchange the contents of this string with another.
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     void
     swap(
         fixed_string<M, CharT, Traits>& s);
@@ -1459,6 +1572,7 @@ public:
         @return `*this`
     */
     template<size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         size_type pos1,
@@ -1477,6 +1591,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         size_type pos1,
@@ -1485,7 +1600,7 @@ public:
         size_type pos2,
         size_type n2 = npos)
     {
-      return replace(pos1, n1, str.substr(pos2, n2));
+      return replace(pos1, n1, str.subview(pos2, n2));
     }
 
     /** Replace a subset of the string.
@@ -1501,6 +1616,7 @@ public:
         @return `*this`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1532,6 +1648,7 @@ public:
         @return `*this`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1559,6 +1676,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         size_type pos,
@@ -1575,6 +1693,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         size_type pos,
@@ -1592,6 +1711,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         size_type pos,
@@ -1607,6 +1727,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         const_iterator i1,
@@ -1629,6 +1750,7 @@ public:
         @return `*this`
     */
     template<typename T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1654,6 +1776,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         const_iterator i1,
@@ -1672,6 +1795,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         const_iterator i1,
@@ -1689,6 +1813,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         const_iterator i1,
@@ -1708,6 +1833,7 @@ public:
         @return `*this`
     */
     template<typename InputIterator>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     fixed_string&
 #else
@@ -1732,6 +1858,7 @@ public:
         @throw std::length_error if the resulting string exceeds `max_size()`
         @return `*this`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
     replace(
         const_iterator i1,
@@ -1756,6 +1883,7 @@ public:
         convertible to `CharT const*`.
     */
     template<class T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     size_type
 #else
@@ -1766,7 +1894,7 @@ public:
 #endif
     find(
         const T& t,
-        size_type pos = 0) const 
+        size_type pos = 0) const
     {
       string_view_type sv = t;
       return find(sv.data(), pos, sv.size());
@@ -1777,6 +1905,7 @@ public:
         Finds the first substring equal to `str`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
       find(
         const fixed_string<M, CharT, Traits>& str,
@@ -1789,11 +1918,12 @@ public:
     
         Finds the first substring equal to the range `(s, s + count)`. This range may contain null characters.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find(
         const CharT* s, 
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the first substring.
     
@@ -1803,15 +1933,17 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find(
         const CharT* s,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept
     {
       return find(s, pos, Traits::length(s));
     }
 
     /// Finds the first character `c`.
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find(
         CharT c,
@@ -1830,6 +1962,7 @@ public:
         convertible to `CharT const*`.
     */
     template<class T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     size_type
 #else
@@ -1851,6 +1984,7 @@ public:
         Finds the last substring equal to `str`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
       rfind(
         const fixed_string<M, CharT, Traits>& str,
@@ -1863,11 +1997,12 @@ public:
     
         Finds the last substring equal to the range `(s, s + count)`. This range may contain null characters.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     rfind(
         const CharT* s, 
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the last substring.
     
@@ -1877,15 +2012,17 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     rfind(
         const CharT* s,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept
     {
       return rfind(s, pos, Traits::length(s));
     }
 
     /// Finds the last character `c`.
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     rfind(
         CharT c,
@@ -1903,6 +2040,7 @@ public:
         convertible to `CharT const*`.
     */
     template<class T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     size_type
 #else
@@ -1924,6 +2062,7 @@ public:
         Finds the first character equal to one of the characters in `str`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
       find_first_of(
         const fixed_string<M, CharT, Traits>& str,
@@ -1936,11 +2075,12 @@ public:
 
         Finds the first character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_first_of(
         const CharT* s,
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the first character equal to any character in the string.
     
@@ -1950,15 +2090,17 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_first_of(
         const CharT* s,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept
     {
       return find_first_of(s, pos, Traits::length(s));
     }
 
     /// Finds the first character equal to `c`.
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_first_of(
         CharT c,
@@ -1976,6 +2118,7 @@ public:
         convertible to `CharT const*`.
     */
     template<class T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     size_type
 #else
@@ -1997,6 +2140,7 @@ public:
         Finds the last character equal to one of the characters in `str`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
       find_last_of(
         const fixed_string<M, CharT, Traits>& str,
@@ -2009,11 +2153,12 @@ public:
     
         Finds the last character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_last_of(
         const CharT* s,
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the last character equal to any character in the string.
     
@@ -2023,15 +2168,17 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_last_of(
         const CharT* s,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept
     {
       return find_last_of(s, pos, Traits::length(s));
     }
 
     /// Finds the last character equal to `c`.
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_last_of(
         CharT c,
@@ -2049,6 +2196,7 @@ public:
         convertible to `CharT const*`.
     */
     template<class T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     size_type
 #else
@@ -2070,6 +2218,7 @@ public:
         Finds the first character equal to none of the characters in `str`.
     */
     template<std::size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
       find_first_not_of(
         const fixed_string<M, CharT, Traits>& str,
@@ -2082,11 +2231,12 @@ public:
         
         Finds the first character equal to none of characters in range `(s, s + count)`. This range can include null characters.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_first_not_of(
         const CharT* s,
         size_type pos, 
-        size_type n) const;
+        size_type n) const noexcept;
 
     /** Finds the first character equal to none the characters in the string.
     
@@ -2096,15 +2246,17 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_first_not_of(
         const CharT* s,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept
     {
       return find_first_not_of(s, pos, Traits::length(s));
     }
 
     /// Finds the first character not equal to `c`.
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_first_not_of(
         CharT c,
@@ -2122,6 +2274,7 @@ public:
         convertible to `CharT const*`.
     */
     template<class T>
+    BOOST_FIXED_STRING_CPP14_CXPER
 #if GENERATING_DOCUMENTATION
     size_type
 #else
@@ -2143,6 +2296,7 @@ public:
         Finds the last character equal to none of the characters in `str`.
     */
     template<size_t M>
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
       find_last_not_of(
         const fixed_string<M, CharT, Traits>& str,
@@ -2155,11 +2309,12 @@ public:
         
         Finds the last character equal to none of the characters in range `(s, s + count)`. This range can include null characters.
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_last_not_of(
         const CharT* s,
         size_type pos,
-        size_type n) const;
+        size_type n) const noexcept;
 
 
     /** Finds the last character equal to none the characters in the string.
@@ -2170,15 +2325,17 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`
     */
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_last_not_of(
         const CharT* s,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept
     {
       return find_last_not_of(s, pos, Traits::length(s));
     }
 
     /// Finds the last character not equal to `c`.
+    BOOST_FIXED_STRING_CPP14_CXPER
     size_type
     find_last_not_of(
         CharT c,
@@ -2188,15 +2345,17 @@ public:
     }
 
     /// Returns whether the string begins with `s` 
+    BOOST_FIXED_STRING_CPP14_CXPER
     bool 
     starts_with(
         string_view_type s) const noexcept
     {
       const size_type len = s.size();
-      return n_ >= len && !Traits::compare(s_, s.data(), len);
+      return size() >= len && !Traits::compare(data(), s.data(), len);
     }
     
     /// Returns whether the string begins with `c`
+    BOOST_FIXED_STRING_CPP14_CXPER
     bool 
     starts_with(
         CharT c) const noexcept
@@ -2205,24 +2364,27 @@ public:
     }
     
     /// Returns whether the string begins with `s`
+    BOOST_FIXED_STRING_CPP14_CXPER
     bool 
     starts_with(
         const CharT* s) const noexcept
     {
       const size_type len = Traits::length(s);
-      return n_ >= len && !Traits::compare(s_, s, len);
+      return size() >= len && !Traits::compare(data(), s, len);
     }
     
     /// Returns whether the string ends with `s`
+    BOOST_FIXED_STRING_CPP14_CXPER
     bool 
     ends_with(
         string_view_type s) const noexcept
     {
       const size_type len = s.size();
-      return n_ >= len && !Traits::compare(s_ + (n_ - len), s.data(), len);
+      return size() >= len && !Traits::compare(data() + (size() - len), s.data(), len);
     }
     
     /// Returns whether the string ends with `c`
+    BOOST_FIXED_STRING_CPP14_CXPER
     bool
     ends_with(
         CharT c) const noexcept
@@ -2231,17 +2393,19 @@ public:
     }
     
     /// Returns whether the string begins with `s`
+    BOOST_FIXED_STRING_CPP14_CXPER
     bool 
     ends_with(
         const CharT* s) const noexcept
     {
       const size_type len = Traits::length(s);
-      return n_ >= len && !Traits::compare(s_ + (n_ - len), s, len);
+      return size() >= len && !Traits::compare(data() + (size() - len), s, len);
     }
 
 private:
+    BOOST_FIXED_STRING_CPP14_CXPER
     fixed_string&
-    assign_char(CharT ch, std::true_type);
+    assign_char(CharT ch, std::true_type) noexcept;
 
     fixed_string&
     assign_char(CharT ch, std::false_type);
@@ -2558,7 +2722,7 @@ std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, 
     fixed_string<N, CharT, Traits> const& s)
 {
-  return os << string_view(s.data(), s.size());
+    return os << string_view(s.data(), s.size());
 }
 
 //------------------------------------------------------------------------------
@@ -2599,9 +2763,47 @@ fixed_string(CharT(&)[N]) ->
     fixed_string<N, CharT, std::char_traits<CharT>>;
 #endif
 
+//------------------------------------------------------------------------------
+//
+// Hashing
+//
+//------------------------------------------------------------------------------
+
+#ifndef BOOST_FIXED_STRING_STANDALONE
+// hash_value overload for Boost.Container_Hash
+template <std::size_t N, 
+    typename CharT, 
+    typename Traits>
+std::size_t 
+hash_value(
+    const fixed_string<N, CharT, Traits>& str)
+{
+    return boost::hash_range(str.begin(), str.end());
+}
+#endif
+
 } // fixed_string
 } // boost
 
-#include <boost/fixed_string/impl/fixed_string.hpp>
+// std::hash partial specialization for fixed_string
+namespace std
+{
+  template <std::size_t N, typename CharT, typename Traits>
+  struct hash<boost::fixed_string::fixed_string<N, CharT, Traits>> 
+  {
+    std::size_t 
+    operator()(
+        const boost::fixed_string::fixed_string<N, CharT, Traits>& str) const
+    {
+#ifndef BOOST_FIXED_STRING_STANDALONE
+        return boost::hash_range(str.begin(), str.end());
+#else
+        using sv = boost::fixed_string::basic_string_view<CharT, Traits>;
+        return std::hash<sv>()(sv(str.data(), str.size()));
+#endif
+    }
+  };
+} // std
 
+#include <boost/fixed_string/impl/fixed_string.hpp>
 #endif
