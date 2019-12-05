@@ -50,14 +50,14 @@ public:
   BOOST_FIXED_STRING_CPP11_CXPER
   fixed_string_base_zero(std::size_t n) noexcept : size_(n) { }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_FIXED_STRING_CPP14_CXPER
   CharT*
   data_impl() noexcept
   {
     return data_;
   }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_FIXED_STRING_CPP14_CXPER
   CharT const*
   data_impl() const noexcept
   {
@@ -145,14 +145,14 @@ public:
   BOOST_FIXED_STRING_CPP14_CXPER
   fixed_string_base_null(std::size_t n) noexcept { set_size(n); }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_FIXED_STRING_CPP14_CXPER
   CharT*
   data_impl() noexcept
   {
     return data_;
   }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_FIXED_STRING_CPP14_CXPER
   CharT const*
   data_impl() const noexcept
   {

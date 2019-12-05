@@ -509,7 +509,7 @@ public:
 
         Undefined behavior if `pos > size()`
     */
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     reference
     operator[](size_type pos) noexcept
     {
@@ -520,7 +520,7 @@ public:
 
         Undefined behavior if `pos > size()`
     */
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     const_reference
     operator[](size_type pos) const noexcept
     {
@@ -531,7 +531,7 @@ public:
 
         Undefined behavior if `empty() == true`
     */
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     CharT&
     front() noexcept
     {
@@ -542,7 +542,7 @@ public:
 
         Undefined behavior if `empty() == true`
     */
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     CharT const&
     front() const noexcept
     {
@@ -553,7 +553,7 @@ public:
 
         Undefined behavior if `empty() == true`
     */
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     CharT&
     back() noexcept
     {
@@ -564,7 +564,7 @@ public:
 
         Undefined behavior if `empty() == true`
     */
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     CharT const&
     back() const noexcept
     {
@@ -572,7 +572,7 @@ public:
     }
 
     /// Returns a pointer to the first character of the string.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     CharT*
     data() noexcept
     {
@@ -580,7 +580,7 @@ public:
     }
 
     /// Returns a pointer to the first character of a string.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     CharT const*
     data() const noexcept
     {
@@ -609,7 +609,7 @@ public:
     //--------------------------------------------------------------------------
 
     /// Returns an iterator to the beginning.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     iterator
     begin() noexcept
     {
@@ -617,7 +617,7 @@ public:
     }
 
     /// Returns an iterator to the beginning.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     const_iterator
     begin() const noexcept
     {
@@ -625,7 +625,7 @@ public:
     }
 
     /// Returns an iterator to the beginning.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     const_iterator
     cbegin() const noexcept
     {
@@ -633,7 +633,7 @@ public:
     }
 
     /// Returns an iterator to the end.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     iterator
     end() noexcept
     {
