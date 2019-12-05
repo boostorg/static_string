@@ -24,11 +24,13 @@ namespace fixed_string {
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_FIXED_STRING_CPP11_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string() noexcept
 {
+#ifdef BOOST_FIXED_STRING_CPP20_CXPER_USED
     term();
+#endif
 }
 
 template<std::size_t N, typename CharT, typename Traits>

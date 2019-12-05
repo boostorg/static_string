@@ -104,7 +104,7 @@ public:
 
         Construct an empty string
     */
-    BOOST_FIXED_STRING_CPP14_CXPER
+    BOOST_FIXED_STRING_CPP11_CXPER
     fixed_string() noexcept;
 
     /** Construct a `fixed_string`.
@@ -588,7 +588,7 @@ public:
     }
 
     /// Returns a non-modifiable standard C character array version of the string.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     CharT const*
     c_str() const noexcept
     {
@@ -641,7 +641,7 @@ public:
     }
 
     /// Returns an iterator to the end.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     const_iterator
     end() const noexcept
     {
@@ -649,7 +649,7 @@ public:
     }
 
     /// Returns an iterator to the end.
-    BOOST_FIXED_STRING_CPP11_CXPER
+    BOOST_FIXED_STRING_CPP14_CXPER
     const_iterator
     cend() const noexcept
     {

@@ -139,8 +139,8 @@ template<std::size_t N, typename CharT, typename Traits>
 class fixed_string_base_null
 {
 public:
-  BOOST_FIXED_STRING_CPP11_CXPER
-  fixed_string_base_null() noexcept {  }
+  BOOST_FIXED_STRING_CPP14_CXPER
+  fixed_string_base_null() noexcept { set_size(0); }
 
   BOOST_FIXED_STRING_CPP14_CXPER
   fixed_string_base_null(std::size_t n) noexcept { set_size(n); }
