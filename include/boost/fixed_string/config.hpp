@@ -33,23 +33,23 @@
 //#undef _­_­cplusplus
 //#define _­_­cplusplus 201703L
 
-#if _­_­cplusplus > 201703L
+#if __cplusplus > 201703L
 #define BOOST_FIXED_STRING_CPP20_CXPER constexpr
 #define BOOST_FIXED_STRING_CPP17_CXPER constexpr
 #define BOOST_FIXED_STRING_CPP14_CXPER constexpr
 #define BOOST_FIXED_STRING_CPP11_CXPER constexpr
 #define BOOST_FIXED_STRING_ALLOW_UNINIT_MEM
-#elif _­_­cplusplus >= 201703L
+#elif __cplusplus >= 201703L
 #define BOOST_FIXED_STRING_CPP20_CXPER
 #define BOOST_FIXED_STRING_CPP17_CXPER constexpr
 #define BOOST_FIXED_STRING_CPP14_CXPER constexpr
 #define BOOST_FIXED_STRING_CPP11_CXPER constexpr
-#elif _­_­cplusplus >= 201402L
+#elif __cplusplus >= 201402L
 #define BOOST_FIXED_STRING_CPP20_CXPER
 #define BOOST_FIXED_STRING_CPP17_CXPER
 #define BOOST_FIXED_STRING_CPP14_CXPER constexpr
 #define BOOST_FIXED_STRING_CPP11_CXPER constexpr
-#elif _­_­cplusplus >= 201103L
+#elif __cplusplus >= 201103L
 #define BOOST_FIXED_STRING_CPP20_CXPER
 #define BOOST_FIXED_STRING_CPP17_CXPER
 #define BOOST_FIXED_STRING_CPP14_CXPER
