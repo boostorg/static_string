@@ -23,24 +23,25 @@ namespace detail {
 template<std::size_t, typename, typename>
 class fixed_string;
 
-// Because k-ballo said so
+// At minimum an integral type shall not qualify as an iterator (Agustin Berge)
 template<class T>
 using is_input_iterator =
     std::integral_constant<bool,
         ! std::is_integral<T>::value>;
 
-// glen put my impl to shame >:(
+// Find the smallest width integral type that can hold a value as large as N (Glen Fernandes)
 template<std::size_t N>
-using smallest_width_t =
-    typename std::conditional<N <= (std::numeric_limits<unsigned char>::max)(), unsigned char,
-    typename std::conditional<N <= (std::numeric_limits<unsigned short>::max)(), unsigned short,
-    typename std::conditional<N <= (std::numeric_limits<unsigned int>::max)(), unsigned int,
-    typename std::conditional<N <= (std::numeric_limits<unsigned long>::max)(), unsigned long,
-    typename std::conditional<N <= (std::numeric_limits<unsigned long long>::max)(), unsigned long long,
+using smallest_width =
+    typename std::conditional<(N <= (std::numeric_limits<unsigned char>::max)()), unsigned char,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned short>::max)()), unsigned short,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned int>::max)()), unsigned int,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned long>::max)()), unsigned long,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned long long>::max)()), unsigned long long,
     void>::type>::type>::type>::type>::type;
 
+// Optimization for using the smallest possible type
 template<std::size_t N, typename CharT, typename Traits>
-class fixed_string_base
+class fixed_string_base_zero
 {
 public:
   CharT*
@@ -73,12 +74,13 @@ public:
     Traits::assign(s_[n_], 0);
   }
 
-  smallest_width_t<N> n_;
+  smallest_width<N> n_;
   CharT s_[N + 1];
 };
 
+// Optimization for when the size is 0
 template<typename CharT, typename Traits>
-class fixed_string_base<0, CharT, Traits>
+class fixed_string_base_zero<0, CharT, Traits>
 {
 public:
   CharT*
@@ -106,6 +108,54 @@ public:
 
   }
 };
+
+// Optimization for storing the size in the last element
+template<std::size_t N, typename CharT, typename Traits>
+class fixed_string_base_null
+{
+public:
+  CharT*
+  data_impl() noexcept
+  {
+    return s_;
+  }
+
+  CharT const*
+  data_impl() const noexcept
+  {
+    return s_;
+  }
+
+  std::size_t
+  size_impl() const noexcept
+  {
+    return N - s_[N];
+  }
+
+  std::size_t
+  set_size(std::size_t n) noexcept
+  {
+    return s_[N] = (N - n);
+  }
+
+  void
+  term_impl() noexcept
+  {
+    Traits::assign(s_[size_impl()], 0);
+  }
+
+  CharT s_[N + 1];
+};
+
+// Decides which size optimization to use
+// If the size is zero, the object will have no members
+// Otherwise, if CharT can hold the max size of the string, store the size in the last char
+// Otherwise, store the size of the string using a member of the smallest type possible
+template<std::size_t N, typename CharT, typename Traits>
+using optimization_base = 
+    typename std::conditional<(N <= (std::numeric_limits<CharT>::max)()) && (N != 0), 
+        fixed_string_base_null<N, CharT, Traits>,
+        fixed_string_base_zero<N, CharT, Traits>>::type;
 
 template<typename CharT, typename Traits>
 inline

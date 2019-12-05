@@ -195,11 +195,7 @@ assign(
         BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
     this->set_size(count);
-    // check for overlap, then move if needed
-    if (s <= &data()[size()] && s >= data())
-      Traits::move(data(), s, size());
-    else
-      Traits::copy(data(), s, size());
+    Traits::move(data(), s, size());
     term();
     return *this;
 }
@@ -314,34 +310,36 @@ insert(
     size_type count) ->
         fixed_string&
 {
-    if(index > size())
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if(index > curr_size)
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
-    if(count > max_size() - size())
+    if(count > max_size() - curr_size)
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
-    const bool inside = s <= &data()[size()] && s >= data();
-    if (!inside || (inside && ((s - data()) + count <= index)))
+    const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+    if (!inside || (inside && ((s - curr_data) + count <= index)))
     {
-      Traits::move(&data()[index + count], &data()[index], size() - index + 1);
-      Traits::copy(&data()[index], s, count);
+      Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+      Traits::copy(&curr_data[index], s, count);
     }
     else
     {
-      const size_type offset = s - data();
-      Traits::move(&data()[index + count], &data()[index], size() - index + 1);
+      const size_type offset = s - curr_data;
+      Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
       if (offset < index)
       {
         const size_type diff = index - offset;
-        Traits::copy(&data()[index], &data()[offset], diff);
-        Traits::copy(&data()[index + diff], &data()[index + count], count - diff);
+        Traits::copy(&curr_data[index], &curr_data[offset], diff);
+        Traits::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
       }
       else
       {
-        Traits::copy(&data()[index], &data()[offset + count], count);
+        Traits::copy(&curr_data[index], &curr_data[offset + count], count);
       }
     }
-    this->set_size(size() + count);
+    this->set_size(curr_size + count);
     return *this;
 }
 
@@ -354,15 +352,17 @@ insert(
     CharT ch) ->
         iterator
 {
-    if(count > max_size() - size())
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if(count > max_size() - curr_size)
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count() > max_size()"});
-    auto const index = pos - data();
-    Traits::move(&data()[index + count], &data()[index], size() - index);
-    this->set_size(size() + count);
-    Traits::assign(&data()[index], count, ch);
+    auto const index = pos - curr_data;
+    Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
+    this->set_size(curr_size + count);
+    Traits::assign(&curr_data[index], count, ch);
     term();
-    return &data()[index];
+    return &curr_data[index];
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -429,12 +429,14 @@ erase(
     size_type count) ->
         fixed_string&
 {
-    if(index > size())
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if(index > curr_size)
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
-    auto const n = (std::min)(count, size() - index);
-    Traits::move(&data()[index], &data()[index + n], size() - (index + n) + 1);
-    this->set_size(size() - n);
+    auto const n = (std::min)(count, curr_size - index);
+    Traits::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
+    this->set_size(curr_size - n);
     return *this;
 }
 
@@ -468,11 +470,12 @@ fixed_string<N, CharT, Traits>::
 push_back(
     CharT ch)
 {
-    if(size() >= max_size())
+    const auto curr_size = size();
+    if(curr_size >= max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() >= max_size()"});
-    Traits::assign(data()[size()], ch);
-    this->set_size(size() + 1);
+    Traits::assign(data()[curr_size], ch);
+    this->set_size(curr_size + 1);
     term();
 }
 
@@ -484,12 +487,12 @@ append(
     size_type count) ->
         fixed_string&
 {
-    if(count > max_size() - size())
+    const auto curr_size = size();
+    if(count > max_size() - curr_size)
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
-    Traits::move(&data()[size() + count], &data()[size()], size() - size());
-    Traits::copy(&data()[size()], s, count);
-    this->set_size(size() + count);
+    Traits::copy(&data()[curr_size], s, count);
+    this->set_size(curr_size + count);
     term();
     return *this;
 }
@@ -534,11 +537,12 @@ void
 fixed_string<N, CharT, Traits>::
 resize(std::size_t n)
 {
+    const auto curr_size = size();
     if(n > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
-    if(n > size())
-        Traits::assign(&data()[size()], n - size(), CharT{});
+    if(n > curr_size)
+        Traits::assign(&data()[curr_size], n - curr_size, CharT{});
     this->set_size(n);
     term();
 }
@@ -548,11 +552,12 @@ void
 fixed_string<N, CharT, Traits>::
 resize(std::size_t n, CharT c)
 {
+    const auto curr_size = size();
     if(n > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
-    if(n > size())
-        Traits::assign(&data()[size()], n - size(), c);
+    if(n > curr_size)
+        Traits::assign(&data()[curr_size], n - curr_size, c);
     this->set_size(n);
     term();
 }
@@ -562,11 +567,12 @@ void
 fixed_string<N, CharT, Traits>::
 swap(fixed_string& s) noexcept
 {
+    const auto curr_size = size();
     fixed_string tmp(s);
-    s.set_size(size());
-    Traits::copy(&s.data()[0], data(), size() + 1);
+    s.set_size(curr_size);
+    Traits::copy(&s.data()[0], data(), curr_size + 1);
     this->set_size(tmp.size());
-    Traits::copy(data(), &tmp.data()[0], size() + 1);
+    Traits::copy(data(), tmp.data(), size() + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -575,15 +581,16 @@ void
 fixed_string<N, CharT, Traits>::
 swap(fixed_string<M, CharT, Traits>& s)
 {
-    if(size() > s.max_size())
+    const auto curr_size = size();
+    if(curr_size > s.max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() > s.max_size()"});
     if(s.size() > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "s.size() > max_size()"});
     fixed_string tmp(s);
-    s.set_size(size());
-    Traits::copy(&s.data()[0], data(), size() + 1);
+    s.set_size(curr_size);
+    Traits::copy(&s.data()[0], data(), curr_size + 1);
     this->set_size(tmp.size());
     Traits::copy(data(), &tmp.data()[0], size() + 1);
 }
@@ -597,49 +604,51 @@ replace(
     const CharT* s,
     size_type n2) -> fixed_string<N, CharT, Traits>&
 {
-  if (pos > size())
-    BOOST_FIXED_STRING_THROW(std::out_of_range{
-           "pos > size()"});
-  if (size() - (std::min)(n1, size() - pos) >= max_size() - n2)
-    BOOST_FIXED_STRING_THROW(std::length_error{
-           "replaced string exceeds max_size()"});
-  if (pos + n1 >= size())
-    n1 = size() - pos;
-  const bool inside = s <= &data()[size()] && s >= data();
-  if (inside && size_type(s - data()) == pos && n1 == n2)
-    return *this;
-  if (!inside || (inside && ((s - data()) + n2 <= pos)))
-  {
-    // source outside
-    Traits::move(&data()[pos + n2], &data()[pos + n1], size() - pos - n1 + 1);
-    Traits::copy(&data()[pos], s, n2);
-  }
-  else
-  {
-    // source inside
-    const size_type offset = s - data();
-    if (n2 >= n1)
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if (pos > curr_size)
+      BOOST_FIXED_STRING_THROW(std::out_of_range{
+             "pos > size()"});
+    if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
+      BOOST_FIXED_STRING_THROW(std::length_error{
+             "replaced string exceeds max_size()"});
+    if (pos + n1 >= curr_size)
+      n1 = curr_size - pos;
+    const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+    if (inside && size_type(s - curr_data) == pos && n1 == n2)
+      return *this;
+    if (!inside || (inside && ((s - curr_data) + n2 <= pos)))
     {
-      // grow/unchanged
-      // shift all right of splice point by n2 - n1 to the right
-      Traits::move(&data()[pos + n2], &data()[pos + n1], size() - pos - n1 + 1);
-      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
-      // copy all before splice point
-      Traits::move(&data()[pos], &data()[offset], diff);
-      // copy all after splice point
-      Traits::move(&data()[pos + diff], &data()[offset + (n2 - n1) + diff], n2 - diff);
+      // source outside
+      Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      Traits::copy(&curr_data[pos], s, n2);
     }
     else
     {
-      // shrink
-      // copy all elements into place
-      Traits::move(&data()[pos], &data()[offset], n2);
-      // shift all elements after splice point left
-      Traits::move(&data()[pos + n2], &data()[pos + n1], size() - pos - n1 + 1);
+      // source inside
+      const size_type offset = s - curr_data;
+      if (n2 >= n1)
+      {
+        // grow/unchanged
+        // shift all right of splice point by n2 - n1 to the right
+        Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+        const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
+        // copy all before splice point
+        Traits::move(&curr_data[pos], &curr_data[offset], diff);
+        // copy all after splice point
+        Traits::move(&curr_data[pos + diff], &curr_data[offset + (n2 - n1) + diff], n2 - diff);
+      }
+      else
+      {
+        // shrink
+        // copy all elements into place
+        Traits::move(&curr_data[pos], &curr_data[offset], n2);
+        // shift all elements after splice point left
+        Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      }
     }
-  }
-  this->set_size(size() + (n2 - n1));
-  return *this;
+    this->set_size(curr_size + (n2 - n1));
+    return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -651,18 +660,20 @@ replace(
     size_type n2,
     CharT c) -> fixed_string<N, CharT, Traits> &
 {
-  if (pos > size())
-    BOOST_FIXED_STRING_THROW(std::out_of_range{
-           "pos > size()"});
-  if (size() - (std::min)(n1, size() - pos) >= max_size() - n2)
-    BOOST_FIXED_STRING_THROW(std::length_error{
-           "replaced string exceeds max_size()"});
-  if (pos + n1 >= size())
-    n1 = size() - pos;
-  Traits::move(&data()[pos + n2], &data()[pos + n1], size() - pos - n1 + 1);
-  Traits::assign(&data()[pos], n2, c);
-  this->set_size(size() + (n2 - n1));
-  return *this;
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if (pos > curr_size)
+      BOOST_FIXED_STRING_THROW(std::out_of_range{
+             "pos > size()"});
+    if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
+      BOOST_FIXED_STRING_THROW(std::length_error{
+             "replaced string exceeds max_size()"});
+    if (pos + n1 >= curr_size)
+      n1 = curr_size - pos;
+    Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+    Traits::assign(&curr_data[pos], n2, c);
+    this->set_size(curr_size + (n2 - n1));
+    return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -674,12 +685,13 @@ find(
     size_type n) const noexcept ->
         size_type
 {
-  if (pos > size() || n > size() - pos)
-    return npos;
-  if (!n)
-    return pos;
-  const auto res = std::search(&data()[pos], &data()[size()], s, &s[n], Traits::eq);
-  return res == end() ? npos : std::distance(data(), res);
+    const auto curr_size = size();
+    if (pos > curr_size || n > curr_size - pos)
+      return npos;
+    if (!n)
+      return pos;
+    const auto res = std::search(&data()[pos], &data()[curr_size], s, &s[n], Traits::eq);
+    return res == end() ? npos : std::distance(data(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -691,16 +703,18 @@ rfind(
     size_type n) const noexcept ->
         size_type
 {
-  if (size() < n)
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if (curr_size < n)
+      return npos;
+    if (pos > curr_size - n)
+      pos = curr_size - n;
+    if (!n)
+      return pos;
+    for (auto sub = &curr_data[pos]; sub >= curr_data; --sub)
+      if (!Traits::compare(sub, s, n))
+        return std::distance(curr_data, sub);
     return npos;
-  if (pos > size() - n)
-    pos = size() - n;
-  if (!n)
-    return pos;
-  for (auto sub = &data()[pos]; sub >= data(); --sub)
-    if (!Traits::compare(sub, s, n))
-      return std::distance(data(), sub);
-  return npos;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -712,10 +726,11 @@ find_first_of(
     size_type n) const noexcept ->
         size_type
 {
-  if (pos >= size() || !n)
-    return npos;
-  const auto res = std::find_first_of(&data()[pos], &data()[size()], s, &s[n], Traits::eq);
-  return res == end() ? npos : std::distance(data(), res);
+    const auto curr_data = data();
+    if (pos >= size() || !n)
+      return npos;
+    const auto res = std::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], Traits::eq);
+    return res == end() ? npos : std::distance(curr_data, res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -727,14 +742,15 @@ find_last_of(
     size_type n) const noexcept ->
         size_type
 {
-  if (!n)
-    return npos;
-  if (pos >= size())
-    pos = 0;
-  else
-    pos = size() - (pos + 1);
-  const auto res = std::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
-  return res == rend() ? npos : size() - 1 - std::distance(rbegin(), res);
+    const auto curr_size = size();
+    if (!n)
+      return npos;
+    if (pos >= curr_size)
+      pos = 0;
+    else
+      pos = curr_size - (pos + 1);
+    const auto res = std::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
+    return res == rend() ? npos : curr_size - 1 - std::distance(rbegin(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -746,12 +762,12 @@ find_first_not_of(
     size_type n) const noexcept ->
         size_type
 {
-  if (pos >= size())
-    return npos;
-  if (!n)
-    return pos;
-  const auto res = detail::find_not_of<Traits>(&data()[pos], &data()[size()], s, n);
-  return res == end() ? npos : std::distance(data(), res);
+    if (pos >= size())
+      return npos;
+    if (!n)
+      return pos;
+    const auto res = detail::find_not_of<Traits>(&data()[pos], &data()[size()], s, n);
+    return res == end() ? npos : std::distance(data(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -763,13 +779,14 @@ find_last_not_of(
     size_type n) const noexcept ->
         size_type
 {
-  if (pos >= size())
-    pos = size() - 1;
-  if (!n)
-    return pos;
-  pos = size() - (pos + 1);
-  const auto res = detail::find_not_of<Traits>(rbegin() + pos, rend(), s, n);
-  return res == rend() ? npos : size() - 1 - std::distance(rbegin(), res);
+    const auto curr_size = size();
+    if (pos >= curr_size)
+      pos = curr_size - 1;
+    if (!n)
+      return pos;
+    pos = curr_size - (pos + 1);
+    const auto res = detail::find_not_of<Traits>(rbegin() + pos, rend(), s, n);
+    return res == rend() ? npos : curr_size - 1 - std::distance(rbegin(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>

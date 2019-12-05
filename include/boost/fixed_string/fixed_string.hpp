@@ -39,7 +39,7 @@ template<
     typename Traits = std::char_traits<CharT>>
 class fixed_string 
 #ifndef GENERATING_DOCUMENTATION
-  : private detail::fixed_string_base<N, CharT, Traits>
+  : detail::optimization_base<N, CharT, Traits>
 #endif
 {
     template<std::size_t, class, class>
@@ -981,7 +981,8 @@ public:
     pop_back() noexcept
     {
       BOOST_FIXED_STRING_ASSERT(size() > 0);
-      Traits::assign(data()[this->set_size(size() - 1)], 0);
+      this->set_size(size() - 1);
+      term();
     }
 
     /** Appends `count` copies of character `ch`

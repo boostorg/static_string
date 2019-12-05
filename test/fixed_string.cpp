@@ -1863,209 +1863,209 @@ void
 testAppend()
 {
   using S = fixed_string<400>;
-    using sv = string_view;
+  using sv = string_view;
 
-    // append(size_type count, CharT ch)
-    BOOST_TEST(fixed_string<1>{}.append(1, 'a') == "a");
-    BOOST_TEST(fixed_string<2>{}.append(2, 'a') == "aa");
-    BOOST_TEST(fixed_string<2>{"a"}.append(1, 'b') == "ab");
-    BOOST_TEST_THROWS(fixed_string<2>{"ab"}.append(1, 'c'), std::length_error);
+  // append(size_type count, CharT ch)
+  BOOST_TEST(fixed_string<1>{}.append(1, 'a') == "a");
+  BOOST_TEST(fixed_string<2>{}.append(2, 'a') == "aa");
+  BOOST_TEST(fixed_string<2>{"a"}.append(1, 'b') == "ab");
+  BOOST_TEST_THROWS(fixed_string<2>{"ab"}.append(1, 'c'), std::length_error);
 
-    // append(string_view_type sv)
-    BOOST_TEST(fixed_string<3>{"a"}.append(sv{"bc"}) == "abc");
-    BOOST_TEST(fixed_string<3>{"ab"}.append(sv{"c"}) == "abc");
-    BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(sv{"*"}), std::length_error);
+  // append(string_view_type sv)
+  BOOST_TEST(fixed_string<3>{"a"}.append(sv{"bc"}) == "abc");
+  BOOST_TEST(fixed_string<3>{"ab"}.append(sv{"c"}) == "abc");
+  BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(sv{"*"}), std::length_error);
 
-    // append(string_view_type sv, size_type pos, size_type count = npos)
-    BOOST_TEST(fixed_string<3>{"a"}.append(sv{"abc"}, 1) == "abc");
-    BOOST_TEST(fixed_string<3>{"a"}.append(sv{"abc"}, 1, 2) == "abc");
-    BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(sv{"a"}, 2, 1), std::out_of_range);
-    BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(sv{"abcd"}, 1, 2), std::length_error);
+  // append(string_view_type sv, size_type pos, size_type count = npos)
+  BOOST_TEST(fixed_string<3>{"a"}.append(sv{"abc"}, 1) == "abc");
+  BOOST_TEST(fixed_string<3>{"a"}.append(sv{"abc"}, 1, 2) == "abc");
+  BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(sv{"a"}, 2, 1), std::out_of_range);
+  BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(sv{"abcd"}, 1, 2), std::length_error);
 
-    // append(CharT const* s, size_type count)
-    BOOST_TEST(fixed_string<3>{"a"}.append("bc", 0) == "a");
-    BOOST_TEST(fixed_string<3>{"a"}.append("bc", 2) == "abc");
-    BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append("bc", 2), std::length_error);
+  // append(CharT const* s, size_type count)
+  BOOST_TEST(fixed_string<3>{"a"}.append("bc", 0) == "a");
+  BOOST_TEST(fixed_string<3>{"a"}.append("bc", 2) == "abc");
+  BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append("bc", 2), std::length_error);
 
-    // append(CharT const* s)
-    BOOST_TEST(fixed_string<3>{"a"}.append("bc") == "abc");
-    BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append("bc"), std::length_error);
+  // append(CharT const* s)
+  BOOST_TEST(fixed_string<3>{"a"}.append("bc") == "abc");
+  BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append("bc"), std::length_error);
 
-    // append(InputIt first, InputIt last)
-    {
-        fixed_string<4> const cs{"abcd"};
-        fixed_string<4> s{"ad"};
-        BOOST_TEST(fixed_string<4>{"ab"}.append(
-            cs.begin() + 2, cs.begin() + 4) == "abcd");
-        BOOST_TEST_THROWS(fixed_string<2>{"ab"}.append(
-            cs.begin() + 2, cs.begin() + 4), std::length_error);
-    }
+  // append(InputIt first, InputIt last)
+  {
+      fixed_string<4> const cs{"abcd"};
+      fixed_string<4> s{"ad"};
+      BOOST_TEST(fixed_string<4>{"ab"}.append(
+          cs.begin() + 2, cs.begin() + 4) == "abcd");
+      BOOST_TEST_THROWS(fixed_string<2>{"ab"}.append(
+          cs.begin() + 2, cs.begin() + 4), std::length_error);
+  }
 
-    // append(std::initializer_list<CharT> ilist)
-    BOOST_TEST(fixed_string<4>{"ab"}.append({'c', 'd'}) == "abcd");
-    BOOST_TEST_THROWS(fixed_string<3>{"ab"}.append({'c', 'd'}), std::length_error);
+  // append(std::initializer_list<CharT> ilist)
+  BOOST_TEST(fixed_string<4>{"ab"}.append({'c', 'd'}) == "abcd");
+  BOOST_TEST_THROWS(fixed_string<3>{"ab"}.append({'c', 'd'}), std::length_error);
 
-    // append(T const& t)
-    {
-        struct T
-        {
-            operator string_view() const noexcept
-            {
-                return "c";
-            }
-        };
-        BOOST_TEST(fixed_string<3>{"ab"}.append(T{}) == "abc");
-        BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(T{}), std::length_error);
-    }
+  // append(T const& t)
+  {
+      struct T
+      {
+          operator string_view() const noexcept
+          {
+              return "c";
+          }
+      };
+      BOOST_TEST(fixed_string<3>{"ab"}.append(T{}) == "abc");
+      BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(T{}), std::length_error);
+  }
 
-    // append(T const& t, size_type pos, size_type count = npos)
-    {
-        struct T
-        {
-            operator string_view() const noexcept
-            {
-                return "abcd";
-            }
-        };
-        BOOST_TEST(fixed_string<4>{"ab"}.append(T{}, 2) == "abcd");
-        BOOST_TEST(fixed_string<3>{"a"}.append(T{}, 1, 2) == "abc");
-        BOOST_TEST_THROWS(fixed_string<4>{"abc"}.append(T{}, 5), std::out_of_range);
-        BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(T{}, 3, 1), std::length_error);
-    }
+  // append(T const& t, size_type pos, size_type count = npos)
+  {
+      struct T
+      {
+          operator string_view() const noexcept
+          {
+              return "abcd";
+          }
+      };
+      BOOST_TEST(fixed_string<4>{"ab"}.append(T{}, 2) == "abcd");
+      BOOST_TEST(fixed_string<3>{"a"}.append(T{}, 1, 2) == "abc");
+      BOOST_TEST_THROWS(fixed_string<4>{"abc"}.append(T{}, 5), std::out_of_range);
+      BOOST_TEST_THROWS(fixed_string<3>{"abc"}.append(T{}, 3, 1), std::length_error);
+  }
 
-    //---
+  //---
 
-    {
-        fixed_string<3> s1("1");
-        s1.append(2, '_');
-        BOOST_TEST(s1 == "1__");
-        BOOST_TEST(*s1.end() == 0);
-        fixed_string<2> s2("1");
-        BOOST_TEST_THROWS(
-            (s2.append(2, '_')),
-            std::length_error);
-    }
-    {
-        fixed_string<2> s1("__");
-        fixed_string<3> s2("1");
-        s2.append(s1);
-        BOOST_TEST(s2 == "1__");
-        BOOST_TEST(*s2.end() == 0);
-        fixed_string<2> s3("1");
-        BOOST_TEST_THROWS(
-            s3.append(s1),
-            std::length_error);
-    }
-    {
-        fixed_string<3> s1("XYZ");
-        fixed_string<4> s2("12");
-        s2.append(s1, 1);
-        BOOST_TEST(s2 == "12YZ");
-        BOOST_TEST(*s2.end() == 0);
-        fixed_string<3> s3("12");
-        s3.append(s1, 1, 1);
-        BOOST_TEST(s3 == "12Y");
-        BOOST_TEST(*s3.end() == 0);
-        fixed_string<3> s4("12");
-        BOOST_TEST_THROWS(
-            (s4.append(s1, 4)),
-            std::out_of_range);
-        fixed_string<3> s5("12");
-        BOOST_TEST_THROWS(
-            (s5.append(s1, 1)),
-            std::length_error);
-    }
-    {
-        fixed_string<4> s1("12");
-        s1.append("XYZ", 2);
-        BOOST_TEST(s1 == "12XY");
-        BOOST_TEST(*s1.end() == 0);
-        fixed_string<3> s3("12");
-        BOOST_TEST_THROWS(
-            (s3.append("XYZ", 2)),
-            std::length_error);
-    }
-    {
-        fixed_string<5> s1("12");
-        s1.append("XYZ");
-        BOOST_TEST(s1 == "12XYZ");
-        BOOST_TEST(*s1.end() == 0);
-        fixed_string<4> s2("12");
-        BOOST_TEST_THROWS(
-            s2.append("XYZ"),
-            std::length_error);
-    }
-    {
-        fixed_string<3> s1("XYZ");
-        fixed_string<5> s2("12");
-        s2.append(s1.begin(), s1.end());
-        BOOST_TEST(s2 == "12XYZ");
-        BOOST_TEST(*s2.end() == 0);
-        fixed_string<4> s3("12");
-        BOOST_TEST_THROWS(
-            s3.append(s1.begin(), s1.end()),
-            std::length_error);
-    }
-    {
-        fixed_string<5> s1("123");
-        s1.append({'X', 'Y'});
-        BOOST_TEST(s1 == "123XY");
-        BOOST_TEST(*s1.end() == 0);
-        fixed_string<4> s2("123");
-        BOOST_TEST_THROWS(
-            s2.append({'X', 'Y'}),
-            std::length_error);
-    }
-    {
-        string_view s1("XYZ");
-        fixed_string<5> s2("12");
-        s2.append(s1);
-        BOOST_TEST(s2 == "12XYZ");
-        BOOST_TEST(*s2.end() == 0);
-        fixed_string<4> s3("12");
-        BOOST_TEST_THROWS(
-            s3.append(s1),
-            std::length_error);
-    }
-    {
-        fixed_string<6> s1("123");
-        s1.append(std::string("UVX"), 1);
-        BOOST_TEST(s1 == "123VX");
-        BOOST_TEST(*s1.end() == 0);
-        s1.append(std::string("PQR"), 1, 1);
-        BOOST_TEST(s1 == "123VXQ");
-        BOOST_TEST(*s1.end() == 0);
-        fixed_string<3> s2("123");
-        BOOST_TEST_THROWS(
-            (s2.append(std::string("PQR"), 1, 1)),
-            std::length_error);
-    }
-    BOOST_TEST(testA(S(), "", 0, S()));
-    BOOST_TEST(testA(S(), "12345", 3, S("123")));
-    BOOST_TEST(testA(S(), "12345", 4, S("1234")));
-    BOOST_TEST(testA(S(), "12345678901234567890", 0, S()));
-    BOOST_TEST(testA(S(), "12345678901234567890", 1, S("1")));
-    BOOST_TEST(testA(S(), "12345678901234567890", 3, S("123")));
-    BOOST_TEST(testA(S(), "12345678901234567890", 20, S("12345678901234567890")));
+  {
+      fixed_string<3> s1("1");
+      s1.append(2, '_');
+      BOOST_TEST(s1 == "1__");
+      BOOST_TEST(*s1.end() == 0);
+      fixed_string<2> s2("1");
+      BOOST_TEST_THROWS(
+          (s2.append(2, '_')),
+          std::length_error);
+  }
+  {
+      fixed_string<2> s1("__");
+      fixed_string<3> s2("1");
+      s2.append(s1);
+      BOOST_TEST(s2 == "1__");
+      BOOST_TEST(*s2.end() == 0);
+      fixed_string<2> s3("1");
+      BOOST_TEST_THROWS(
+          s3.append(s1),
+          std::length_error);
+  }
+  {
+      fixed_string<3> s1("XYZ");
+      fixed_string<4> s2("12");
+      s2.append(s1, 1);
+      BOOST_TEST(s2 == "12YZ");
+      BOOST_TEST(*s2.end() == 0);
+      fixed_string<3> s3("12");
+      s3.append(s1, 1, 1);
+      BOOST_TEST(s3 == "12Y");
+      BOOST_TEST(*s3.end() == 0);
+      fixed_string<3> s4("12");
+      BOOST_TEST_THROWS(
+          (s4.append(s1, 4)),
+          std::out_of_range);
+      fixed_string<3> s5("12");
+      BOOST_TEST_THROWS(
+          (s5.append(s1, 1)),
+          std::length_error);
+  }
+  {
+      fixed_string<4> s1("12");
+      s1.append("XYZ", 2);
+      BOOST_TEST(s1 == "12XY");
+      BOOST_TEST(*s1.end() == 0);
+      fixed_string<3> s3("12");
+      BOOST_TEST_THROWS(
+          (s3.append("XYZ", 2)),
+          std::length_error);
+  }
+  {
+      fixed_string<5> s1("12");
+      s1.append("XYZ");
+      BOOST_TEST(s1 == "12XYZ");
+      BOOST_TEST(*s1.end() == 0);
+      fixed_string<4> s2("12");
+      BOOST_TEST_THROWS(
+          s2.append("XYZ"),
+          std::length_error);
+  }
+  {
+      fixed_string<3> s1("XYZ");
+      fixed_string<5> s2("12");
+      s2.append(s1.begin(), s1.end());
+      BOOST_TEST(s2 == "12XYZ");
+      BOOST_TEST(*s2.end() == 0);
+      fixed_string<4> s3("12");
+      BOOST_TEST_THROWS(
+          s3.append(s1.begin(), s1.end()),
+          std::length_error);
+  }
+  {
+      fixed_string<5> s1("123");
+      s1.append({'X', 'Y'});
+      BOOST_TEST(s1 == "123XY");
+      BOOST_TEST(*s1.end() == 0);
+      fixed_string<4> s2("123");
+      BOOST_TEST_THROWS(
+          s2.append({'X', 'Y'}),
+          std::length_error);
+  }
+  {
+      string_view s1("XYZ");
+      fixed_string<5> s2("12");
+      s2.append(s1);
+      BOOST_TEST(s2 == "12XYZ");
+      BOOST_TEST(*s2.end() == 0);
+      fixed_string<4> s3("12");
+      BOOST_TEST_THROWS(
+          s3.append(s1),
+          std::length_error);
+  }
+  {
+      fixed_string<6> s1("123");
+      s1.append(std::string("UVX"), 1);
+      BOOST_TEST(s1 == "123VX");
+      BOOST_TEST(*s1.end() == 0);
+      s1.append(std::string("PQR"), 1, 1);
+      BOOST_TEST(s1 == "123VXQ");
+      BOOST_TEST(*s1.end() == 0);
+      fixed_string<3> s2("123");
+      BOOST_TEST_THROWS(
+          (s2.append(std::string("PQR"), 1, 1)),
+          std::length_error);
+  }
+  BOOST_TEST(testA(S(), "", 0, S()));
+  BOOST_TEST(testA(S(), "12345", 3, S("123")));
+  BOOST_TEST(testA(S(), "12345", 4, S("1234")));
+  BOOST_TEST(testA(S(), "12345678901234567890", 0, S()));
+  BOOST_TEST(testA(S(), "12345678901234567890", 1, S("1")));
+  BOOST_TEST(testA(S(), "12345678901234567890", 3, S("123")));
+  BOOST_TEST(testA(S(), "12345678901234567890", 20, S("12345678901234567890")));
 
-    BOOST_TEST(testA(S("12345"), "", 0, S("12345")));
-    BOOST_TEST(testA(S("12345"), "12345", 5, S("1234512345")));
-    BOOST_TEST(testA(S("12345"), "1234567890", 10, S("123451234567890")));
+  BOOST_TEST(testA(S("12345"), "", 0, S("12345")));
+  BOOST_TEST(testA(S("12345"), "12345", 5, S("1234512345")));
+  BOOST_TEST(testA(S("12345"), "1234567890", 10, S("123451234567890")));
 
-    BOOST_TEST(testA(S("12345678901234567890"), "", 0, S("12345678901234567890")));
-    BOOST_TEST(testA(S("12345678901234567890"), "12345", 5, S("1234567890123456789012345")));
-    BOOST_TEST(testA(S("12345678901234567890"), "12345678901234567890", 20,
-               S("1234567890123456789012345678901234567890")));
+  BOOST_TEST(testA(S("12345678901234567890"), "", 0, S("12345678901234567890")));
+  BOOST_TEST(testA(S("12345678901234567890"), "12345", 5, S("1234567890123456789012345")));
+  BOOST_TEST(testA(S("12345678901234567890"), "12345678901234567890", 20,
+              S("1234567890123456789012345678901234567890")));
 
-    S s_short = "123/";
-    S s_long = "Lorem ipsum dolor sit amet, consectetur/";
+  S s_short = "123/";
+  S s_long = "Lorem ipsum dolor sit amet, consectetur/";
 
-    s_short.append(s_short.data(), s_short.size());
-    BOOST_TEST(s_short == "123/123/");
-    s_short.append(s_short.data(), s_short.size());
-    BOOST_TEST(s_short == "123/123/123/123/");
-    s_short.append(s_short.data(), s_short.size());
-    BOOST_TEST(s_short == "123/123/123/123/123/123/123/123/");
+  s_short.append(s_short.data(), s_short.size());
+  BOOST_TEST(s_short == "123/123/");
+  s_short.append(s_short.data(), s_short.size());
+  BOOST_TEST(s_short == "123/123/123/123/");
+  s_short.append(s_short.data(), s_short.size());
+  BOOST_TEST(s_short == "123/123/123/123/123/123/123/123/");
 }
 
 // done
@@ -6938,8 +6938,25 @@ runTests()
   return report_errors();
 }
 
-BOOST_FIXED_STRING_STATIC_ASSERT(sizeof(fixed_string<0>) == 1, "size shall be 1 for N < 255");
-BOOST_FIXED_STRING_STATIC_ASSERT(alignof(fixed_string<254>) == 1, "alignment shall be 1 for N < 255");
+static_assert(std::is_base_of<
+    detail::fixed_string_base_zero<0, char, std::char_traits<char>>, 
+    fixed_string<0>>::value, 
+    "the zero size optimization shall be used for N = 0");
+
+static_assert(std::is_base_of<
+    detail::fixed_string_base_null<1, char, std::char_traits<char>>, 
+    fixed_string<1>>::value, 
+    "the null terminator optimization shall be used for N <= (std::numeric_limits<char>::max)()");
+
+static_assert(std::is_base_of<
+    detail::fixed_string_base_null<(std::numeric_limits<char>::max)(), char, std::char_traits<char>>,
+    fixed_string<(std::numeric_limits<char>::max)()>>::value,
+    "the null terminator optimization shall be used for N <= std::numeric_limits<char>::max()");
+
+static_assert(std::is_base_of<
+    detail::fixed_string_base_zero<(std::numeric_limits<char>::max)() + 1, char, std::char_traits<char>>,
+    fixed_string<(std::numeric_limits<char>::max)() + 1>>::value,
+    "the minimum size type optimization shall be used for N > std::numeric_limits<char>::max()");
 
 } // fixed_string
 } // boost
