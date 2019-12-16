@@ -658,6 +658,7 @@ public:
     }
 
     /// Returns a reverse iterator to the beginning.
+    BOOST_STATIC_STRING_CPP17_CONSTEXPR
     reverse_iterator
     rbegin() noexcept
     {
@@ -665,6 +666,7 @@ public:
     }
 
     /// Returns a reverse iterator to the beginning.
+    BOOST_STATIC_STRING_CPP17_CONSTEXPR
     const_reverse_iterator
     rbegin() const noexcept
     {
@@ -672,6 +674,7 @@ public:
     }
 
     /// Returns a reverse iterator to the beginning.
+    BOOST_STATIC_STRING_CPP17_CONSTEXPR
     const_reverse_iterator
     crbegin() const noexcept
     {
@@ -679,6 +682,7 @@ public:
     }
 
     /// Returns a reverse iterator to the end.
+    BOOST_STATIC_STRING_CPP17_CONSTEXPR
     reverse_iterator
     rend() noexcept
     {
@@ -686,6 +690,7 @@ public:
     }
 
     /// Returns a reverse iterator to the end.
+    BOOST_STATIC_STRING_CPP17_CONSTEXPR
     const_reverse_iterator
     rend() const noexcept
     {
@@ -693,6 +698,7 @@ public:
     }
 
     /// Returns a reverse iterator to the end.
+    BOOST_STATIC_STRING_CPP17_CONSTEXPR
     const_reverse_iterator
     crend() const noexcept
     {
