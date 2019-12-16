@@ -5,7 +5,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-project fixed_string/doc ;
+project static_string/doc ;
 
 import os ;
 import path ;
@@ -23,7 +23,7 @@ import saxonhe ;
 # docs can be rebuild if any of the header files change.
 #
 
-local sources = [ path.glob-tree ../include/boost/fixed_string : *.hpp *.ipp : detail impl ] ;
+local sources = [ path.glob-tree ../include/boost/static_string : *.hpp *.ipp : detail impl ] ;
 
 # Get the configured paths to doxygen and xsltproc
 
@@ -148,12 +148,12 @@ install qbk : reference.qbk ;
 install images
     :
     :
-        <location>html/fixed_string/images
+        <location>html/static_string/images
     ;
 
 explicit images ;
 
-xml fixed_string_doc
+xml static_string_doc
     :
         qbk/main.qbk
     :
@@ -161,7 +161,7 @@ xml fixed_string_doc
         <dependency>qbk
     ;
 
-explicit fixed_string_doc ;
+explicit static_string_doc ;
 
 #-------------------------------------------------------------------------------
 #
@@ -169,9 +169,9 @@ explicit fixed_string_doc ;
 #
 #-------------------------------------------------------------------------------
 
-boostbook fixed_string
+boostbook static_string
     :
-        fixed_string_doc
+        static_string_doc
     :
         <xsl:param>boost.root=../../../..
         <xsl:param>chapter.autolabel=1
@@ -195,5 +195,5 @@ boostbook fixed_string
 alias boostdoc ;
 explicit boostdoc ;
 
-alias boostrelease : fixed_string ;
+alias boostrelease : static_string ;
 explicit boostrelease ;

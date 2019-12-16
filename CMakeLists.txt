@@ -4,7 +4,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/boostorg/fixed_string
+# Official repository: https://github.com/boostorg/static_string
 #
 
 cmake_minimum_required (VERSION 3.5.1)
@@ -36,11 +36,11 @@ endfunction()
 
 #-------------------------------------------------------------------------------
 #
-# FixedString
+# StaticString
 #
 #-------------------------------------------------------------------------------
 
-project (FixedString VERSION 1)
+project (StaticString VERSION 1)
 
 set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -145,8 +145,8 @@ endif()
 #include_directories (.)
 
 file (GLOB_RECURSE PROJECT_FILES
-    ${PROJECT_SOURCE_DIR}/include/boost/fixed_string/*.hpp
-    ${PROJECT_SOURCE_DIR}/include/boost/fixed_string/*.ipp
+    ${PROJECT_SOURCE_DIR}/include/boost/static_string/*.hpp
+    ${PROJECT_SOURCE_DIR}/include/boost/static_string/*.ipp
 )
 
 add_subdirectory (test)

@@ -5,17 +5,17 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/boostorg/fixed_string
+// Official repository: https://github.com/boostorg/static_string
 //
 
-#ifndef BOOST_FIXED_STRING_IMPL_FIXED_STRING_HPP
-#define BOOST_FIXED_STRING_IMPL_FIXED_STRING_HPP
+#ifndef BOOST_STATIC_STRING_IMPL_STATIC_STRING_HPP
+#define BOOST_STATIC_STRING_IMPL_STATIC_STRING_HPP
 
-#include <boost/fixed_string/config.hpp>
-#include <boost/fixed_string/detail/fixed_string.hpp>
+#include <boost/static_string/config.hpp>
+#include <boost/static_string/detail/static_string.hpp>
 
 namespace boost {
-namespace fixed_string {
+namespace static_string {
 
 //------------------------------------------------------------------------------
 //
@@ -24,28 +24,28 @@ namespace fixed_string {
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP11_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string() noexcept
+BOOST_STATIC_STRING_CPP11_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string() noexcept
 {
-#ifdef BOOST_FIXED_STRING_CPP20_CXPER_USED
+#ifdef BOOST_STATIC_STRING_CPP20_CONSTEXPR_USED
     term();
 #endif
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(size_type count, CharT ch)
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(size_type count, CharT ch)
 {
     assign(count, ch);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(fixed_string<M, CharT, Traits> const& other,
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(basic_static_string<M, CharT, Traits> const& other,
     size_type pos)
 {
     assign(other, pos);
@@ -53,10 +53,10 @@ fixed_string(fixed_string<M, CharT, Traits> const& other,
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(
-    fixed_string<M, CharT, Traits> const& other,
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
+    basic_static_string<M, CharT, Traits> const& other,
     size_type pos,
     size_type count)
 {
@@ -64,21 +64,21 @@ fixed_string(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(CharT const* s, size_type count)
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(CharT const* s, size_type count)
 {
     assign(s, count);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(CharT const* s)
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(CharT const* s)
 {
     auto const count = Traits::length(s);
     if(count > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "count > max_size()"});
     this->set_size(count);
     Traits::copy(data(), s, size() + 1);
@@ -86,9 +86,9 @@ fixed_string(CharT const* s)
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class InputIterator>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
     InputIterator first,
     InputIterator last,
     typename std::enable_if<
@@ -99,45 +99,45 @@ fixed_string(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(
-    fixed_string const& s) noexcept
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
+    basic_static_string const& s) noexcept
 {
     assign(s);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(
-    fixed_string<M, CharT, Traits> const& s)
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
+    basic_static_string<M, CharT, Traits> const& s)
 {
     assign(s);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(std::initializer_list<CharT> init)
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(std::initializer_list<CharT> init)
 {
     assign(init.begin(), init.end());
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(string_view_type sv)
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(string_view_type sv)
 {
     assign(sv);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
-BOOST_FIXED_STRING_CPP14_CXPER
-fixed_string<N, CharT, Traits>::
-fixed_string(T const& t, size_type pos, size_type n)
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(T const& t, size_type pos, size_type n)
 {
     assign(t, pos, n);
 }
@@ -149,16 +149,16 @@ fixed_string(T const& t, size_type pos, size_type n)
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 assign(
     size_type count,
     CharT ch) ->
-        fixed_string&
+        basic_static_string&
 {
     if(count > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "count > max_size()"});
     this->set_size(count);
     Traits::assign(data(), size(), ch);
@@ -167,12 +167,12 @@ assign(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 assign(
-    fixed_string const& s) noexcept ->
-        fixed_string&
+    basic_static_string const& s) noexcept ->
+        basic_static_string&
 {
     if(this == &s)
         return *this;
@@ -186,30 +186,30 @@ assign(
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 assign(
-    fixed_string<M, CharT, Traits> const& s,
+    basic_static_string<M, CharT, Traits> const& s,
     size_type pos,
     size_type count) ->
-    fixed_string&
+    basic_static_string&
 {
     auto const ss = s.subview(pos, count);
     return assign(ss.data(), ss.size());
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 assign(
     CharT const* s,
     size_type count) ->
-        fixed_string&
+        basic_static_string&
 {
     if(count > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "count > max_size()"});
     this->set_size(count);
     Traits::move(data(), s, size());
@@ -219,19 +219,19 @@ assign(
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class InputIterator>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 assign(
     InputIterator first,
     InputIterator last) ->
         typename std::enable_if<
             detail::is_input_iterator<InputIterator>::value,
-                fixed_string&>::type
+                basic_static_string&>::type
 {
     std::size_t const n = std::distance(first, last);
     if(n > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "n > max_size()"});
     this->set_size(n);
     for(auto it = data(); first != last; ++it, ++first)
@@ -247,27 +247,27 @@ assign(
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 at(size_type pos) ->
     reference
 {
     if(pos >= size())
-        BOOST_FIXED_STRING_THROW(std::out_of_range{
+        BOOST_STATIC_STRING_THROW(std::out_of_range{
             "pos >= size()"});
     return data()[pos];
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 at(size_type pos) const ->
     const_reference
 {
     if(pos >= size())
-        BOOST_FIXED_STRING_THROW(std::out_of_range{
+        BOOST_STATIC_STRING_THROW(std::out_of_range{
             "pos >= size()"});
     return data()[pos];
 }
@@ -279,13 +279,13 @@ at(size_type pos) const ->
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 reserve(std::size_t n)
 {
     if(n > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "n > max_size()"});
 }
 
@@ -296,9 +296,9 @@ reserve(std::size_t n)
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 clear() noexcept
 {
     this->set_size(0);
@@ -308,39 +308,39 @@ clear() noexcept
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
     size_type count,
     CharT ch) ->
-        fixed_string&
+        basic_static_string&
 {
     if(index > size())
-        BOOST_FIXED_STRING_THROW(std::out_of_range{
+        BOOST_STATIC_STRING_THROW(std::out_of_range{
             "index > size()"});
     insert(begin() + index, count, ch);
     return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
     CharT const* s,
     size_type count) ->
-        fixed_string&
+        basic_static_string&
 {
     const auto curr_size = size();
     const auto curr_data = data();
     if(index > curr_size)
-        BOOST_FIXED_STRING_THROW(std::out_of_range{
+        BOOST_STATIC_STRING_THROW(std::out_of_range{
             "index > size()"});
     if(count > max_size() - curr_size)
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
     if (!inside || (inside && ((s - curr_data) + count <= index)))
@@ -368,9 +368,9 @@ insert(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
     size_type count,
@@ -380,7 +380,7 @@ insert(
     const auto curr_size = size();
     const auto curr_data = data();
     if(count > max_size() - curr_size)
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "size() + count() > max_size()"});
     auto const index = pos - curr_data;
     Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
@@ -392,9 +392,9 @@ insert(
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class InputIterator>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
     InputIterator first,
@@ -409,9 +409,9 @@ insert(
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
     T const & t) ->
@@ -419,7 +419,7 @@ insert(
             std::is_convertible<
                 T const&, string_view_type>::value &&
             ! std::is_convertible<
-                T const&, CharT const*>::value, fixed_string&
+                T const&, CharT const*>::value, basic_static_string&
                     >::type
 {
     return insert(index, t, 0, npos);
@@ -427,9 +427,9 @@ insert(
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
     T const & t,
@@ -439,7 +439,7 @@ insert(
             std::is_convertible<
                 T const&, string_view_type>::value &&
             ! std::is_convertible<
-                T const&, CharT const*>::value, fixed_string&
+                T const&, CharT const*>::value, basic_static_string&
                     >::type
 {
     auto const s =
@@ -450,18 +450,18 @@ insert(
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 erase(
     size_type index,
     size_type count) ->
-        fixed_string&
+        basic_static_string&
 {
     const auto curr_size = size();
     const auto curr_data = data();
     if(index > curr_size)
-        BOOST_FIXED_STRING_THROW(std::out_of_range{
+        BOOST_STATIC_STRING_THROW(std::out_of_range{
             "index > size()"});
     auto const n = (std::min)(count, curr_size - index);
     Traits::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
@@ -470,9 +470,9 @@ erase(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 erase(
     const_iterator pos) ->
         iterator
@@ -482,9 +482,9 @@ erase(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 erase(
     const_iterator first,
     const_iterator last) ->
@@ -496,15 +496,15 @@ erase(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 push_back(
     CharT ch)
 {
     const auto curr_size = size();
     if(curr_size >= max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "size() >= max_size()"});
     Traits::assign(data()[curr_size], ch);
     this->set_size(curr_size + 1);
@@ -512,17 +512,17 @@ push_back(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 append(
     CharT const* s,
     size_type count) ->
-        fixed_string&
+        basic_static_string&
 {
     const auto curr_size = size();
     if(count > max_size() - curr_size)
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
     Traits::copy(&data()[curr_size], s, count);
     this->set_size(curr_size + count);
@@ -531,35 +531,35 @@ append(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
-    fixed_string
+    basic_static_string
 {
     if(pos > size())
-        BOOST_FIXED_STRING_THROW(std::out_of_range{
+        BOOST_STATIC_STRING_THROW(std::out_of_range{
             "pos > size()"});
     return {&data()[pos], (std::min)(count, size() - pos)};
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 subview(size_type pos, size_type count) const ->
     string_view_type
 {
   if (pos > size())
-    BOOST_FIXED_STRING_THROW(std::out_of_range{
+    BOOST_STATIC_STRING_THROW(std::out_of_range{
         "pos > size()"});
   return {&data()[pos], (std::min)(count, size() - pos)};
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 copy(CharT* dest, size_type count, size_type pos) const noexcept ->
     size_type
 {
@@ -569,14 +569,14 @@ copy(CharT* dest, size_type count, size_type pos) const noexcept ->
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 resize(std::size_t n)
 {
     const auto curr_size = size();
     if(n > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "n > max_size()"});
     if(n > curr_size)
         Traits::assign(&data()[curr_size], n - curr_size, CharT{});
@@ -585,14 +585,14 @@ resize(std::size_t n)
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 resize(std::size_t n, CharT c)
 {
     const auto curr_size = size();
     if(n > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "n > max_size()"});
     if(n > curr_size)
         Traits::assign(&data()[curr_size], n - curr_size, c);
@@ -601,13 +601,13 @@ resize(std::size_t n, CharT c)
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-fixed_string<N, CharT, Traits>::
-swap(fixed_string& s) noexcept
+basic_static_string<N, CharT, Traits>::
+swap(basic_static_string& s) noexcept
 {
     const auto curr_size = size();
-    fixed_string tmp(s);
+    basic_static_string tmp(s);
     s.set_size(curr_size);
     Traits::copy(&s.data()[0], data(), curr_size + 1);
     this->set_size(tmp.size());
@@ -616,19 +616,19 @@ swap(fixed_string& s) noexcept
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-fixed_string<N, CharT, Traits>::
-swap(fixed_string<M, CharT, Traits>& s)
+basic_static_string<N, CharT, Traits>::
+swap(basic_static_string<M, CharT, Traits>& s)
 {
     const auto curr_size = size();
     if(curr_size > s.max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "size() > s.max_size()"});
     if(s.size() > max_size())
-        BOOST_FIXED_STRING_THROW(std::length_error{
+        BOOST_STATIC_STRING_THROW(std::length_error{
             "s.size() > max_size()"});
-    fixed_string tmp(s);
+    basic_static_string tmp(s);
     s.set_size(curr_size);
     Traits::copy(&s.data()[0], data(), curr_size + 1);
     this->set_size(tmp.size());
@@ -636,22 +636,22 @@ swap(fixed_string<M, CharT, Traits>& s)
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 replace(
     size_type pos,
     size_type n1,
     const CharT* s,
-    size_type n2) -> fixed_string<N, CharT, Traits>&
+    size_type n2) -> basic_static_string<N, CharT, Traits>&
 {
     const auto curr_size = size();
     const auto curr_data = data();
     if (pos > curr_size)
-      BOOST_FIXED_STRING_THROW(std::out_of_range{
+      BOOST_STATIC_STRING_THROW(std::out_of_range{
              "pos > size()"});
     if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
-      BOOST_FIXED_STRING_THROW(std::length_error{
+      BOOST_STATIC_STRING_THROW(std::length_error{
              "replaced string exceeds max_size()"});
     if (pos + n1 >= curr_size)
       n1 = curr_size - pos;
@@ -693,22 +693,22 @@ replace(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 replace(
     size_type pos,
     size_type n1,
     size_type n2,
-    CharT c) -> fixed_string<N, CharT, Traits> &
+    CharT c) -> basic_static_string<N, CharT, Traits> &
 {
     const auto curr_size = size();
     const auto curr_data = data();
     if (pos > curr_size)
-      BOOST_FIXED_STRING_THROW(std::out_of_range{
+      BOOST_STATIC_STRING_THROW(std::out_of_range{
              "pos > size()"});
     if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
-      BOOST_FIXED_STRING_THROW(std::length_error{
+      BOOST_STATIC_STRING_THROW(std::length_error{
              "replaced string exceeds max_size()"});
     if (pos + n1 >= curr_size)
       n1 = curr_size - pos;
@@ -719,9 +719,9 @@ replace(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 find(
     const CharT* s,
     size_type pos,
@@ -738,9 +738,9 @@ find(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 rfind(
     const CharT* s,
     size_type pos,
@@ -762,9 +762,9 @@ rfind(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 find_first_of(
     const CharT* s,
     size_type pos,
@@ -779,9 +779,9 @@ find_first_of(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 find_last_of(
     const CharT* s,
     size_type pos,
@@ -800,9 +800,9 @@ find_last_of(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 find_first_not_of(
     const CharT* s,
     size_type pos,
@@ -818,9 +818,9 @@ find_first_not_of(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 find_last_not_of(
     const CharT* s,
     size_type pos,
@@ -838,11 +838,11 @@ find_last_not_of(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-BOOST_FIXED_STRING_CPP14_CXPER
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 assign_char(CharT ch, std::true_type) noexcept ->
-    fixed_string&
+    basic_static_string&
 {
     this->set_size(1);
     Traits::assign(data()[0], ch);
@@ -852,27 +852,27 @@ assign_char(CharT ch, std::true_type) noexcept ->
 
 template<std::size_t N, typename CharT, typename Traits>
 auto
-fixed_string<N, CharT, Traits>::
+basic_static_string<N, CharT, Traits>::
 assign_char(CharT, std::false_type) ->
-    fixed_string&
+    basic_static_string&
 {
-    BOOST_FIXED_STRING_THROW(std::length_error{
+    BOOST_STATIC_STRING_THROW(std::length_error{
         "max_size() == 0"});
 }
 
 template<class Integer, class>
 inline
-fixed_string<detail::max_digits(sizeof(Integer))>
-to_fixed_string(Integer x)
+basic_static_string<detail::max_digits(sizeof(Integer)), char>
+to_static_string(Integer x)
 {
     using CharT = char;
     using Traits = std::char_traits<CharT>;
-    BOOST_FIXED_STRING_STATIC_ASSERT(std::is_integral<Integer>::value, "Integer must be an integral type");
+    BOOST_STATIC_STRING_STATIC_ASSERT(std::is_integral<Integer>::value, "Integer must be an integral type");
     char buf[detail::max_digits(sizeof(Integer))];
     auto last = buf + sizeof(buf);
     auto it = detail::raw_to_string<
         CharT, Integer, Traits>(last, sizeof(buf), x);
-    fixed_string<detail::max_digits(sizeof(Integer))> s;
+    basic_static_string<detail::max_digits(sizeof(Integer)), char> s;
     s.resize(static_cast<std::size_t>(last - it));
     auto p = s.data();
     while(it < last)
@@ -880,7 +880,7 @@ to_fixed_string(Integer x)
     return s;
 }
 
-} // fixed_string
+} // static_string
 } // boost
 
 #endif

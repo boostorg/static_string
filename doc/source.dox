@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 
 INPUT = \
-        $(LIB_DIR)/include/boost/fixed_string
+        $(LIB_DIR)/include/boost/static_string
 
 ALIASES               += esafe="@par Exception Safety"
 
@@ -43,7 +43,7 @@ SKIP_FUNCTION_MACROS   = YES
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "FixedString"
+PROJECT_NAME           = "StaticString"
 PROJECT_NUMBER         =
 PROJECT_BRIEF          = String Library
 PROJECT_LOGO           =

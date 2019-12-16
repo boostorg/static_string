@@ -5,23 +5,23 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/boostorg/fixed_string
+// Official repository: https://github.com/boostorg/static_string
 //
 
-#ifndef BOOST_FIXED_STRING_DETAIL_FIXED_STRING_HPP
-#define BOOST_FIXED_STRING_DETAIL_FIXED_STRING_HPP
+#ifndef BOOST_STATIC_STRING_DETAIL_STATIC_STRING_HPP
+#define BOOST_STATIC_STRING_DETAIL_STATIC_STRING_HPP
 
-#include <boost/fixed_string/config.hpp>
+#include <boost/static_string/config.hpp>
 #include <iterator>
 #include <type_traits>
 #include <limits>
 
 namespace boost {
-namespace fixed_string {
+namespace static_string {
 namespace detail {
 
 template<std::size_t, typename, typename>
-class fixed_string;
+class basic_static_string;
 
 // At minimum an integral type shall not qualify as an iterator (Agustin Berge)
 template<class T>
@@ -41,44 +41,44 @@ using smallest_width =
 
 // Optimization for using the smallest possible type
 template<std::size_t N, typename CharT, typename Traits>
-class fixed_string_base_zero
+class static_string_base_zero
 {
 public:
-  BOOST_FIXED_STRING_CPP11_CXPER
-  fixed_string_base_zero() noexcept { };
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero() noexcept { };
 
-  BOOST_FIXED_STRING_CPP11_CXPER
-  fixed_string_base_zero(std::size_t n) noexcept : size_(n) { }
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero(std::size_t n) noexcept : size_(n) { }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   CharT*
   data_impl() noexcept
   {
     return data_;
   }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   CharT const*
   data_impl() const noexcept
   {
     return data_;
   }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
   std::size_t
   size_impl() const noexcept
   {
     return size_;
   }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   std::size_t
   set_size(std::size_t n) noexcept
   {
     return size_ = n;
   }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
   term_impl() noexcept
   {
@@ -86,7 +86,7 @@ public:
   }
 
   smallest_width<N> size_{0};
-#ifdef BOOST_FIXED_STRING_ALLOW_UNINIT_MEM
+#ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
   CharT data_[N + 1];
 #else
   CharT data_[N + 1]{};
@@ -95,14 +95,14 @@ public:
 
 // Optimization for when the size is 0
 template<typename CharT, typename Traits>
-class fixed_string_base_zero<0, CharT, Traits>
+class static_string_base_zero<0, CharT, Traits>
 {
 public:
-  BOOST_FIXED_STRING_CPP11_CXPER
-  fixed_string_base_zero() noexcept {  }
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero() noexcept {  }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
-  fixed_string_base_zero(std::size_t) noexcept { }
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero(std::size_t) noexcept { }
 
   // not possible to constexpr with the static there
   CharT*
@@ -112,21 +112,21 @@ public:
     return &null;
   }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
   std::size_t
   size_impl() const noexcept
   {
     return 0;
   }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
   std::size_t
   set_size(std::size_t) noexcept
   {
     return 0;
   }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
   term_impl() noexcept
   {
@@ -136,58 +136,58 @@ public:
 
 // Optimization for storing the size in the last element
 template<std::size_t N, typename CharT, typename Traits>
-class fixed_string_base_null
+class static_string_base_null
 {
 public:
-  BOOST_FIXED_STRING_CPP14_CXPER
-  fixed_string_base_null() noexcept { set_size(0); }
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  static_string_base_null() noexcept { set_size(0); }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
-  fixed_string_base_null(std::size_t n) noexcept { set_size(n); }
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  static_string_base_null(std::size_t n) noexcept { set_size(n); }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   CharT*
   data_impl() noexcept
   {
     return data_;
   }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   CharT const*
   data_impl() const noexcept
   {
     return data_;
   }
 
-  BOOST_FIXED_STRING_CPP11_CXPER
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
   std::size_t
   size_impl() const noexcept
   {
     return N - data_[N];
   }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   std::size_t
   set_size(std::size_t n) noexcept
   {
     return data_[N] = (N - n);
   }
 
-  BOOST_FIXED_STRING_CPP14_CXPER
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
   term_impl() noexcept
   {
     Traits::assign(data_[size_impl()], 0);
   }
 
-#ifdef BOOST_FIXED_STRING_ALLOW_UNINIT_MEM
+#ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
   CharT data_[N + 1];
 #else
   CharT data_[N + 1]{};
 #endif
 };
 
-//#define BOOST_FIXED_STRING_NO_NULL_OPTIMIZATION
+//#define BOOST_STATIC_STRING_NO_NULL_OPTIMIZATION
 
 // Decides which size optimization to use
 // If the size is zero, the object will have no members
@@ -195,12 +195,12 @@ public:
 // Otherwise, store the size of the string using a member of the smallest type possible
 template<std::size_t N, typename CharT, typename Traits>
 using optimization_base = 
-#ifndef BOOST_FIXED_STRING_NO_NULL_OPTIMIZATION
+#ifndef BOOST_STATIC_STRING_NO_NULL_OPTIMIZATION
     typename std::conditional<(N <= (std::numeric_limits<CharT>::max)()) && (N != 0), 
-        fixed_string_base_null<N, CharT, Traits>,
-        fixed_string_base_zero<N, CharT, Traits>>::type;
+        static_string_base_null<N, CharT, Traits>,
+        static_string_base_zero<N, CharT, Traits>>::type;
 #else
-    fixed_string_base_zero<N, CharT, Traits>;
+    static_string_base_zero<N, CharT, Traits>;
 #endif
 
 template<typename CharT, typename Traits>
@@ -234,7 +234,7 @@ template<std::size_t N, typename CharT, typename Traits >
 inline
 int
 lexicographical_compare(
-    const fixed_string<N, CharT, Traits>& s1,
+    const basic_static_string<N, CharT, Traits>& s1,
     CharT const* s2, std::size_t n2)
 {
     return detail::lexicographical_compare<
@@ -256,8 +256,8 @@ template<std::size_t N, std::size_t M, typename CharT, typename Traits>
 inline
 int 
 lexicographical_compare(
-    const fixed_string<N, CharT, Traits>& s1, 
-    const fixed_string<M, CharT, Traits>& s2)
+    const basic_static_string<N, CharT, Traits>& s1, 
+    const basic_static_string<M, CharT, Traits>& s2)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     s1.data(), s1.size(), s2.data(), s2.size());
@@ -326,7 +326,7 @@ inline
 CharT*
 raw_to_string(CharT* last, std::size_t size, Integer i)
 {
-    BOOST_FIXED_STRING_ASSERT(size >= max_digits(sizeof(Integer)));
+    BOOST_STATIC_STRING_ASSERT(size >= max_digits(sizeof(Integer)));
     return raw_to_string<CharT, Integer, Traits>(
         last, i, std::is_signed<Integer>{});
 }
@@ -347,7 +347,7 @@ find_not_of(
 }
 
 } // detail
-} // fixed_string
+} // static_string
 } // boost
 
 #endif
