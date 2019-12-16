@@ -1,4 +1,4 @@
-# Boost.FixedString
+# Boost.StaticString
 
 Branch          | Travis | Appveyor | Azure Pipelines | codecov.io | Docs | Matrix |
 :-------------: | ------ | -------- | --------------- | ---------- | ---- | ------ |
