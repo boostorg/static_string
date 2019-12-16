@@ -794,7 +794,7 @@ public:
         Inserts `count` copies of character `ch` at the position `index`
 
         @throw std::out_of_range if `index > size()`
-        @throw std::length_error if `size() + count > max_size()`
+        @throw std::length_error if `count > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -809,7 +809,7 @@ public:
         Inserts null-terminated string pointed to by `s` at the position `index`
 
         @throw std::out_of_range if `index > size()`
-        @throw std::length_error if `size() + count > max_size()`
+        @throw std::length_error if `count > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -828,7 +828,7 @@ public:
         The inserted string can contain null characters.
 
         @throw std::out_of_range if `index > size()`
-        @throw std::length_error if ` size() + count> max_size()`
+        @throw std::length_error if `count > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -845,7 +845,7 @@ public:
         The inserted string can contain null characters.
 
         @throw std::out_of_range if `index > size()`
-        @throw std::length_error if `size() + sv.size() > max_size()`
+        @throw std::length_error if `sv.size() > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -864,7 +864,7 @@ public:
         The inserted string can contain null characters.
 
         @throw std::out_of_range if `index > size() || index_str > sv.size()`
-        @throw std::length_error if `size() + sv.substr(index_str, count).size() > max_size()`
+        @throw std::length_error if `sv.substr(index_str, count).size() > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -884,7 +884,7 @@ public:
 
         The inserted character can be null.
 
-        @throw std::length_error if `size() + 1> max_size()`
+        @throw std::length_error if `1 > max_size() - size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -902,7 +902,7 @@ public:
 
         The inserted characters can be null.
 
-        @throw std::length_error if `size() + count > max_size()`
+        @throw std::length_error if `count > max_size() - size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -920,7 +920,7 @@ public:
         This function does not participate in overload resolution if
         `InputIterator` does not satisfy <em>LegacyInputIterator</em>
 
-        @throw std::length_error if `size() + std::distance(first, last) > max_size()`
+        @throw std::length_error if `std::distance(first, last) > max_size() - size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
     template<typename InputIterator>
@@ -943,7 +943,7 @@ public:
 
         The inserted string can contain null characters.
 
-        @throw std::length_error if `size() + ilist.size() > max_size()`
+        @throw std::length_error if `ilist.size() > max_size() - size()`
         @return An iterator to the first inserted character or pos if no insertion took place
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -964,7 +964,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
 
-        @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
+        @throw std::length_error if `string_view{t}.substr(index_str, count).size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -993,7 +993,7 @@ public:
         convertible to `CharT const*`.
 
         @throw std::out_of_range if `index_str > string_view{t}.size()`
-        @throw std::length_error if `size() + string_view{t}.substr(index_str, count).size() > max_size()`
+        @throw std::length_error if `string_view{t}.substr(index_str, count).size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -1044,7 +1044,7 @@ public:
 
     /** Appends the given character `ch` to the end of the string.
 
-        @throw std::length_error if `size() + 1 > max_size()`
+        @throw std::length_error if `1 > max_size() - size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
@@ -1068,7 +1068,7 @@ public:
 
         The appended characters may be null.
 
-        @throw std::length_error if `size() + count > max_size()`
+        @throw std::length_error if `count > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1086,7 +1086,7 @@ public:
 
         The appended string can contain null characters.
 
-        @throw std::length_error if `size() + sv.size() > max_size()`
+        @throw std::length_error if `sv.size() > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1104,7 +1104,7 @@ public:
         The appended string can contain null characters.
 
         @throw std::out_of_range if `pos > sv.size()`
-        @throw std::length_error if `size() + sv.substr(pos, count).size() > max_size()`
+        @throw std::length_error if `sv.substr(pos, count).size() > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1123,7 +1123,7 @@ public:
     
         The appended string can contain null characters.
 
-        @throw std::length_error if `size() + count > max_size()`
+        @throw std::length_error if `count > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1139,7 +1139,7 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`.
 
-        @throw std::length_error if `size() + Traits::length(s) > max_size()`
+        @throw std::length_error if `Traits::length(s) > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1158,7 +1158,7 @@ public:
         This function does not participate in overload resolution if
         `InputIterator` does not satisfy <em>LegacyInputIterator</em>
 
-        @throw std::length_error if `size() + std::distance(first, last) > max_size()`
+        @throw std::length_error if `std::distance(first, last) > max_size() - size()`
         @return `*this`
     */
     template<typename InputIterator>
@@ -1184,7 +1184,7 @@ public:
 
         The appended string can contain null characters.
 
-        @throw std::length_error if `size() + ilist.size() > max_size()`
+        @throw std::length_error if `ilist.size() > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1205,7 +1205,7 @@ public:
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
 
-        @throw std::length_error if `size() + string_view{t} > max_size()`
+        @throw std::length_error if `string_view{t}.size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -1236,7 +1236,7 @@ public:
         convertible to `CharT const*`.
 
         @throw std::out_of_range if `pos > string_view{t}.size()`
-        @throw std::length_error if `size() + string_view{t}.substr(pos, count).size() > max_size()`
+        @throw std::length_error if `string_view{t}.substr(pos, count).size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -1261,7 +1261,7 @@ public:
 
     /** Append to the string.
 
-        @throw std::length_error if `size() + s.size() > max_size()`
+        @throw std::length_error if `s.size() > max_size() - size()`
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1276,7 +1276,7 @@ public:
     
         Appends the given character `ch` to the end of the string.
 
-        @throw std::length_error if `size() + 1 > max_size()`
+        @throw std::length_error if `1 > max_size() - size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1294,7 +1294,7 @@ public:
         The length of the string is determined by the first
         null character using `Traits::length(s)`.
 
-        @throw std::length_error if `size() + Traits::length(s) > max_size()`
+        @throw std::length_error if `Traits::length(s) > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1311,7 +1311,7 @@ public:
 
         The appended string can contain null characters.
 
-        @throw std::length_error if `size() + ilist.size() > max_size()`
+        @throw std::length_error if `ilist.size() > max_size() - size()`
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR

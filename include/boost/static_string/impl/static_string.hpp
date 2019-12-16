@@ -178,8 +178,6 @@ assign(
         return *this;
     this->set_size(s.size());
     auto const n = size() + 1;
-    // VFALCO This informs the static analyzer
-    //BOOST_BEAST_ASSUME(n != 0);
     Traits::copy(data(), &s.data()[0], n);
     return *this;
 }
@@ -341,7 +339,7 @@ insert(
             "index > size()"});
     if(count > max_size() - curr_size)
         BOOST_STATIC_STRING_THROW(std::length_error{
-            "size() + count > max_size()"});
+            "count > max_size() - size()"});
     const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
     if (!inside || (inside && ((s - curr_data) + count <= index)))
     {
@@ -381,7 +379,7 @@ insert(
     const auto curr_data = data();
     if(count > max_size() - curr_size)
         BOOST_STATIC_STRING_THROW(std::length_error{
-            "size() + count() > max_size()"});
+            "count() > max_size() - size()"});
     auto const index = pos - curr_data;
     Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
     this->set_size(curr_size + count);
@@ -523,7 +521,7 @@ append(
     const auto curr_size = size();
     if(count > max_size() - curr_size)
         BOOST_STATIC_STRING_THROW(std::length_error{
-            "size() + count > max_size()"});
+            "count > max_size() - size()"});
     Traits::copy(&data()[curr_size], s, count);
     this->set_size(curr_size + count);
     term();
