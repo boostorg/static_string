@@ -2426,52 +2426,6 @@ private:
 
 //------------------------------------------------------------------------------
 //
-// Disallowed operations
-//
-//------------------------------------------------------------------------------
-
-// These operations are explicitly deleted since
-// there is no reasonable implementation possible.
-
-template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
-inline
-void
-operator+(
-    basic_static_string<N, CharT, Traits>const& lhs,
-    basic_static_string<M, CharT, Traits>const& rhs) = delete;
-
-template<std::size_t N, typename CharT, typename Traits>
-inline
-void
-operator+(
-    CharT const* lhs,
-    basic_static_string<N, CharT, Traits>const& rhs) = delete;
-
-template<std::size_t N, typename CharT, typename Traits>
-inline
-void
-operator+(
-    CharT lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) = delete;
-
-template<std::size_t N, typename CharT, typename Traits>
-inline
-void
-operator+(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs) = delete;
-
-template<std::size_t N, typename CharT, typename Traits>
-inline
-void
-operator+(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT rhs) = delete;
-
-//------------------------------------------------------------------------------
-//
 // Non-member functions
 //
 //------------------------------------------------------------------------------
@@ -2479,6 +2433,7 @@ operator+(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
@@ -2491,6 +2446,7 @@ operator==(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
@@ -2503,6 +2459,7 @@ operator!=(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
@@ -2515,6 +2472,7 @@ operator<(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
@@ -2527,6 +2485,7 @@ operator<=(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
@@ -2539,6 +2498,7 @@ operator>(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
@@ -2549,6 +2509,7 @@ operator>=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
@@ -2561,6 +2522,7 @@ operator==(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
@@ -2573,6 +2535,7 @@ operator==(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
@@ -2585,6 +2548,7 @@ operator!=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
@@ -2597,6 +2561,7 @@ operator!=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
@@ -2609,6 +2574,7 @@ operator<(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
@@ -2621,6 +2587,7 @@ operator<(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
@@ -2633,6 +2600,7 @@ operator<=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
@@ -2645,6 +2613,7 @@ operator<=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
@@ -2657,6 +2626,7 @@ operator>(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
@@ -2669,6 +2639,7 @@ operator>(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
@@ -2681,6 +2652,7 @@ operator>=(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
@@ -2690,6 +2662,67 @@ operator>=(
     return detail::lexicographical_compare<CharT, Traits>(
         lhs.data(), lhs.size(),
         rhs, Traits::length(rhs)) >= 0;
+}
+
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+basic_static_string<N + M, CharT, Traits>
+operator+(
+    basic_static_string<N, CharT, Traits>const& lhs,
+    basic_static_string<M, CharT, Traits>const& rhs)
+{
+    return basic_static_string<N + M, CharT, Traits>(lhs) += rhs;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+basic_static_string<N + 1, CharT, Traits>
+operator+(
+    basic_static_string<N, CharT, Traits> const& lhs,
+    CharT rhs)
+{
+    return basic_static_string<N + 1, CharT, Traits>(lhs) += rhs;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+basic_static_string<N + 1, CharT, Traits>
+operator+(
+    CharT lhs,
+    basic_static_string<N, CharT, Traits> const& rhs)
+{
+    return basic_static_string<N + 1, CharT, Traits>(rhs).insert(0, lhs);
+}
+
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+basic_static_string<N + M, CharT, Traits>
+operator+(
+    basic_static_string<N, CharT, Traits>const& lhs,
+    const CharT(&rhs)[M])
+{
+    return basic_static_string<N + M, CharT, Traits>(lhs).append(+rhs, M);
+}
+
+template<
+    std::size_t N, std::size_t M,
+    typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+basic_static_string<N + M, CharT, Traits>
+operator+(
+    const CharT(&lhs)[N],
+    basic_static_string<M, CharT, Traits>const& rhs)
+{
+    return basic_static_string<N + M, CharT, Traits>(rhs).insert(0, +rhs, N);
 }
 
 //------------------------------------------------------------------------------
@@ -2702,6 +2735,7 @@ template<
     std::size_t N, 
     typename CharT, 
     typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 void
 swap(
@@ -2714,6 +2748,7 @@ swap(
 template<
     std::size_t N, std::size_t M,
     typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 void
 swap(

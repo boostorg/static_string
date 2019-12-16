@@ -226,6 +226,7 @@ using optimization_base =
 #endif
 
 template<typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
@@ -242,6 +243,7 @@ lexicographical_compare(
 }
 
 template<typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
@@ -252,7 +254,8 @@ lexicographical_compare(
         CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
 
-template<std::size_t N, typename CharT, typename Traits >
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
@@ -264,6 +267,7 @@ lexicographical_compare(
 }
 
 template<typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
@@ -275,6 +279,7 @@ lexicographical_compare(
 }
 
 template<std::size_t N, std::size_t M, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int 
 lexicographical_compare(
@@ -289,8 +294,9 @@ lexicographical_compare(
 // representation of a binary number. This includes
 // the potential minus sign.
 //
+BOOST_STATIC_STRING_CPP11_CONSTEXPR
 inline
-std::size_t constexpr
+std::size_t
 max_digits(std::size_t bytes)
 {
     return static_cast<std::size_t>(
