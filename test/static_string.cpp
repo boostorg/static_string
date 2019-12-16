@@ -6963,10 +6963,10 @@ constexpr bool testConstexpr()
   
 #else __cplusplus >= 201103L
   // c++11 constexpr tests
-  basic_static_string<4, char, cxper_char_traits> a;
+  /*basic_static_string<4, char, cxper_char_traits> a;
   auto b = a.size();
   auto c = a.empty();
-  auto d = a.empty();
+  auto d = a.empty();*/
 #endif
   return true;
 }
