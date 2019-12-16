@@ -77,9 +77,8 @@ basic_static_string<N, CharT, Traits>::
 basic_static_string(CharT const* s)
 {
     auto const count = Traits::length(s);
-    if(count > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "count > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
+                                 std::length_error{"count > max_size()"});
     this->set_size(count);
     Traits::copy(data(), s, size() + 1);
 }
@@ -157,9 +156,8 @@ assign(
     CharT ch) ->
         basic_static_string&
 {
-    if(count > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "count > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
+                                 std::length_error{"count > max_size()"});
     this->set_size(count);
     Traits::assign(data(), size(), ch);
     term();
@@ -206,9 +204,8 @@ assign(
     size_type count) ->
         basic_static_string&
 {
-    if(count > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "count > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
+                                 std::length_error{"count > max_size()"});
     this->set_size(count);
     Traits::move(data(), s, size());
     term();
@@ -228,9 +225,8 @@ assign(
                 basic_static_string&>::type
 {
     std::size_t const n = std::distance(first, last);
-    if(n > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "n > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(n > max_size(),
+                                 std::length_error{"n > max_size()"});
     this->set_size(n);
     for(auto it = data(); first != last; ++it, ++first)
         Traits::assign(*it, *first);
@@ -251,9 +247,8 @@ basic_static_string<N, CharT, Traits>::
 at(size_type pos) ->
     reference
 {
-    if(pos >= size())
-        BOOST_STATIC_STRING_THROW(std::out_of_range{
-            "pos >= size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        pos >= size(), std::out_of_range{"pos >= size()"});
     return data()[pos];
 }
 
@@ -264,9 +259,8 @@ basic_static_string<N, CharT, Traits>::
 at(size_type pos) const ->
     const_reference
 {
-    if(pos >= size())
-        BOOST_STATIC_STRING_THROW(std::out_of_range{
-            "pos >= size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        pos >= size(), std::out_of_range{"pos >= size()"});
     return data()[pos];
 }
 
@@ -282,9 +276,8 @@ void
 basic_static_string<N, CharT, Traits>::
 reserve(std::size_t n)
 {
-    if(n > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "n > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        n > max_size(), std::out_of_range{"n > max_size()"});
 }
 
 //------------------------------------------------------------------------------
@@ -315,9 +308,8 @@ insert(
     CharT ch) ->
         basic_static_string&
 {
-    if(index > size())
-        BOOST_STATIC_STRING_THROW(std::out_of_range{
-            "index > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        index > size(), std::out_of_range{"index > size()"});
     insert(begin() + index, count, ch);
     return *this;
 }
@@ -334,12 +326,10 @@ insert(
 {
     const auto curr_size = size();
     const auto curr_data = data();
-    if(index > curr_size)
-        BOOST_STATIC_STRING_THROW(std::out_of_range{
-            "index > size()"});
-    if(count > max_size() - curr_size)
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "count > max_size() - size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        index > curr_size, std::out_of_range{"index > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
     const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
     if (!inside || (inside && ((s - curr_data) + count <= index)))
     {
@@ -377,9 +367,8 @@ insert(
 {
     const auto curr_size = size();
     const auto curr_data = data();
-    if(count > max_size() - curr_size)
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "count() > max_size() - size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        count > max_size() - curr_size, std::length_error{"count() > max_size() - size()"});
     auto const index = pos - curr_data;
     Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
     this->set_size(curr_size + count);
@@ -458,9 +447,8 @@ erase(
 {
     const auto curr_size = size();
     const auto curr_data = data();
-    if(index > curr_size)
-        BOOST_STATIC_STRING_THROW(std::out_of_range{
-            "index > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        index > curr_size, std::out_of_range{"index > size()"});
     auto const n = (std::min)(count, curr_size - index);
     Traits::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
     this->set_size(curr_size - n);
@@ -501,9 +489,8 @@ push_back(
     CharT ch)
 {
     const auto curr_size = size();
-    if(curr_size >= max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "size() >= max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        curr_size >= max_size(), std::length_error{"size() >= max_size()"});
     Traits::assign(data()[curr_size], ch);
     this->set_size(curr_size + 1);
     term();
@@ -519,9 +506,8 @@ append(
         basic_static_string&
 {
     const auto curr_size = size();
-    if(count > max_size() - curr_size)
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "count > max_size() - size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
     Traits::copy(&data()[curr_size], s, count);
     this->set_size(curr_size + count);
     term();
@@ -535,9 +521,8 @@ basic_static_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
     basic_static_string
 {
-    if(pos > size())
-        BOOST_STATIC_STRING_THROW(std::out_of_range{
-            "pos > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        pos > size(), std::out_of_range{"pos > size()"});
     return {&data()[pos], (std::min)(count, size() - pos)};
 }
 
@@ -548,10 +533,9 @@ basic_static_string<N, CharT, Traits>::
 subview(size_type pos, size_type count) const ->
     string_view_type
 {
-  if (pos > size())
-    BOOST_STATIC_STRING_THROW(std::out_of_range{
-        "pos > size()"});
-  return {&data()[pos], (std::min)(count, size() - pos)};
+    BOOST_STATIC_STRING_THROW_IF(
+      pos > size(), std::out_of_range{"pos > size()"});
+    return {&data()[pos], (std::min)(count, size() - pos)};
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -573,9 +557,8 @@ basic_static_string<N, CharT, Traits>::
 resize(std::size_t n)
 {
     const auto curr_size = size();
-    if(n > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "n > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        n > max_size(), std::length_error{"n > max_size()"});
     if(n > curr_size)
         Traits::assign(&data()[curr_size], n - curr_size, CharT{});
     this->set_size(n);
@@ -589,9 +572,8 @@ basic_static_string<N, CharT, Traits>::
 resize(std::size_t n, CharT c)
 {
     const auto curr_size = size();
-    if(n > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "n > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        n > max_size(), std::length_error{"n > max_size()"});
     if(n > curr_size)
         Traits::assign(&data()[curr_size], n - curr_size, c);
     this->set_size(n);
@@ -620,12 +602,10 @@ basic_static_string<N, CharT, Traits>::
 swap(basic_static_string<M, CharT, Traits>& s)
 {
     const auto curr_size = size();
-    if(curr_size > s.max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "size() > s.max_size()"});
-    if(s.size() > max_size())
-        BOOST_STATIC_STRING_THROW(std::length_error{
-            "s.size() > max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        curr_size > s.max_size(), std::length_error{"size() > s.max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        s.size() > max_size(), std::length_error{"s.size() > max_size()"});
     basic_static_string tmp(s);
     s.set_size(curr_size);
     Traits::copy(&s.data()[0], data(), curr_size + 1);
@@ -645,12 +625,11 @@ replace(
 {
     const auto curr_size = size();
     const auto curr_data = data();
-    if (pos > curr_size)
-      BOOST_STATIC_STRING_THROW(std::out_of_range{
-             "pos > size()"});
-    if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
-      BOOST_STATIC_STRING_THROW(std::length_error{
-             "replaced string exceeds max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        pos > curr_size, std::out_of_range{"pos > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2, 
+        std::length_error{"replaced string exceeds max_size()"});
     if (pos + n1 >= curr_size)
       n1 = curr_size - pos;
     const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
@@ -702,12 +681,11 @@ replace(
 {
     const auto curr_size = size();
     const auto curr_data = data();
-    if (pos > curr_size)
-      BOOST_STATIC_STRING_THROW(std::out_of_range{
-             "pos > size()"});
-    if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
-      BOOST_STATIC_STRING_THROW(std::length_error{
-             "replaced string exceeds max_size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        pos > curr_size, std::out_of_range{"pos > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+        curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+        std::length_error{"replaced string exceeds max_size()"});
     if (pos + n1 >= curr_size)
       n1 = curr_size - pos;
     Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
@@ -854,8 +832,8 @@ basic_static_string<N, CharT, Traits>::
 assign_char(CharT, std::false_type) ->
     basic_static_string&
 {
-    BOOST_STATIC_STRING_THROW(std::length_error{
-        "max_size() == 0"});
+    BOOST_STATIC_STRING_THROW(std::length_error{"max_size() == 0"});
+    return *this;
 }
 
 template<class Integer, class>

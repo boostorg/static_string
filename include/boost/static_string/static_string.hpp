@@ -285,7 +285,7 @@ public:
         CharT ch)
     {
         return assign_char(ch,
-            std::integral_constant<bool, (N>0)>{});
+            std::integral_constant<bool, (N > 0)>{});
     }
 
     /** Assign to the string.

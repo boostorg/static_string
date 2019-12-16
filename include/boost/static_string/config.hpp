@@ -14,6 +14,9 @@
 // Are we dependent on Boost?
 // #define BOOST_STATIC_STRING_STANDALONE
 
+// Disable exceptions and their associated checks
+// #define BOOST_STATIC_STRING_NO_EXCEPTIONS
+
 // Can we have deduction guides?
 #ifdef __cpp_deduction_guides
 #define BOOST_STATIC_STRING_USE_DEDUCT
@@ -77,8 +80,16 @@
 #include <string_view>
 #endif
 
+#ifdef BOOST_STATIC_STRING_NO_EXCEPTIONS
+#define BOOST_STATIC_STRING_THROW_IF(cond, ex)
+#define BOOST_STATIC_STRING_THROW(ex)
+#endif
+
 // Boost and non-Boost versions of utilities
 #ifndef BOOST_STATIC_STRING_STANDALONE
+#ifndef BOOST_STATIC_STRING_THROW_IF
+#define BOOST_STATIC_STRING_THROW_IF(cond, ex) if (cond) BOOST_THROW_EXCEPTION(ex)
+#endif
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) BOOST_THROW_EXCEPTION(ex)
 #endif
@@ -89,6 +100,9 @@
 #define BOOST_STATIC_STRING_ASSERT(cond) BOOST_ASSERT(cond)
 #endif
 #else
+#ifndef BOOST_STATIC_STRING_THROW_IF
+#define BOOST_STATIC_STRING_THROW_IF(cond, ex) if (cond) throw ex
+#endif
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) throw ex
 #endif
