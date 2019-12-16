@@ -24,14 +24,17 @@ namespace fixed_string {
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP11_CXPER
 fixed_string<N, CharT, Traits>::
-fixed_string()
+fixed_string() noexcept
 {
-    n_ = 0;
+#ifdef BOOST_FIXED_STRING_CPP20_CXPER_USED
     term();
+#endif
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(size_type count, CharT ch)
 {
@@ -40,6 +43,7 @@ fixed_string(size_type count, CharT ch)
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(fixed_string<M, CharT, Traits> const& other,
     size_type pos)
@@ -49,6 +53,7 @@ fixed_string(fixed_string<M, CharT, Traits> const& other,
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(
     fixed_string<M, CharT, Traits> const& other,
@@ -59,6 +64,7 @@ fixed_string(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(CharT const* s, size_type count)
 {
@@ -66,6 +72,7 @@ fixed_string(CharT const* s, size_type count)
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(CharT const* s)
 {
@@ -73,12 +80,13 @@ fixed_string(CharT const* s)
     if(count > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
-    n_ = count;
-    Traits::copy(s_, s, n_ + 1);
+    this->set_size(count);
+    Traits::copy(data(), s, size() + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class InputIterator>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(
     InputIterator first,
@@ -91,15 +99,17 @@ fixed_string(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(
-    fixed_string const& s)
+    fixed_string const& s) noexcept
 {
     assign(s);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(
     fixed_string<M, CharT, Traits> const& s)
@@ -108,6 +118,7 @@ fixed_string(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(std::initializer_list<CharT> init)
 {
@@ -115,6 +126,7 @@ fixed_string(std::initializer_list<CharT> init)
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(string_view_type sv)
 {
@@ -123,6 +135,7 @@ fixed_string(string_view_type sv)
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
+BOOST_FIXED_STRING_CPP14_CXPER
 fixed_string<N, CharT, Traits>::
 fixed_string(T const& t, size_type pos, size_type n)
 {
@@ -136,6 +149,7 @@ fixed_string(T const& t, size_type pos, size_type n)
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 assign(
@@ -146,13 +160,14 @@ assign(
     if(count > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
-    n_ = count;
-    Traits::assign(s_, n_, ch);
+    this->set_size(count);
+    Traits::assign(data(), size(), ch);
     term();
     return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 assign(
@@ -161,16 +176,17 @@ assign(
 {
     if(this == &s)
         return *this;
-    n_ = s.n_;
-    auto const n = n_ + 1;
+    this->set_size(s.size());
+    auto const n = size() + 1;
     // VFALCO This informs the static analyzer
     //BOOST_BEAST_ASSUME(n != 0);
-    Traits::copy(s_, &s.s_[0], n);
+    Traits::copy(data(), &s.data()[0], n);
     return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 assign(
@@ -179,11 +195,12 @@ assign(
     size_type count) ->
     fixed_string&
 {
-    auto const ss = s.substr(pos, count);
+    auto const ss = s.subview(pos, count);
     return assign(ss.data(), ss.size());
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 assign(
@@ -194,18 +211,15 @@ assign(
     if(count > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "count > max_size()"});
-    n_ = count;
-    // check for overlap, then move if needed
-    if (s <= &s_[size()] && s >= s_)
-      Traits::move(s_, s, n_);
-    else
-      Traits::copy(s_, s, n_);
+    this->set_size(count);
+    Traits::move(data(), s, size());
     term();
     return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class InputIterator>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 assign(
@@ -219,8 +233,8 @@ assign(
     if(n > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
-    n_ = n;
-    for(auto it = s_; first != last; ++it, ++first)
+    this->set_size(n);
+    for(auto it = data(); first != last; ++it, ++first)
         Traits::assign(*it, *first);
     term();
     return *this;
@@ -233,6 +247,7 @@ assign(
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 at(size_type pos) ->
@@ -241,10 +256,11 @@ at(size_type pos) ->
     if(pos >= size())
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "pos >= size()"});
-    return s_[pos];
+    return data()[pos];
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 at(size_type pos) const ->
@@ -253,7 +269,7 @@ at(size_type pos) const ->
     if(pos >= size())
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "pos >= size()"});
-    return s_[pos];
+    return data()[pos];
 }
 
 //------------------------------------------------------------------------------
@@ -263,6 +279,7 @@ at(size_type pos) const ->
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 void
 fixed_string<N, CharT, Traits>::
 reserve(std::size_t n)
@@ -279,17 +296,19 @@ reserve(std::size_t n)
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 void
 fixed_string<N, CharT, Traits>::
-clear()
+clear() noexcept
 {
-    n_ = 0;
+    this->set_size(0);
     term();
 }
 
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 insert(
@@ -306,6 +325,7 @@ insert(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 insert(
@@ -314,38 +334,41 @@ insert(
     size_type count) ->
         fixed_string&
 {
-    if(index > size())
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if(index > curr_size)
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
-    if(size() + count > max_size())
+    if(count > max_size() - curr_size)
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
-    const bool inside = s <= &s_[size()] && s >= s_;
-    if (!inside || (inside && ((s - s_) + count <= index)))
+    const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+    if (!inside || (inside && ((s - curr_data) + count <= index)))
     {
-      Traits::move(&s_[index + count], &s_[index], size() - index + 1);
-      Traits::copy(&s_[index], s, count);
+      Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+      Traits::copy(&curr_data[index], s, count);
     }
     else
     {
-      const size_type offset = s - s_;
-      Traits::move(&s_[index + count], &s_[index], size() - index + 1);
+      const size_type offset = s - curr_data;
+      Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
       if (offset < index)
       {
         const size_type diff = index - offset;
-        Traits::copy(&s_[index], &s_[offset], diff);
-        Traits::copy(&s_[index + diff], &s_[index + count], count - diff);
+        Traits::copy(&curr_data[index], &curr_data[offset], diff);
+        Traits::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
       }
       else
       {
-        Traits::copy(&s_[index], &s_[offset + count], count);
+        Traits::copy(&curr_data[index], &curr_data[offset + count], count);
       }
     }
-    n_ += count;
+    this->set_size(curr_size + count);
     return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 insert(
@@ -354,20 +377,22 @@ insert(
     CharT ch) ->
         iterator
 {
-    if(size() + count > max_size())
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if(count > max_size() - curr_size)
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count() > max_size()"});
-    auto const index = pos - s_;
-    Traits::move(
-        &s_[index + count], &s_[index], size() - index);
-    n_ += count;
-    Traits::assign(&s_[index], count, ch);
+    auto const index = pos - curr_data;
+    Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
+    this->set_size(curr_size + count);
+    Traits::assign(&curr_data[index], count, ch);
     term();
-    return &s_[index];
+    return &curr_data[index];
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class InputIterator>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 insert(
@@ -384,6 +409,7 @@ insert(
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 insert(
@@ -401,6 +427,7 @@ insert(
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class T>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 insert(
@@ -423,6 +450,7 @@ insert(
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 erase(
@@ -430,17 +458,19 @@ erase(
     size_type count) ->
         fixed_string&
 {
-    if(index > size())
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if(index > curr_size)
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "index > size()"});
-    auto const n = (std::min)(count, size() - index);
-    Traits::move(
-        &s_[index], &s_[index + n], size() - (index + n) + 1);
-    n_ -= n;
+    auto const n = (std::min)(count, curr_size - index);
+    Traits::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
+    this->set_size(curr_size - n);
     return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 erase(
@@ -452,6 +482,7 @@ erase(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 erase(
@@ -465,19 +496,23 @@ erase(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 void
 fixed_string<N, CharT, Traits>::
 push_back(
     CharT ch)
 {
-    if(size() >= max_size())
+    const auto curr_size = size();
+    if(curr_size >= max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() >= max_size()"});
-    Traits::assign(s_[n_++], ch);
+    Traits::assign(data()[curr_size], ch);
+    this->set_size(curr_size + 1);
     term();
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 append(
@@ -485,100 +520,123 @@ append(
     size_type count) ->
         fixed_string&
 {
-    if(size() + count > max_size())
+    const auto curr_size = size();
+    if(count > max_size() - curr_size)
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() + count > max_size()"});
-    Traits::move(
-        &s_[n_ + count], &s_[n_], size() - n_);
-    Traits::copy(&s_[n_], s, count);
-    n_ += count;
+    Traits::copy(&data()[curr_size], s, count);
+    this->set_size(curr_size + count);
     term();
     return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
-    string_view
+    fixed_string
 {
     if(pos > size())
         BOOST_FIXED_STRING_THROW(std::out_of_range{
             "pos > size()"});
-    return {&s_[pos], (std::min)(count, size() - pos)};
+    return {&data()[pos], (std::min)(count, size() - pos)};
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
-copy(CharT* dest, size_type count, size_type pos) const ->
+subview(size_type pos, size_type count) const ->
+    string_view_type
+{
+  if (pos > size())
+    BOOST_FIXED_STRING_THROW(std::out_of_range{
+        "pos > size()"});
+  return {&data()[pos], (std::min)(count, size() - pos)};
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
+auto
+fixed_string<N, CharT, Traits>::
+copy(CharT* dest, size_type count, size_type pos) const noexcept ->
     size_type
 {
-    auto const s = substr(pos, count);
+    auto const s = subview(pos, count);
     Traits::copy(dest, s.data(), s.size());
     return s.size();
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 void
 fixed_string<N, CharT, Traits>::
 resize(std::size_t n)
 {
+    const auto curr_size = size();
     if(n > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
-    if(n > n_)
-        Traits::assign(&s_[n_], n - n_, CharT{});
-    n_ = n;
+    if(n > curr_size)
+        Traits::assign(&data()[curr_size], n - curr_size, CharT{});
+    this->set_size(n);
     term();
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 void
 fixed_string<N, CharT, Traits>::
 resize(std::size_t n, CharT c)
 {
+    const auto curr_size = size();
     if(n > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "n > max_size()"});
-    if(n > n_)
-        Traits::assign(&s_[n_], n - n_, c);
-    n_ = n;
+    if(n > curr_size)
+        Traits::assign(&data()[curr_size], n - curr_size, c);
+    this->set_size(n);
     term();
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 void
 fixed_string<N, CharT, Traits>::
-swap(fixed_string& s)
+swap(fixed_string& s) noexcept
 {
+    const auto curr_size = size();
     fixed_string tmp(s);
-    s.n_ = n_;
-    Traits::copy(&s.s_[0], s_, n_ + 1);
-    n_ = tmp.n_;
-    Traits::copy(s_, &tmp.s_[0], n_ + 1);
+    s.set_size(curr_size);
+    Traits::copy(&s.data()[0], data(), curr_size + 1);
+    this->set_size(tmp.size());
+    Traits::copy(data(), tmp.data(), size() + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
+BOOST_FIXED_STRING_CPP14_CXPER
 void
 fixed_string<N, CharT, Traits>::
 swap(fixed_string<M, CharT, Traits>& s)
 {
-    if(size() > s.max_size())
+    const auto curr_size = size();
+    if(curr_size > s.max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "size() > s.max_size()"});
     if(s.size() > max_size())
         BOOST_FIXED_STRING_THROW(std::length_error{
             "s.size() > max_size()"});
     fixed_string tmp(s);
-    s.n_ = n_;
-    Traits::copy(&s.s_[0], s_, n_ + 1);
-    n_ = tmp.n_;
-    Traits::copy(s_, &tmp.s_[0], n_ + 1);
+    s.set_size(curr_size);
+    Traits::copy(&s.data()[0], data(), curr_size + 1);
+    this->set_size(tmp.size());
+    Traits::copy(data(), &tmp.data()[0], size() + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 replace(
@@ -587,52 +645,55 @@ replace(
     const CharT* s,
     size_type n2) -> fixed_string<N, CharT, Traits>&
 {
-  if (pos > size())
-    BOOST_FIXED_STRING_THROW(std::out_of_range{
-           "pos > size()"});
-  if (size() - (std::min)(n1, size() - pos) >= max_size() - n2)
-    BOOST_FIXED_STRING_THROW(std::length_error{
-           "replaced string exceeds max_size()"});
-  if (pos + n1 >= size())
-    n1 = size() - pos;
-  const bool inside = s <= &s_[size()] && s >= s_;
-  if (inside && size_type(s - s_) == pos && n1 == n2)
-    return *this;
-  if (!inside || (inside && ((s - s_) + n2 <= pos)))
-  {
-    // source outside
-    Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
-    Traits::copy(&s_[pos], s, n2);
-  }
-  else
-  {
-    // source inside
-    const size_type offset = s - s_;
-    if (n2 >= n1)
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if (pos > curr_size)
+      BOOST_FIXED_STRING_THROW(std::out_of_range{
+             "pos > size()"});
+    if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
+      BOOST_FIXED_STRING_THROW(std::length_error{
+             "replaced string exceeds max_size()"});
+    if (pos + n1 >= curr_size)
+      n1 = curr_size - pos;
+    const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+    if (inside && size_type(s - curr_data) == pos && n1 == n2)
+      return *this;
+    if (!inside || (inside && ((s - curr_data) + n2 <= pos)))
     {
-      // grow/unchanged
-      // shift all right of splice point by n2 - n1 to the right
-      Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
-      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
-      // copy all before splice point
-      Traits::move(&s_[pos], &s_[offset], diff);
-      // copy all after splice point
-      Traits::move(&s_[pos + diff], &s_[offset + (n2 - n1) + diff], n2 - diff);
+      // source outside
+      Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      Traits::copy(&curr_data[pos], s, n2);
     }
     else
     {
-      // shrink
-      // copy all elements into place
-      Traits::move(&s_[pos], &s_[offset], n2);
-      // shift all elements after splice point left
-      Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
+      // source inside
+      const size_type offset = s - curr_data;
+      if (n2 >= n1)
+      {
+        // grow/unchanged
+        // shift all right of splice point by n2 - n1 to the right
+        Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+        const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
+        // copy all before splice point
+        Traits::move(&curr_data[pos], &curr_data[offset], diff);
+        // copy all after splice point
+        Traits::move(&curr_data[pos + diff], &curr_data[offset + (n2 - n1) + diff], n2 - diff);
+      }
+      else
+      {
+        // shrink
+        // copy all elements into place
+        Traits::move(&curr_data[pos], &curr_data[offset], n2);
+        // shift all elements after splice point left
+        Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      }
     }
-  }
-  n_ += (n2 - n1);
-  return *this;
+    this->set_size(curr_size + (n2 - n1));
+    return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 replace(
@@ -641,135 +702,150 @@ replace(
     size_type n2,
     CharT c) -> fixed_string<N, CharT, Traits> &
 {
-  if (pos > size())
-    BOOST_FIXED_STRING_THROW(std::out_of_range{
-           "pos > size()"});
-  if (size() - (std::min)(n1, size() - pos) >= max_size() - n2)
-    BOOST_FIXED_STRING_THROW(std::length_error{
-           "replaced string exceeds max_size()"});
-  if (pos + n1 >= size())
-    n1 = size() - pos;
-  Traits::move(&s_[pos + n2], &s_[pos + n1], size() - pos - n1 + 1);
-  Traits::assign(&s_[pos], n2, c);
-  n_ += (n2 - n1);
-  return *this;
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if (pos > curr_size)
+      BOOST_FIXED_STRING_THROW(std::out_of_range{
+             "pos > size()"});
+    if (curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
+      BOOST_FIXED_STRING_THROW(std::length_error{
+             "replaced string exceeds max_size()"});
+    if (pos + n1 >= curr_size)
+      n1 = curr_size - pos;
+    Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+    Traits::assign(&curr_data[pos], n2, c);
+    this->set_size(curr_size + (n2 - n1));
+    return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 find(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
-  if (pos > n_ || n > n_ - pos)
-    return npos;
-  if (!n)
-    return pos;
-  const auto res = std::search(&s_[pos], &s_[n_], s, &s[n], Traits::eq);
-  return res == end() ? npos : std::distance(s_, res);
+    const auto curr_size = size();
+    if (pos > curr_size || n > curr_size - pos)
+      return npos;
+    if (!n)
+      return pos;
+    const auto res = std::search(&data()[pos], &data()[curr_size], s, &s[n], Traits::eq);
+    return res == end() ? npos : std::distance(data(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 rfind(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
-  if (n_ < n)
+    const auto curr_size = size();
+    const auto curr_data = data();
+    if (curr_size < n)
+      return npos;
+    if (pos > curr_size - n)
+      pos = curr_size - n;
+    if (!n)
+      return pos;
+    for (auto sub = &curr_data[pos]; sub >= curr_data; --sub)
+      if (!Traits::compare(sub, s, n))
+        return std::distance(curr_data, sub);
     return npos;
-  if (pos > n_ - n)
-    pos = n_ - n;
-  if (!n)
-    return pos;
-  for (auto sub = &s_[pos]; sub >= s_; --sub)
-    if (!Traits::compare(sub, s, n))
-      return std::distance(s_, sub);
-  return npos;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 find_first_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
-  if (pos >= n_ || !n)
-    return npos;
-  const auto res = std::find_first_of(&s_[pos], &s_[n_], s, &s[n], Traits::eq);
-  return res == end() ? npos : std::distance(s_, res);
+    const auto curr_data = data();
+    if (pos >= size() || !n)
+      return npos;
+    const auto res = std::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], Traits::eq);
+    return res == end() ? npos : std::distance(curr_data, res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 find_last_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
-  if (!n)
-    return npos;
-  if (pos >= n_)
-    pos = 0;
-  else
-    pos = n_ - (pos + 1);
-  const auto res = std::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
-  return res == rend() ? npos : n_ - 1 - std::distance(rbegin(), res);
+    const auto curr_size = size();
+    if (!n)
+      return npos;
+    if (pos >= curr_size)
+      pos = 0;
+    else
+      pos = curr_size - (pos + 1);
+    const auto res = std::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
+    return res == rend() ? npos : curr_size - 1 - std::distance(rbegin(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 find_first_not_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
-  if (pos >= n_)
-    return npos;
-  if (!n)
-    return pos;
-  const auto res = detail::find_not_of<Traits>(&s_[pos], &s_[n_], s, n);
-  return res == end() ? npos : std::distance(s_, res);
+    if (pos >= size())
+      return npos;
+    if (!n)
+      return pos;
+    const auto res = detail::find_not_of<Traits>(&data()[pos], &data()[size()], s, n);
+    return res == end() ? npos : std::distance(data(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
 find_last_not_of(
     const CharT* s,
     size_type pos,
-    size_type n) const -> 
+    size_type n) const noexcept ->
         size_type
 {
-  if (pos >= n_)
-    pos = n_ - 1;
-  if (!n)
-    return pos;
-  pos = n_ - (pos + 1);
-  const auto res = detail::find_not_of<Traits>(rbegin() + pos, rend(), s, n);
-  return res == rend() ? npos : n_ - 1 - std::distance(rbegin(), res);
+    const auto curr_size = size();
+    if (pos >= curr_size)
+      pos = curr_size - 1;
+    if (!n)
+      return pos;
+    pos = curr_size - (pos + 1);
+    const auto res = detail::find_not_of<Traits>(rbegin() + pos, rend(), s, n);
+    return res == rend() ? npos : curr_size - 1 - std::distance(rbegin(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+BOOST_FIXED_STRING_CPP14_CXPER
 auto
 fixed_string<N, CharT, Traits>::
-assign_char(CharT ch, std::true_type) ->
+assign_char(CharT ch, std::true_type) noexcept ->
     fixed_string&
 {
-    n_ = 1;
-    Traits::assign(s_[0], ch);
+    this->set_size(1);
+    Traits::assign(data()[0], ch);
     term();
     return *this;
 }

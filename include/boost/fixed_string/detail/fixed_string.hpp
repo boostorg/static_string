@@ -14,6 +14,7 @@
 #include <boost/fixed_string/config.hpp>
 #include <iterator>
 #include <type_traits>
+#include <limits>
 
 namespace boost {
 namespace fixed_string {
@@ -22,11 +23,185 @@ namespace detail {
 template<std::size_t, typename, typename>
 class fixed_string;
 
-// Because k-ballo said so
+// At minimum an integral type shall not qualify as an iterator (Agustin Berge)
 template<class T>
 using is_input_iterator =
     std::integral_constant<bool,
         ! std::is_integral<T>::value>;
+
+// Find the smallest width integral type that can hold a value as large as N (Glen Fernandes)
+template<std::size_t N>
+using smallest_width =
+    typename std::conditional<(N <= (std::numeric_limits<unsigned char>::max)()), unsigned char,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned short>::max)()), unsigned short,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned int>::max)()), unsigned int,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned long>::max)()), unsigned long,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned long long>::max)()), unsigned long long,
+    void>::type>::type>::type>::type>::type;
+
+// Optimization for using the smallest possible type
+template<std::size_t N, typename CharT, typename Traits>
+class fixed_string_base_zero
+{
+public:
+  BOOST_FIXED_STRING_CPP11_CXPER
+  fixed_string_base_zero() noexcept { };
+
+  BOOST_FIXED_STRING_CPP11_CXPER
+  fixed_string_base_zero(std::size_t n) noexcept : size_(n) { }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  CharT*
+  data_impl() noexcept
+  {
+    return data_;
+  }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  CharT const*
+  data_impl() const noexcept
+  {
+    return data_;
+  }
+
+  BOOST_FIXED_STRING_CPP11_CXPER
+  std::size_t
+  size_impl() const noexcept
+  {
+    return size_;
+  }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  std::size_t
+  set_size(std::size_t n) noexcept
+  {
+    return size_ = n;
+  }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  void
+  term_impl() noexcept
+  {
+    Traits::assign(data_[size_], 0);
+  }
+
+  smallest_width<N> size_{0};
+#ifdef BOOST_FIXED_STRING_ALLOW_UNINIT_MEM
+  CharT data_[N + 1];
+#else
+  CharT data_[N + 1]{};
+#endif
+};
+
+// Optimization for when the size is 0
+template<typename CharT, typename Traits>
+class fixed_string_base_zero<0, CharT, Traits>
+{
+public:
+  BOOST_FIXED_STRING_CPP11_CXPER
+  fixed_string_base_zero() noexcept {  }
+
+  BOOST_FIXED_STRING_CPP11_CXPER
+  fixed_string_base_zero(std::size_t) noexcept { }
+
+  // not possible to constexpr with the static there
+  CharT*
+  data_impl() const noexcept
+  {
+    static CharT null{};
+    return &null;
+  }
+
+  BOOST_FIXED_STRING_CPP11_CXPER
+  std::size_t
+  size_impl() const noexcept
+  {
+    return 0;
+  }
+
+  BOOST_FIXED_STRING_CPP11_CXPER
+  std::size_t
+  set_size(std::size_t) noexcept
+  {
+    return 0;
+  }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  void
+  term_impl() noexcept
+  {
+
+  }
+};
+
+// Optimization for storing the size in the last element
+template<std::size_t N, typename CharT, typename Traits>
+class fixed_string_base_null
+{
+public:
+  BOOST_FIXED_STRING_CPP14_CXPER
+  fixed_string_base_null() noexcept { set_size(0); }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  fixed_string_base_null(std::size_t n) noexcept { set_size(n); }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  CharT*
+  data_impl() noexcept
+  {
+    return data_;
+  }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  CharT const*
+  data_impl() const noexcept
+  {
+    return data_;
+  }
+
+  BOOST_FIXED_STRING_CPP11_CXPER
+  std::size_t
+  size_impl() const noexcept
+  {
+    return N - data_[N];
+  }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  std::size_t
+  set_size(std::size_t n) noexcept
+  {
+    return data_[N] = (N - n);
+  }
+
+  BOOST_FIXED_STRING_CPP14_CXPER
+  void
+  term_impl() noexcept
+  {
+    Traits::assign(data_[size_impl()], 0);
+  }
+
+#ifdef BOOST_FIXED_STRING_ALLOW_UNINIT_MEM
+  CharT data_[N + 1];
+#else
+  CharT data_[N + 1]{};
+#endif
+};
+
+//#define BOOST_FIXED_STRING_NO_NULL_OPTIMIZATION
+
+// Decides which size optimization to use
+// If the size is zero, the object will have no members
+// Otherwise, if CharT can hold the max size of the string, store the size in the last char
+// Otherwise, store the size of the string using a member of the smallest type possible
+template<std::size_t N, typename CharT, typename Traits>
+using optimization_base = 
+#ifndef BOOST_FIXED_STRING_NO_NULL_OPTIMIZATION
+    typename std::conditional<(N <= (std::numeric_limits<CharT>::max)()) && (N != 0), 
+        fixed_string_base_null<N, CharT, Traits>,
+        fixed_string_base_zero<N, CharT, Traits>>::type;
+#else
+    fixed_string_base_zero<N, CharT, Traits>;
+#endif
 
 template<typename CharT, typename Traits>
 inline
