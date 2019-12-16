@@ -277,7 +277,7 @@ basic_static_string<N, CharT, Traits>::
 reserve(std::size_t n)
 {
     BOOST_STATIC_STRING_THROW_IF(
-        n > max_size(), std::out_of_range{"n > max_size()"});
+        n > max_size(), std::length_error{"n > max_size()"});
 }
 
 //------------------------------------------------------------------------------
