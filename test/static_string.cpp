@@ -16,6 +16,7 @@
 namespace boost {
 namespace static_string {
   
+using string_view = basic_string_view<char, std::char_traits<char>>;
 
 template <class S>
 bool
@@ -6933,7 +6934,6 @@ constexpr bool testConstexpr()
 
 #elif __cplusplus >= 201402L
   // c++14 constexpr tests
-  static_string<4> a;
   
 
   using S = basic_static_string<16, char, cxper_char_traits>;
@@ -6963,7 +6963,7 @@ constexpr bool testConstexpr()
   
 #else __cplusplus >= 201103L
   // c++11 constexpr tests
-  static_string<4> a;
+  static_string<4, char, cxper_char_traits> a;
   auto b = a.size();
   auto c = a.empty();
   auto d = a.empty();
@@ -7006,6 +7006,9 @@ runTests()
   testStartsEnds();
 
   testHash();
+
+  static_string<1>() + static_string<3>();
+  static_string<3>() + "ggggg";
 
   return report_errors();
 }

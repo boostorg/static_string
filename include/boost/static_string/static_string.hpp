@@ -81,7 +81,7 @@ public:
 
     /// The type of `string_view` returned by the interface
     using string_view_type =
-        string_view;
+        basic_string_view<CharT, Traits>;
 
     //--------------------------------------------------------------------------
     //
@@ -957,14 +957,14 @@ public:
 
     /** Insert into the string.
     
-        Inserts elements from `string_view{t}` at the position `index`
+        Inserts elements from `string_view_type{t}` at the position `index`
 
         The inserted string can contain null characters.
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
 
-        @throw std::length_error if `string_view{t}.substr(index_str, count).size() > max_size() - size()`
+        @throw std::length_error if `string_view_type{t}.substr(index_str, count).size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -985,15 +985,15 @@ public:
 
     /** Insert into the string.
 
-        Inserts elements from `string_view{t}.substr(index_str, count)` at the position `index`
+        Inserts elements from `string_view_type{t}.substr(index_str, count)` at the position `index`
 
         The inserted string can contain null characters.
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
 
-        @throw std::out_of_range if `index_str > string_view{t}.size()`
-        @throw std::length_error if `string_view{t}.substr(index_str, count).size() > max_size() - size()`
+        @throw std::out_of_range if `index_str > string_view_type{t}.size()`
+        @throw std::length_error if `string_view_type{t}.substr(index_str, count).size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -1198,14 +1198,14 @@ public:
 
     /** Append to the string.
     
-        Appends characters from `string_view{t}`
+        Appends characters from `string_view_type{t}`
 
         The appended string can contain null characters.
         This function participates in overload resolution if
         `T` is convertible to `string_view` and `T` is not
         convertible to `CharT const*`.
 
-        @throw std::length_error if `string_view{t}.size() > max_size() - size()`
+        @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -1223,20 +1223,20 @@ public:
     append(
         T const& t)
     {
-        return append(string_view{t});
+        return append(string_view_type{t});
     }
 
     /** Append to the string.
     
-        Appends characters from `string_view{t}.substr{pos, count}`
+        Appends characters from `string_view_type{t}.substr{pos, count}`
 
         The appended string can contain null characters.
         This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
+        `T` is convertible to `string_view_type` and `T` is not
         convertible to `CharT const*`.
 
-        @throw std::out_of_range if `pos > string_view{t}.size()`
-        @throw std::length_error if `string_view{t}.substr(pos, count).size() > max_size() - size()`
+        @throw std::out_of_range if `pos > string_view_type{t}.size()`
+        @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
         @return `*this`
     */
     template<typename T>
@@ -1256,7 +1256,7 @@ public:
         size_type pos,
         size_type count = npos)
     {
-        return append(string_view{t}.substr(pos, count));
+        return append(string_view_type{t}.substr(pos, count));
     }
 
     /** Append to the string.
@@ -1328,7 +1328,7 @@ public:
 
         The appended string can contain null characters.
         This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
+        `T` is convertible to `string_view_type` and `T` is not
         convertible to `CharT const*`.
 
         @throw std::length_error if `string_view_type{t}.size() > max_size()`
@@ -2770,7 +2770,7 @@ std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, 
     basic_static_string<N, CharT, Traits> const& s)
 {
-    return os << string_view(s.data(), s.size());
+    return os << basic_string_view<CharT, Traits>(s.data(), s.size());
 }
 
 //------------------------------------------------------------------------------
