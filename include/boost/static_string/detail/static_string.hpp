@@ -39,6 +39,28 @@ using smallest_width =
     typename std::conditional<(N <= (std::numeric_limits<unsigned long long>::max)()), unsigned long long,
     void>::type>::type>::type>::type>::type;
 
+// std::is_nothrow_convertible is C++20
+template<typename To>
+void is_nothrow_convertible_helper(To) noexcept;
+
+// MSVC is unable to parse this inline, so a helper is needed
+template<typename From, typename To, typename = 
+    decltype(is_nothrow_convertible_helper<To>(std::declval<From>()))>
+struct is_nothrow_convertible_msvc_helper
+{
+  static const bool value =
+      noexcept(is_nothrow_convertible_helper<To>(std::declval<From>()));
+};
+
+template<typename From, typename To, typename = void>
+struct is_nothrow_convertible
+    : std::false_type { };
+
+template<typename From, typename To>
+struct is_nothrow_convertible<From, To, typename std::enable_if<
+    is_nothrow_convertible_msvc_helper<From, To>::value>::type>
+        : std::true_type { };
+
 // Optimization for using the smallest possible type
 template<std::size_t N, typename CharT, typename Traits>
 class static_string_base_zero
@@ -208,7 +230,7 @@ inline
 int
 lexicographical_compare(
     CharT const* s1, std::size_t n1,
-    CharT const* s2, std::size_t n2)
+    CharT const* s2, std::size_t n2) noexcept
 {
     if(n1 < n2)
         return Traits::compare(
@@ -224,7 +246,7 @@ inline
 int
 lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
-    CharT const* s2, std::size_t n2)
+    CharT const* s2, std::size_t n2) noexcept
 {
     return detail::lexicographical_compare<
         CharT, Traits>(s1.data(), s1.size(), s2, n2);
@@ -235,7 +257,7 @@ inline
 int
 lexicographical_compare(
     const basic_static_string<N, CharT, Traits>& s1,
-    CharT const* s2, std::size_t n2)
+    CharT const* s2, std::size_t n2) noexcept
 {
     return detail::lexicographical_compare<
         CharT, Traits>(s1.data(), s1.size(), s2, n2);
@@ -246,7 +268,7 @@ inline
 int
 lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
-    basic_string_view<CharT, Traits> s2)
+    basic_string_view<CharT, Traits> s2) noexcept
 {
     return detail::lexicographical_compare<CharT, Traits>(
         s1.data(), s1.size(), s2.data(), s2.size());
@@ -257,7 +279,7 @@ inline
 int 
 lexicographical_compare(
     const basic_static_string<N, CharT, Traits>& s1, 
-    const basic_static_string<M, CharT, Traits>& s2)
+    const basic_static_string<M, CharT, Traits>& s2) noexcept
 {
   return detail::lexicographical_compare<CharT, Traits>(
     s1.data(), s1.size(), s2.data(), s2.size());

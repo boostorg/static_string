@@ -1895,7 +1895,8 @@ public:
 #endif
     find(
         const T& t,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept(detail::is_nothrow_convertible<const T&,
+                                          string_view_type>::value)
     {
       string_view_type sv = t;
       return find(sv.data(), pos, sv.size());
@@ -1974,7 +1975,8 @@ public:
 #endif
     rfind(
         const T& t,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept(detail::is_nothrow_convertible<const T&,
+                                             string_view_type>::value)
     {
       string_view_type sv = t;
       return rfind(sv.data(), pos, sv.size());
@@ -2052,7 +2054,8 @@ public:
 #endif
     find_first_of(
         const T& t,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept(detail::is_nothrow_convertible<const T&,
+                                          string_view_type>::value)
     {
       string_view_type sv = t;
       return find_first_of(sv.data(), pos, sv.size());
@@ -2130,7 +2133,8 @@ public:
 #endif
     find_last_of(
         const T& t,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept(detail::is_nothrow_convertible<const T&,
+                                             string_view_type>::value)
     {
       string_view_type sv = t;
       return find_last_of(sv.data(), pos, sv.size());
@@ -2208,7 +2212,8 @@ public:
 #endif
     find_first_not_of(
         const T& t,
-        size_type pos = 0) const
+        size_type pos = 0) const noexcept(detail::is_nothrow_convertible<const T&,
+                                          string_view_type>::value)
     {
       string_view_type sv = t;
       return find_first_not_of(sv.data(), pos, sv.size());
@@ -2286,7 +2291,8 @@ public:
 #endif
     find_last_not_of(
         const T& t,
-        size_type pos = npos) const
+        size_type pos = npos) const noexcept(detail::is_nothrow_convertible<const T&,
+                                             string_view_type>::value)
     {
       string_view_type sv = t;
       return find_last_not_of(sv.data(), pos, sv.size());
