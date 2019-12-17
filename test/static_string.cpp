@@ -7031,6 +7031,7 @@ static_assert(std::is_base_of<
     static_string<0>>::value, 
     "the zero size optimization shall be used for N = 0");
 
+#ifdef BOOST_STATIC_STRING_USE_NULL_OPTIMIZATION
 static_assert(std::is_base_of<
     detail::static_string_base_null<1, char, std::char_traits<char>>, 
     static_string<1>>::value, 
@@ -7045,6 +7046,12 @@ static_assert(std::is_base_of<
     detail::static_string_base_zero<(std::numeric_limits<char>::max)() + 1, char, std::char_traits<char>>,
     static_string<(std::numeric_limits<char>::max)() + 1>>::value,
     "the minimum size type optimization shall be used for N > std::numeric_limits<char>::max()");
+#else
+static_assert(std::is_base_of<
+    detail::static_string_base_zero<(std::numeric_limits<char>::max)() + 1, char, std::char_traits<char>>,
+    static_string<(std::numeric_limits<char>::max)() + 1>>::value,
+    "the minimum size type optimization shall be used for N > 0");
+#endif
 
 } // static_string
 } // boost
