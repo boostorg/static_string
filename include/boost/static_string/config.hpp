@@ -12,7 +12,7 @@
 #define BOOST_STATIC_STRING_CONFIG_HPP
 
 // Are we dependent on Boost?
-#define BOOST_STATIC_STRING_STANDALONE
+// #define BOOST_STATIC_STRING_STANDALONE
 
 // Disable exceptions and their associated checks
 // #define BOOST_STATIC_STRING_NO_EXCEPTIONS
