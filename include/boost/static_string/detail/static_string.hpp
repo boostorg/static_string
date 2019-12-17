@@ -76,14 +76,14 @@ public:
   CharT*
   data_impl() noexcept
   {
-    return +data_;
+    return data_;
   }
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   CharT const*
   data_impl() const noexcept
   {
-    return +data_;
+    return data_;
   }
 
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
@@ -171,14 +171,14 @@ public:
   CharT*
   data_impl() noexcept
   {
-    return +data_;
+    return data_;
   }
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   CharT const*
   data_impl() const noexcept
   {
-    return +data_;
+    return data_;
   }
 
   BOOST_STATIC_STRING_CPP11_CONSTEXPR

@@ -6932,6 +6932,23 @@ constexpr bool testConstexpr()
 #elif __cplusplus >= 201703L
   // c++17 constexpr tests
 
+  using S = basic_static_string<16, char, cxper_char_traits>;
+  // ctor
+  {
+    constexpr S s1;
+    constexpr S s2(1, 'a');
+    constexpr S s3("");
+    constexpr S s4("", 1);
+    constexpr S s5 = s1;
+    constexpr auto b = s1.size();
+    constexpr auto c = s1.empty();
+    constexpr auto d = s1.max_size();
+    constexpr auto e = s1.capacity();
+    constexpr auto f = s1.length();
+    constexpr auto g = s2.front();
+    constexpr auto h = s2.back();
+  }
+
 #elif __cplusplus >= 201402L
   // c++14 constexpr tests
   
@@ -6951,10 +6968,6 @@ constexpr bool testConstexpr()
     constexpr auto f = s1.length();
     constexpr auto g = s2.front();
     constexpr auto h = s2.back();
-    constexpr auto k = s2.begin();
-    constexpr auto l = s2.end();
-    constexpr auto i = s2.data();
-    constexpr auto j = s2.c_str();
   }
 
   //constexpr auto g = s1.assign(1, '1');
