@@ -6974,7 +6974,7 @@ constexpr bool testConstexpr()
   //constexpr auto h = s1.assign({'1'});
   //constexpr auto i = s1.assign("", 1);
   
-#else __cplusplus >= 201103L
+#elif __cplusplus >= 201103L
   // c++11 constexpr tests
   /*basic_static_string<4, char, cxper_char_traits> a;
   auto b = a.size();

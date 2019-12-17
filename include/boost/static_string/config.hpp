@@ -114,8 +114,13 @@
 #endif
 #endif
 
-#if (__cplusplus >= 201402L) && (__cplusplus < 201703L) && defined(BOOST_STATIC_STRING_NULL_OPTIMIZATION) && defined(__clang__) && ((__clang_major__ == 4) || (__clang_major__ == 5))
+#if (__cplusplus >= 201402L) && \
+(__cplusplus < 201703L) && \
+defined(BOOST_STATIC_STRING_NULL_OPTIMIZATION) && \
+defined(__clang__) && \
+((__clang_major__ == 4) || (__clang_major__ == 5))
 #error The null terminator optimization is not supported for clang 4.x and clang 5.x
+#undef BOOST_STATIC_STRING_NULL_OPTIMIZATION
 #endif
 
 namespace boost {
