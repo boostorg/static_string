@@ -17,6 +17,9 @@
 // Disable exceptions and their associated checks
 // #define BOOST_STATIC_STRING_NO_EXCEPTIONS
 
+// Opt-in to the null terminator optimization
+// #define BOOST_STATIC_STRING_NULL_OPTIMIZATION
+
 // Can we have deduction guides?
 #ifdef __cpp_deduction_guides
 #define BOOST_STATIC_STRING_USE_DEDUCT
@@ -32,9 +35,6 @@
 #else
 #define BOOST_STATIC_STRING_NODISCARD
 #endif
-
-//#undef _­_­cplusplus
-//#define _­_­cplusplus 201703L
 
 #if __cplusplus > 201703L
 #define BOOST_STATIC_STRING_CPP20_CONSTEXPR constexpr
@@ -112,6 +112,10 @@
 #ifndef BOOST_STATIC_STRING_ASSERT
 #define BOOST_STATIC_STRING_ASSERT(cond) assert(cond)
 #endif
+#endif
+
+#if (__cplusplus >= 201402L) && (__cplusplus < 201703L) && defined(BOOST_STATIC_STRING_NULL_OPTIMIZATION) && defined(__clang__) && ((__clang_major__ == 4) || (__clang_major__ == 5))
+#error The null terminator optimization is not supported for clang 4.x and clang 5.x
 #endif
 
 namespace boost {

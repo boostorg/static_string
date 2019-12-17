@@ -209,15 +209,13 @@ public:
 #endif
 };
 
-//#define BOOST_STATIC_STRING_NO_NULL_OPTIMIZATION
-
 // Decides which size optimization to use
 // If the size is zero, the object will have no members
 // Otherwise, if CharT can hold the max size of the string, store the size in the last char
 // Otherwise, store the size of the string using a member of the smallest type possible
 template<std::size_t N, typename CharT, typename Traits>
 using optimization_base = 
-#ifndef BOOST_STATIC_STRING_NO_NULL_OPTIMIZATION
+#ifdef BOOST_STATIC_STRING_USE_NULL_OPTIMIZATION
     typename std::conditional<(N <= (std::numeric_limits<CharT>::max)()) && (N != 0), 
         static_string_base_null<N, CharT, Traits>,
         static_string_base_zero<N, CharT, Traits>>::type;
