@@ -405,7 +405,7 @@ inline
 static_string<N>
 to_static_string_float_impl(Floating value)
 {
-  char buffer[N];
+  char buffer[N + 1];
   std::sprintf(buffer, "%f", value);
   return static_string<N>(buffer);
 }
@@ -415,8 +415,8 @@ inline
 static_wstring<N>
 to_static_wstring_float_impl(Floating value)
 {
-  wchar_t buffer[N];
-  std::swprintf(buffer, L"%f", value);
+  wchar_t buffer[N + 1];
+  std::swprintf(buffer, N + 1, L"%f", value);
   return static_wstring<N>(buffer);
 }
 
