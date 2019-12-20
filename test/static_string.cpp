@@ -3587,22 +3587,23 @@ testGeneral()
 void
 testToStaticString()
 {
-    BOOST_TEST(to_static_string<long>(0) == "0");
-    BOOST_TEST(to_static_string<long>(1) == "1");
-    BOOST_TEST(to_static_string<long>(0xffff) == "65535");
-    BOOST_TEST(to_static_string<long>(0x10000) == "65536");
-    BOOST_TEST(to_static_string<long long>(0xffffffff) == "4294967295");
+    BOOST_TEST(to_static_string(0) == "0");
+    BOOST_TEST(to_static_string(1) == "1");
+    BOOST_TEST(to_static_string(0xffff) == "65535");
+    BOOST_TEST(to_static_string(0x10000) == "65536");
+    BOOST_TEST(to_static_string(0xffffffff) == "4294967295");
 
-    BOOST_TEST(to_static_string<long>(-1) == "-1");
-    BOOST_TEST(to_static_string<long>(-65535) == "-65535");
-    BOOST_TEST(to_static_string<long>(-65536) == "-65536");
-    BOOST_TEST(to_static_string<long long>(-4294967295ll) == "-4294967295");
+    BOOST_TEST(to_static_string(-1) == "-1");
+    BOOST_TEST(to_static_string(-65535) == "-65535");
+    BOOST_TEST(to_static_string(-65536) == "-65536");
+    BOOST_TEST(to_static_string(-4294967295ll) == "-4294967295");
 
-    BOOST_TEST(to_static_string<unsigned long>(0) == "0");
-    BOOST_TEST(to_static_string<unsigned long>(1) == "1");
-    BOOST_TEST(to_static_string<unsigned long>(0xffff) == "65535");
-    BOOST_TEST(to_static_string<unsigned long>(0x10000) == "65536");
-    BOOST_TEST(to_static_string<unsigned long>(0xffffffff) == "4294967295");
+    BOOST_TEST(to_static_string(0) == "0");
+
+    BOOST_TEST(to_static_string(1) == "1");
+    BOOST_TEST(to_static_string(0xffff) == "65535");
+    BOOST_TEST(to_static_string(0x10000) == "65536");
+    BOOST_TEST(to_static_string(0xffffffff) == "4294967295");
 }
 
 // done
