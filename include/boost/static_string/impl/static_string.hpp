@@ -843,7 +843,7 @@ inline
 to_static_string(int value)
 {
   return detail::to_static_string_int_impl<
-    std::char_traits<char>, std::numeric_limits<int>::digits10 + 1>(value);
+    std::numeric_limits<int>::digits10 + 1>(value);
 }
 
 static_string<std::numeric_limits<long>::digits10 + 1>
@@ -851,7 +851,7 @@ inline
 to_static_string(long value)
 {
   return detail::to_static_string_int_impl<
-    std::char_traits<char>, std::numeric_limits<long>::digits10 + 1>(value);
+    std::numeric_limits<long>::digits10 + 1>(value);
 }
 
 static_string<std::numeric_limits<long long>::digits10 + 1>
@@ -859,7 +859,7 @@ inline
 to_static_string(long long value)
 {
   return detail::to_static_string_int_impl<
-    std::char_traits<char>, std::numeric_limits<long long>::digits10 + 1>(value);
+    std::numeric_limits<long long>::digits10 + 1>(value);
 }
 
 static_string<std::numeric_limits<unsigned int>::digits10 + 1>
@@ -867,7 +867,7 @@ inline
 to_static_string(unsigned int value)
 {
   return detail::to_static_string_int_impl<
-    std::char_traits<char>, std::numeric_limits<unsigned int>::digits10 + 1>(value);
+   std::numeric_limits<unsigned int>::digits10 + 1>(value);
 }
 
 static_string<std::numeric_limits<unsigned long>::digits10 + 1>
@@ -875,7 +875,7 @@ inline
 to_static_string(unsigned long value)
 {
   return detail::to_static_string_int_impl<
-    std::char_traits<char>, std::numeric_limits<unsigned long>::digits10 + 1>(value);
+    std::numeric_limits<unsigned long>::digits10 + 1>(value);
 }
 
 static_string<std::numeric_limits<unsigned long long>::digits10 + 1>
@@ -883,7 +883,7 @@ inline
 to_static_string(unsigned long long value)
 {
   return detail::to_static_string_int_impl<
-    std::char_traits<char>, std::numeric_limits<unsigned long long>::digits10 + 1>(value);
+    std::numeric_limits<unsigned long long>::digits10 + 1>(value);
 }
 
 static_string<std::numeric_limits<float>::max_digits10 + 1>
@@ -917,7 +917,7 @@ inline
 to_static_wstring(int value)
 {
   return detail::to_static_wstring_int_impl<
-    std::char_traits<wchar_t>, std::numeric_limits<int>::digits10 + 1>(value);
+    std::numeric_limits<int>::digits10 + 1>(value);
 }
 
 static_wstring<std::numeric_limits<long>::digits10 + 1>
@@ -925,7 +925,7 @@ inline
 to_static_wstring(long value)
 {
   return detail::to_static_wstring_int_impl<
-    std::char_traits<wchar_t>, std::numeric_limits<long>::digits10 + 1>(value);
+    std::numeric_limits<long>::digits10 + 1>(value);
 }
 
 static_wstring<std::numeric_limits<long long>::digits10 + 1>
@@ -933,7 +933,7 @@ inline
 to_static_wstring(long long value)
 {
   return detail::to_static_wstring_int_impl<
-    std::char_traits<wchar_t>, std::numeric_limits<long long>::digits10 + 1>(value);
+   std::numeric_limits<long long>::digits10 + 1>(value);
 }
 
 static_wstring<std::numeric_limits<unsigned int>::digits10 + 1>
@@ -941,7 +941,7 @@ inline
 to_static_wstring(unsigned int value)
 {
   return detail::to_static_wstring_int_impl<
-    std::char_traits<wchar_t>, std::numeric_limits<unsigned int>::digits10 + 1>(value);
+    std::numeric_limits<unsigned int>::digits10 + 1>(value);
 }
 
 static_wstring<std::numeric_limits<unsigned long>::digits10 + 1>
@@ -949,7 +949,7 @@ inline
 to_static_wstring(unsigned long value)
 {
   return detail::to_static_wstring_int_impl<
-    std::char_traits<wchar_t>, std::numeric_limits<unsigned long>::digits10 + 1>(value);
+    std::numeric_limits<unsigned long>::digits10 + 1>(value);
 }
 
 static_wstring<std::numeric_limits<unsigned long long>::digits10 + 1>
@@ -957,7 +957,7 @@ inline
 to_static_wstring(unsigned long long value)
 {
   return detail::to_static_wstring_int_impl<
-    std::char_traits<wchar_t>, std::numeric_limits<unsigned long long>::digits10 + 1>(value);
+    std::numeric_limits<unsigned long long>::digits10 + 1>(value);
 }
 
 static_wstring<std::numeric_limits<float>::max_digits10 + 1>

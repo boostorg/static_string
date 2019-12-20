@@ -376,26 +376,26 @@ integer_to_wstring(
   return str_end;
 }
 
-template<typename Traits, std::size_t N, typename Integer>
+template<std::size_t N, typename Integer>
 inline
 static_string<N>
 to_static_string_int_impl(Integer value)
 {
   char buffer[N];
   const auto digits_end = std::end(buffer);
-  const auto digits_begin = integer_to_string<Traits, Integer>(
+  const auto digits_begin = integer_to_string<std::char_traits<char>, Integer>(
     digits_end, value, std::is_signed<Integer>{});
   return static_string<N>(digits_begin, std::distance(digits_begin, digits_end));
 }
 
-template<typename Traits, std::size_t N, typename Integer>
+template<std::size_t N, typename Integer>
 inline
 static_wstring<N>
 to_static_wstring_int_impl(Integer value)
 {
   wchar_t buffer[N];
   const auto digits_end = std::end(buffer);
-  const auto digits_begin = integer_to_wstring<Traits, Integer>(
+  const auto digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
     digits_end, value, std::is_signed<Integer>{});
   return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
 }
