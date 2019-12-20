@@ -2775,29 +2775,103 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 
 //------------------------------------------------------------------------------
 //
+// Aliases
+//
+//------------------------------------------------------------------------------
+
+template<std::size_t N>
+using static_string = basic_static_string<N, char>;
+
+template<std::size_t N>
+using static_wstring = basic_static_string<N, wchar_t>;
+
+template<std::size_t N>
+using static_u16string = basic_static_string<N, char16_t>;
+
+template<std::size_t N>
+using static_u32string = basic_static_string<N, char32_t>;
+
+//------------------------------------------------------------------------------
+//
 // Numeric conversions
 //
 //------------------------------------------------------------------------------
 
-/** Returns a static string representing an integer as a decimal.
+// string
 
-    @param x The signed or unsigned integer to convert.
-    This must be an integral type.
-
-    @return A @ref basic_static_string with an implementation defined
-    maximum size at least as large enough to hold the longest
-    possible decimal representation of any integer of the given type.
-*/
-template<
-    class Integer
-#ifndef GENERATING_DOCUMENTATION
-    , class = typename std::enable_if<
-        std::is_integral<Integer>::value>::type
-#endif
->
+static_string<std::numeric_limits<int>::digits10 + 1>
 inline
-basic_static_string<detail::max_digits(sizeof(Integer)), char>
-to_static_string(Integer x);
+to_static_string(int value);
+
+static_string<std::numeric_limits<long>::digits10 + 1>
+inline
+to_static_string(long value);
+
+static_string<std::numeric_limits<long long>::digits10 + 1>
+inline
+to_static_string(long long value);
+
+static_string<std::numeric_limits<unsigned int>::digits10 + 1>
+inline
+to_static_string(unsigned int value);
+
+static_string<std::numeric_limits<unsigned long>::digits10 + 1>
+inline
+to_static_string(unsigned long value);
+
+static_string<std::numeric_limits<unsigned long long>::digits10 + 1>
+inline
+to_static_string(unsigned long long value);
+
+static_string<std::numeric_limits<float>::max_digits10 + 1>
+inline
+to_static_string(float value);
+
+static_string<std::numeric_limits<double>::max_digits10 + 1>
+inline
+to_static_string(double value);
+
+static_string<std::numeric_limits<long double>::max_digits10 + 1>
+inline
+to_static_string(long double value);
+
+// wstring
+
+static_wstring<std::numeric_limits<int>::digits10 + 1>
+inline
+to_static_wstring(int value);
+
+static_wstring<std::numeric_limits<long>::digits10 + 1>
+inline
+to_static_wstring(long value);
+
+static_wstring<std::numeric_limits<long long>::digits10 + 1>
+inline
+to_static_wstring(long long value);
+
+static_wstring<std::numeric_limits<unsigned int>::digits10 + 1>
+inline
+to_static_wstring(unsigned int value);
+
+static_wstring<std::numeric_limits<unsigned long>::digits10 + 1>
+inline
+to_static_wstring(unsigned long value);
+
+static_wstring<std::numeric_limits<unsigned long long>::digits10 + 1>
+inline
+to_static_wstring(unsigned long long value);
+
+static_wstring<std::numeric_limits<float>::max_digits10 + 1>
+inline
+to_static_wstring(float value);
+
+static_wstring<std::numeric_limits<double>::max_digits10 + 1>
+inline
+to_static_wstring(double value);
+
+static_wstring<std::numeric_limits<long double>::max_digits10 + 1>
+inline
+to_static_wstring(long double value);
 
 //------------------------------------------------------------------------------
 //
@@ -2829,29 +2903,12 @@ hash_value(
     return boost::hash_range(str.begin(), str.end());
 }
 #endif
-
-//------------------------------------------------------------------------------
-//
-// Aliases
-//
-//------------------------------------------------------------------------------
-
-template<std::size_t N>
-using static_string = basic_static_string<N, char>;
-
-template<std::size_t N>
-using static_wstring = basic_static_string<N, wchar_t>;
-
-template<std::size_t N>
-using static_u16string = basic_static_string<N, char16_t>;
-
-template<std::size_t N>
-using static_u32string = basic_static_string<N, char32_t>;
-
 } // static_string
 } // boost
 
+#ifndef GENERATING_DOCUMENTATION
 // std::hash partial specialization for basic_static_string
+#endif
 namespace std
 {
   template <std::size_t N, typename CharT, typename Traits>

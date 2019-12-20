@@ -15,13 +15,21 @@
 #include <iterator>
 #include <type_traits>
 #include <limits>
+#include <cwchar>
 
 namespace boost {
 namespace static_string {
-namespace detail {
 
 template<std::size_t, typename, typename>
 class basic_static_string;
+
+namespace detail {
+
+template<std::size_t N>
+using static_string = basic_static_string<N, char, std::char_traits<char>>;
+
+template<std::size_t N>
+using static_wstring = basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
 
 // At minimum an integral type shall not qualify as an iterator (Agustin Berge)
 template<class T>
@@ -288,73 +296,128 @@ lexicographical_compare(
     s1.data(), s1.size(), s2.data(), s2.size());
 }
 
-// Maximum number of characters in the decimal
-// representation of a binary number. This includes
-// the potential minus sign.
-//
-BOOST_STATIC_STRING_CPP11_CONSTEXPR
+template<typename Traits, typename Integer>
 inline
-std::size_t
-max_digits(std::size_t bytes)
+char*
+integer_to_string(
+    char* str_end, Integer value, std::true_type)
 {
-    return static_cast<std::size_t>(
-        bytes * 2.41) + 1 + 1;
+    if (value == 0)
+    {
+      Traits::assign(*--str_end, '0');
+      return str_end;
+    }
+    if (value < 0)
+    {
+        value = -value;
+        for(; value > 0; value /= 10)
+            Traits::assign(*--str_end, "0123456789"[value % 10]);
+        Traits::assign(*--str_end, '-');
+        return str_end;
+    }
+    for (; value > 0; value /= 10)
+        Traits::assign(*--str_end, "0123456789"[value % 10]);
+    return str_end;
 }
 
-template<typename CharT, class Integer, typename Traits>
+template<typename Traits, typename Integer>
 inline
-CharT*
-raw_to_string(
-    CharT* buf, Integer x, std::true_type)
+char*
+integer_to_string(
+    char* str_end, Integer value, std::false_type)
 {
-    if(x == 0)
+    if (value == 0)
     {
-        Traits::assign(*--buf, '0');
-        return buf;
+      Traits::assign(*--str_end, '0');
+      return str_end;
     }
-    if(x < 0)
-    {
-        x = -x;
-        for(;x > 0; x /= 10)
-            Traits::assign(*--buf ,
-                "0123456789"[x % 10]);
-        Traits::assign(*--buf, '-');
-        return buf;
-    }
-    for(;x > 0; x /= 10)
-        Traits::assign(*--buf ,
-            "0123456789"[x % 10]);
-    return buf;
+    for (; value > 0; value /= 10)
+        Traits::assign(*--str_end, "0123456789"[value % 10]);
+    return str_end;
 }
 
-template<typename CharT, class Integer, typename Traits>
+template<typename Traits, typename Integer>
 inline
-CharT*
-raw_to_string(
-    CharT* buf, Integer x, std::false_type)
+wchar_t*
+integer_to_wstring(
+  wchar_t* str_end, Integer value, std::true_type)
 {
-    if(x == 0)
-    {
-        *--buf = '0';
-        return buf;
-    }
-    for(;x > 0; x /= 10)
-        Traits::assign(*--buf ,
-            "0123456789"[x % 10]);
-    return buf;
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, L'0');
+    return str_end;
+  }
+  if (value < 0)
+  {
+    value = -value;
+    for (; value > 0; value /= 10)
+      Traits::assign(*--str_end, L"0123456789"[value % 10]);
+    Traits::assign(*--str_end, L'-');
+    return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, L"0123456789"[value % 10]);
+  return str_end;
 }
 
-template<
-    typename CharT,
-    class Integer,
-    typename Traits = std::char_traits<CharT>>
+template<typename Traits, typename Integer>
 inline
-CharT*
-raw_to_string(CharT* last, std::size_t size, Integer i)
+wchar_t*
+integer_to_wstring(
+  wchar_t* str_end, Integer value, std::false_type)
 {
-    BOOST_STATIC_STRING_ASSERT(size >= max_digits(sizeof(Integer)));
-    return raw_to_string<CharT, Integer, Traits>(
-        last, i, std::is_signed<Integer>{});
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, L'0');
+    return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, L"0123456789"[value % 10]);
+  return str_end;
+}
+
+template<typename Traits, std::size_t N, typename Integer>
+inline
+static_string<N>
+to_static_string_int_impl(Integer value)
+{
+  char buffer[N];
+  const auto digits_end = std::end(buffer);
+  const auto digits_begin = integer_to_string<Traits, Integer>(
+    digits_end, value, std::is_signed<Integer>{});
+  return static_string<N>(digits_begin, std::distance(digits_begin, digits_end));
+}
+
+template<typename Traits, std::size_t N, typename Integer>
+inline
+static_wstring<N>
+to_static_wstring_int_impl(Integer value)
+{
+  wchar_t buffer[N];
+  const auto digits_end = std::end(buffer);
+  const auto digits_begin = integer_to_wstring<Traits, Integer>(
+    digits_end, value, std::is_signed<Integer>{});
+  return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
+}
+
+template<std::size_t N, typename Floating>
+inline
+static_string<N>
+to_static_string_float_impl(Floating value)
+{
+  char buffer[N];
+  std::sprintf(buffer, "%f", value);
+  return static_string<N>(buffer);
+}
+
+template<std::size_t N, typename Floating>
+inline
+static_wstring<N>
+to_static_wstring_float_impl(Floating value)
+{
+  wchar_t buffer[N];
+  std::swprintf(buffer, L"%f", value);
+  return static_wstring<N>(buffer);
 }
 
 template<

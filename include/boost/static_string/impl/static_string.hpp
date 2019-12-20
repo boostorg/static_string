@@ -836,24 +836,152 @@ assign_char(CharT, std::false_type) ->
     return *this;
 }
 
-template<class Integer, class>
+// string
+
+static_string<std::numeric_limits<int>::digits10 + 1>
 inline
-basic_static_string<detail::max_digits(sizeof(Integer)), char>
-to_static_string(Integer x)
+to_static_string(int value)
 {
-    using CharT = char;
-    using Traits = std::char_traits<CharT>;
-    BOOST_STATIC_STRING_STATIC_ASSERT(std::is_integral<Integer>::value, "Integer must be an integral type");
-    char buf[detail::max_digits(sizeof(Integer))];
-    auto last = buf + sizeof(buf);
-    auto it = detail::raw_to_string<
-        CharT, Integer, Traits>(last, sizeof(buf), x);
-    basic_static_string<detail::max_digits(sizeof(Integer)), char> s;
-    s.resize(static_cast<std::size_t>(last - it));
-    auto p = s.data();
-    while(it < last)
-        Traits::assign(*p++, *it++);
-    return s;
+  return detail::to_static_string_int_impl<
+    std::char_traits<char>, std::numeric_limits<int>::digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<long>::digits10 + 1>
+inline
+to_static_string(long value)
+{
+  return detail::to_static_string_int_impl<
+    std::char_traits<char>, std::numeric_limits<long>::digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<long long>::digits10 + 1>
+inline
+to_static_string(long long value)
+{
+  return detail::to_static_string_int_impl<
+    std::char_traits<char>, std::numeric_limits<long long>::digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<unsigned int>::digits10 + 1>
+inline
+to_static_string(unsigned int value)
+{
+  return detail::to_static_string_int_impl<
+    std::char_traits<char>, std::numeric_limits<unsigned int>::digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<unsigned long>::digits10 + 1>
+inline
+to_static_string(unsigned long value)
+{
+  return detail::to_static_string_int_impl<
+    std::char_traits<char>, std::numeric_limits<unsigned long>::digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<unsigned long long>::digits10 + 1>
+inline
+to_static_string(unsigned long long value)
+{
+  return detail::to_static_string_int_impl<
+    std::char_traits<char>, std::numeric_limits<unsigned long long>::digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<float>::max_digits10 + 1>
+inline
+to_static_string(float value)
+{
+  return detail::to_static_string_float_impl<
+    std::numeric_limits<float>::max_digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<double>::max_digits10 + 1>
+inline
+to_static_string(double value)
+{
+  return detail::to_static_string_float_impl<
+    std::numeric_limits<double>::max_digits10 + 1>(value);
+}
+
+static_string<std::numeric_limits<long double>::max_digits10 + 1>
+inline
+to_static_string(long double value)
+{
+  return detail::to_static_string_float_impl<
+    std::numeric_limits<long double>::max_digits10 + 1>(value);
+}
+
+// wstring
+
+static_wstring<std::numeric_limits<int>::digits10 + 1>
+inline
+to_static_wstring(int value)
+{
+  return detail::to_static_wstring_int_impl<
+    std::char_traits<wchar_t>, std::numeric_limits<int>::digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<long>::digits10 + 1>
+inline
+to_static_wstring(long value)
+{
+  return detail::to_static_wstring_int_impl<
+    std::char_traits<wchar_t>, std::numeric_limits<long>::digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<long long>::digits10 + 1>
+inline
+to_static_wstring(long long value)
+{
+  return detail::to_static_wstring_int_impl<
+    std::char_traits<wchar_t>, std::numeric_limits<long long>::digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<unsigned int>::digits10 + 1>
+inline
+to_static_wstring(unsigned int value)
+{
+  return detail::to_static_wstring_int_impl<
+    std::char_traits<wchar_t>, std::numeric_limits<unsigned int>::digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<unsigned long>::digits10 + 1>
+inline
+to_static_wstring(unsigned long value)
+{
+  return detail::to_static_wstring_int_impl<
+    std::char_traits<wchar_t>, std::numeric_limits<unsigned long>::digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<unsigned long long>::digits10 + 1>
+inline
+to_static_wstring(unsigned long long value)
+{
+  return detail::to_static_wstring_int_impl<
+    std::char_traits<wchar_t>, std::numeric_limits<unsigned long long>::digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<float>::max_digits10 + 1>
+inline
+to_static_wstring(float value)
+{
+  return detail::to_static_wstring_float_impl<
+    std::numeric_limits<float>::max_digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<double>::max_digits10 + 1>
+inline
+to_static_wstring(double value)
+{
+  return detail::to_static_wstring_float_impl<
+    std::numeric_limits<double>::max_digits10 + 1>(value);
+}
+
+static_wstring<std::numeric_limits<long double>::max_digits10 + 1>
+inline
+to_static_wstring(long double value)
+{
+  return detail::to_static_wstring_float_impl<
+    std::numeric_limits<long double>::max_digits10 + 1>(value);
 }
 
 } // static_string
