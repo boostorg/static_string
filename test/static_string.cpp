@@ -6971,6 +6971,10 @@ constexpr bool testConstexpr()
     constexpr auto h = s2.back();
   }
 
+  static_string<0> a;
+
+  constexpr auto b = a.data();
+
   //constexpr auto g = s1.assign(1, '1');
   //constexpr auto h = s1.assign({'1'});
   //constexpr auto i = s1.assign("", 1);
@@ -7020,9 +7024,6 @@ runTests()
   testStartsEnds();
 
   testHash();
-
-  static_string<1>() + static_string<3>();
-  static_string<3>() + "ggggg";
 
   return report_errors();
 }

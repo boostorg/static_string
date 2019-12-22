@@ -119,7 +119,7 @@ public:
 #ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
   CharT data_[N + 1];
 #else
-  CharT data_[N + 1]{};
+  CharT data_[N + 1]{0};
 #endif
 };
 
@@ -129,17 +129,17 @@ class static_string_base_zero<0, CharT, Traits>
 {
 public:
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  static_string_base_zero() noexcept {  }
+  static_string_base_zero() noexcept { }
 
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   static_string_base_zero(std::size_t) noexcept { }
 
-  // not possible to constexpr with the static there
+  // Modifying the null terminator is UB
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
   CharT*
   data_impl() const noexcept
   {
-    static CharT null{};
-    return &null;
+    return const_cast<CharT*>(&null_);
   }
 
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
@@ -158,11 +158,14 @@ public:
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
-  term_impl() noexcept
-  {
+  term_impl() noexcept { }
 
-  }
+private:
+  static constexpr CharT null_{0};
 };
+
+template<typename CharT, typename Traits>
+constexpr CharT static_string_base_zero<0, CharT, Traits>::null_;
 
 // Optimization for storing the size in the last element
 template<std::size_t N, typename CharT, typename Traits>
@@ -213,7 +216,7 @@ public:
 #ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
   CharT data_[N + 1];
 #else
-  CharT data_[N + 1]{};
+  CharT data_[N + 1]{0};
 #endif
 };
 
