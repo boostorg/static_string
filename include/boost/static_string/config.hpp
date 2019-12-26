@@ -15,7 +15,7 @@
 // #define BOOST_STATIC_STRING_STANDALONE
 
 // Disable exceptions and their associated checks
-#define BOOST_STATIC_STRING_NO_EXCEPTIONS
+// #define BOOST_STATIC_STRING_NO_EXCEPTIONS
 
 // Opt-in to the null terminator optimization
 // #define BOOST_STATIC_STRING_NULL_OPTIMIZATION
