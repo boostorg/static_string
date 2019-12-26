@@ -36,7 +36,7 @@ basic_static_string() noexcept
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(size_type count, CharT ch)
+basic_static_string(size_type count, CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(count, ch);
 }
@@ -46,7 +46,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(basic_static_string<M, CharT, Traits> const& other,
-    size_type pos)
+    size_type pos) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(other, pos);
 }
@@ -58,7 +58,7 @@ basic_static_string<N, CharT, Traits>::
 basic_static_string(
     basic_static_string<M, CharT, Traits> const& other,
     size_type pos,
-    size_type count)
+    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(other, pos, count);
 }
@@ -66,7 +66,7 @@ basic_static_string(
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(CharT const* s, size_type count)
+basic_static_string(CharT const* s, size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(s, count);
 }
@@ -74,7 +74,7 @@ basic_static_string(CharT const* s, size_type count)
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(CharT const* s)
+basic_static_string(CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     auto const count = Traits::length(s);
     BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
@@ -92,7 +92,7 @@ basic_static_string(
     InputIterator last,
     typename std::enable_if<
         detail::is_input_iterator<InputIterator>::value,
-            iterator>::type*)
+            iterator>::type*) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(first, last);
 }
@@ -111,7 +111,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-    basic_static_string<M, CharT, Traits> const& s)
+    basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(s);
 }
@@ -119,7 +119,7 @@ basic_static_string(
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(std::initializer_list<CharT> init)
+basic_static_string(std::initializer_list<CharT> init) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(init.begin(), init.end());
 }
@@ -127,7 +127,7 @@ basic_static_string(std::initializer_list<CharT> init)
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(string_view_type sv)
+basic_static_string(string_view_type sv) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(sv);
 }
@@ -136,7 +136,7 @@ template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(T const& t, size_type pos, size_type n)
+basic_static_string(T const& t, size_type pos, size_type n) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     assign(t, pos, n);
 }
@@ -153,7 +153,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 assign(
     size_type count,
-    CharT ch) ->
+    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         basic_static_string&
 {
     BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
@@ -188,7 +188,7 @@ basic_static_string<N, CharT, Traits>::
 assign(
     basic_static_string<M, CharT, Traits> const& s,
     size_type pos,
-    size_type count) ->
+    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
     basic_static_string&
 {
     auto const ss = s.subview(pos, count);
@@ -201,7 +201,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 assign(
     CharT const* s,
-    size_type count) ->
+    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         basic_static_string&
 {
     BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
@@ -219,7 +219,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 assign(
     InputIterator first,
-    InputIterator last) ->
+    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         typename std::enable_if<
             detail::is_input_iterator<InputIterator>::value,
                 basic_static_string&>::type
@@ -244,7 +244,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-at(size_type pos) ->
+at(size_type pos) BOOST_STATIC_STRING_COND_NOEXCEPT ->
     reference
 {
     BOOST_STATIC_STRING_THROW_IF(
@@ -256,7 +256,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-at(size_type pos) const ->
+at(size_type pos) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
     const_reference
 {
     BOOST_STATIC_STRING_THROW_IF(
@@ -274,7 +274,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-reserve(std::size_t n)
+reserve(std::size_t n) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     BOOST_STATIC_STRING_THROW_IF(
         n > max_size(), std::length_error{"n > max_size()"});
@@ -305,7 +305,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
     size_type count,
-    CharT ch) ->
+    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         basic_static_string&
 {
     BOOST_STATIC_STRING_THROW_IF(
@@ -321,7 +321,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
     CharT const* s,
-    size_type count) ->
+    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         basic_static_string&
 {
     const auto curr_size = size();
@@ -362,7 +362,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
     size_type count,
-    CharT ch) ->
+    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         iterator
 {
     const auto curr_size = size();
@@ -385,7 +385,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
     InputIterator first,
-    InputIterator last) ->
+    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         typename std::enable_if<
             detail::is_input_iterator<
                 InputIterator>::value, iterator>::type
@@ -401,7 +401,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
-    T const & t) ->
+    T const & t) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         typename std::enable_if<
             std::is_convertible<
                 T const&, string_view_type>::value &&
@@ -421,7 +421,7 @@ insert(
     size_type index,
     T const & t,
     size_type index_str,
-    size_type count) ->
+    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         typename std::enable_if<
             std::is_convertible<
                 T const&, string_view_type>::value &&
@@ -442,7 +442,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 erase(
     size_type index,
-    size_type count) ->
+    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         basic_static_string&
 {
     const auto curr_size = size();
@@ -460,7 +460,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 erase(
-    const_iterator pos) ->
+    const_iterator pos) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         iterator
 {
     erase(pos - begin(), 1);
@@ -473,7 +473,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 erase(
     const_iterator first,
-    const_iterator last) ->
+    const_iterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         iterator
 {
     erase(first - begin(),
@@ -486,7 +486,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
 push_back(
-    CharT ch)
+    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     const auto curr_size = size();
     BOOST_STATIC_STRING_THROW_IF(
@@ -502,7 +502,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 append(
     CharT const* s,
-    size_type count) ->
+    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         basic_static_string&
 {
     const auto curr_size = size();
@@ -518,7 +518,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-substr(size_type pos, size_type count) const ->
+substr(size_type pos, size_type count) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
     basic_static_string
 {
     BOOST_STATIC_STRING_THROW_IF(
@@ -530,7 +530,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-subview(size_type pos, size_type count) const ->
+subview(size_type pos, size_type count) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
     string_view_type
 {
     BOOST_STATIC_STRING_THROW_IF(
@@ -554,7 +554,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-resize(std::size_t n)
+resize(std::size_t n) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     const auto curr_size = size();
     BOOST_STATIC_STRING_THROW_IF(
@@ -569,7 +569,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-resize(std::size_t n, CharT c)
+resize(std::size_t n, CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     const auto curr_size = size();
     BOOST_STATIC_STRING_THROW_IF(
@@ -599,7 +599,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-swap(basic_static_string<M, CharT, Traits>& s)
+swap(basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
     const auto curr_size = size();
     BOOST_STATIC_STRING_THROW_IF(
@@ -621,7 +621,7 @@ replace(
     size_type pos,
     size_type n1,
     const CharT* s,
-    size_type n2) -> basic_static_string<N, CharT, Traits>&
+    size_type n2) BOOST_STATIC_STRING_COND_NOEXCEPT -> basic_static_string<N, CharT, Traits>&
 {
     const auto curr_size = size();
     const auto curr_data = data();
@@ -677,7 +677,7 @@ replace(
     size_type pos,
     size_type n1,
     size_type n2,
-    CharT c) -> basic_static_string<N, CharT, Traits> &
+    CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT -> basic_static_string<N, CharT, Traits> &
 {
     const auto curr_size = size();
     const auto curr_data = data();
@@ -829,7 +829,7 @@ assign_char(CharT ch, std::true_type) noexcept ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 basic_static_string<N, CharT, Traits>::
-assign_char(CharT, std::false_type) ->
+assign_char(CharT, std::false_type) BOOST_STATIC_STRING_COND_NOEXCEPT ->
     basic_static_string&
 {
     BOOST_STATIC_STRING_THROW(std::length_error{"max_size() == 0"});
@@ -840,7 +840,7 @@ assign_char(CharT, std::false_type) ->
 
 static_string<std::numeric_limits<int>::digits10 + 1>
 inline
-to_static_string(int value)
+to_static_string(int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<int>::digits10 + 1>(value);
@@ -848,7 +848,7 @@ to_static_string(int value)
 
 static_string<std::numeric_limits<long>::digits10 + 1>
 inline
-to_static_string(long value)
+to_static_string(long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<long>::digits10 + 1>(value);
@@ -856,7 +856,7 @@ to_static_string(long value)
 
 static_string<std::numeric_limits<long long>::digits10 + 1>
 inline
-to_static_string(long long value)
+to_static_string(long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<long long>::digits10 + 1>(value);
@@ -864,15 +864,15 @@ to_static_string(long long value)
 
 static_string<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
-to_static_string(unsigned int value)
+to_static_string(unsigned int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_int_impl<
-   std::numeric_limits<unsigned int>::digits10 + 1>(value);
+    std::numeric_limits<unsigned int>::digits10 + 1>(value);
 }
 
 static_string<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
-to_static_string(unsigned long value)
+to_static_string(unsigned long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<unsigned long>::digits10 + 1>(value);
@@ -880,7 +880,7 @@ to_static_string(unsigned long value)
 
 static_string<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
-to_static_string(unsigned long long value)
+to_static_string(unsigned long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<unsigned long long>::digits10 + 1>(value);
@@ -888,7 +888,7 @@ to_static_string(unsigned long long value)
 
 static_string<std::numeric_limits<float>::max_digits10 + 1>
 inline
-to_static_string(float value)
+to_static_string(float value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_float_impl<
     std::numeric_limits<float>::max_digits10 + 1>(value);
@@ -896,7 +896,7 @@ to_static_string(float value)
 
 static_string<std::numeric_limits<double>::max_digits10 + 1>
 inline
-to_static_string(double value)
+to_static_string(double value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_float_impl<
     std::numeric_limits<double>::max_digits10 + 1>(value);
@@ -904,7 +904,7 @@ to_static_string(double value)
 
 static_string<std::numeric_limits<long double>::max_digits10 + 1>
 inline
-to_static_string(long double value)
+to_static_string(long double value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_string_float_impl<
     std::numeric_limits<long double>::max_digits10 + 1>(value);
@@ -914,7 +914,7 @@ to_static_string(long double value)
 
 static_wstring<std::numeric_limits<int>::digits10 + 1>
 inline
-to_static_wstring(int value)
+to_static_wstring(int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<int>::digits10 + 1>(value);
@@ -922,7 +922,7 @@ to_static_wstring(int value)
 
 static_wstring<std::numeric_limits<long>::digits10 + 1>
 inline
-to_static_wstring(long value)
+to_static_wstring(long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<long>::digits10 + 1>(value);
@@ -930,15 +930,15 @@ to_static_wstring(long value)
 
 static_wstring<std::numeric_limits<long long>::digits10 + 1>
 inline
-to_static_wstring(long long value)
+to_static_wstring(long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_int_impl<
-   std::numeric_limits<long long>::digits10 + 1>(value);
+    std::numeric_limits<long long>::digits10 + 1>(value);
 }
 
 static_wstring<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
-to_static_wstring(unsigned int value)
+to_static_wstring(unsigned int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<unsigned int>::digits10 + 1>(value);
@@ -946,7 +946,7 @@ to_static_wstring(unsigned int value)
 
 static_wstring<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
-to_static_wstring(unsigned long value)
+to_static_wstring(unsigned long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<unsigned long>::digits10 + 1>(value);
@@ -954,7 +954,7 @@ to_static_wstring(unsigned long value)
 
 static_wstring<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
-to_static_wstring(unsigned long long value)
+to_static_wstring(unsigned long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<unsigned long long>::digits10 + 1>(value);
@@ -962,7 +962,7 @@ to_static_wstring(unsigned long long value)
 
 static_wstring<std::numeric_limits<float>::max_digits10 + 1>
 inline
-to_static_wstring(float value)
+to_static_wstring(float value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_float_impl<
     std::numeric_limits<float>::max_digits10 + 1>(value);
@@ -970,7 +970,7 @@ to_static_wstring(float value)
 
 static_wstring<std::numeric_limits<double>::max_digits10 + 1>
 inline
-to_static_wstring(double value)
+to_static_wstring(double value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_float_impl<
     std::numeric_limits<double>::max_digits10 + 1>(value);
@@ -978,7 +978,7 @@ to_static_wstring(double value)
 
 static_wstring<std::numeric_limits<long double>::max_digits10 + 1>
 inline
-to_static_wstring(long double value)
+to_static_wstring(long double value) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   return detail::to_static_wstring_float_impl<
     std::numeric_limits<long double>::max_digits10 + 1>(value);

@@ -15,7 +15,7 @@
 // #define BOOST_STATIC_STRING_STANDALONE
 
 // Disable exceptions and their associated checks
-// #define BOOST_STATIC_STRING_NO_EXCEPTIONS
+#define BOOST_STATIC_STRING_NO_EXCEPTIONS
 
 // Opt-in to the null terminator optimization
 // #define BOOST_STATIC_STRING_NULL_OPTIMIZATION
@@ -81,8 +81,11 @@
 #endif
 
 #ifdef BOOST_STATIC_STRING_NO_EXCEPTIONS
+#define BOOST_STATIC_STRING_COND_NOEXCEPT noexcept
 #define BOOST_STATIC_STRING_THROW_IF(cond, ex)
 #define BOOST_STATIC_STRING_THROW(ex)
+#else
+#define BOOST_STATIC_STRING_COND_NOEXCEPT
 #endif
 
 // Boost and non-Boost versions of utilities

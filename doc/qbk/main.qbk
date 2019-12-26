@@ -65,11 +65,21 @@ A fixed capacity string is useful when:
 
 [/-----------------------------------------------------------------------------]
 
+[section Requirements]
+
+The library is usable in two different modes: standalone and Boost dependent. This library defaults to Boost dependent mode; standalone mode is opt-in through the use of a configuration macro.
+
+When in Boost dependent mode, the library requires the use of at least C++11, in addition to Boost.Core, Boost.Utility, and Boost.ContainerHash. In standalone mode, C++17 is required but no libraries except for the standard library are needed.
+
+[endsect]
+
+[/-----------------------------------------------------------------------------]
+
 [section Design]
 
 The over-arching design goal is to resemble the interface and behavior of
 `std::string` as much as possible. When any operation would exceed the
-maximum allowed size of the string, `std::length_error` is thrown. All
+maximum allowed size of the string, `std::length_error` is thrown if exceptions are enabled. All
 algorithms which throw exceptions provide the strong exception safety
 guarantee. This is intended to be a drop in replacement for `std::string`.
 All the operations for `static_string` work when the source is within the string itself. 
@@ -80,8 +90,7 @@ and certain functions that will never throw are marked as `noexcept`, which dive
 those of `std::string`. Every function that is in the C++20 specification of `std::string` is
 present in this implementation, with the only difference being the lack of `constexpr`
 for the time being. The avaliable overloads for `static_string` are identical to those
-of `std::string`, except for `operator+` which is explicitly deleted as no reasonable implementation
-would be possible, due to the difficulty in determining the size of the resulting `static_string`.
+of `std::string`.
 
 [endsect]
 
@@ -89,11 +98,38 @@ would be possible, due to the difficulty in determining the size of the resultin
 
 [section Iterators]
 
-The iterator invalidation rules are different than those for `std::string`,
-since:
+The iterator invalidation rules differ from those of `std::string`:
 
 * Moving a string invalidates all iterators
 * Swapping two strings invalidates all iterators
+
+[endsect]
+
+[/-----------------------------------------------------------------------------]
+
+[section Optimizations]
+
+Depending on the character type and size used for a specialization of `static_string`, certain optimizations are used to reduce the size of the class type. Given the name of a specialization of the form `static_string<N, CharT, Traits>`:
+
+* If `N` is 0, then the class has no non-static data members. Given two objects `a` and `b` of type `static_string<0, T>` and `static_string<0, U>` respectively, the pointer value returned by `data()` will be the same if `T` and `U` are the same.
+
+* Otherwise, the type of the member used to store the size of the `static_string` will be the smallest standard unsigned integer type that can represent the value `N`.
+
+The optionally enabled null-terminator optimization will instead store the size of the `static_string` in the last character of the data array as `N - size()` if `CharT` can represent the value `N`.
+
+[endsect]
+
+[/-----------------------------------------------------------------------------]
+
+[section Configuration]
+
+Certain features can be enabled and disabled though defining configuration macros. The macros and the associated feature they control are:
+
+* `BOOST_STATIC_STRING_STANDALONE`: When defined, the library is put into standalone mode.
+
+* `BOOST_STATIC_STRING_NO_EXCEPTIONS`: When defined, exceptions and their associated checks are disabled.
+
+* `BOOST_STATIC_STRING_NULL_OPTIMIZATION`: When defined, the `static_string` will use the null-terminator optimization.
 
 [endsect]
 

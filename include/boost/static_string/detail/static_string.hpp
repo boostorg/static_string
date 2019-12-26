@@ -167,6 +167,7 @@ private:
 template<typename CharT, typename Traits>
 constexpr CharT static_string_base_zero<0, CharT, Traits>::null_;
 
+#ifdef BOOST_STATIC_STRING_NULL_OPTIMIZATION
 // Optimization for storing the size in the last element
 template<std::size_t N, typename CharT, typename Traits>
 class static_string_base_null
@@ -219,6 +220,7 @@ public:
   CharT data_[N + 1]{0};
 #endif
 };
+#endif
 
 // Decides which size optimization to use
 // If the size is zero, the object will have no members
@@ -303,40 +305,40 @@ template<typename Traits, typename Integer>
 inline
 char*
 integer_to_string(
-    char* str_end, Integer value, std::true_type)
+  char* str_end, Integer value, std::true_type)
 {
-    if (value == 0)
-    {
-      Traits::assign(*--str_end, '0');
-      return str_end;
-    }
-    if (value < 0)
-    {
-        value = -value;
-        for(; value > 0; value /= 10)
-            Traits::assign(*--str_end, "0123456789"[value % 10]);
-        Traits::assign(*--str_end, '-');
-        return str_end;
-    }
-    for (; value > 0; value /= 10)
-        Traits::assign(*--str_end, "0123456789"[value % 10]);
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, '0');
     return str_end;
+  }
+  if (value < 0)
+  {
+    value = -value;
+    for (; value > 0; value /= 10)
+      Traits::assign(*--str_end, "0123456789"[value % 10]);
+    Traits::assign(*--str_end, '-');
+    return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, "0123456789"[value % 10]);
+  return str_end;
 }
 
 template<typename Traits, typename Integer>
 inline
 char*
 integer_to_string(
-    char* str_end, Integer value, std::false_type)
+  char* str_end, Integer value, std::false_type)
 {
-    if (value == 0)
-    {
-      Traits::assign(*--str_end, '0');
-      return str_end;
-    }
-    for (; value > 0; value /= 10)
-        Traits::assign(*--str_end, "0123456789"[value % 10]);
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, '0');
     return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, "0123456789"[value % 10]);
+  return str_end;
 }
 
 template<typename Traits, typename Integer>
