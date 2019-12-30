@@ -425,6 +425,7 @@ public:
         @throw std::length_error if `ilist.size() > max_size()`
         @return `*this`
     */
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     assign(
         std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT
@@ -802,7 +803,13 @@ public:
     insert(
         size_type index,
         size_type count,
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+    {
+      BOOST_STATIC_STRING_THROW_IF(
+        index > size(), std::out_of_range{"index > size()"});
+      insert(begin() + index, count, ch);
+      return *this;
+    }
     
     /** Insert into the string.
     
@@ -947,13 +954,10 @@ public:
         @return An iterator to the first inserted character or pos if no insertion took place
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    insert(
+      iterator
+      insert(
         const_iterator pos,
-        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT
-    {
-        return insert(pos, ilist.begin(), ilist.end());
-    }
+        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
     /** Insert into the string.
     
@@ -981,7 +985,10 @@ public:
 #endif
     insert(
         size_type index,
-        T const& t) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        T const& t) BOOST_STATIC_STRING_COND_NOEXCEPT
+    {
+      return insert(index, t, 0, npos);
+    }
 
     /** Insert into the string.
 
@@ -1010,7 +1017,11 @@ public:
         size_type index,
         T const& t,
         size_type index_str,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+    {
+      auto const s = string_view_type(t).substr(index_str, count);
+      return insert(index, s.data(), s.size());
+    }
 
     /** Removes `min(count, size() - index)` characters starting at `index`
 
@@ -1852,10 +1863,7 @@ public:
         const_iterator i1,
         const_iterator i2,
         InputIterator j1,
-        InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT
-    {
-      return replace(i1, i2, basic_static_string(j1, j2));
-    }
+        InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
     /** Replace a subset of the string.
     
@@ -1866,14 +1874,11 @@ public:
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
+      basic_static_string&
+      replace(
         const_iterator i1,
         const_iterator i2,
-        std::initializer_list<CharT> il) BOOST_STATIC_STRING_COND_NOEXCEPT
-    {
-      return replace(i1, i2, il.begin(), il.size());
-    }
+        std::initializer_list<CharT> il) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
     //--------------------------------------------------------------------------
     //

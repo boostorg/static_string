@@ -31,7 +31,8 @@ using static_string = basic_static_string<N, char, std::char_traits<char>>;
 template<std::size_t N>
 using static_wstring = basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
 
-// At minimum an integral type shall not qualify as an iterator (Agustin Berge)
+// At minimum an integral type shall not qualify as an iterator (Agustin Berge) 
+// Applicable standardese: http://eel.is/c++draft/containers#container.requirements.general-17
 template<class T>
 using is_input_iterator =
     std::integral_constant<bool,
@@ -68,6 +69,46 @@ template<typename From, typename To>
 struct is_nothrow_convertible<From, To, typename std::enable_if<
     is_nothrow_convertible_msvc_helper<From, To>::value>::type>
         : std::true_type { };
+
+// void_t for c++11
+template<typename...>
+using void_t = void;
+
+// Check if iterator can do subtraction, meaning its random access
+template<typename T, typename = void>
+struct is_difference_iter : std::false_type { };
+
+template<typename T>
+struct is_difference_iter<T, void_t<decltype(std::declval<T>() - std::declval<T>())>> : std::true_type { };
+
+// constexpr distance for c++14
+template<typename InputIt, typename std::enable_if<!is_difference_iter<InputIt>::value>::type* = nullptr>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR 
+typename std::iterator_traits<InputIt>::difference_type
+distance(InputIt first, InputIt last)
+{
+  std::size_t dist = 0;
+  for (; first != last; ++first, ++dist);
+  return dist;
+}
+
+template<typename RandomIt, typename std::enable_if<is_difference_iter<RandomIt>::value>::type* = nullptr>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR 
+typename std::iterator_traits<RandomIt>::difference_type
+distance(RandomIt first, RandomIt last)
+{
+  return last - first;
+}
+
+// Copy using traits, respecting iterator rules
+template<typename Traits, typename InputIt, typename CharT>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+copy_with_traits(InputIt first, InputIt last, CharT* out)
+{
+  for (; first != last; ++first, ++out)
+    Traits::assign(*out, *first);
+}
 
 // Optimization for using the smallest possible type
 template<std::size_t N, typename CharT, typename Traits>
@@ -429,10 +470,14 @@ template<
     typename Traits,
     typename CharT,
     typename ForwardIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 ForwardIterator
 find_not_of(
-  ForwardIterator first, ForwardIterator last, const CharT* str, std::size_t n) noexcept
+  ForwardIterator first, 
+  ForwardIterator last, 
+  const CharT* str, 
+  std::size_t n) noexcept
 {
   for (; first != last; ++first)
     if (!Traits::find(str, n, *first))
@@ -445,3 +490,4 @@ find_not_of(
 } // boost
 
 #endif
+

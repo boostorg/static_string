@@ -224,7 +224,7 @@ assign(
             detail::is_input_iterator<InputIterator>::value,
                 basic_static_string&>::type
 {
-    std::size_t const n = std::distance(first, last);
+    std::size_t const n = detail::distance(first, last);
     BOOST_STATIC_STRING_THROW_IF(n > max_size(),
                                  std::length_error{"n > max_size()"});
     this->set_size(n);
@@ -304,22 +304,6 @@ auto
 basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
-    size_type count,
-    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT ->
-        basic_static_string&
-{
-    BOOST_STATIC_STRING_THROW_IF(
-        index > size(), std::out_of_range{"index > size()"});
-    insert(begin() + index, count, ch);
-    return *this;
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-insert(
-    size_type index,
     CharT const* s,
     size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         basic_static_string&
@@ -390,48 +374,60 @@ insert(
             detail::is_input_iterator<
                 InputIterator>::value, iterator>::type
 {
-  const size_type index = pos - begin();
-  return insert(index, &*first, std::distance(first, last)).begin() + index;
+    const auto curr_size = size();
+    const auto curr_data = data();
+    const auto count = detail::distance(first, last);
+    const auto index = pos - begin();
+    const auto s = &*first;
+    BOOST_STATIC_STRING_THROW_IF(
+      index > curr_size, std::out_of_range{"index > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+      count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
+    const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+    if (!inside || (inside && ((s - curr_data) + count <= index)))
+    {
+      Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+      detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
+    }
+    else
+    {
+      const size_type offset = s - curr_data;
+      Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+      if (offset < index)
+      {
+        const size_type diff = index - offset;
+        Traits::copy(&curr_data[index], &curr_data[offset], diff);
+        Traits::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
+      }
+      else
+      {
+        Traits::copy(&curr_data[index], &curr_data[offset + count], count);
+      }
+    }
+    this->set_size(curr_size + count);
+    return begin() + index;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class T>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 insert(
-    size_type index,
-    T const & t) BOOST_STATIC_STRING_COND_NOEXCEPT ->
-        typename std::enable_if<
-            std::is_convertible<
-                T const&, string_view_type>::value &&
-            ! std::is_convertible<
-                T const&, CharT const*>::value, basic_static_string&
-                    >::type
+    const_iterator pos,
+    std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+        iterator
 {
-    return insert(index, t, 0, npos);
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-template<class T>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-insert(
-    size_type index,
-    T const & t,
-    size_type index_str,
-    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
-        typename std::enable_if<
-            std::is_convertible<
-                T const&, string_view_type>::value &&
-            ! std::is_convertible<
-                T const&, CharT const*>::value, basic_static_string&
-                    >::type
-{
-    auto const s =
-        string_view_type(t).substr(index_str, count);
-    return insert(index, s.data(), s.size());
+    const auto curr_size = size();
+    const auto curr_data = data();
+    const auto index = pos - begin();
+    BOOST_STATIC_STRING_THROW_IF(
+      index > curr_size, std::out_of_range{"index > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+      ilist.size() > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
+    Traits::move(&curr_data[index + ilist.size()], &curr_data[index], curr_size - index + 1);
+    detail::copy_with_traits<Traits>(ilist.begin(), ilist.end(), &curr_data[index]);
+    this->set_size(curr_size + ilist.size());
+    return curr_data + index;
 }
 
 //------------------------------------------------------------------------------
@@ -477,7 +473,7 @@ erase(
         iterator
 {
     erase(first - begin(),
-        std::distance(first, last));
+        detail::distance(first, last));
     return begin() + (first - begin());
 }
 
@@ -695,6 +691,97 @@ replace(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+template<typename InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace(
+      const_iterator i1,
+      const_iterator i2,
+      InputIterator j1,
+      InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+          typename std::enable_if<
+              detail::is_input_iterator<InputIterator>::value,
+                  basic_static_string<N, CharT, Traits>&>::type
+{
+    const auto curr_size = size();
+    const auto curr_data = data();
+    std::size_t n1 = std::distance(i1, i2);
+    const std::size_t n2 = detail::distance(j1, j2);
+    const std::size_t pos = i1 - begin();
+    const auto s = &*j1;
+    BOOST_STATIC_STRING_THROW_IF(
+      pos > curr_size, std::out_of_range{"pos > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+      curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+      std::length_error{"replaced string exceeds max_size()"});
+    if (pos + n1 >= curr_size)
+      n1 = curr_size - pos;
+    const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+    if (inside && size_type(s - curr_data) == pos && n1 == n2)
+      return *this;
+    if (!inside || (inside && ((s - curr_data) + n2 <= pos)))
+    {
+      // source outside
+      Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      detail::copy_with_traits<Traits>(j1, j2, &curr_data[pos]);
+    }
+    else
+    {
+      // source inside
+      const size_type offset = s - curr_data;
+      if (n2 >= n1)
+      {
+        // grow/unchanged
+        // shift all right of splice point by n2 - n1 to the right
+        Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+        const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
+        // copy all before splice point
+        Traits::move(&curr_data[pos], &curr_data[offset], diff);
+        // copy all after splice point
+        Traits::move(&curr_data[pos + diff], &curr_data[offset + (n2 - n1) + diff], n2 - diff);
+      }
+      else
+      {
+        // shrink
+        // copy all elements into place
+        Traits::move(&curr_data[pos], &curr_data[offset], n2);
+        // shift all elements after splice point left
+        Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      }
+    }
+    this->set_size(curr_size + (n2 - n1));
+    return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace(
+    const_iterator i1,
+    const_iterator i2,
+    std::initializer_list<CharT> il) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+        basic_static_string&
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  std::size_t n1 = detail::distance(i1, i2);
+  const std::size_t pos = i1 - begin();
+  BOOST_STATIC_STRING_THROW_IF(
+    pos > curr_size, std::out_of_range{"pos > size()"});
+  BOOST_STATIC_STRING_THROW_IF(
+    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - il.size(),
+    std::length_error{"replaced string exceeds max_size()"});
+  if (pos + n1 >= curr_size)
+    n1 = curr_size - pos;
+  Traits::move(&curr_data[pos + il.size()], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+  detail::copy_with_traits<Traits>(il.begin(), il.end(), &curr_data[pos]);
+  this->set_size(curr_size + (il.size() - n1));
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
@@ -710,7 +797,7 @@ find(
     if (!n)
       return pos;
     const auto res = std::search(&data()[pos], &data()[curr_size], s, &s[n], Traits::eq);
-    return res == end() ? npos : std::distance(data(), res);
+    return res == end() ? npos : detail::distance(data(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -733,7 +820,7 @@ rfind(
       return pos;
     for (auto sub = &curr_data[pos]; sub >= curr_data; --sub)
       if (!Traits::compare(sub, s, n))
-        return std::distance(curr_data, sub);
+        return detail::distance(curr_data, sub);
     return npos;
 }
 
@@ -751,7 +838,7 @@ find_first_of(
     if (pos >= size() || !n)
       return npos;
     const auto res = std::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], Traits::eq);
-    return res == end() ? npos : std::distance(curr_data, res);
+    return res == end() ? npos : detail::distance(curr_data, res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -772,7 +859,7 @@ find_last_of(
     else
       pos = curr_size - (pos + 1);
     const auto res = std::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
-    return res == rend() ? npos : curr_size - 1 - std::distance(rbegin(), res);
+    return res == rend() ? npos : curr_size - 1 - detail::distance(rbegin(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -790,7 +877,7 @@ find_first_not_of(
     if (!n)
       return pos;
     const auto res = detail::find_not_of<Traits>(&data()[pos], &data()[size()], s, n);
-    return res == end() ? npos : std::distance(data(), res);
+    return res == end() ? npos : detail::distance(data(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -810,7 +897,7 @@ find_last_not_of(
       return pos;
     pos = curr_size - (pos + 1);
     const auto res = detail::find_not_of<Traits>(rbegin() + pos, rend(), s, n);
-    return res == rend() ? npos : curr_size - 1 - std::distance(rbegin(), res);
+    return res == rend() ? npos : curr_size - 1 - detail::distance(rbegin(), res);
 }
 
 template<std::size_t N, typename CharT, typename Traits>

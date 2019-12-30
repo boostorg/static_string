@@ -119,11 +119,15 @@
 
 #if (__cplusplus >= 201402L) && \
 (__cplusplus < 201703L) && \
-defined(BOOST_STATIC_STRING_NULL_OPTIMIZATION) && \
 defined(__clang__) && \
 ((__clang_major__ == 4) || (__clang_major__ == 5))
-#error The null terminator optimization is not supported for clang 4.x and clang 5.x
-#undef BOOST_STATIC_STRING_NULL_OPTIMIZATION
+// This directive works on clang
+#warning C++14 constexpr is not supported in clang 4.x and 5.x due to a compiler bug.
+#ifdef BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
+#undef BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
+#endif
+#undef BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#define BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #endif
 
 namespace boost {
