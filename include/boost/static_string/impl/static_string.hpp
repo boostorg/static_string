@@ -224,12 +224,17 @@ assign(
             detail::is_input_iterator<InputIterator>::value,
                 basic_static_string&>::type
 {
-    std::size_t const n = detail::distance(first, last);
-    BOOST_STATIC_STRING_THROW_IF(n > max_size(),
-                                 std::length_error{"n > max_size()"});
-    this->set_size(n);
-    for(auto it = data(); first != last; ++it, ++first)
-        Traits::assign(*it, *first);
+    auto ptr = data();
+    for (std::size_t i = 0; first != last; ++first, ++ptr, ++i)
+    {
+      if (1 > max_size() - i)
+      {
+        this->set_size(i);
+        BOOST_STATIC_STRING_THROW(std::length_error{"n > max_size()"});
+      }
+      Traits::assign(*ptr, *first);
+    }
+    this->set_size(ptr - data());
     term();
     return *this;
 }
@@ -362,22 +367,22 @@ insert(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIterator>
+template<class ForwardIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
-    InputIterator first,
-    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    ForwardIterator first,
+    ForwardIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
         typename std::enable_if<
-            detail::is_input_iterator<
-                InputIterator>::value, iterator>::type
+            detail::is_forward_iterator<
+                ForwardIterator>::value, iterator>::type
 {
     const auto curr_size = size();
     const auto curr_data = data();
     const auto count = detail::distance(first, last);
-    const auto index = pos - begin();
+    const auto index = pos - curr_data;
     const auto s = &*first;
     BOOST_STATIC_STRING_THROW_IF(
       index > curr_size, std::out_of_range{"index > size()"});
@@ -409,6 +414,33 @@ insert(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+template<class InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+insert(
+    const_iterator pos,
+    InputIterator first,
+    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+        typename std::enable_if<
+            detail::is_input_iterator<
+                InputIterator>::value && 
+                    ! detail::is_forward_iterator<
+                          InputIterator>::value, iterator>::type
+{
+    const auto curr_size = size();
+    const auto curr_data = data();
+    const auto count = read_back(first, last);
+    const auto index = pos - curr_data;
+    const auto s = curr_data + curr_size + 1;
+    BOOST_STATIC_STRING_THROW_IF(
+      index > curr_size, std::out_of_range{"index > size()"});
+    std::rotate(&curr_data[index], &curr_data[curr_size + 1], &curr_data[curr_size + count + 1]);
+    this->set_size(curr_size + count);
+    return curr_data + index;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
@@ -419,7 +451,7 @@ insert(
 {
     const auto curr_size = size();
     const auto curr_data = data();
-    const auto index = pos - begin();
+    const auto index = pos - curr_data;
     BOOST_STATIC_STRING_THROW_IF(
       index > curr_size, std::out_of_range{"index > size()"});
     BOOST_STATIC_STRING_THROW_IF(
@@ -691,24 +723,24 @@ replace(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<typename InputIterator>
+template<typename ForwardIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 replace(
       const_iterator i1,
       const_iterator i2,
-      InputIterator j1,
-      InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+      ForwardIterator j1,
+      ForwardIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT ->
           typename std::enable_if<
-              detail::is_input_iterator<InputIterator>::value,
+              detail::is_forward_iterator<ForwardIterator>::value,
                   basic_static_string<N, CharT, Traits>&>::type
 {
     const auto curr_size = size();
     const auto curr_data = data();
-    std::size_t n1 = std::distance(i1, i2);
+    std::size_t n1 = detail::distance(i1, i2);
     const std::size_t n2 = detail::distance(j1, j2);
-    const std::size_t pos = i1 - begin();
+    const std::size_t pos = i1 - curr_data;
     const auto s = &*j1;
     BOOST_STATIC_STRING_THROW_IF(
       pos > curr_size, std::out_of_range{"pos > size()"});
@@ -755,6 +787,44 @@ replace(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
+template<typename InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace(
+      const_iterator i1,
+      const_iterator i2,
+      InputIterator j1,
+      InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+          typename std::enable_if<
+            detail::is_input_iterator<
+                InputIterator>::value && 
+                    ! detail::is_forward_iterator<
+                         InputIterator>::value, 
+                             basic_static_string<N, CharT, Traits>&>::type
+{
+    const auto curr_size = size();
+    const auto curr_data = data();
+    std::size_t n1 = detail::distance(i1, i2);
+    const std::size_t n2 = read_back(j1, j2);
+    const std::size_t pos = i1 - curr_data;
+    BOOST_STATIC_STRING_THROW_IF(
+      pos > curr_size, std::out_of_range{"pos > size()"});
+    BOOST_STATIC_STRING_THROW_IF(
+      curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+      std::length_error{"replaced string exceeds max_size()"});
+    // Rotate to the correct order. [i2, end] will now start with the replaced string, continue to the existing string not being replaced, and end with a null terminator
+    std::rotate(&curr_data[pos], &curr_data[curr_size + 1], &curr_data[curr_size + n2 + 1]);
+    // Cap the size
+    if (pos + n1 >= curr_size)
+      n1 = curr_size - pos;
+    // Move everything from the end of the splice point to the end of the rotated string to the begining of the splice point
+    Traits::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], (curr_size + (n2 - n1)) - pos);
+    this->set_size(curr_size + (n2 - n1));
+    return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
@@ -767,7 +837,7 @@ replace(
   const auto curr_size = size();
   const auto curr_data = data();
   std::size_t n1 = detail::distance(i1, i2);
-  const std::size_t pos = i1 - begin();
+  const std::size_t pos = i1 - curr_data;
   BOOST_STATIC_STRING_THROW_IF(
     pos > curr_size, std::out_of_range{"pos > size()"});
   BOOST_STATIC_STRING_THROW_IF(
@@ -921,6 +991,27 @@ assign_char(CharT, std::false_type) BOOST_STATIC_STRING_COND_NOEXCEPT ->
 {
     BOOST_STATIC_STRING_THROW(std::length_error{"max_size() == 0"});
     return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<typename InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+read_back(
+    InputIterator first,
+    InputIterator last) -> 
+        std::size_t
+{
+  const auto curr_data = data();
+  auto new_size = size();
+  for (; first != last; ++first)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      1 > max_size() - new_size, std::length_error{"count > max_size() - size()"});
+    Traits::assign(curr_data[++new_size], *first);
+  }
+  return new_size - size();
 }
 
 // string

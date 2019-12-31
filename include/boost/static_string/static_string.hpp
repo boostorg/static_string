@@ -936,13 +936,41 @@ public:
     iterator
 #else
     typename std::enable_if<
-        detail::is_input_iterator<InputIterator>::value,
-            iterator>::type
+      detail::is_input_iterator<
+          InputIterator>::value && 
+              ! detail::is_forward_iterator<
+                    InputIterator>::value, iterator>::type
 #endif
     insert(
         const_iterator pos,
         InputIterator first,
         InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+
+     /** Insert into the string.
+    
+        Inserts characters from the range `(first, last)` before the element (if any) pointed by `pos`
+
+        The inserted string can contain null characters.
+        This function does not participate in overload resolution if
+        `LegacyForwardIterator` does not satisfy <em>LegacyForwardIterator</em>
+
+        @throw std::length_error if `std::distance(first, last) > max_size() - size()`
+        @return An iterator to the first inserted character or pos if no insertion took place
+    */
+    template<typename ForwardIterator>
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#if GENERATING_DOCUMENTATION
+    iterator
+#else
+    typename std::enable_if<
+        detail::is_forward_iterator<
+            ForwardIterator>::value, 
+                iterator>::type
+#endif
+    insert(
+        const_iterator pos,
+        ForwardIterator first,
+        ForwardIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
     /** Insert into the string.
     
@@ -954,8 +982,8 @@ public:
         @return An iterator to the first inserted character or pos if no insertion took place
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-      iterator
-      insert(
+    iterator
+    insert(
         const_iterator pos,
         std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
@@ -1856,14 +1884,41 @@ public:
     basic_static_string&
 #else
     typename std::enable_if<
-        detail::is_input_iterator<InputIterator>::value,
-            basic_static_string&>::type
+        detail::is_input_iterator<
+            InputIterator>::value && 
+                ! detail::is_forward_iterator<
+                      InputIterator>::value, 
+                          basic_static_string<N, CharT, Traits>&>::type
 #endif
     replace(
         const_iterator i1,
         const_iterator i2,
         InputIterator j1,
         InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT;
+
+    /** Replace a subset of the string.
+    
+        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[j1, j2)`.
+
+        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
+    template<typename ForwardIterator>
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#if GENERATING_DOCUMENTATION
+    basic_static_string&
+#else
+    typename std::enable_if<
+        detail::is_forward_iterator<
+            ForwardIterator>::value,
+                basic_static_string<N, CharT, Traits>&>::type
+#endif
+    replace(
+        const_iterator i1,
+        const_iterator i2,
+        ForwardIterator j1,
+        ForwardIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
     /** Replace a subset of the string.
     
@@ -2427,6 +2482,14 @@ private:
 
     basic_static_string&
     assign_char(CharT ch, std::false_type) BOOST_STATIC_STRING_COND_NOEXCEPT;
+
+    // Returns the size of data read from input iterator. Read data begins at data() + size() + 1.
+    template<typename InputIterator>
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    std::size_t
+    read_back(
+        InputIterator first, 
+        InputIterator last);
 };
 
 //------------------------------------------------------------------------------

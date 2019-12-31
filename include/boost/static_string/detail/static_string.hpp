@@ -31,13 +31,6 @@ using static_string = basic_static_string<N, char, std::char_traits<char>>;
 template<std::size_t N>
 using static_wstring = basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
 
-// At minimum an integral type shall not qualify as an iterator (Agustin Berge) 
-// Applicable standardese: http://eel.is/c++draft/containers#container.requirements.general-17
-template<class T>
-using is_input_iterator =
-    std::integral_constant<bool,
-        ! std::is_integral<T>::value>;
-
 // Find the smallest width integral type that can hold a value as large as N (Glen Fernandes)
 template<std::size_t N>
 using smallest_width =
@@ -74,15 +67,51 @@ struct is_nothrow_convertible<From, To, typename std::enable_if<
 template<typename...>
 using void_t = void;
 
-// Check if iterator can do subtraction, meaning its random access
+// Simplified check for if a type is an iterator
+template<class T, typename = void>
+struct is_iterator : std::false_type { };
+
+template<class T>
+struct is_iterator<T,
+  void_t<typename T::difference_type, 
+         typename T::value_type, 
+         typename T::pointer, 
+         typename T::reference, 
+         typename T::iterator_category>>
+    : std::true_type { };
+
+template<class T>
+struct is_iterator<T*, void>
+    : std::true_type { };
+
+template<class T, typename = void>
+struct is_input_iterator : std::false_type { };
+
+template<class T>
+struct is_input_iterator<T, typename std::enable_if<is_iterator<T>::value && 
+    std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
+        std::input_iterator_tag>::value>::type>
+            : std::true_type { };
+
+template<class T, typename = void>
+struct is_forward_iterator : std::false_type { };
+
+template<class T>
+struct is_forward_iterator<T, typename std::enable_if<is_iterator<T>::value &&
+    std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
+        std::forward_iterator_tag>::value>::type>
+            : std::true_type { };
+
 template<typename T, typename = void>
-struct is_difference_iter : std::false_type { };
+struct is_subtractable 
+    : std::false_type { };
 
 template<typename T>
-struct is_difference_iter<T, void_t<decltype(std::declval<T>() - std::declval<T>())>> : std::true_type { };
+struct is_subtractable<T, void_t<decltype(std::declval<T&>() - std::declval<T&>())>>
+    : std::true_type { };
 
 // constexpr distance for c++14
-template<typename InputIt, typename std::enable_if<!is_difference_iter<InputIt>::value>::type* = nullptr>
+template<typename InputIt, typename std::enable_if<!is_subtractable<InputIt>::value>::type* = nullptr>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR 
 typename std::iterator_traits<InputIt>::difference_type
 distance(InputIt first, InputIt last)
@@ -92,7 +121,7 @@ distance(InputIt first, InputIt last)
   return dist;
 }
 
-template<typename RandomIt, typename std::enable_if<is_difference_iter<RandomIt>::value>::type* = nullptr>
+template<typename RandomIt, typename std::enable_if<is_subtractable<RandomIt>::value>::type* = nullptr>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR 
 typename std::iterator_traits<RandomIt>::difference_type
 distance(RandomIt first, RandomIt last)
