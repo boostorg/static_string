@@ -72,13 +72,10 @@ template<class T, typename = void>
 struct is_iterator : std::false_type { };
 
 template<class T>
-struct is_iterator<T,
-  void_t<typename T::difference_type, 
-         typename T::value_type, 
-         typename T::pointer, 
-         typename T::reference, 
-         typename T::iterator_category>>
-    : std::true_type { };
+struct is_iterator<T, 
+    typename std::enable_if<std::is_class<T>::value, 
+        void_t<typename T::iterator_category>>::type>
+            : std::true_type { };
 
 template<class T>
 struct is_iterator<T*, void>
