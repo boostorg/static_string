@@ -1625,7 +1625,7 @@ public:
         size_type n1,
         const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
-      return replace(pos1, n1, str.data(), str.size());
+      return replace_unchecked(pos1, n1, str.data(), str.size());
     }
 
     /** Replace a subset of the string.
@@ -1929,11 +1929,14 @@ public:
         @return `*this`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-      basic_static_string&
-      replace(
+    basic_static_string&
+    replace(
         const_iterator i1,
         const_iterator i2,
-        std::initializer_list<CharT> il) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        std::initializer_list<CharT> il) BOOST_STATIC_STRING_COND_NOEXCEPT
+    {
+        return replace_unchecked(i1 - begin(), i2 - i1, il.begin(), il.size());
+    }
 
     //--------------------------------------------------------------------------
     //
@@ -2489,7 +2492,15 @@ private:
     std::size_t
     read_back(
         InputIterator first, 
-        InputIterator last);
+        InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    basic_static_string&
+    replace_unchecked(
+        size_type pos,
+        size_type n1,
+        const CharT* s,
+        size_type n2) BOOST_STATIC_STRING_COND_NOEXCEPT;
 };
 
 //------------------------------------------------------------------------------
