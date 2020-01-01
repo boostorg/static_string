@@ -1611,7 +1611,7 @@ public:
 
     /** Replace a subset of the string.
     
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `s`
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `s`. This replacement is done unchecked.
         
         @throw std::out_of_range if `pos1 > size()`
         @throw std::length_error if the resulting string exceeds `max_size()`
@@ -1626,6 +1626,24 @@ public:
         const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
       return replace_unchecked(pos1, n1, str.data(), str.size());
+    }
+
+    /** Replace a subset of the string.
+
+        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `s`.
+
+        @throw std::out_of_range if `pos1 > size()`
+        @throw std::length_error if the resulting string exceeds `max_size()`
+        @return `*this`
+    */
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      basic_static_string&
+      replace(
+        size_type pos1,
+        size_type n1,
+        const basic_static_string& str) BOOST_STATIC_STRING_COND_NOEXCEPT
+    {
+      return replace(pos1, n1, str.data(), str.size());
     }
 
     /** Replace a subset of the string.
