@@ -13,6 +13,10 @@
 
 #include <boost/core/lightweight_test.hpp>
 
+#include "constexpr_tests.hpp"
+
+#include <iostream>
+
 namespace boost {
 namespace static_string {
   
@@ -202,10 +206,13 @@ testR(S s, typename S::size_type pos, typename S::size_type n1, const typename S
 {
   const typename S::size_type old_size = s.size();
   S s0 = s;
+  if (n1 > old_size)
+    s.size();
   if (pos <= old_size)
   {
     s.replace(pos, n1, str, n2);
-    return s == expected;
+    s0.replace(s0.begin() + pos, s0.begin() + pos + n1, str, str + n2);
+    return s == expected && s0 == expected;
   }
   else
   {
@@ -214,7 +221,7 @@ testR(S s, typename S::size_type pos, typename S::size_type n1, const typename S
   }
 }
 
-// dpne
+// done
 
 static
 void
@@ -5780,7 +5787,7 @@ testReplace()
   // replace(const_iterator i1, const_iterator i2, InputIterator j1, InputIterator j2);
   {
     static_string<20> fs1 = "helloworld";
-    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs1.begin(), fs1.end()) == "helloworld");
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.begin() + 5, fs1.begin(), fs1.end()) == "helloworldworld");
   }
   // replace(const_iterator i1, const_iterator i2, initializer_list<charT> il);
   {
@@ -6904,95 +6911,10 @@ void testHash()
   BOOST_TEST(hasher(U("1234567890")) == hasher(U("1234567890")));
 }
 
-#ifdef BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
-struct cxper_char_traits
-{
-  using char_type = char;
-  using int_type = int;
-  using state_type = mbstate_t;
-
-  static constexpr void assign(char_type& c1, const char_type& c2) noexcept { }
-  static constexpr bool eq(char_type c1, char_type c2) noexcept { return true; }
-  static constexpr bool lt(char_type c1, char_type c2) noexcept { return true; }
-
-  static constexpr int compare(const char_type* s1, const char_type* s2, size_t n) { return 0; }
-  static constexpr size_t length(const char_type* s) { return 0; }
-  static constexpr const char_type* find(const char_type* s, size_t n,
-                                         const char_type& a) { return 0; }
-  static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n) { return s1; }
-  static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n) { return s1; }
-  static constexpr char_type* assign(char_type* s, size_t n, char_type a) { return s; }
-};
-#endif
-
-constexpr bool testConstexpr()
-{
-#if __cplusplus > 201703L
-  // c++20 constexpr tests
-
-#elif __cplusplus >= 201703L
-  // c++17 constexpr tests
-
-  using S = basic_static_string<16, char, cxper_char_traits>;
-  // ctor
-  {
-    constexpr S s1;
-    constexpr S s2(1, 'a');
-    constexpr S s3("");
-    constexpr S s4("", 1);
-    constexpr S s5 = s1;
-    constexpr auto b = s1.size();
-    constexpr auto c = s1.empty();
-    constexpr auto d = s1.max_size();
-    constexpr auto e = s1.capacity();
-    constexpr auto f = s1.length();
-    constexpr auto g = s2.front();
-    constexpr auto h = s2.back();
-  }
-
-#elif __cplusplus >= 201402L
-  // c++14 constexpr tests
-  
-
-  using S = basic_static_string<16, char, cxper_char_traits>;
-  // ctor
-  {
-    constexpr S s1;
-    constexpr S s2(1, 'a');
-    constexpr S s3("");
-    constexpr S s4("", 1);
-    constexpr S s5 = s1;
-    constexpr auto b = s1.size();
-    constexpr auto c = s1.empty();
-    constexpr auto d = s1.max_size();
-    constexpr auto e = s1.capacity();
-    constexpr auto f = s1.length();
-    constexpr auto g = s2.front();
-    constexpr auto h = s2.back();
-  }
-
-  static_string<0> a;
-
-  constexpr auto b = a.data();
-
-  //constexpr auto g = s1.assign(1, '1');
-  //constexpr auto h = s1.assign({'1'});
-  //constexpr auto i = s1.assign("", 1);
-  
-#elif __cplusplus >= 201103L
-  // c++11 constexpr tests
-  /*basic_static_string<4, char, cxper_char_traits> a;
-  auto b = a.size();
-  auto c = a.empty();
-  auto d = a.empty();*/
-#endif
-  return true;
-}
-
 int
 runTests()
 {
-  constexpr auto cxper = testConstexpr();
+  constexpr auto cxper = testConstantEvaluation();
 
   testConstruct();
     
@@ -7024,7 +6946,6 @@ runTests()
   testStartsEnds();
 
   testHash();
-
   return report_errors();
 }
 
