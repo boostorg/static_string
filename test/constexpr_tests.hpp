@@ -2,7 +2,7 @@
 #include <boost/static_string/static_string.hpp>
 
 // char_traits aren't constexpr until c++17
-#ifndef BOOST_STATIC_STRING_CPP17_CONSTEXPR_USED
+#ifdef BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
 struct cxper_char_traits
 {
   using char_type = char;
