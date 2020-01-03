@@ -631,8 +631,7 @@ replace(
   const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
       pos > curr_size, std::out_of_range{"pos > size()"});
-  if (pos + n1 >= curr_size)
-    n1 = curr_size - pos;
+  n1 = (std::min)(n1, curr_size - pos);
   return replace(curr_data + pos, curr_data + pos + n1, s, s + n2);
 }
 
@@ -653,8 +652,7 @@ replace(
   BOOST_STATIC_STRING_THROW_IF(
       curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
       std::length_error{"replaced string exceeds max_size()"});
-  if (pos + n1 >= curr_size)
-    n1 = curr_size - pos;
+  n1 = (std::min)(n1, curr_size - pos);
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
   Traits::assign(&curr_data[pos], n2, c);
   this->set_size(curr_size + (n2 - n1));
@@ -684,8 +682,7 @@ replace(
   BOOST_STATIC_STRING_THROW_IF(
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
     std::length_error{"replaced string exceeds max_size()"});
-  if (pos + n1 >= curr_size)
-    n1 = curr_size - pos;
+  n1 = (std::min)(n1, curr_size - pos);
   const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
   if (inside && size_type(s - curr_data) == pos && n1 == n2)
     return *this;
@@ -753,8 +750,7 @@ replace(
   // Rotate to the correct order. [i2, end] will now start with the replaced string, continue to the existing string not being replaced, and end with a null terminator
   std::rotate(&curr_data[pos], &curr_data[curr_size + 1], &curr_data[curr_size + n2 + 1]);
   // Cap the size
-  if (pos + n1 >= curr_size)
-    n1 = curr_size - pos;
+  n1 = (std::min)(n1, curr_size - pos);
   // Move everything from the end of the splice point to the end of the rotated string to the begining of the splice point
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], (curr_size + (n2 - n1)) - pos);
   this->set_size(curr_size + (n2 - n1));
