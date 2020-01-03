@@ -507,14 +507,65 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 ForwardIterator
 find_not_of(
-  ForwardIterator first, 
-  ForwardIterator last, 
-  const CharT* str, 
-  std::size_t n) noexcept
+    ForwardIterator first, 
+    ForwardIterator last, 
+    const CharT* str, 
+    std::size_t n) noexcept
 {
   for (; first != last; ++first)
     if (!Traits::find(str, n, *first))
       return first;
+  return last;
+}
+
+// constexpr search for C++14
+template<
+    typename ForwardIt1, 
+    typename ForwardIt2, 
+    typename BinaryPredicate>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR 
+inline
+ForwardIt1 
+search(
+    ForwardIt1 first,
+    ForwardIt1 last,
+    ForwardIt2 s_first,
+    ForwardIt2 s_last,
+    BinaryPredicate p)
+{
+  for (; ; ++first)
+  {
+    ForwardIt1 it = first;
+    for (ForwardIt2 s_it = s_first; ; ++it, ++s_it)
+    {
+      if (s_it == s_last)
+        return first;
+      if (it == last)
+        return last;
+      if (!p(*it, *s_it))
+        break;
+    }
+  }
+}
+
+template<
+    typename InputIt, 
+    typename ForwardIt, 
+    typename BinaryPredicate>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+InputIt 
+find_first_of(
+    InputIt first,
+    InputIt last,
+    ForwardIt s_first,
+    ForwardIt s_last,
+    BinaryPredicate p)
+{
+  for (; first != last; ++first)
+    for (ForwardIt it = s_first; it != s_last; ++it)
+      if (p(*first, *it))
+        return first;
   return last;
 }
 

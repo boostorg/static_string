@@ -39,6 +39,20 @@ testConstantEvaluation()
   return true;
 #elif defined(BOOST_STATIC_STRING_CPP17_CONSTEXPR_USED)
   // c++17 constexpr tests
+
+  /*
+  {
+    auto j = a.rbegin();
+  }
+  {
+    auto j = a.crbegin();
+  }
+  {
+    auto j = a.rend();
+  }
+  {
+    auto j = a.crend();
+  }*/
   return true;
 #elif defined(BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED)
   // c++14 constexpr tests
@@ -100,19 +114,6 @@ testConstantEvaluation()
   {
     auto j = a.cend();
   }
-  /*
-  {
-    auto j = a.rbegin();
-  }
-  {
-    auto j = a.crbegin();
-  }
-  {
-    auto j = a.rend();
-  }
-  {
-    auto j = a.crend();
-  }*/
 
   // capacity and size
   auto j = cstatic_string().size() +
@@ -126,7 +127,6 @@ testConstantEvaluation()
 
   // insert
   a.insert(a.begin(), 1, 'a');
-  // cannot have a pointer outside the same array due to UB
   a.insert(0, a.begin());
   a.insert(0, a.begin(), 1);
   a.insert(a.begin(), 'a');
@@ -141,6 +141,87 @@ testConstantEvaluation()
   a.push_back('a');
   a.pop_back();
 
+  // append
+  a.append(1, 'a');
+  a.append("a", 1);
+  a.append("a");
+  a.append(a.begin(), a.end());
+  a.append({'a'});
+
+  // append operator
+  a += 'a';
+  a += "a";
+  a += {'a'};
+
+  // compare
+  a.compare(b);
+  a.compare(0, 1, b);
+  a.compare(0, 1, b, 0, 1);
+  a.compare("a");
+  a.compare(0, 1, "a");
+  a.compare(0, 1, "a", 1);
+  
+  // substr
+  a.substr(0);
+  
+  // subview
+  a.subview(0);
+  
+  // copy
+  char k[20]{};
+  a.copy(k, 1, 0);
+
+  // resize
+  a.resize(1);
+  a.resize(1, 'a');
+
+  // swap
+  a.swap(b);
+
+  // replace
+  a.replace(0, 1, a);
+  a.replace(0, 1, a, 0, 1);
+  a.replace(0, 1, a.data(), 1);
+  a.replace(0, 1, a.data());
+  a.replace(0, 1, 1, 'a');
+  a.replace(a.begin(), a.end(), a);
+  a.replace(a.begin(), a.end(), a.data(), 1);
+  a.replace(a.begin(), a.end(), a.data());
+  a.replace(a.begin(), a.end(), 1, 'a');
+  a.replace(a.begin(), a.end(), a.begin(), a.end());
+  a.replace(a.begin(), a.end(), {'a'});
+
+  // find
+  a.find(a);
+  a.find("a", 0, 1);
+  a.find("a", 0);
+  a.find('a', 0);
+
+  // rfind
+  a.rfind(a);
+  a.rfind("a", 0, 1);
+  a.rfind("a", 0);
+  a.rfind('a', 0);
+
+  // find_first_of
+  a.find_first_of(a);
+  a.find_first_of("a", 0, 1);
+  a.find_first_of("a", 0);
+  a.find_first_of('a', 0);
+
+  // find_first_not_of
+  a.find_first_not_of(a);
+  a.find_first_not_of("a", 0, 1);
+  a.find_first_not_of("a", 0);
+  a.find_first_not_of('a', 0);
+
+  // starts_with
+  a.starts_with('a');
+  a.starts_with("a");
+
+  // ends_with
+  a.ends_with('a');
+  a.ends_with("a");
   return true;
 #elif defined(BOOST_STATIC_STRING_CPP11_CONSTEXPR_USED)
   // c++11 constexpr tests

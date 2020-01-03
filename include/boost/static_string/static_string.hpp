@@ -1996,7 +1996,7 @@ public:
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
-      find(
+    find(
         const basic_static_string<M, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {

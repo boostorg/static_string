@@ -776,7 +776,7 @@ find(
     return npos;
   if (!n)
     return pos;
-  const auto res = std::search(&data()[pos], &data()[curr_size], s, &s[n], Traits::eq);
+  const auto res = detail::search(&data()[pos], &data()[curr_size], s, &s[n], Traits::eq);
   return res == end() ? npos : detail::distance(data(), res);
 }
 
@@ -817,7 +817,7 @@ find_first_of(
   const auto curr_data = data();
   if (pos >= size() || !n)
     return npos;
-  const auto res = std::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], Traits::eq);
+  const auto res = detail::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], Traits::eq);
   return res == end() ? npos : detail::distance(curr_data, res);
 }
 
@@ -838,7 +838,7 @@ find_last_of(
     pos = 0;
   else
     pos = curr_size - (pos + 1);
-  const auto res = std::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
+  const auto res = detail::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
   return res == rend() ? npos : curr_size - 1 - detail::distance(rbegin(), res);
 }
 
