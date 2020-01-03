@@ -63,9 +63,16 @@ struct is_nothrow_convertible<From, To, typename std::enable_if<
     is_nothrow_convertible_msvc_helper<From, To>::value>::type>
         : std::true_type { };
 
-// void_t for c++11
+// GCC 4.8, 4.9 workaround for void_t to make the defining-type-id dependant 
 template<typename...>
-using void_t = void;
+struct void_t_helper
+{
+  using type = void;
+};
+
+// void_t for c++11
+template<typename... Ts>
+using void_t = typename void_t_helper<Ts...>::type;
 
 // Simplified check for if a type is an iterator
 template<class T, typename = void>

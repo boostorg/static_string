@@ -21,7 +21,7 @@
 // #define BOOST_STATIC_STRING_NULL_OPTIMIZATION
 
 // Can we have deduction guides?
-#ifdef __cpp_deduction_guides
+#if __cpp_deduction_guides >= 201703
 #define BOOST_STATIC_STRING_USE_DEDUCT
 #endif
 
@@ -36,7 +36,14 @@
 #define BOOST_STATIC_STRING_NODISCARD
 #endif
 
-#if __cplusplus > 201703L
+// MSVC doesn't define __cplusplus by default
+#ifdef _MSVC_LANG
+#define BOOST_STATIC_STRING_STANDARD_VERSION _MSVC_LANG
+#else
+#define BOOST_STATIC_STRING_STANDARD_VERSION __cplusplus
+#endif
+
+#if BOOST_STATIC_STRING_STANDARD_VERSION > 201703L
 #define BOOST_STATIC_STRING_CPP20_CONSTEXPR constexpr
 #define BOOST_STATIC_STRING_CPP17_CONSTEXPR constexpr
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR constexpr
@@ -46,7 +53,7 @@
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
 #define BOOST_STATIC_STRING_CPP11_CONSTEXPR_USED
 #define BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
-#elif __cplusplus >= 201703L
+#elif BOOST_STATIC_STRING_STANDARD_VERSION >= 201703L
 #define BOOST_STATIC_STRING_CPP20_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP17_CONSTEXPR constexpr
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR constexpr
@@ -54,7 +61,7 @@
 #define BOOST_STATIC_STRING_CPP17_CONSTEXPR_USED
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
 #define BOOST_STATIC_STRING_CPP11_CONSTEXPR_USED
-#elif __cplusplus >= 201402L
+#elif BOOST_STATIC_STRING_STANDARD_VERSION >= 201402L
 #define BOOST_STATIC_STRING_CPP20_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP17_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR constexpr
@@ -117,8 +124,8 @@
 #endif
 #endif
 
-#if (__cplusplus >= 201402L) && \
-(__cplusplus < 201703L) && \
+#if (BOOST_STATIC_STRING_STANDARD_VERSION >= 201402L) && \
+(BOOST_STATIC_STRING_STANDARD_VERSION < 201703L) && \
 defined(__clang__) && \
 ((__clang_major__ == 4) || (__clang_major__ == 5))
 // This directive works on clang

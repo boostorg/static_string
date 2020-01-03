@@ -337,8 +337,8 @@ insert(
       count > max_size() - curr_size, std::length_error{"count() > max_size() - size()"});
   auto const index = pos - curr_data;
   Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
-  this->set_size(curr_size + count);
   Traits::assign(&curr_data[index], count, ch);
+  this->set_size(curr_size + count);
   term();
   return &curr_data[index];
 }
