@@ -26,8 +26,10 @@
 #endif
 
 // Include <version> if we can
+#ifdef __has_include 
 #if __has_include(<version>)
 #include <version>
+#endif
 #endif
 
 // Can we use is_constant_evaluated?
