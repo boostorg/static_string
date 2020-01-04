@@ -363,7 +363,15 @@ insert(
   const auto s = &*first;
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
-  const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+  // Makes this more constexpr friendly if we can use is_constant_evaluated
+  const bool inside =
+#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+    std::is_constant_evaluated() ?
+    detail::is_inside(curr_data, curr_data + curr_size, s) :
+    s <= &curr_data[curr_size] && s >= curr_data;
+#else
+    s <= &curr_data[curr_size] && s >= curr_data;
+#endif
   if (!inside || (inside && ((s - curr_data) + count <= index)))
   {
     Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
@@ -683,7 +691,15 @@ replace(
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
     std::length_error{"replaced string exceeds max_size()"});
   n1 = (std::min)(n1, curr_size - pos);
-  const bool inside = s <= &curr_data[curr_size] && s >= curr_data;
+  // Makes this more constexpr friendly if we can use is_constant_evaluated
+  const bool inside =
+#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+    std::is_constant_evaluated() ? 
+    detail::is_inside(curr_data, curr_data + curr_size, s) :
+    s <= &curr_data[curr_size] && s >= curr_data;
+#else
+    s <= &curr_data[curr_size] && s >= curr_data;
+#endif
   if (inside && size_type(s - curr_data) == pos && n1 == n2)
     return *this;
   if (!inside || (inside && ((s - curr_data) + n2 <= pos)))

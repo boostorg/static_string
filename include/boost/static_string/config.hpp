@@ -25,6 +25,16 @@
 #define BOOST_STATIC_STRING_USE_DEDUCT
 #endif
 
+// Include <version> if we can
+#if __has_include(<version>)
+#include <version>
+#endif
+
+// Can we use is_constant_evaluated?
+#if __cpp_lib_is_constant_evaluated >= 201811L
+#define BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+#endif
+
 // Can we use [[nodiscard]]?
 #ifdef __has_attribute
 #if __has_attribute(nodiscard)
