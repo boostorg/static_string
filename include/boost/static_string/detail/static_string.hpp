@@ -186,14 +186,14 @@ public:
   void
   term_impl() noexcept
   {
-    Traits::assign(data_[size_], 0);
+    Traits::assign(data_[size_], CharT());
   }
 
   smallest_width<N> size_{0};
 #ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
   CharT data_[N + 1];
 #else
-  CharT data_[N + 1]{0};
+  CharT data_[N + 1]{};
 #endif
 };
 
@@ -235,7 +235,7 @@ public:
   term_impl() noexcept { }
 
 private:
-  static constexpr CharT null_{0};
+  static constexpr CharT null_{};
 };
 
 template<typename CharT, typename Traits>
@@ -285,13 +285,14 @@ public:
   void
   term_impl() noexcept
   {
+    // This requires the null terminator to be 0
     Traits::assign(data_[size_impl()], 0);
   }
 
 #ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
   CharT data_[N + 1];
 #else
-  CharT data_[N + 1]{0};
+  CharT data_[N + 1]{};
 #endif
 };
 #endif

@@ -36,11 +36,64 @@ testConstantEvaluation()
 {
 #ifdef BOOST_STATIC_STRING_CPP20_CONSTEXPR_USED
   // c++20 constexpr tests
-  return true;
-#elif defined(BOOST_STATIC_STRING_CPP17_CONSTEXPR_USED)
-  // c++17 constexpr tests
+  cstatic_string a;
+  cstatic_string b(1, 'a');
+  cstatic_string c(b, 0);
+  cstatic_string d(b, 0, 1);
+  cstatic_string e("a", 1);
+  cstatic_string f("a");
+  //cstatic_string g(f.begin(), f.end());
+  cstatic_string h(f);
+  cstatic_string i({'a'});
 
-  /*
+  // assignment
+  a = b;
+  a = "a";
+  a = 'a';
+  a = {'a'};
+
+  // assign
+  a.assign(b);
+  a.assign(b, 0, 1);
+  a.assign("a", 1);
+  a.assign("a");
+  a.assign(b.begin(), b.end());
+  a.assign({'a'});
+  a.assign(1, 'a');
+
+  // element access
+  {
+    auto j = a.at(0);
+  }
+  {
+    auto j = a[0];
+  }
+  {
+    auto j = a.front();
+  }
+  {
+    auto j = a.back();
+  }
+  {
+    auto j = a.data();
+  }
+  {
+    auto j = a.c_str();
+  }
+  {
+    auto j = a.begin();
+  }
+  {
+    auto j = a.cbegin();
+  }
+  {
+    auto j = a.end();
+  }
+  {
+    auto j = a.cend();
+  }
+
+  // reverse iterators
   {
     auto j = a.rbegin();
   }
@@ -52,7 +105,310 @@ testConstantEvaluation()
   }
   {
     auto j = a.crend();
-  }*/
+  }
+
+  // capacity and size
+  auto j = cstatic_string().size() +
+    cstatic_string().empty() +
+    cstatic_string().length() +
+    cstatic_string().max_size() +
+    cstatic_string().capacity();
+
+  // clear
+  a.clear();
+
+  // insert
+  a.insert(a.begin(), 1, 'a');
+  a.insert(0, a.begin());
+  a.insert(0, a.begin(), 1);
+  a.insert(a.begin(), 'a');
+  a.insert(a.begin(), {'a'});
+
+  // erase
+  a.erase();
+  a.erase(a.begin());
+  a.erase(a.begin(), a.end());
+
+  // push
+  a.push_back('a');
+  a.pop_back();
+
+  // append
+  a.append(1, 'a');
+  a.append("a", 1);
+  a.append("a");
+  a.append(a.begin(), a.end());
+  a.append({'a'});
+
+  // append operator
+  a += 'a';
+  a += "a";
+  a += {'a'};
+
+  // compare
+  a.compare(b);
+  a.compare(0, 1, b);
+  a.compare(0, 1, b, 0, 1);
+  a.compare("a");
+  a.compare(0, 1, "a");
+  a.compare(0, 1, "a", 1);
+
+  // substr
+  a.substr(0);
+
+  // subview
+  a.subview(0);
+
+  // copy
+  char k[20]{};
+  a.copy(k, 1, 0);
+
+  // resize
+  a.resize(1);
+  a.resize(1, 'a');
+
+  // swap
+  a.swap(b);
+
+  // replace
+  a.replace(0, 1, a);
+  a.replace(0, 1, a, 0, 1);
+  a.replace(0, 1, a.data(), 1);
+  a.replace(0, 1, a.data());
+  a.replace(0, 1, 1, 'a');
+  a.replace(a.begin(), a.end(), a);
+  a.replace(a.begin(), a.end(), a.data(), 1);
+  a.replace(a.begin(), a.end(), a.data());
+  a.replace(a.begin(), a.end(), 1, 'a');
+  a.replace(a.begin(), a.end(), a.begin(), a.end());
+  a.replace(a.begin(), a.end(), {'a'});
+
+#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+  a.replace(a.begin(), a.end(), "a");
+  a.replace(a.begin(), a.end(), "a", 1);
+#endif
+
+  // find
+  a.find(a);
+  a.find("a", 0, 1);
+  a.find("a", 0);
+  a.find('a', 0);
+
+  // rfind
+  a.rfind(a);
+  a.rfind("a", 0, 1);
+  a.rfind("a", 0);
+  a.rfind('a', 0);
+
+  // find_first_of
+  a.find_first_of(a);
+  a.find_first_of("a", 0, 1);
+  a.find_first_of("a", 0);
+  a.find_first_of('a', 0);
+
+  // find_first_not_of
+  a.find_first_not_of(a);
+  a.find_first_not_of("a", 0, 1);
+  a.find_first_not_of("a", 0);
+  a.find_first_not_of('a', 0);
+
+  // starts_with
+  a.starts_with('a');
+  a.starts_with("a");
+
+  // ends_with
+  a.ends_with('a');
+  a.ends_with("a");
+
+  return true;
+#elif defined(BOOST_STATIC_STRING_CPP17_CONSTEXPR_USED)
+  //c++17 constexpr tests
+
+    // ctors
+  cstatic_string a;
+  cstatic_string b(1, 'a');
+  cstatic_string c(b, 0);
+  cstatic_string d(b, 0, 1);
+  cstatic_string e("a", 1);
+  cstatic_string f("a");
+  //cstatic_string g(f.begin(), f.end());
+  cstatic_string h(f);
+  cstatic_string i({'a'});
+
+  // assignment
+  a = b;
+  a = "a";
+  a = 'a';
+  a = {'a'};
+
+  // assign
+  a.assign(b);
+  a.assign(b, 0, 1);
+  a.assign("a", 1);
+  a.assign("a");
+  a.assign(b.begin(), b.end());
+  a.assign({'a'});
+  a.assign(1, 'a');
+
+  // element access
+  {
+    auto j = a.at(0);
+  }
+  {
+    auto j = a[0];
+  }
+  {
+    auto j = a.front();
+  }
+  {
+    auto j = a.back();
+  }
+  {
+    auto j = a.data();
+  }
+  {
+    auto j = a.c_str();
+  }
+  {
+    auto j = a.begin();
+  }
+  {
+    auto j = a.cbegin();
+  }
+  {
+    auto j = a.end();
+  }
+  {
+    auto j = a.cend();
+  }
+
+  // reverse iterators
+  {
+    auto j = a.rbegin();
+  }
+  {
+    auto j = a.crbegin();
+  }
+  {
+    auto j = a.rend();
+  }
+  {
+    auto j = a.crend();
+  }
+
+  // capacity and size
+  auto j = cstatic_string().size() +
+    cstatic_string().empty() +
+    cstatic_string().length() +
+    cstatic_string().max_size() +
+    cstatic_string().capacity();
+
+  // clear
+  a.clear();
+
+  // insert
+  a.insert(a.begin(), 1, 'a');
+  a.insert(0, a.begin());
+  a.insert(0, a.begin(), 1);
+  a.insert(a.begin(), 'a');
+  a.insert(a.begin(), {'a'});
+
+  // erase
+  a.erase();
+  a.erase(a.begin());
+  a.erase(a.begin(), a.end());
+
+  // push
+  a.push_back('a');
+  a.pop_back();
+
+  // append
+  a.append(1, 'a');
+  a.append("a", 1);
+  a.append("a");
+  a.append(a.begin(), a.end());
+  a.append({'a'});
+
+  // append operator
+  a += 'a';
+  a += "a";
+  a += {'a'};
+
+  // compare
+  a.compare(b);
+  a.compare(0, 1, b);
+  a.compare(0, 1, b, 0, 1);
+  a.compare("a");
+  a.compare(0, 1, "a");
+  a.compare(0, 1, "a", 1);
+
+  // substr
+  a.substr(0);
+
+  // subview
+  a.subview(0);
+
+  // copy
+  char k[20]{};
+  a.copy(k, 1, 0);
+
+  // resize
+  a.resize(1);
+  a.resize(1, 'a');
+
+  // swap
+  a.swap(b);
+
+  // replace
+  a.replace(0, 1, a);
+  a.replace(0, 1, a, 0, 1);
+  a.replace(0, 1, a.data(), 1);
+  a.replace(0, 1, a.data());
+  a.replace(0, 1, 1, 'a');
+  a.replace(a.begin(), a.end(), a);
+  a.replace(a.begin(), a.end(), a.data(), 1);
+  a.replace(a.begin(), a.end(), a.data());
+  a.replace(a.begin(), a.end(), 1, 'a');
+  a.replace(a.begin(), a.end(), a.begin(), a.end());
+  a.replace(a.begin(), a.end(), {'a'});
+
+#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+  a.replace(a.begin(), a.end(), "a");
+  a.replace(a.begin(), a.end(), "a", 1);
+#endif
+
+  // find
+  a.find(a);
+  a.find("a", 0, 1);
+  a.find("a", 0);
+  a.find('a', 0);
+
+  // rfind
+  a.rfind(a);
+  a.rfind("a", 0, 1);
+  a.rfind("a", 0);
+  a.rfind('a', 0);
+
+  // find_first_of
+  a.find_first_of(a);
+  a.find_first_of("a", 0, 1);
+  a.find_first_of("a", 0);
+  a.find_first_of('a', 0);
+
+  // find_first_not_of
+  a.find_first_not_of(a);
+  a.find_first_not_of("a", 0, 1);
+  a.find_first_not_of("a", 0);
+  a.find_first_not_of('a', 0);
+
+  // starts_with
+  a.starts_with('a');
+  a.starts_with("a");
+
+  // ends_with
+  a.ends_with('a');
+  a.ends_with("a");
+ 
   return true;
 #elif defined(BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED)
   // c++14 constexpr tests
