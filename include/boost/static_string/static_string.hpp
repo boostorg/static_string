@@ -2894,78 +2894,92 @@ using static_u32string = basic_static_string<N, char32_t>;
 //
 //------------------------------------------------------------------------------
 
-// string
-
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<int>::digits10 + 1>
 inline
 to_static_string(int value) noexcept;
 
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<long>::digits10 + 1>
 inline
 to_static_string(long value) noexcept;
 
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<long long>::digits10 + 1>
 inline
 to_static_string(long long value) noexcept;
 
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
 to_static_string(unsigned int value) noexcept;
 
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
 to_static_string(unsigned long value) noexcept;
 
+/// Converts `value` to a `static_string`
 static_string<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
 to_static_string(unsigned long long value) noexcept;
 
+/// Converts `value` to a `static_string`
 static_string<std::numeric_limits<float>::max_digits10 + 1>
 inline
 to_static_string(float value) noexcept;
 
+/// Converts `value` to a `static_string`
 static_string<std::numeric_limits<double>::max_digits10 + 1>
 inline
 to_static_string(double value) noexcept;
 
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<long double>::max_digits10 + 1>
 inline
 to_static_string(long double value) noexcept;
 
-// wstring
-
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<int>::digits10 + 1>
 inline
 to_static_wstring(int value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<long>::digits10 + 1>
 inline
 to_static_wstring(long value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<long long>::digits10 + 1>
 inline
 to_static_wstring(long long value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
 to_static_wstring(unsigned int value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
 to_static_wstring(unsigned long value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
 to_static_wstring(unsigned long long value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<float>::max_digits10 + 1>
 inline
 to_static_wstring(float value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<double>::max_digits10 + 1>
 inline
 to_static_wstring(double value) noexcept;
 
+/// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<long double>::max_digits10 + 1>
 inline
 to_static_wstring(long double value) noexcept;
