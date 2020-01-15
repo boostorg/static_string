@@ -79,20 +79,20 @@ basic_static_string(CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
   auto const count = Traits::length(s);
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
                                 std::length_error{"count > max_size()"});
+  Traits::copy(data(), s, count + 1);
   this->set_size(count);
-  Traits::copy(data(), s, size() + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIterator>
+template<class InputIterator,
+    typename std::enable_if<
+        detail::is_input_iterator<InputIterator>
+            ::value>::type*>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
     InputIterator first,
-    InputIterator last,
-    typename std::enable_if<
-        detail::is_input_iterator<InputIterator>::value,
-            iterator>::type*) BOOST_STATIC_STRING_COND_NOEXCEPT
+    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT
 {
   assign(first, last);
 }
@@ -962,11 +962,11 @@ replace_unchecked(
   return *this;
 }
 
-// string
+// to_static_string
 
 static_string<std::numeric_limits<int>::digits10 + 1>
 inline
-to_static_string(int value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(int value) noexcept
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<int>::digits10 + 1>(value);
@@ -974,7 +974,7 @@ to_static_string(int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<long>::digits10 + 1>
 inline
-to_static_string(long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(long value) noexcept
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<long>::digits10 + 1>(value);
@@ -982,7 +982,7 @@ to_static_string(long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<long long>::digits10 + 1>
 inline
-to_static_string(long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(long long value) noexcept
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<long long>::digits10 + 1>(value);
@@ -990,7 +990,7 @@ to_static_string(long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
-to_static_string(unsigned int value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(unsigned int value) noexcept
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<unsigned int>::digits10 + 1>(value);
@@ -998,7 +998,7 @@ to_static_string(unsigned int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
-to_static_string(unsigned long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(unsigned long value) noexcept
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<unsigned long>::digits10 + 1>(value);
@@ -1006,7 +1006,7 @@ to_static_string(unsigned long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
-to_static_string(unsigned long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(unsigned long long value) noexcept
 {
   return detail::to_static_string_int_impl<
     std::numeric_limits<unsigned long long>::digits10 + 1>(value);
@@ -1014,7 +1014,7 @@ to_static_string(unsigned long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<float>::max_digits10 + 1>
 inline
-to_static_string(float value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(float value) noexcept
 {
   return detail::to_static_string_float_impl<
     std::numeric_limits<float>::max_digits10 + 1>(value);
@@ -1022,7 +1022,7 @@ to_static_string(float value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<double>::max_digits10 + 1>
 inline
-to_static_string(double value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(double value) noexcept
 {
   return detail::to_static_string_float_impl<
     std::numeric_limits<double>::max_digits10 + 1>(value);
@@ -1030,17 +1030,16 @@ to_static_string(double value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_string<std::numeric_limits<long double>::max_digits10 + 1>
 inline
-to_static_string(long double value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_string(long double value) noexcept
 {
   return detail::to_static_string_float_impl<
     std::numeric_limits<long double>::max_digits10 + 1>(value);
 }
 
-// wstring
-
+// to_static_wstring
 static_wstring<std::numeric_limits<int>::digits10 + 1>
 inline
-to_static_wstring(int value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(int value) noexcept
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<int>::digits10 + 1>(value);
@@ -1048,7 +1047,7 @@ to_static_wstring(int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<long>::digits10 + 1>
 inline
-to_static_wstring(long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(long value) noexcept
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<long>::digits10 + 1>(value);
@@ -1056,7 +1055,7 @@ to_static_wstring(long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<long long>::digits10 + 1>
 inline
-to_static_wstring(long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(long long value) noexcept
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<long long>::digits10 + 1>(value);
@@ -1064,7 +1063,7 @@ to_static_wstring(long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
-to_static_wstring(unsigned int value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(unsigned int value) noexcept
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<unsigned int>::digits10 + 1>(value);
@@ -1072,7 +1071,7 @@ to_static_wstring(unsigned int value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
-to_static_wstring(unsigned long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(unsigned long value) noexcept
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<unsigned long>::digits10 + 1>(value);
@@ -1080,7 +1079,7 @@ to_static_wstring(unsigned long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
-to_static_wstring(unsigned long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(unsigned long long value) noexcept
 {
   return detail::to_static_wstring_int_impl<
     std::numeric_limits<unsigned long long>::digits10 + 1>(value);
@@ -1088,7 +1087,7 @@ to_static_wstring(unsigned long long value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<float>::max_digits10 + 1>
 inline
-to_static_wstring(float value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(float value) noexcept
 {
   return detail::to_static_wstring_float_impl<
     std::numeric_limits<float>::max_digits10 + 1>(value);
@@ -1096,7 +1095,7 @@ to_static_wstring(float value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<double>::max_digits10 + 1>
 inline
-to_static_wstring(double value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
     std::numeric_limits<double>::max_digits10 + 1>(value);
@@ -1104,7 +1103,7 @@ to_static_wstring(double value) BOOST_STATIC_STRING_COND_NOEXCEPT
 
 static_wstring<std::numeric_limits<long double>::max_digits10 + 1>
 inline
-to_static_wstring(long double value) BOOST_STATIC_STRING_COND_NOEXCEPT
+to_static_wstring(long double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
     std::numeric_limits<long double>::max_digits10 + 1>(value);

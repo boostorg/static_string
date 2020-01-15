@@ -380,7 +380,7 @@ template<typename Traits, typename Integer>
 inline
 char*
 integer_to_string(
-  char* str_end, Integer value, std::true_type)
+  char* str_end, Integer value, std::true_type) noexcept
 {
   if (value == 0)
   {
@@ -404,7 +404,7 @@ template<typename Traits, typename Integer>
 inline
 char*
 integer_to_string(
-  char* str_end, Integer value, std::false_type)
+  char* str_end, Integer value, std::false_type) noexcept
 {
   if (value == 0)
   {
@@ -420,7 +420,7 @@ template<typename Traits, typename Integer>
 inline
 wchar_t*
 integer_to_wstring(
-  wchar_t* str_end, Integer value, std::true_type)
+  wchar_t* str_end, Integer value, std::true_type) noexcept
 {
   if (value == 0)
   {
@@ -444,7 +444,7 @@ template<typename Traits, typename Integer>
 inline
 wchar_t*
 integer_to_wstring(
-  wchar_t* str_end, Integer value, std::false_type)
+  wchar_t* str_end, Integer value, std::false_type) noexcept
 {
   if (value == 0)
   {
@@ -459,7 +459,7 @@ integer_to_wstring(
 template<std::size_t N, typename Integer>
 inline
 static_string<N>
-to_static_string_int_impl(Integer value)
+to_static_string_int_impl(Integer value) noexcept
 {
   char buffer[N];
   const auto digits_end = std::end(buffer);
@@ -471,7 +471,7 @@ to_static_string_int_impl(Integer value)
 template<std::size_t N, typename Integer>
 inline
 static_wstring<N>
-to_static_wstring_int_impl(Integer value)
+to_static_wstring_int_impl(Integer value) noexcept
 {
   wchar_t buffer[N];
   const auto digits_end = std::end(buffer);
@@ -483,20 +483,24 @@ to_static_wstring_int_impl(Integer value)
 template<std::size_t N, typename Floating>
 inline
 static_string<N>
-to_static_string_float_impl(Floating value)
+to_static_string_float_impl(Floating value) noexcept
 {
+  // extra one needed for null terminator
   char buffer[N + 1];
   std::sprintf(buffer, "%f", value);
+  // this will not throw
   return static_string<N>(buffer);
 }
 
 template<std::size_t N, typename Floating>
 inline
 static_wstring<N>
-to_static_wstring_float_impl(Floating value)
+to_static_wstring_float_impl(Floating value) noexcept
 {
+  // extra one needed for null terminator
   wchar_t buffer[N + 1];
   std::swprintf(buffer, N + 1, L"%f", value);
+  // this will not throw
   return static_wstring<N>(buffer);
 }
 
