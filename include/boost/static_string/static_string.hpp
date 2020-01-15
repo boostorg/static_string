@@ -2989,7 +2989,7 @@ basic_static_string(CharT(&)[N]) ->
 //------------------------------------------------------------------------------
 
 #ifndef BOOST_STATIC_STRING_STANDALONE
-// hash_value overload for Boost.Container_Hash
+/// hash_value overload for Boost.Container_Hash
 template <std::size_t N, 
     typename CharT, 
     typename Traits>
@@ -3004,11 +3004,17 @@ hash_value(
 } // static_string
 } // boost
 
-// std::hash partial specialization for basic_static_string
+/// std::hash partial specialization for basic_static_string
 namespace std
 {
   template <std::size_t N, typename CharT, typename Traits>
-  struct hash<boost::static_string::basic_static_string<N, CharT, Traits>> 
+  struct hash<
+#if GENERATING_DOCUMENTATION
+    basic_static_string
+#else
+    boost::static_string::basic_static_string<N, CharT, Traits>
+#endif
+  >
   {
     std::size_t 
     operator()(

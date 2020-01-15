@@ -100,8 +100,8 @@ of `std::string`.
 
 The iterator invalidation rules differ from those of `std::string`:
 
-* Moving a string invalidates all iterators
-* Swapping two strings invalidates all iterators
+* Moving a `static_string` invalidates all iterators
+* Swapping two `static_string`s invalidates all iterators
 
 [endsect]
 
@@ -127,7 +127,7 @@ Certain features can be enabled and disabled though defining configuration macro
 
 * `BOOST_STATIC_STRING_STANDALONE`: When defined, the library is put into standalone mode.
 
-* `BOOST_STATIC_STRING_NO_EXCEPTIONS`: When defined, exceptions and their associated checks are disabled.
+* `BOOST_STATIC_STRING_NO_EXCEPTIONS`: When defined, exceptions and their associated checks are disabled. This causes violations of preconditions to result in undefined behavior.
 
 * `BOOST_STATIC_STRING_NULL_OPTIMIZATION`: When defined, the `static_string` will use the null-terminator optimization.
 
