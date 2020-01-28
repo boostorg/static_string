@@ -12,7 +12,7 @@ compile-time fixed capacity and contiguous embedded storage in which the
 characters are placed within the string object itself. Its API closely
 resembles that of `std::string`.
 
-**[Documentation](https://18.github.io/doc/static_string/)**
+**[Documentation](https://sdkrystian.github.io/doc/static_string/)**
 
 ## License
 
