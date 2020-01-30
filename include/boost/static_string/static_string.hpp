@@ -855,13 +855,14 @@ public:
         @throw std::length_error if `sv.size() > max_size() - size()`
         @return `*this`
     */
+    template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     insert(
         size_type index,
-        string_view_type sv) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
-        return insert(index, sv.data(), sv.size());
+        return insert(index, str.data(), str.size());
     }
 
     /** Insert into the string.
@@ -874,15 +875,16 @@ public:
         @throw std::length_error if `sv.substr(index_str, count).size() > max_size() - size()`
         @return `*this`
     */
+    template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     insert(
         size_type index,
-        string_view_type sv,
+        const basic_static_string<M, CharT, Traits>& str,
         size_type index_str,
         size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
-        return insert(index, sv.substr(index_str, count));
+        return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
     }
 
     /** Insert into the string.
@@ -1715,7 +1717,7 @@ public:
         size_type pos2,
         size_type n2 = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
-      return replace_unchecked(pos1, n1, str.data(), (std::min)(n2, str.size() - pos2));
+      return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
 
     /** Replace a substring with a substring.
@@ -1757,7 +1759,7 @@ public:
         size_type pos2,
         size_type n2 = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
-      return replace(pos1, n1, str.data(), (std::min)(n2, str.size() - pos2));
+      return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
 
     /** Replace a substring with an object convertible to `string_view`.
