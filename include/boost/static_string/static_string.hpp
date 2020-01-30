@@ -1962,13 +1962,32 @@ public:
     //
     //--------------------------------------------------------------------------
 
-    /** Finds the first substring.
-    
-        Finds the first substring equal to `t`.
+    /** Find the first occurrence of a string within the string.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        the first occurrence of `sv` within the string starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @note An empty string is always found.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
+        @return The lowest index `idx` greater than or equal to `pos`
+        where each element of `[sv.begin(), sv.end())` is equal to
+        that of `[begin() + idx, begin() + idx + count)` if one exists,
+        and @ref npos otherwise.
+
+        @param t The string to search for.
+        @param pos The index to start searching at. The default argument
+        for this parameter is `0`.
     */
     template<class T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1989,23 +2008,53 @@ public:
       return find(sv.data(), pos, sv.size());
     }
     
-    /** Finds the first substring.
+     /** Find the first occurrence of a string within the string.
+        
+        Finds the first occurrence of `str` within the
+        string starting at the index `pos`.
 
-        Finds the first substring equal to `str`.
+        @par Complexity
+
+        Linear.
+
+        @return The lowest index `idx` greater than or equal to `pos` 
+        where each element of `str` is equal to that of 
+        `[begin() + idx, begin() + idx + str.size())` 
+        if one exists, and @ref npos otherwise.
+
+        @param str The string to search for.
+        @param pos The index to start searching at. The default argument for
+        this parameter is `0`.
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
-    find(
+      find(
         const basic_static_string<M, CharT, Traits>& str,
         size_type pos = 0) const noexcept
     {
       return find(str.data(), pos, str.size());
     }
 
-    /** Finds the first substring.
-    
-        Finds the first substring equal to the range `(s, s + count)`. This range may contain null characters.
+    /** Find the first occurrence of a string within the string.
+
+        Finds the first occurrence of the string pointed to
+        by `s` within the string starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @note An empty string is always found.
+
+        @return The lowest index `idx` greater than or equal to `pos`
+        where each element of `[s, s + n)` is equal to that of
+        `[begin() + idx, begin() + idx + n)` if one exists,
+        and @ref npos otherwise.
+
+        @param s The string to search for.
+        @param pos The index to start searching at.
+        @param n The length of the string to search for.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2014,13 +2063,26 @@ public:
         size_type pos,
         size_type n) const noexcept;
 
-    /** Finds the first substring.
-    
-        Finds the first substring equal to the character
-        string pointed to by `s`.
-    
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`
+    /** Find the first occurrence of a string within the string.
+
+        Finds the first occurrence of the string pointed to by `s`
+        of length `count` within the string starting at the index `pos`,
+        where `count` is `Traits::length(s)`.
+
+        @par Complexity
+
+        Linear.
+
+        @note An empty string is always found.
+
+        @return The lowest index `idx` greater than or equal to `pos`
+        where each element of `[s, s + count)` is equal to that of
+        `[begin() + idx, begin() + idx + count)` if one exists,
+        and @ref npos otherwise.
+
+        @param s The string to search for.
+        @param pos The index to start searching at. The default argument
+        for this parameter is `0`.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2031,7 +2093,22 @@ public:
       return find(s, pos, Traits::length(s));
     }
 
-    /// Finds the first character `c`.
+    /** Find the first occurrence of a character within the string.
+
+        Finds the first occurrence of `c` within the string
+        starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first occurrence of `c` within
+        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+
+        @param c The character to search for.
+        @param pos The index to start searching at. The default argument
+        for this parameter is `0`.
+    */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
     find(
@@ -2042,13 +2119,31 @@ public:
     }
 
 
-    /** Finds the last substring.
-    
-        Finds the last substring equal to `t`.
+    /** Find the last occurrence of a string within the string.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        the last occurrence of `sv` within the string starting before or at
+        the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
+        @return The highest index `idx` less than or equal to `pos`
+        where each element of `[sv.begin(), sv.end())` is equal to
+        that of `[begin() + idx, begin() + idx + count)` if one exists,
+        and @ref npos otherwise.
+
+        @param t The string to search for.
+        @param pos The index to start searching at. The default argument
+        for this parameter is @ref npos.
     */
     template<class T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2069,9 +2164,23 @@ public:
       return rfind(sv.data(), pos, sv.size());
     }
 
-    /** Finds the last substring.
-    
-        Finds the last substring equal to `str`.
+    /** Find the last occurrence of a string within the string.
+
+        Finds the last occurrence of `str` within the string
+        starting before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The highest index `idx` less than or equal to `pos`
+        where each element of `str` is equal to that
+        of `[begin() + idx, begin() + idx + str.size())`
+        if one exists, and @ref npos otherwise.
+
+        @param str The string to search for.
+        @param pos The index to start searching at. The default argument for
+        this parameter is @ref npos.
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2083,9 +2192,24 @@ public:
       return rfind(str.data(), pos, str.size());
     }
 
-    /** Finds the last substring.
-    
-        Finds the last substring equal to the range `(s, s + count)`. This range may contain null characters.
+    /** Find the last occurrence of a string within the string.
+
+        Finds the last occurrence of the string pointed to
+        by `s` within the string starting before or at
+        the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The highest index `idx` less than or equal to `pos`
+        where each element of `[s, s + n)` is equal to that of
+        `[begin() + idx, begin() + idx + n)` if one exists,
+        and @ref npos otherwise.
+
+        @param s The string to search for.
+        @param pos The index to start searching at.
+        @param n The length of the string to search for.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2094,13 +2218,24 @@ public:
         size_type pos,
         size_type n) const noexcept;
 
-    /** Finds the last substring.
-    
-        Finds the last substring equal to the character
-        string pointed to by `s`.
+    /** Find the last occurrence of a string within the string.
 
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`
+        Finds the last occurrence of the string pointed to by `s`
+        of length `count` within the string starting before or at the
+        index `pos`, where `count` is `Traits::length(s)`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The highest index `idx` less than or equal to `pos`
+        where each element of `[s, s + count)` is equal to that of
+        `[begin() + idx, begin() + idx + count)` if one exists,
+        and @ref npos otherwise.
+
+        @param s The string to search for.
+        @param pos The index to stop searching at. The default argument
+        for this parameter is @ref npos.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2111,7 +2246,22 @@ public:
       return rfind(s, pos, Traits::length(s));
     }
 
-    /// Finds the last character `c`.
+    /** Find the last occurrence of a character within the string.
+
+        Finds the last occurrence of `c` within the string
+        starting before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last occurrence of `c` within
+        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+
+        @param c The character to search for.
+        @param pos The index to stop searching at. The default argument
+        for this parameter is @ref npos.
+    */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
     rfind(
@@ -2121,13 +2271,30 @@ public:
       return rfind(&c, pos, 1);
     }
 
-    /** Finds the first character equal to any character in the string.
-    
-        Finds the first character equal to one of the characters in `t`.
+    /** Find the first occurrence of any of the characters within the string.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        the first occurrence of any of the characters in `sv`
+        within the string starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
+        @return The index corrosponding to the first occurrence of
+        any of the characters in `[sv.begin(), sv.end())` within
+        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+
+        @param t The characters to search for.
+        @param pos The index to start searching at. The default argument
+        for this parameter is `0`.
     */
     template<class T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2148,9 +2315,21 @@ public:
       return find_first_of(sv.data(), pos, sv.size());
     }
 
-    /** Finds the first character equal to any character in the string.
-    
-        Finds the first character equal to one of the characters in `str`.
+    /** Find the first occurrence of any of the characters within the string.
+
+        Finds the first occurrence of any of the characters within `str` within the
+        string starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first occurrence of any of the characters
+        of `str` within `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+
+        @param str The characters to search for.
+        @param pos The index to start searching at. The default argument for
+        this parameter is `0`.
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2162,9 +2341,22 @@ public:
       return find_first_of(str.data(), pos, str.size());
     }
 
-    /** Finds the first character equal to any character in the string.
+    /** Find the first occurrence of any of the characters within the string.
 
-        Finds the first character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
+        Finds the first occurrence of any of the characters within the string pointed to
+        by `s` within the string starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first occurrence
+        of any of the characters in `[s, s + n)` within `[begin() + pos, end())`
+        if it exists, and @ref npos otherwise.
+
+        @param s The characters to search for.
+        @param pos The index to start searching at.
+        @param n The length of the string to search for.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2173,13 +2365,23 @@ public:
         size_type pos,
         size_type n) const noexcept;
 
-    /** Finds the first character equal to any character in the string.
-    
-        Finds the first character equal to one of the characters
-        in character string pointed to by `s`. 
-     
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`
+    /** Find the first occurrence of any of the characters within the string.
+
+        Finds the first occurrence of the any of the characters within string
+        pointed to by `s` of length `count` within the string starting at the
+        index `pos`, where `count` is `Traits::length(s)`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first occurrence of any of
+        the characters in `[s, s + count)` within
+        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+
+        @param s The characters to search for.
+        @param pos The index to start searching at. The default argument
+        for this parameter is `0`.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2190,7 +2392,22 @@ public:
       return find_first_of(s, pos, Traits::length(s));
     }
 
-    /// Finds the first character equal to `c`.
+    /** Find the first occurrence of a character within the string.
+
+        Finds the first occurrence of `c` within the string
+        starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first occurrence of `c` within
+        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+
+        @param c The character to search for.
+        @param pos The index to start searching at. The default argument
+        for this parameter is `0`.
+    */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
     find_first_of(
@@ -2200,13 +2417,30 @@ public:
       return find_first_of(&c, pos, 1);
     }
 
-    /** Finds the last character equal to any character in the string.
-    
-        Finds the last character equal to one of the characters in `t`.
+    /** Find the last occurrence of any of the characters within the string.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        the last occurrence of any of the characters in `sv`
+        within the string before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
+        @return The index corrosponding to the last occurrence of
+        any of the characters in `[sv.begin(), sv.end())` within
+        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+
+        @param t The characters to search for.
+        @param pos The index to stop searching at. The default argument
+        for this parameter is @ref npos.
     */
     template<class T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2227,9 +2461,21 @@ public:
       return find_last_of(sv.data(), pos, sv.size());
     }
      
-    /** Finds the last character equal to any character in the string.
-    
-        Finds the last character equal to one of the characters in `str`.
+    /** Find the last occurrence of any of the characters within the string.
+
+        Finds the last occurrence of any of the characters within `str` within the
+        string starting before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last occurrence of any of the characters
+        of `str` within `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+
+        @param str The characters to search for.
+        @param pos The index to stop searching at. The default argument for
+        this parameter is @ref npos.
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2241,9 +2487,22 @@ public:
       return find_last_of(str.data(), pos, str.size());
     }
 
-    /** Finds the last character equal to any character in the string.
-    
-        Finds the last character equal to one of the characters in the range `(s, s + count)`. This range can include null characters.
+    /** Find the last occurrence of any of the characters within the string.
+
+        Finds the last occurrence of any of the characters within the string pointed to
+        by `s` within the string before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last occurrence
+        of any of the characters in `[s, s + n)` within `[begin(), begin() + pos]`
+        if it exists, and @ref npos otherwise.
+
+        @param s The characters to search for.
+        @param pos The index to stop searching at.
+        @param n The length of the string to search for.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2252,13 +2511,23 @@ public:
         size_type pos,
         size_type n) const noexcept;
 
-    /** Finds the last character equal to any character in the string.
-    
-        Finds the last character equal to one of the characters
-        in character string pointed to by `s`.
+    /** Find the last occurrence of any of the characters within the string.
 
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`
+        Finds the last occurrence of any of the characters within the string pointed to
+        by `s` of length `count` within the string before or at the index `pos`,
+        where `count` is `Traits::length(s)`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last occurrence
+        of any of the characters in `[s, s + count)` within `[begin(), begin() + pos]`
+        if it exists, and @ref npos otherwise.
+
+        @param s The characters to search for.
+        @param pos The index to stop searching at. The default argument for
+        this parameter is @ref npos.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2269,7 +2538,22 @@ public:
       return find_last_of(s, pos, Traits::length(s));
     }
 
-    /// Finds the last character equal to `c`.
+    /** Find the last occurrence of a character within the string.
+
+        Finds the last occurrence of `c` within the string
+        before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last occurrence of `c` within
+        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+
+        @param c The character to search for.
+        @param pos The index to stop searching at. The default argument
+        for this parameter is @ref npos.
+    */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
     find_last_of(
@@ -2279,13 +2563,29 @@ public:
       return find_last_of(&c, pos, 1);
     }
 
-    /** Finds the first character equal to none the characters in the string.
-    
-        Finds the first character equal to none of the characters in `t`.
+    /** Find the first occurrence of a character not within the string.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        the first character that is not within `sv`, starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
+        @return The index corrosponding to the first occurrence of
+        a character that is not in `[sv.begin(), sv.end())` within
+        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+
+        @param t The characters to ignore.
+        @param pos The index to start searching at. The default argument
+        for this parameter is `0`.
     */
     template<class T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2306,9 +2606,21 @@ public:
       return find_first_not_of(sv.data(), pos, sv.size());
     }
 
-    /** Finds the first character equal to none the characters in the string.
-    
-        Finds the first character equal to none of the characters in `str`.
+    /** Find the first occurrence of any of the characters not within the string.
+
+        Finds the first occurrence of a character that is not within `str`
+        within the string starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first character of `[begin() + pos, end())`
+        that is not within `str` if it exists, and @ref npos otherwise.
+
+        @param str The characters to ignore.
+        @param pos The index to start searching at. The default argument for
+        this parameter is `0`.
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2320,9 +2632,22 @@ public:
       return find_first_not_of(str.data(), pos, str.size());
     }
 
-    /** Finds the first character equal to none the characters in the string.
-        
-        Finds the first character equal to none of characters in range `(s, s + count)`. This range can include null characters.
+    /** Find the first occurrence of any of the characters not within the string.
+
+        Finds the first occurrence of a character that is not within the string
+        pointed to by `s` within the string starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first character of `[begin() + pos, end())`
+        that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
+
+        @param s The characters to ignore.
+        @param pos The index to start searching at. The default argument for
+        this parameter is `0`.
+        @param n The length of the characters to ignore.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2331,13 +2656,22 @@ public:
         size_type pos, 
         size_type n) const noexcept;
 
-    /** Finds the first character equal to none the characters in the string.
-    
-        Finds the first character equal to none of the characters in
-        character string pointed to by `s`.
+    /** Find the first occurrence of any of the characters not within the string.
 
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`
+        Finds the first occurrence of a character that is not within the string
+        pointed to by `s` of length `count` within the string starting
+        at the index `pos`, where `count` is `Traits::length(s)`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first character of `[begin() + pos, end())`
+        that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
+
+        @param s The characters to ignore.
+        @param pos The index to start searching at. The default argument for
+        this parameter is `0`.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2348,7 +2682,22 @@ public:
       return find_first_not_of(s, pos, Traits::length(s));
     }
 
-    /// Finds the first character not equal to `c`.
+    /** Find the first occurrence of a character not equal to `c`.
+
+        Finds the first occurrence of a character that is not equal
+        to `c`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the first character of `[begin() + pos, end())`
+        that is not equal to `c` if it exists, and @ref npos otherwise.
+
+        @param c The character to ignore.
+        @param pos The index to start searching at. The default argument for
+        this parameter is `0`.
+    */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
     find_first_not_of(
@@ -2358,13 +2707,29 @@ public:
       return find_first_not_of(&c, pos, 1);
     }
 
-    /** Finds the last character equal to none the characters in the string.
-    
-        Finds the last character equal to none of the characters in `t`.
+    /** Find the last occurrence of a character not within the string.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        the last character that is not within `sv`, starting at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
+        @return The index corrosponding to the last occurrence of
+        a character that is not in `[sv.begin(), sv.end())` within
+        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+
+        @param t The characters to ignore.
+        @param pos The index to start searching at. The default argument
+        for this parameter is @ref npos.
     */
     template<class T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2385,9 +2750,21 @@ public:
       return find_last_not_of(sv.data(), pos, sv.size());
     }
 
-    /** Finds the last character equal to none the characters in the string.
-    
-        Finds the last character equal to none of the characters in `str`.
+    /** Find the last occurrence of a character not within the string.
+
+        Finds the last occurrence of a character that is not within `str`
+        within the string before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+        that is not within `str` if it exists, and @ref npos otherwise.
+
+        @param str The characters to ignore.
+        @param pos The index to stop searching at. The default argument for
+        this parameter is @ref npos.
     */
     template<size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2399,9 +2776,22 @@ public:
       return find_last_not_of(str.data(), pos, str.size());
     }
 
-    /** Finds the last character equal to none the characters in the string.
-        
-        Finds the last character equal to none of the characters in range `(s, s + count)`. This range can include null characters.
+    /** Find the last occurrence of a character not within the string.
+
+        Finds the last occurrence of a character that is not within the
+        string pointed to by `s` within the string before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+        that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
+
+        @param s The characters to ignore.
+        @param pos The index to stop searching at. The default argument for
+        this parameter is @ref npos.
+        @param n The length of the characters to ignore.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2411,13 +2801,22 @@ public:
         size_type n) const noexcept;
 
 
-    /** Finds the last character equal to none the characters in the string.
-    
-        Finds the last character equal to none of the characters in
-        character string pointed to by `s`.
+    /** Find the last occurrence of a character not within the string.
 
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`
+        Finds the last occurrence of a character that is not within the
+        string pointed to by `s` of length `count` within the string
+        before or at the index `pos`, where `count` is `Traits::length(s)`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+        that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
+
+        @param s The characters to ignore.
+        @param pos The index to stop searching at. The default argument for
+        this parameter is @ref npos.
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
@@ -2428,7 +2827,22 @@ public:
       return find_last_not_of(s, pos, Traits::length(s));
     }
 
-    /// Finds the last character not equal to `c`.
+    /** Find the last occurrence of a character not equal to `c`.
+
+        Finds the last occurrence of a character that is not equal
+        to `c` before or at the index `pos`.
+
+        @par Complexity
+
+        Linear.
+
+        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+        that is not equal to `c` if it exists, and @ref npos otherwise.
+
+        @param c The character to ignore.
+        @param pos The index to start searching at. The default argument for
+        this parameter is @ref npos.
+    */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
     find_last_not_of(
