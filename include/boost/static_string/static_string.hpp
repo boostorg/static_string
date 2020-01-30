@@ -1608,14 +1608,35 @@ public:
     void
     swap(
         basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_COND_NOEXCEPT;
-
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `s`. This replacement is done unchecked.
         
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+
+   /** Replace a substring with a string.
+
+        Replaces `rcount` characters starting at index `pos1` with those
+        of `str`, where `rcount` is `std::min(n1, size() - pos1)`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note 
+        The replacement is done unchecked, as the source cannot be
+        within the destination.
+        
+        All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam M The size of the input string.
+
         @return `*this`
+
+        @param pos1 The index to replace at.
+        @param n1 The number of characters to replace.
+        @param str The string to replace with.
+
+        @throw std::length_error `size() + (str.size() - rcount) > max_size()`
+        @throw std::out_of_range `pos1 > size()`
     */
     template<size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1628,17 +1649,31 @@ public:
       return replace_unchecked(pos1, n1, str.data(), str.size());
     }
 
-    /** Replace a subset of the string.
+    /** Replace a substring with a string.
 
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `s`.
+        Replaces `rcount` characters starting at index `pos1` with those
+        of `str`, where `rcount` is `std::min(n1, size() - pos1)`.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param pos1 The index to replace at.
+        @param n1 The number of characters to replace.
+        @param str The string to replace with.
+
+        @throw std::length_error `size() + (str.size() - rcount) > max_size()`
+        @throw std::out_of_range `pos1 > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-      basic_static_string&
-      replace(
+    basic_static_string&
+    replace(
         size_type pos1,
         size_type n1,
         const basic_static_string& str) BOOST_STATIC_STRING_COND_NOEXCEPT
@@ -1646,14 +1681,30 @@ public:
       return replace(pos1, n1, str.data(), str.size());
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `str`
-        except that if `n2` is greater than `str.size()`, `[pos2, pos2 + str.size())` is used.
+    /** Replace a substring with a substring.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces `rcount` characters starting at index `pos1` with those of
+        `str.subview(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos1)`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param pos1 The index to replace at.
+        @param n1 The number of characters to replace.
+        @param str The string to replace with.
+        @param pos2 The index to begin the substring.
+        @param n2 The length of the substring.
+        The default argument for this parameter is @ref npos.
+
+        @throw std::length_error `size() + (std::min(str.size(), n2) - rcount) > max_size()`
+        @throw std::out_of_range `pos1 > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1664,20 +1715,80 @@ public:
         size_type pos2,
         size_type n2 = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
-      return replace(pos1, n1, str.subview(pos2, n2));
+      return replace_unchecked(pos1, n1, str.data(), (std::min)(n2, str.size() - pos2));
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `t` after converting to `string_view_type`.
+    /** Replace a substring with a substring.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Replaces `rcount` characters starting at index `pos1` with those of
+        `str.subview(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos1)`.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note 
+        The replacement is done unchecked, as the source cannot be
+        within the destination.
+        
+        All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param pos1 The index to replace at.
+        @param n1 The number of characters to replace.
+        @param str The string to replace with.
+        @param pos2 The index to begin the substring.
+        @param n2 The length of the substring.
+        The default argument for this parameter is @ref npos.
+
+        @throw std::length_error `size() + (std::min(str.size(), n2) - rcount) > max_size()`
+        @throw std::out_of_range `pos1 > size()`
+    */
+    template<std::size_t M>
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    basic_static_string&
+    replace(
+        size_type pos1,
+        size_type n1,
+        const basic_static_string<M, CharT, Traits>& str,
+        size_type pos2,
+        size_type n2 = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+    {
+      return replace(pos1, n1, str.data(), (std::min)(n2, str.size() - pos2));
+    }
+
+    /** Replace a substring with an object convertible to `string_view`.
+
+        Constructs a temporary `string_view` object `sv` from `t`, and
+        replaces `rcount` characters starting at index `pos1` with those
+        of `sv`, where `rcount` is `std::min(n1, size() - pos1)`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
+        @return `*this`
+
+        @param pos1 The index to replace at.
+        @param n1 The number of characters to replace.
+        @param t The object to replace with.
+
+        @throw std::length_error `size() + (sv.size() - rcount) > max_size()`
+        @throw std::out_of_range `pos1 > size()`
     */
     template<typename T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1698,18 +1809,38 @@ public:
       return replace(pos1, n1, sv.data(), sv.size());
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with substring `[pos2, pos2 + n2)` of `t`
-        after converting to `string_view_type`, except that if `n2` is greater than `t.size()`, `[pos2, pos2 + t.size())` is used.
+    /** Replace a substring with a substring of an object convertible to `string_view`.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and
+        replaces `rcount` characters starting at index `pos1` with those
+        of `sv.substr(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos)`.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
         @return `*this`
+
+        @param pos1 The index to replace at.
+        @param n1 The number of characters to replace.
+        @param t The object to replace with.
+        @param pos2 The index to begin the substring.
+        @param n2 The length of the substring.
+        The default argument for this parameter is @ref npos.
+
+        @throw std::length_error `size() + (std::min(n2, sv.size()) - rcount) > max_size()`
+        @throw std::out_of_range `pos1 > size()`
     */
     template<typename T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1732,13 +1863,28 @@ public:
       return replace(pos1, n1, sv.substr(pos2, n2));
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + n2)`.
+    /** Replace a substring with a string.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces `rcount` characters starting at index `pos` with those of
+        `[s, s + n2)`, where `rcount` is `std::min(n1, size() - pos)`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param pos The index to replace at.
+        @param n1 The number of characters to replace.
+        @param s The string to replace with.
+        @param n2 The length of the string to replace with.
+
+        @throw std::length_error `size() + (n2 - rcount) > max_size()`
+        @throw std::out_of_range `pos > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1749,13 +1895,28 @@ public:
         size_type n2) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with the characters in the range `[s, s + Traits::length(s))`.
+    /** Replace a substring with a string.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces `rcount` characters starting at index `pos` with those of
+        `[s, s + len)`, where the length of the string `len` is `Traits::length(s)` and `rcount`
+        is `std::min(n1, size() - pos)`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param pos The index to replace at.
+        @param n1 The number of characters to replace.
+        @param s The string to replace with.
+
+        @throw std::length_error `size() + (len - rcount) > max_size()`
+        @throw std::out_of_range `pos > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1767,13 +1928,28 @@ public:
       return replace(pos, n1, s, Traits::length(s));
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[pos1, pos1 + n1)` with `n2` copies of `c`.
+    /** Replace a substring with copies of a character.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces `rcount` characters starting at index `pos` with `n2` copies
+        of `c`, where `rcount` is `std::min(n1, size() - pos)`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param pos The index to replace at.
+        @param n1 The number of characters to replace.
+        @param n2 The number of characters to replace with.
+        @param c The character to replace with.
+
+        @throw std::length_error `size() + (n2 - rcount) > max_size()`
+        @throw std::out_of_range `pos > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1783,35 +1959,78 @@ public:
         size_type n2,
         CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with `s`
+    /** Replace a range with a string.
 
-        @throw std::out_of_range if `pos1 > size()`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces the characters in the range `[i1, i2)`
+        with those of `str`.
+
+        @par Precondition
+
+        `[i1, i2)` is a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam M The size of the input string.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator referring past the end of
+        the last character to replace.
+        @param str The string to replace with.
+
+        @throw std::length_error `size() + (str.size() - std::distance(i1, i2)) > max_size()`
     */
+    template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     replace(
         const_iterator i1,
         const_iterator i2,
-        const basic_static_string& str) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_COND_NOEXCEPT
     {
       return replace(i1, i2, str.data(), str.size());
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with `t` after converting to `string_view_type`.
+    /** Replace a range with an object convertible to `string_view`.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t`, and
+        replaces the characters in the range `[i1, i2)` with those
+        of `sv`.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        @par Precondition
+
+        `[i1, i2)` is a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char const*>::value`.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator referring past the end of
+        the last character to replace.
+        @param t The object to replace with.
+
+        @throw std::length_error `size() + (sv.size() - std::distance(i1, i2)) > max_size()`
     */
     template<typename T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1832,13 +2051,32 @@ public:
       return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + n)`.
+    /** Replace a range with a string.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces the characters in the range `[i1, i2)` with those of
+        `[s, s + n)`.
+
+        @par Precondition
+
+        `[i1, i2)` is a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator referring past the end of
+        the last character to replace.
+        @param s The string to replace with.
+        @param n The length of the string to replace with.
+
+        @throw std::length_error `size() + (n - std::distance(i1, i2)) > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1851,13 +2089,31 @@ public:
       return replace(i1 - begin(), i2 - i1, s, n);
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[s, s + Traits::length(s))`.
+    /** Replace a range with a string.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces the characters in the range `[i1, i2)` with those of
+        `[s, s + len)`, where the length of the string `len` is `Traits::length(s)`.
+
+        @par Precondition
+
+        `[i1, i2)` shall be a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator referring past the end of
+        the last character to replace.
+        @param s The string to replace with.
+
+        @throw std::length_error `size() + (len - std::distance(i1, i2)) > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1869,13 +2125,32 @@ public:
       return replace(i1, i2, s, Traits::length(s));
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with `n` copies of `c`.
+    /** Replace a range with copies of a character.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces the characters in the range `[i1, i2)` with
+        `n` copies of `c`.
+
+        @par Precondition
+
+        `[i1, i2)` is a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator past the end of
+        the last character to replace.
+        @param n The number of characters to replace with.
+        @param c The character to replace with.
+
+        @throw std::length_error `size() + (n - std::distance(i1, i2)) > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1888,13 +2163,42 @@ public:
       return replace(i1 - begin(), i2 - i1, n, c);
     }
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[j1, j2)`.
+    /** Replace a range with a range.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces the characters in the range `[i1, i2)`
+        with those of `[j1, j2)`.
+
+        @par Precondition
+
+        `[i1, i2)` is a valid range.
+
+        `[j1, j2)` is a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam InputIt The type of the iterators.
+
+        @par Constraints
+
+        `InputIt` satisfies __InputIterator__ and does not 
+        satisfy __ForwardIterator__.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator referring past the end of
+        the last character to replace.
+        @param j1 An iterator referring to the first character to replace with.
+        @param j2 An iterator referring past the end of
+        the last character to replace with.
+
+        @throw std::length_error `size() + (inserted - std::distance(i1, i2)) > max_size()`
     */
     template<typename InputIterator>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1914,13 +2218,41 @@ public:
         InputIterator j1,
         InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with the characters in the range `[j1, j2)`.
+    /** Replace a range with a range.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces the characters in the range `[i1, i2)`
+        with those of `[j1, j2)`.
+
+        @par Precondition
+
+        `[i1, i2)` is a valid range.
+
+        `[j1, j2)` is a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam InputIt The type of the iterators.
+
+        @par Constraints
+
+        `InputIt` satisfies __ForwardIterator__.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator referring past the end of
+        the last character to replace.
+        @param j1 An iterator referring to the first character to replace with.
+        @param j2 An iterator referring past the end of
+        the last character to replace with.
+
+        @throw std::length_error `size() + (std::distance(j1, j2) - std::distance(i1, i2)) > max_size()`
     */
     template<typename ForwardIterator>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1938,13 +2270,31 @@ public:
         ForwardIterator j1,
         ForwardIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Replace a subset of the string.
-    
-        Replaces the part of the string indicated by `[i1, i2)` with the characters in the initializer list `il`.
+    /** Replace a range with an initializer list.
 
-        @throw std::out_of_range if `i1` and `i2` do not refer to elements within the range `[0, size())`
-        @throw std::length_error if the resulting string exceeds `max_size()`
+        Replaces the characters in the range `[i1, i2)`
+        with those of contained in the initializer list `il`.
+
+        @par Precondition
+
+        `[i1, i2)` is a valid range.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param i1 An iterator referring to the first character to replace.
+        @param i2 An iterator past the end of
+        the last character to replace.
+        @param il The initializer list to replace with.
+
+        @throw std::length_error `size() + (il.size() - std::distance(i1, i2)) > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
