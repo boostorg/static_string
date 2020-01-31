@@ -35,18 +35,16 @@
 
 [/-----------------------------------------------------------------------------]
 
-[section Introduction]
+[heading Introduction]
 
 This library provides a dynamically resizable string of characters with
 compile-time fixed capacity and contiguous embedded storage in which the
 characters are placed within the string object itself. Its API closely
 resembles that of `std::string`
 
-[endsect]
-
 [/-----------------------------------------------------------------------------]
 
-[section Motivation]
+[heading Motivation]
 
 A fixed capacity string is useful when:
 
@@ -61,21 +59,17 @@ A fixed capacity string is useful when:
   within the string object itself (e.g. to support `memcpy` for serialization
   purposes).
 
-[endsect]
-
 [/-----------------------------------------------------------------------------]
 
-[section Requirements]
+[heading Requirements]
 
 The library is usable in two different modes: standalone and Boost dependent. This library defaults to Boost dependent mode; standalone mode is opt-in through the use of a configuration macro.
 
 When in Boost dependent mode, the library requires the use of at least C++11, in addition to Boost.Core, Boost.Utility, and Boost.ContainerHash. In standalone mode, C++17 is required but no libraries except for the standard library are needed.
 
-[endsect]
-
 [/-----------------------------------------------------------------------------]
 
-[section Design]
+[heading Design]
 
 The over-arching design goal is to resemble the interface and behavior of
 `std::string` as much as possible. When any operation would exceed the
@@ -92,22 +86,18 @@ present in this implementation, with the only difference being the lack of `cons
 for the time being. The avaliable overloads for `static_string` are identical to those
 of `std::string`.
 
-[endsect]
-
 [/-----------------------------------------------------------------------------]
 
-[section Iterators]
+[heading Iterators]
 
 The iterator invalidation rules differ from those of `std::string`:
 
 * Moving a `static_string` invalidates all iterators
 * Swapping two `static_string`s invalidates all iterators
 
-[endsect]
-
 [/-----------------------------------------------------------------------------]
 
-[section Optimizations]
+[heading Optimizations]
 
 Depending on the character type and size used for a specialization of `static_string`, certain optimizations are used to reduce the size of the class type. Given the name of a specialization of the form `static_string<N, CharT, Traits>`:
 
@@ -117,11 +107,9 @@ Depending on the character type and size used for a specialization of `static_st
 
 The optionally enabled null-terminator optimization will instead store the size of the `static_string` in the last character of the data array as `N - size()` if `CharT` can represent the value `N`.
 
-[endsect]
-
 [/-----------------------------------------------------------------------------]
 
-[section Configuration]
+[heading Configuration]
 
 Certain features can be enabled and disabled though defining configuration macros. The macros and the associated feature they control are:
 
@@ -131,7 +119,11 @@ Certain features can be enabled and disabled though defining configuration macro
 
 * `BOOST_STATIC_STRING_NULL_OPTIMIZATION`: When defined, the `static_string` will use the null-terminator optimization.
 
-[endsect]
+[/-----------------------------------------------------------------------------]
+
+[heading Reference]
+
+[link static_string.ref.boost__static_string__static_string `static_string`]
 
 [/-----------------------------------------------------------------------------]
 

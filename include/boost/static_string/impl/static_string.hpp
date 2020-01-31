@@ -36,7 +36,7 @@ basic_static_string() noexcept
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(size_type count, CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+basic_static_string(size_type count, CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(count, ch);
 }
@@ -46,7 +46,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(basic_static_string<M, CharT, Traits> const& other,
-    size_type pos) BOOST_STATIC_STRING_COND_NOEXCEPT
+    size_type pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(other, pos);
 }
@@ -58,7 +58,7 @@ basic_static_string<N, CharT, Traits>::
 basic_static_string(
     basic_static_string<M, CharT, Traits> const& other,
     size_type pos,
-    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(other, pos, count);
 }
@@ -66,7 +66,7 @@ basic_static_string(
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(CharT const* s, size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT
+basic_static_string(CharT const* s, size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(s, count);
 }
@@ -74,7 +74,7 @@ basic_static_string(CharT const* s, size_type count) BOOST_STATIC_STRING_COND_NO
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+basic_static_string(CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   auto const count = Traits::length(s);
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
@@ -92,7 +92,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
     InputIterator first,
-    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT
+    InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(first, last);
 }
@@ -111,7 +111,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-    basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(s);
 }
@@ -119,7 +119,7 @@ basic_static_string(
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(std::initializer_list<CharT> init) BOOST_STATIC_STRING_COND_NOEXCEPT
+basic_static_string(std::initializer_list<CharT> init) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(init.begin(), init.end());
 }
@@ -127,7 +127,7 @@ basic_static_string(std::initializer_list<CharT> init) BOOST_STATIC_STRING_COND_
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(string_view_type sv) BOOST_STATIC_STRING_COND_NOEXCEPT
+basic_static_string(string_view_type sv) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(sv);
 }
@@ -136,7 +136,7 @@ template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(T const& t, size_type pos, size_type n) BOOST_STATIC_STRING_COND_NOEXCEPT
+basic_static_string(T const& t, size_type pos, size_type n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   assign(t, pos, n);
 }
@@ -153,7 +153,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 assign(
     size_type count,
-    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         basic_static_string&
 {
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
@@ -188,7 +188,7 @@ basic_static_string<N, CharT, Traits>::
 assign(
     basic_static_string<M, CharT, Traits> const& s,
     size_type pos,
-    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
     basic_static_string&
 {
   auto const ss = s.subview(pos, count);
@@ -201,7 +201,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 assign(
     CharT const* s,
-    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         basic_static_string&
 {
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
@@ -219,7 +219,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 assign(
     InputIterator first,
-    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         typename std::enable_if<
             detail::is_input_iterator<InputIterator>::value,
                 basic_static_string&>::type
@@ -249,7 +249,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-at(size_type pos) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+at(size_type pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
     reference
 {
   BOOST_STATIC_STRING_THROW_IF(
@@ -261,7 +261,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-at(size_type pos) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
+at(size_type pos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
     const_reference
 {
   BOOST_STATIC_STRING_THROW_IF(
@@ -279,7 +279,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-reserve(std::size_t n) BOOST_STATIC_STRING_COND_NOEXCEPT
+reserve(std::size_t n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   BOOST_STATIC_STRING_THROW_IF(
       n > max_size(), std::length_error{"n > max_size()"});
@@ -310,7 +310,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     size_type index,
     CharT const* s,
-    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         basic_static_string&
 {
   const auto curr_size = size();
@@ -328,7 +328,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
     size_type count,
-    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         iterator
 {
   const auto curr_size = size();
@@ -351,7 +351,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
     ForwardIterator first,
-    ForwardIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    ForwardIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         typename std::enable_if<
             detail::is_forward_iterator<
                 ForwardIterator>::value, iterator>::type
@@ -404,7 +404,7 @@ basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
     InputIterator first,
-    InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         typename std::enable_if<
             detail::is_input_iterator<
                 InputIterator>::value && 
@@ -429,7 +429,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 insert(
     const_iterator pos,
-    std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         iterator
 {
   const auto curr_size = size();
@@ -453,7 +453,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 erase(
     size_type index,
-    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         basic_static_string&
 {
   const auto curr_size = size();
@@ -471,7 +471,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 erase(
-    const_iterator pos) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    const_iterator pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         iterator
 {
   erase(pos - begin(), 1);
@@ -484,7 +484,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 erase(
     const_iterator first,
-    const_iterator last) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    const_iterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         iterator
 {
   erase(first - begin(),
@@ -497,7 +497,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
 push_back(
-    CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
@@ -513,7 +513,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 append(
     CharT const* s,
-    size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         basic_static_string&
 {
   const auto curr_size = size();
@@ -529,7 +529,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-substr(size_type pos, size_type count) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
+substr(size_type pos, size_type count) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
     basic_static_string
 {
   BOOST_STATIC_STRING_THROW_IF(
@@ -541,7 +541,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-subview(size_type pos, size_type count) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
+subview(size_type pos, size_type count) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
     string_view_type
 {
   BOOST_STATIC_STRING_THROW_IF(
@@ -553,7 +553,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-copy(CharT* dest, size_type count, size_type pos) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
+copy(CharT* dest, size_type count, size_type pos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
     size_type
 {
   auto const s = subview(pos, count);
@@ -565,7 +565,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-resize(std::size_t n) BOOST_STATIC_STRING_COND_NOEXCEPT
+resize(std::size_t n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
@@ -580,7 +580,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-resize(std::size_t n, CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT
+resize(std::size_t n, CharT c) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
@@ -610,7 +610,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-swap(basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_COND_NOEXCEPT
+swap(basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
@@ -632,7 +632,7 @@ replace(
     size_type pos,
     size_type n1,
     const CharT* s,
-    size_type n2) BOOST_STATIC_STRING_COND_NOEXCEPT -> 
+    size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT -> 
         basic_static_string<N, CharT, Traits>&
 {
   const auto curr_size = size();
@@ -651,7 +651,7 @@ replace(
     size_type pos,
     size_type n1,
     size_type n2,
-    CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT -> basic_static_string<N, CharT, Traits> &
+    CharT c) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT -> basic_static_string<N, CharT, Traits> &
 {
   const auto curr_size = size();
   const auto curr_data = data();
@@ -676,7 +676,7 @@ replace(
       const_iterator i1,
       const_iterator i2,
       ForwardIterator j1,
-      ForwardIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+      ForwardIterator j2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
           typename std::enable_if<
               detail::is_forward_iterator<ForwardIterator>::value,
                   basic_static_string<N, CharT, Traits>&>::type
@@ -745,7 +745,7 @@ replace(
       const_iterator i1,
       const_iterator i2,
       InputIterator j1,
-      InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+      InputIterator j2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
           typename std::enable_if<
             detail::is_input_iterator<
                 InputIterator>::value && 
@@ -908,7 +908,7 @@ assign_char(CharT ch, std::true_type) noexcept ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 basic_static_string<N, CharT, Traits>::
-assign_char(CharT, std::false_type) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+assign_char(CharT, std::false_type) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
     basic_static_string&
 {
   BOOST_STATIC_STRING_THROW(std::length_error{"max_size() == 0"});
@@ -944,7 +944,7 @@ replace_unchecked(
     size_type pos,
     size_type n1,
     const CharT* s,
-    size_type n2) BOOST_STATIC_STRING_COND_NOEXCEPT ->
+    size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
         basic_static_string&
 {
   const auto curr_data = data();

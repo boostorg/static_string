@@ -79,7 +79,7 @@ public:
     using const_reverse_iterator =
         std::reverse_iterator<const_iterator>;
 
-    /// The type of `string_view` returned by the interface
+    /// The type of `string_view_type` returned by the interface
     using string_view_type =
         basic_string_view<CharT, Traits>;
 
@@ -117,7 +117,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
         size_type count,
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
         
@@ -127,7 +127,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
         basic_static_string<M, CharT, Traits> const& other,
-        size_type pos) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
     
@@ -138,7 +138,7 @@ public:
     basic_static_string(
         basic_static_string<M, CharT, Traits> const& other,
         size_type pos,
-        size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
         
@@ -147,7 +147,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
         CharT const* s,
-        size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
         
@@ -155,7 +155,7 @@ public:
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
-        CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
     
@@ -171,7 +171,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
         InputIterator first,
-        InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
         
@@ -188,7 +188,7 @@ public:
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
-        basic_static_string<M, CharT, Traits> const& other) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        basic_static_string<M, CharT, Traits> const& other) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
         
@@ -196,16 +196,16 @@ public:
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
-        std::initializer_list<CharT> init) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        std::initializer_list<CharT> init) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
     
-        Construct from a `string_view`
+        Construct from a `string_view_type`
     */
     explicit
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string(
-        string_view_type sv) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        string_view_type sv) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Construct a `basic_static_string`.
     
@@ -225,7 +225,7 @@ public:
     basic_static_string(
         T const& t,
         size_type pos,
-        size_type n) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     //--------------------------------------------------------------------------
     //
@@ -256,7 +256,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator=(
-        basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign(s);
     }
@@ -270,7 +270,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator=(
-        CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign(s);
     }
@@ -282,7 +282,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator=(
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign_char(ch,
             std::integral_constant<bool, (N > 0)>{});
@@ -295,7 +295,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator=(
-        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT
+        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign(ilist);
     }
@@ -307,7 +307,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator=(
-        string_view_type sv) BOOST_STATIC_STRING_COND_NOEXCEPT
+        string_view_type sv) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign(sv);
     }
@@ -323,7 +323,7 @@ public:
     basic_static_string&
     assign(
         size_type count,
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Replace the contents.
     
@@ -347,7 +347,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     assign(
-        basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         // VFALCO this could come in two flavors,
         //        N>M and N<M, and skip the exception
@@ -368,7 +368,7 @@ public:
     assign(
         basic_static_string<M, CharT, Traits> const& s,
         size_type pos,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Replace the contents.
     
@@ -381,7 +381,7 @@ public:
     basic_static_string&
     assign(
         CharT const* s,
-        size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Replace the contents.
     
@@ -393,7 +393,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     assign(
-        CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign(s, Traits::length(s));
     }
@@ -416,7 +416,7 @@ public:
 #endif
     assign(
         InputIterator first,
-        InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Replace the contents.
     
@@ -428,7 +428,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     assign(
-        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT
+        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign(ilist.begin(), ilist.end());
     }
@@ -449,7 +449,7 @@ public:
         ! std::is_convertible<T, CharT const*>::value,
             basic_static_string&>::type
 #endif
-    assign(T const& t) BOOST_STATIC_STRING_COND_NOEXCEPT
+    assign(T const& t) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         string_view_type ss{t};
         return assign(ss.data(), ss.size());
@@ -480,7 +480,7 @@ public:
     assign(
         T const& t,
         size_type pos,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return assign(string_view_type{t}.substr(pos, count));
     }
@@ -497,7 +497,7 @@ public:
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     reference
-    at(size_type pos) BOOST_STATIC_STRING_COND_NOEXCEPT;
+    at(size_type pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Access specified character with bounds checking.
 
@@ -505,7 +505,7 @@ public:
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     const_reference
-    at(size_type pos) const BOOST_STATIC_STRING_COND_NOEXCEPT;
+    at(size_type pos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Access specified character
 
@@ -559,7 +559,7 @@ public:
     CharT&
     back() noexcept
     {
-        return data()[size()-1];
+        return data()[size() - 1];
     }
 
     /** Accesses the last character.
@@ -570,7 +570,7 @@ public:
     CharT const&
     back() const noexcept
     {
-        return data()[size()-1];
+        return data()[size() - 1];
     }
 
     /// Returns a pointer to the first character of the string.
@@ -756,7 +756,7 @@ public:
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
-    reserve(std::size_t n) BOOST_STATIC_STRING_COND_NOEXCEPT;
+    reserve(std::size_t n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Returns the number of characters that can be held in currently allocated storage.
 
@@ -816,7 +816,7 @@ public:
     insert(
         size_type index,
         size_type count,
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       BOOST_STATIC_STRING_THROW_IF(
         index > size(), std::out_of_range{"index > size()"});
@@ -850,7 +850,7 @@ public:
     basic_static_string&
     insert(
         size_type index,
-        CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return insert(index, s, Traits::length(s));
     }
@@ -882,7 +882,7 @@ public:
     insert(
         size_type index,
         CharT const* s,
-        size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Insert a string.
 
@@ -912,7 +912,7 @@ public:
     basic_static_string&
     insert(
         size_type index,
-        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return insert(index, str.data(), str.size());
     }
@@ -934,7 +934,7 @@ public:
 
         @return `*this`
 
-        @param inddex The index to insert at.
+        @param index The index to insert at.
         @param str The string from which to insert.
         @param index_str The index in `str` to start inserting from.
         @param count The number of characters to insert.
@@ -950,7 +950,7 @@ public:
         size_type index,
         const basic_static_string<M, CharT, Traits>& str,
         size_type index_str,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
     }
@@ -983,7 +983,7 @@ public:
     iterator
     insert(
         const_iterator pos,
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return insert(pos, 1, ch);
     }
@@ -1018,7 +1018,7 @@ public:
     insert(
         const_iterator pos,
         size_type count,
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Insert a range of characters.
 
@@ -1069,7 +1069,7 @@ public:
     insert(
         const_iterator pos,
         InputIterator first,
-        InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Insert a range of characters.
 
@@ -1118,7 +1118,7 @@ public:
     insert(
         const_iterator pos,
         ForwardIterator first,
-        ForwardIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        ForwardIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Insert characters from an initializer list.
 
@@ -1148,11 +1148,11 @@ public:
     iterator
     insert(
         const_iterator pos,
-        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
-    /** Insert characters from an object convertible to `string_view`.
+    /** Insert characters from an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view` object `sv` from `t` and
+        Constructs a temporary `string_view_type` object `sv` from `t` and
         inserts `[sv.begin(), sv.end())` at `index`.
 
         @par Precondition
@@ -1196,14 +1196,14 @@ public:
 #endif
     insert(
         size_type index,
-        T const& t) BOOST_STATIC_STRING_COND_NOEXCEPT
+        T const& t) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return insert(index, t, 0, npos);
     }
 
-    /** Insert characters from an object convertible to `string_view`.
+    /** Insert characters from an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view` object `sv` from `t`
+        Constructs a temporary `string_view_type` object `sv` from `t`
         and inserts `sv.substr(index_str, count)` at `index`.
 
         @par Exception Safety
@@ -1225,7 +1225,7 @@ public:
 
         @param index The index to insert at.
         @param t The string to insert from.
-        @param index_str The index in the temporary `string_view` object
+        @param index_str The index in the temporary `string_view_type` object
         to start the substring from.
         @param count The number of characters to insert.
 
@@ -1246,7 +1246,7 @@ public:
         size_type index,
         T const& t,
         size_type index_str,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       auto const s = string_view_type(t).substr(index_str, count);
       return insert(index, s.data(), s.size());
@@ -1261,7 +1261,7 @@ public:
     basic_static_string&
     erase(
         size_type index = 0,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Removes the character at `pos`
 
@@ -1270,7 +1270,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     iterator
     erase(
-        const_iterator pos) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        const_iterator pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Removes the characters in the range `(first, last)`
 
@@ -1280,7 +1280,7 @@ public:
     iterator
     erase(
         const_iterator first,
-        const_iterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        const_iterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Appends the given character `ch` to the end of the string.
 
@@ -1289,7 +1289,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     push_back(
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Removes the last character from the string
 
@@ -1315,7 +1315,7 @@ public:
     basic_static_string&
     append(
         size_type count,
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return insert(size(), count, ch);
     }
@@ -1332,7 +1332,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     append(
-        string_view_type sv) BOOST_STATIC_STRING_COND_NOEXCEPT
+        string_view_type sv) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(sv.data(), sv.size());
     }
@@ -1352,7 +1352,7 @@ public:
     append(
         string_view_type sv,
         size_type pos,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(sv.substr(pos, count));
     }
@@ -1370,7 +1370,7 @@ public:
     basic_static_string&
     append(
         CharT const* s,
-        size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Append to the string.
     
@@ -1385,7 +1385,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     append(
-        CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(s, Traits::length(s));
     }
@@ -1412,7 +1412,7 @@ public:
 #endif
     append(
         InputIterator first,
-        InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT
+        InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         insert(end(), first, last);
         return *this;
@@ -1430,7 +1430,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     append(
-        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT
+        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         insert(end(), ilist);
         return *this;
@@ -1442,7 +1442,7 @@ public:
 
         The appended string can contain null characters.
         This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
+        `T` is convertible to `string_view_type` and `T` is not
         convertible to `CharT const*`.
 
         @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
@@ -1461,7 +1461,7 @@ public:
                 basic_static_string&>::type
 #endif
     append(
-        T const& t) BOOST_STATIC_STRING_COND_NOEXCEPT
+        T const& t) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(string_view_type{t});
     }
@@ -1494,7 +1494,7 @@ public:
     append(
         T const& t,
         size_type pos,
-        size_type count = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(string_view_type{t}.substr(pos, count));
     }
@@ -1507,7 +1507,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator+=(
-        basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(s.data(), s.size());
     }
@@ -1521,7 +1521,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator+=(
-        CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         push_back(ch);
         return *this;
@@ -1540,7 +1540,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator+=(
-        CharT const* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(s);
     }
@@ -1557,7 +1557,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     operator+=(
-        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT
+        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(ilist);
     }
@@ -1584,7 +1584,7 @@ public:
             basic_static_string&>::type
 #endif
     operator+=(
-        T const& t) BOOST_STATIC_STRING_COND_NOEXCEPT
+        T const& t) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return append(t);
     }
@@ -1613,7 +1613,7 @@ public:
     compare(
         size_type pos1,
         size_type count1,
-        basic_static_string<M, CharT, Traits> const& s) const BOOST_STATIC_STRING_COND_NOEXCEPT
+        basic_static_string<M, CharT, Traits> const& s) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return detail::lexicographical_compare<CharT, Traits>(
             subview(pos1, count1), s.data(), s.size());
@@ -1633,7 +1633,7 @@ public:
         size_type count1,
         basic_static_string<M, CharT, Traits> const& s,
         size_type pos2,
-        size_type count2 = npos) const BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count2 = npos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return detail::lexicographical_compare(
             subview(pos1, count1), s.subview(pos2, count2));
@@ -1662,7 +1662,7 @@ public:
     compare(
         size_type pos1,
         size_type count1,
-        CharT const* s) const BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT const* s) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return detail::lexicographical_compare<CharT, Traits>(
             subview(pos1, count1), s, Traits::length(s));
@@ -1678,7 +1678,7 @@ public:
         size_type pos1,
         size_type count1,
         CharT const* s,
-        size_type count2) const BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count2) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return detail::lexicographical_compare<CharT, Traits>(
             subview(pos1, count1), s, count2);
@@ -1706,7 +1706,7 @@ public:
     compare(
         size_type pos1,
         size_type count1,
-        string_view_type s) const BOOST_STATIC_STRING_COND_NOEXCEPT
+        string_view_type s) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return detail::lexicographical_compare<CharT, Traits>(
             subview(pos1, count1), s);
@@ -1717,7 +1717,7 @@ public:
         Replaces the part of the string indicated by `[pos1, pos1 + count1)` with a substring `[pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
 
         This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
+        `T` is convertible to `string_view_type` and `T` is not
         convertible to `CharT const*`.
     */
     template<typename T>
@@ -1735,35 +1735,59 @@ public:
         size_type count1,
         T const& t,
         size_type pos2,
-        size_type count2 = npos) const BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type count2 = npos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return compare(pos1, count1,
             string_view_type(t).substr(pos2, count2));
     }
 
-    /** Returns a substring.
-    
-        Returns a substring `(pos, pos + count)`. If the requested substring is greater than the size of the string, the returned substring is `[pos, size())`.
+    /** Return a substring.
 
-        @throw std::out_of_range if `pos > size()`
+        Returns a substring of the string.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @return A string object containing the characters
+        `[data() + pos, std::min(count, size() - pos))`.
+
+        @param pos The index to being the substring at. The
+        default arugment for this parameter is `0`.
+        @param count The length of the substring. The default arugment
+        for this parameter is @ref npos.
+
+        @throw std::out_of_range `pos > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string
     substr(
         size_type pos = 0,
-        size_type count = npos) const BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count = npos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
-    /** Returns a view of a substring.
+    /** Return a view of a substring.
 
-        Returns a view of a substring `(pos, pos + count)`. If the requested view is greater than the size of the string, the returned view is `[pos, size())`.
+        Returns a view of a substring.
 
-        @throw std::out_of_range if `pos > size()`
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @return A `string_view_type` object referring 
+        to `[data() + pos, std::min(count, size() - pos))`.
+
+        @param pos The index to being the substring at. The
+        default arugment for this parameter is `0`.
+        @param count The length of the substring. The default arugment
+        for this parameter is @ref npos.
+
+        @throw std::out_of_range `pos > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     string_view_type
     subview(
         size_type pos = 0,
-        size_type count = npos) const BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type count = npos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Copy a substring to another string.
 
@@ -1786,7 +1810,7 @@ public:
     copy(
         CharT* dest,
         size_type count,
-        size_type pos = 0) const BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type pos = 0) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Change the size of the string.
 
@@ -1801,7 +1825,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     resize(
-        std::size_t n) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        std::size_t n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Change the size of the string.
 
@@ -1819,7 +1843,7 @@ public:
     void
     resize(
         std::size_t n,
-        CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT c) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /// Exchange the contents of this string with another.
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1832,7 +1856,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     swap(
-        basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
         
 
    /** Replace a substring with a string.
@@ -1869,7 +1893,7 @@ public:
     replace(
         size_type pos1,
         size_type n1,
-        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace_unchecked(pos1, n1, str.data(), str.size());
     }
@@ -1901,7 +1925,7 @@ public:
     replace(
         size_type pos1,
         size_type n1,
-        const basic_static_string& str) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const basic_static_string& str) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace(pos1, n1, str.data(), str.size());
     }
@@ -1938,7 +1962,7 @@ public:
         size_type n1,
         const basic_static_string& str,
         size_type pos2,
-        size_type n2 = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
@@ -1980,14 +2004,14 @@ public:
         size_type n1,
         const basic_static_string<M, CharT, Traits>& str,
         size_type pos2,
-        size_type n2 = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
 
-    /** Replace a substring with an object convertible to `string_view`.
+    /** Replace a substring with an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and
+        Constructs a temporary `string_view_type` object `sv` from `t`, and
         replaces `rcount` characters starting at index `pos1` with those
         of `sv`, where `rcount` is `std::min(n1, size() - pos1)`.
 
@@ -2028,15 +2052,15 @@ public:
     replace(
         size_type pos1,
         size_type n1,
-        const T& t) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const T& t) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       string_view_type sv = t;
       return replace(pos1, n1, sv.data(), sv.size());
     }
 
-    /** Replace a substring with a substring of an object convertible to `string_view`.
+    /** Replace a substring with a substring of an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and
+        Constructs a temporary `string_view_type` object `sv` from `t`, and
         replaces `rcount` characters starting at index `pos1` with those
         of `sv.substr(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos)`.
 
@@ -2082,7 +2106,7 @@ public:
         size_type n1,
         const T& t,
         size_type pos2,
-        size_type n2 = npos) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       string_view_type sv = t;
       return replace(pos1, n1, sv.substr(pos2, n2));
@@ -2117,7 +2141,7 @@ public:
         size_type pos,
         size_type n1,
         const CharT* s,
-        size_type n2) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
 
     /** Replace a substring with a string.
@@ -2148,7 +2172,7 @@ public:
     replace(
         size_type pos,
         size_type n1,
-        const CharT* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const CharT* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace(pos, n1, s, Traits::length(s));
     }
@@ -2182,7 +2206,7 @@ public:
         size_type pos,
         size_type n1,
         size_type n2,
-        CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        CharT c) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Replace a range with a string.
 
@@ -2218,14 +2242,14 @@ public:
     replace(
         const_iterator i1,
         const_iterator i2,
-        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace(i1, i2, str.data(), str.size());
     }
 
-    /** Replace a range with an object convertible to `string_view`.
+    /** Replace a range with an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and
+        Constructs a temporary `string_view_type` object `sv` from `t`, and
         replaces the characters in the range `[i1, i2)` with those
         of `sv`.
 
@@ -2270,7 +2294,7 @@ public:
     replace(
         const_iterator i1,
         const_iterator i2,
-        const T& t) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const T& t) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       string_view_type sv = t;
       return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
@@ -2309,7 +2333,7 @@ public:
         const_iterator i1,
         const_iterator i2,
         const CharT* s,
-        size_type n) BOOST_STATIC_STRING_COND_NOEXCEPT
+        size_type n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace(i1 - begin(), i2 - i1, s, n);
     }
@@ -2345,7 +2369,7 @@ public:
     replace(
         const_iterator i1,
         const_iterator i2,
-        const CharT* s) BOOST_STATIC_STRING_COND_NOEXCEPT
+        const CharT* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace(i1, i2, s, Traits::length(s));
     }
@@ -2383,7 +2407,7 @@ public:
         const_iterator i1,
         const_iterator i2,
         size_type n,
-        CharT c) BOOST_STATIC_STRING_COND_NOEXCEPT
+        CharT c) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
       return replace(i1 - begin(), i2 - i1, n, c);
     }
@@ -2441,7 +2465,7 @@ public:
         const_iterator i1,
         const_iterator i2,
         InputIterator j1,
-        InputIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        InputIterator j2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Replace a range with a range.
 
@@ -2493,7 +2517,7 @@ public:
         const_iterator i1,
         const_iterator i2,
         ForwardIterator j1,
-        ForwardIterator j2) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        ForwardIterator j2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     /** Replace a range with an initializer list.
 
@@ -2526,7 +2550,7 @@ public:
     replace(
         const_iterator i1,
         const_iterator i2,
-        std::initializer_list<CharT> il) BOOST_STATIC_STRING_COND_NOEXCEPT
+        std::initializer_list<CharT> il) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
         return replace_unchecked(i1 - begin(), i2 - i1, il.begin(), il.size());
     }
@@ -2539,7 +2563,7 @@ public:
 
     /** Find the first occurrence of a string within the string.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
         the first occurrence of `sv` within the string starting at the index `pos`.
 
         @par Complexity
@@ -2696,7 +2720,7 @@ public:
 
     /** Find the last occurrence of a string within the string.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
         the last occurrence of `sv` within the string starting before or at
         the index `pos`.
 
@@ -2848,7 +2872,7 @@ public:
 
     /** Find the first occurrence of any of the characters within the string.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
         the first occurrence of any of the characters in `sv`
         within the string starting at the index `pos`.
 
@@ -2994,7 +3018,7 @@ public:
 
     /** Find the last occurrence of any of the characters within the string.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
         the last occurrence of any of the characters in `sv`
         within the string before or at the index `pos`.
 
@@ -3140,7 +3164,7 @@ public:
 
     /** Find the first occurrence of a character not within the string.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
         the first character that is not within `sv`, starting at the index `pos`.
 
         @par Complexity
@@ -3284,7 +3308,7 @@ public:
 
     /** Find the last occurrence of a character not within the string.
 
-        Constructs a temporary `string_view` object `sv` from `t`, and finds
+        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
         the last character that is not within `sv`, starting at the index `pos`.
 
         @par Complexity
@@ -3491,7 +3515,7 @@ private:
     assign_char(CharT ch, std::true_type) noexcept;
 
     basic_static_string&
-    assign_char(CharT ch, std::false_type) BOOST_STATIC_STRING_COND_NOEXCEPT;
+    assign_char(CharT ch, std::false_type) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     // Returns the size of data read from input iterator. Read data begins at data() + size() + 1.
     template<typename InputIterator>
@@ -3499,7 +3523,7 @@ private:
     std::size_t
     read_back(
         InputIterator first, 
-        InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -3507,7 +3531,7 @@ private:
         size_type pos,
         size_type n1,
         const CharT* s,
-        size_type n2) BOOST_STATIC_STRING_COND_NOEXCEPT;
+        size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 };
 
 //------------------------------------------------------------------------------
@@ -3524,7 +3548,7 @@ inline
 bool
 operator==(
     basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return lhs.compare(rhs) == 0;
 }
@@ -3537,7 +3561,7 @@ inline
 bool
 operator!=(
     basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return lhs.compare(rhs) != 0;
 }
@@ -3550,7 +3574,7 @@ inline
 bool
 operator<(
     basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return lhs.compare(rhs) < 0;
 }
@@ -3563,7 +3587,7 @@ inline
 bool
 operator<=(
     basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return lhs.compare(rhs) <= 0;
 }
@@ -3576,7 +3600,7 @@ inline
 bool
 operator>(
     basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return lhs.compare(rhs) > 0;
 }
@@ -3589,7 +3613,7 @@ inline
 bool
 operator>=(
     basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return lhs.compare(rhs) >= 0;
 }
@@ -3600,7 +3624,7 @@ inline
 bool
 operator==(
     CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs, Traits::length(lhs),
@@ -3613,7 +3637,7 @@ inline
 bool
 operator==(
     basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT const* rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs.data(), lhs.size(),
@@ -3626,7 +3650,7 @@ inline
 bool
 operator!=(
     CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs, Traits::length(lhs),
@@ -3639,7 +3663,7 @@ inline
 bool
 operator!=(
     basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT const* rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs.data(), lhs.size(),
@@ -3652,7 +3676,7 @@ inline
 bool
 operator<(
     CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs, Traits::length(lhs),
@@ -3665,7 +3689,7 @@ inline
 bool
 operator<(
     basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT const* rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs.data(), lhs.size(),
@@ -3678,7 +3702,7 @@ inline
 bool
 operator<=(
     CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs, Traits::length(lhs),
@@ -3691,7 +3715,7 @@ inline
 bool
 operator<=(
     basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT const* rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs.data(), lhs.size(),
@@ -3704,7 +3728,7 @@ inline
 bool
 operator>(
     CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs, Traits::length(lhs),
@@ -3717,7 +3741,7 @@ inline
 bool
 operator>(
     basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT const* rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs.data(), lhs.size(),
@@ -3730,7 +3754,7 @@ inline
 bool
 operator>=(
     CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs, Traits::length(lhs),
@@ -3743,7 +3767,7 @@ inline
 bool
 operator>=(
     basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT const* rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return detail::lexicographical_compare<CharT, Traits>(
         lhs.data(), lhs.size(),
@@ -3758,7 +3782,7 @@ inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
     basic_static_string<N, CharT, Traits>const& lhs,
-    basic_static_string<M, CharT, Traits>const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits>const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return basic_static_string<N + M, CharT, Traits>(lhs) += rhs;
 }
@@ -3769,7 +3793,7 @@ inline
 basic_static_string<N + 1, CharT, Traits>
 operator+(
     basic_static_string<N, CharT, Traits> const& lhs,
-    CharT rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    CharT rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return basic_static_string<N + 1, CharT, Traits>(lhs) += rhs;
 }
@@ -3780,7 +3804,7 @@ inline
 basic_static_string<N + 1, CharT, Traits>
 operator+(
     CharT lhs,
-    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits> const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return basic_static_string<N + 1, CharT, Traits>(rhs).insert(0, lhs);
 }
@@ -3793,7 +3817,7 @@ inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
     basic_static_string<N, CharT, Traits>const& lhs,
-    const CharT(&rhs)[M]) BOOST_STATIC_STRING_COND_NOEXCEPT
+    const CharT(&rhs)[M]) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return basic_static_string<N + M, CharT, Traits>(lhs).append(+rhs, M);
 }
@@ -3806,7 +3830,7 @@ inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
     const CharT(&lhs)[N],
-    basic_static_string<M, CharT, Traits>const& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits>const& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     return basic_static_string<N + M, CharT, Traits>(rhs).insert(0, +rhs, N);
 }
@@ -3826,7 +3850,7 @@ inline
 void
 swap(
     basic_static_string<N, CharT, Traits>& lhs,
-    basic_static_string<N, CharT, Traits>& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<N, CharT, Traits>& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     lhs.swap(rhs);
 }
@@ -3839,7 +3863,7 @@ inline
 void
 swap(
     basic_static_string<N, CharT, Traits>& lhs,
-    basic_static_string<M, CharT, Traits>& rhs) BOOST_STATIC_STRING_COND_NOEXCEPT
+    basic_static_string<M, CharT, Traits>& rhs) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 {
     lhs.swap(rhs);
 }
