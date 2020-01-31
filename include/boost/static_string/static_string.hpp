@@ -790,13 +790,26 @@ public:
     void
     clear() noexcept;
 
-    /** Insert into the string.
-    
-        Inserts `count` copies of character `ch` at the position `index`
+    /** Insert a character.
 
-        @throw std::out_of_range if `index > size()`
-        @throw std::length_error if `count > max_size() - size()`
+        Inserts `count` copies of `ch` at the position `index`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param index The index to insert at.
+        @param count The number of characters to insert.
+        @param ch The character to insert.
+
+        @throw std::length_error `size() + count > max_size()`
+        @throw std::out_of_range `index > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -811,13 +824,27 @@ public:
       return *this;
     }
     
-    /** Insert into the string.
-    
-        Inserts null-terminated string pointed to by `s` at the position `index`
+    /** Insert a string.
 
-        @throw std::out_of_range if `index > size()`
-        @throw std::length_error if `count > max_size() - size()`
+        Inserts the null-terminated character string pointed to by `s`
+        of length `count` at the position `index` where `count`
+        is `Traits::length(s)`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param index The index to insert at.
+        @param s The string to insert.
+
+        @throw std::length_error `size() + count > max_size()`
+        @throw std::out_of_range `index > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -828,15 +855,27 @@ public:
         return insert(index, s, Traits::length(s));
     }
 
-    /** Insert into the string.
-    
-        Inserts the characters in the range `(s, s+count)` at the position `index`
+    /** Insert a string.
 
-        The inserted string can contain null characters.
+        Inserts `count` characters of the string pointed to by `s`
+        at the position `index`.
 
-        @throw std::out_of_range if `index > size()`
-        @throw std::length_error if `count > max_size() - size()`
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @param index The index to insert at.
+        @param s The string to insert.
+        @param count The length of the string to insert.
+
+        @throw std::length_error `size() + count > max_size()`
+        @throw std::out_of_range `index > size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -845,15 +884,28 @@ public:
         CharT const* s,
         size_type count) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Insert into the string.
-    
-        Inserts the contents of string view `sv` at the position `index`
+    /** Insert a string.
 
-        The inserted string can contain null characters.
+        Inserts the string `str`
+        at the position `index`.
 
-        @throw std::out_of_range if `index > size()`
-        @throw std::length_error if `sv.size() > max_size() - size()`
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam M The size of the input string.
+
         @return `*this`
+
+        @param index The index to insert at.
+        @param str The string to insert.
+
+        @throw std::length_error `size() + str.size() > max_size()`
+        @throw std::out_of_range `index > size()`
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -865,15 +917,31 @@ public:
         return insert(index, str.data(), str.size());
     }
 
-    /** Insert into the string.
-    
-        Inserts the string `sv.substr(index_str, count)` at the position `index`
+    /** Insert a string.
 
-        The inserted string can contain null characters.
+        Inserts a string, obtained by `str.substr(index_str, count)`
+        at the position `index`.
 
-        @throw std::out_of_range if `index > size() || index_str > sv.size()`
-        @throw std::length_error if `sv.substr(index_str, count).size() > max_size() - size()`
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam M The size of the input string.
+
         @return `*this`
+
+        @param inddex The index to insert at.
+        @param str The string from which to insert.
+        @param index_str The index in `str` to start inserting from.
+        @param count The number of characters to insert.
+        The default argument for this parameter is @ref npos.
+
+        @throw std::length_error `size() + str.substr(index_str, count).size() > max_size()`
+        @throw std::out_of_range `index > size()`
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -887,14 +955,29 @@ public:
         return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
     }
 
-    /** Insert into the string.
-    
-        Inserts character `ch` before the character (if any) pointed by `pos`
+    /** Insert a character.
 
-        The inserted character can be null.
+        Inserts the character `ch` before the character pointed by `pos`.
 
-        @throw std::length_error if `1 > max_size() - size()`
-        @return An iterator to the first inserted character or pos if no insertion took place
+        @par Precondition
+
+        `pos` shall be vaild within `[data(), data() + size()]`
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @return An iterator which refers to the first inserted character
+        or `pos` if no characters were inserted
+
+        @param pos The index to insert at.
+        @param ch The character to insert.
+
+        @throw std::length_error `size() + 1 > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     iterator
@@ -905,14 +988,30 @@ public:
         return insert(pos, 1, ch);
     }
 
-    /** Insert into the string.
+    /** Insert characters.
 
-        Inserts `count` copies of character `ch` before the character (if any) pointed by `pos`
+        Inserts `count` copies of `ch` before the character pointed by `pos`.
 
-        The inserted characters can be null.
+        @par Precondition
 
-        @throw std::length_error if `count > max_size() - size()`
-        @return An iterator to the first inserted character or pos if no insertion took place
+        `pos` shall be valid within `[data(), data() + size()]`
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @return An iterator which refers to the first inserted character
+        or `pos` if no characters were inserted
+
+        @param pos The position to insert at.
+        @param count The number of characters to insert.
+        @param ch The character to insert.
+
+        @throw std::length_error `size() + count > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     iterator
@@ -921,16 +1020,40 @@ public:
         size_type count,
         CharT ch) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Insert into the string.
-    
-        Inserts characters from the range `(first, last)` before the element (if any) pointed by `pos`
+    /** Insert a range of characters.
 
-        The inserted string can contain null characters.
-        This function does not participate in overload resolution if
-        `InputIterator` does not satisfy <em>LegacyInputIterator</em>
+        Inserts characters from the range `[first, last)` before the
+        character pointed to by `pos`.
 
-        @throw std::length_error if `std::distance(first, last) > max_size() - size()`
-        @return An iterator to the first inserted character or pos if no insertion took place
+        @par Precondition
+
+        `pos` shall be valid within `[data(), data() + size()]`,
+
+        `[first, last)` shall be a valid range
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam InputIterator The type of the iterators.
+
+        @par Constraints
+
+        `InputIterator` satisfies __InputIterator__ and does not 
+        satisfy __ForwardIterator__.
+
+        @return An iterator which refers to the first inserted character
+        or `pos` if no characters were inserted
+
+        @param pos The position to insert at.
+        @param first An iterator representing the first character to insert.
+        @param last An iterator representing one past the last character to insert.
+
+        @throw std::length_error `size() + insert_count > max_size()`
     */
     template<typename InputIterator>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -948,17 +1071,40 @@ public:
         InputIterator first,
         InputIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-     /** Insert into the string.
-    
-        Inserts characters from the range `(first, last)` before the element (if any) pointed by `pos`
+    /** Insert a range of characters.
 
-        The inserted string can contain null characters.
-        This function does not participate in overload resolution if
-        `LegacyForwardIterator` does not satisfy <em>LegacyForwardIterator</em>
+       Inserts characters from the range `[first, last)` before the
+       character pointed to by `pos`.
 
-        @throw std::length_error if `std::distance(first, last) > max_size() - size()`
-        @return An iterator to the first inserted character or pos if no insertion took place
-    */
+       @par Precondition
+
+       `pos` shall be valid within `[data(), data() + size()]`,
+
+       `[first, last)` shall be a valid range
+
+       @par Exception Safety
+
+       Strong guarantee.
+
+       @note All references, pointers, or iterators
+       referring to contained elements are invalidated. Any
+       past-the-end iterators are also invalidated.
+
+       @tparam ForwardIterator The type of the iterators.
+
+       @par Constraints
+
+       `InputIterator` satisfies __ForwardIterator__.
+
+       @return An iterator which refers to the first inserted character
+       or `pos` if no characters were inserted
+
+       @param pos The position to insert at.
+       @param first An iterator representing the first character to insert.
+       @param last An iterator representing one past the last character to insert.
+
+       @throw std::length_error `size() + insert_count > max_size()`
+   */
     template<typename ForwardIterator>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
@@ -974,14 +1120,29 @@ public:
         ForwardIterator first,
         ForwardIterator last) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Insert into the string.
-    
-        Inserts elements from initializer list `ilist` before the element (if any) pointed by `pos`
+    /** Insert characters from an initializer list.
 
-        The inserted string can contain null characters.
+        Inserts characters from `ilist` before `pos`.
 
-        @throw std::length_error if `ilist.size() > max_size() - size()`
-        @return An iterator to the first inserted character or pos if no insertion took place
+        @par Precondition
+
+        `pos` shall be valid within `[data(), data() + size()]`
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @return An iterator which refers to the first inserted character
+        or `pos` if no characters were inserted
+
+        @param pos The position to insert at.
+        @param ilist The initializer list from which to insert.
+
+        @throw std::length_error `size() + ilist.size() > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     iterator
@@ -989,17 +1150,37 @@ public:
         const_iterator pos,
         std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Insert into the string.
-    
-        Inserts elements from `string_view_type{t}` at the position `index`
+    /** Insert characters from an object convertible to `string_view`.
 
-        The inserted string can contain null characters.
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        Constructs a temporary `string_view` object `sv` from `t` and
+        inserts `[sv.begin(), sv.end())` at `index`.
 
-        @throw std::length_error if `string_view_type{t}.substr(index_str, count).size() > max_size() - size()`
+        @par Precondition
+
+        `index` shall be valid within `[data(), data() + size()]`
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
         @return `*this`
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, char CharT*>::value`.
+
+        @param index The index to insert at.
+        @param t The string to insert from.
+
+        @throw std::length_error `size() + sv.size() > max_size()`
+        @throw std::out_of_range `index > size()`
     */
     template<typename T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1020,18 +1201,36 @@ public:
       return insert(index, t, 0, npos);
     }
 
-    /** Insert into the string.
+    /** Insert characters from an object convertible to `string_view`.
 
-        Inserts elements from `string_view_type{t}.substr(index_str, count)` at the position `index`
+        Constructs a temporary `string_view` object `sv` from `t`
+        and inserts `sv.substr(index_str, count)` at `index`.
 
-        The inserted string can contain null characters.
-        This function participates in overload resolution if
-        `T` is convertible to `string_view` and `T` is not
-        convertible to `CharT const*`.
+        @par Exception Safety
 
-        @throw std::out_of_range if `index_str > string_view_type{t}.size()`
-        @throw std::length_error if `string_view_type{t}.substr(index_str, count).size() > max_size() - size()`
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @tparam T The type of the object to convert.
+
+        @par Constraints
+
+        `std::is_convertible<T const&, string_view>::value &&
+        !std::is_convertible<T const&, CharT const*>::value`.
+
         @return `*this`
+
+        @param index The index to insert at.
+        @param t The string to insert from.
+        @param index_str The index in the temporary `string_view` object
+        to start the substring from.
+        @param count The number of characters to insert.
+
+        @throw std::length_error `size() + sv.size() > max_size()`
+        @throw std::out_of_range `index > size()`
     */
     template<typename T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1566,32 +1765,56 @@ public:
         size_type pos = 0,
         size_type count = npos) const BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Copy a substring.
+    /** Copy a substring to another string.
 
-        Copy a substring `(pos, pos+count)` to character string pointed to by `dest`.
+        Copies `std::min(count, size() - pos)` characters starting at
+        index `pos` to the string pointed to by `dest`.
+
+        @note The resulting string is not null terminated.
+
+        @return The number of characters copied.
+
+        @param count The number of characters to copy.
+        @param dest The string to copy to.
+        @param pos The index to begin copying from. The
+        default argument for this parameter is `0`.
+
+        @throw std::out_of_range `pos > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     size_type
     copy(
         CharT* dest,
         size_type count,
-        size_type pos = 0) const noexcept;
+        size_type pos = 0) const BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Changes the number of characters stored.
+    /** Change the size of the string.
 
-        If the resulting string is larger, the new
-        characters are uninitialized.
+        Resizes the string to contain `n` characters. If
+        `n > size()`, characters with the value `CharT()` are
+        appended. Otherwise, `size()` is reduced to `n`.
+
+        @param n The size to resize the string to.
+
+        @throw std::out_of_range `n > max_size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     resize(
         std::size_t n) BOOST_STATIC_STRING_COND_NOEXCEPT;
 
-    /** Changes the number of characters stored.
+    /** Change the size of the string.
 
-        If the resulting string is larger, the new
-        characters are initialized to the value of `c`.
-    */
+         Resizes the string to contain `n` characters. If
+         `n > size()`, copies of `c` are
+         appended. Otherwise, `size()` is reduced to `n`.
+
+         @param n The size to resize the string to.
+         @param c The characters to append if the size
+         increases.
+
+         @throw std::out_of_range `n > max_size()`
+     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     resize(
@@ -1781,7 +2004,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return `*this`
 
@@ -1830,7 +2053,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return `*this`
 
@@ -2023,7 +2246,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return `*this`
 
@@ -2184,11 +2407,11 @@ public:
         referring to contained elements are invalidated. Any
         past-the-end iterators are also invalidated.
 
-        @tparam InputIt The type of the iterators.
+        @tparam InputIterator The type of the iterators.
 
         @par Constraints
 
-        `InputIt` satisfies __InputIterator__ and does not 
+        `InputIterator` satisfies __InputIterator__ and does not 
         satisfy __ForwardIterator__.
 
         @return `*this`
@@ -2239,11 +2462,11 @@ public:
         referring to contained elements are invalidated. Any
         past-the-end iterators are also invalidated.
 
-        @tparam InputIt The type of the iterators.
+        @tparam ForwardIterator The type of the iterators.
 
         @par Constraints
 
-        `InputIt` satisfies __ForwardIterator__.
+        `ForwardIterator` satisfies __ForwardIterator__.
 
         @return `*this`
 
@@ -2330,7 +2553,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return The lowest index `idx` greater than or equal to `pos`
         where each element of `[sv.begin(), sv.end())` is equal to
@@ -2486,7 +2709,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return The highest index `idx` less than or equal to `pos`
         where each element of `[sv.begin(), sv.end())` is equal to
@@ -2638,7 +2861,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return The index corrosponding to the first occurrence of
         any of the characters in `[sv.begin(), sv.end())` within
@@ -2784,7 +3007,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return The index corrosponding to the last occurrence of
         any of the characters in `[sv.begin(), sv.end())` within
@@ -2929,7 +3152,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return The index corrosponding to the first occurrence of
         a character that is not in `[sv.begin(), sv.end())` within
@@ -3073,7 +3296,7 @@ public:
         @par Constraints
 
         `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char const*>::value`.
+        !std::is_convertible<T const&, char CharT*>::value`.
 
         @return The index corrosponding to the last occurrence of
         a character that is not in `[sv.begin(), sv.end())` within

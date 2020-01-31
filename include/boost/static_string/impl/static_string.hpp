@@ -553,7 +553,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-copy(CharT* dest, size_type count, size_type pos) const noexcept ->
+copy(CharT* dest, size_type count, size_type pos) const BOOST_STATIC_STRING_COND_NOEXCEPT ->
     size_type
 {
   auto const s = subview(pos, count);
