@@ -132,7 +132,7 @@
 defined(__clang__) && \
 ((__clang_major__ == 4) || (__clang_major__ == 5))
 // This directive works on clang
-#warning C++14 constexpr is not supported in clang 4.x and 5.x due to a compiler bug.
+#warning "C++14 constexpr is not supported in clang 4.x and 5.x due to a compiler bug."
 #ifdef BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
 #undef BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
 #endif
@@ -141,10 +141,10 @@ defined(__clang__) && \
 #endif
 
 #ifdef __clang__
-#warning STATIC STRING CLANG DEBUG INFO
-#warning LIBSTDCXX OLD __GLIBCPP__
-#warning LIBSTDCXX NEW __GLIBCXX__
-#warning LIBCXX _LIBCPP_VERSION
+#pragma message "STATIC STRING CLANG DEBUG INFO"
+#pragma message "LIBSTDCXX OLD: " __GLIBCPP__
+#pragma message "LIBSTDCXX: " NEW __GLIBCXX__
+#pragma message "LIBCXX: " _LIBCPP_VERSION
 #endif
 
 #ifndef BOOST_STATIC_STRING_STANDALONE
