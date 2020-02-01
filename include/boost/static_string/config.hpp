@@ -125,6 +125,8 @@
 #endif
 #endif
 
+// Compiler bug prevents constexpr from working with clang 4.x and 5.x
+// if it is detected, we disable constexpr
 #if (BOOST_STATIC_STRING_STANDARD_VERSION >= 201402L) && \
 (BOOST_STATIC_STRING_STANDARD_VERSION < 201703L) && \
 defined(__clang__) && \
@@ -138,6 +140,13 @@ defined(__clang__) && \
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #endif
 
+#ifdef __clang__
+#warning STATIC STRING CLANG DEBUG INFO
+#warning LIBSTDCXX OLD __GLIBCPP__
+#warning LIBSTDCXX NEW __GLIBCXX__
+#warning LIBCXX _LIBCPP_VERSION
+#endif
+
 #ifndef BOOST_STATIC_STRING_STANDALONE
 #include <boost/assert.hpp>
 #include <boost/container_hash/hash.hpp>
@@ -146,6 +155,7 @@ defined(__clang__) && \
 #include <boost/throw_exception.hpp>
 #else
 #include <cassert>
+#include <stdexcept>
 #include <string_view>
 #endif
 
