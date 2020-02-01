@@ -574,7 +574,8 @@ find_first_of(
   return last;
 }
 
-// Check if a pointer lies within a range without unspecified behavior, allowing it to be used in a constant evaluation
+// Check if a pointer lies within a range (inclusive) without unspecified behavior,
+// allowing it to be used in a constant evaluation
 template<typename T>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -584,10 +585,7 @@ is_inside(
     const T* src_last,
     const T* ptr)
 {
-  for (; src_first != src_last; ++src_first)
-    if (src_first == ptr)
-      return true;
-  return false;
+  return std::greater_equal<void>()(ptr, src_first) && std::less_equal<void>()(ptr, src_last);
 }
 
 } // detail

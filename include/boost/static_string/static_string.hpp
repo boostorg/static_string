@@ -893,9 +893,9 @@ public:
 
         Strong guarantee.
 
-        @note
-        The insertion is done unchecked, as the source cannot be
-        within the destination.
+        @note The insertion is done unchecked when
+        the capacity of `str` differs from that of the
+        string the function is called on.
 
         @note All references, pointers, or iterators
         referring to contained elements are invalidated. Any
@@ -921,27 +921,7 @@ public:
         return insert_unchecked(index, str.data(), str.size());
     }
 
-    /** Insert a string.
-
-        Inserts the string `str`
-        at the position `index`.
-
-        @par Exception Safety
-
-        Strong guarantee.
-
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
-
-        @return `*this`
-
-        @param index The index to insert at.
-        @param str The string to insert.
-
-        @throw std::length_error `size() + str.size() > max_size()`
-        @throw std::out_of_range `index > size()`
-    */
+#ifndef GENERATING_DOCUMENTATION
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     insert(
@@ -950,6 +930,7 @@ public:
     {
         return insert(index, str.data(), str.size());
     }
+#endif
 
     /** Insert a string.
 
@@ -960,9 +941,9 @@ public:
 
         Strong guarantee.
 
-        @note
-        The insertion is done unchecked, as the source cannot be
-        within the destination.
+        @note The insertion is done unchecked when
+        the capacity of `str` differs from that of the
+        string the function is called on.
 
         @note All references, pointers, or iterators
         referring to contained elements are invalidated. Any
@@ -997,31 +978,7 @@ public:
         return insert_unchecked(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
     }
 
-    /** Insert a string.
-
-        Inserts a string, obtained by `str.substr(index_str, count)`
-        at the position `index`.
-
-        @par Exception Safety
-
-        Strong guarantee.
-
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
-
-        @return `*this`
-
-        @param index The index to insert at.
-        @param str The string from which to insert.
-        @param index_str The index in `str` to start inserting from.
-        @param count The number of characters to insert.
-        The default argument for this parameter is @ref npos.
-
-        @throw std::length_error `size() + str.substr(index_str, count).size() > max_size()`
-        @throw std::out_of_range `index > size()`
-        @throw std::out_of_range `index_str > str.size()`
-    */
+#ifndef GENERATING_DOCUMENTATION
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     insert(
@@ -1035,6 +992,7 @@ public:
         );
         return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
     }
+#endif
 
     /** Insert a character.
 
@@ -1942,8 +1900,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     swap(
-        basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
-        
+        basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT; 
 
    /** Replace a substring with a string.
 
@@ -1954,9 +1911,9 @@ public:
 
         Strong guarantee.
 
-        @note 
-        The replacement is done unchecked, as the source cannot be
-        within the destination.
+        @note The replacement is done unchecked when
+        the capacity of `str` differs from that of the
+        string the function is called on.
         
         All references, pointers, or iterators
         referring to contained elements are invalidated. Any
@@ -1984,28 +1941,7 @@ public:
       return replace_unchecked(pos1, n1, str.data(), str.size());
     }
 
-    /** Replace a substring with a string.
-
-        Replaces `rcount` characters starting at index `pos1` with those
-        of `str`, where `rcount` is `std::min(n1, size() - pos1)`.
-
-        @par Exception Safety
-
-        Strong guarantee.
-
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
-
-        @return `*this`
-
-        @param pos1 The index to replace at.
-        @param n1 The number of characters to replace.
-        @param str The string to replace with.
-
-        @throw std::length_error `size() + (str.size() - rcount) > max_size()`
-        @throw std::out_of_range `pos1 > size()`
-    */
+#ifndef GENERATING_DOCUMENTATION
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
     replace(
@@ -2015,6 +1951,7 @@ public:
     {
       return replace(pos1, n1, str.data(), str.size());
     }
+#endif
 
     /** Replace a substring with a substring.
 
@@ -2025,50 +1962,9 @@ public:
 
         Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
-
-        @return `*this`
-
-        @param pos1 The index to replace at.
-        @param n1 The number of characters to replace.
-        @param str The string to replace with.
-        @param pos2 The index to begin the substring.
-        @param n2 The length of the substring.
-        The default argument for this parameter is @ref npos.
-
-        @throw std::length_error `size() + (std::min(str.size(), n2) - rcount) > max_size()`
-        @throw std::out_of_range `pos1 > size()`
-        @throw std::out_of_range `pos2 > str.size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos1,
-        size_type n1,
-        const basic_static_string& str,
-        size_type pos2,
-        size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
-    {
-      BOOST_STATIC_STRING_THROW_IF(
-        pos2 > str.size(), std::out_of_range{"pos2 > str.size()"}
-      );
-      return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
-    }
-
-    /** Replace a substring with a substring.
-
-        Replaces `rcount` characters starting at index `pos1` with those of
-        `str.subview(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos1)`.
-
-        @par Exception Safety
-
-        Strong guarantee.
-
-        @note 
-        The replacement is done unchecked, as the source cannot be
-        within the destination.
+        @note The replacement is done unchecked when
+        the capacity of `str` differs from that of the
+        string the function is called on.
         
         All references, pointers, or iterators
         referring to contained elements are invalidated. Any
@@ -2102,6 +1998,23 @@ public:
       );
       return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
+
+#ifndef GENERATING_DOCUMENTATION
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    basic_static_string&
+    replace(
+        size_type pos1,
+        size_type n1,
+        const basic_static_string& str,
+        size_type pos2,
+        size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+    {
+      BOOST_STATIC_STRING_THROW_IF(
+        pos2 > str.size(), std::out_of_range{"pos2 > str.size()"}
+      );
+      return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
+    }
+#endif
 
     /** Replace a substring with an object convertible to `string_view_type`.
 
