@@ -1,6 +1,6 @@
 //
 // Copyright (c) 2016-2019 Vinnie Falco (vinnie dot falco at gmail dot com)
-// Copyright (c) 2019 Krystian Stasiowski (sdkrystian at gmail dot com)
+// Copyright (c) 2019-2020 Krystian Stasiowski (sdkrystian at gmail dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -942,6 +942,7 @@ public:
 
         @throw std::length_error `size() + str.substr(index_str, count).size() > max_size()`
         @throw std::out_of_range `index > size()`
+        @throw std::out_of_range `index_str > str.size()`
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1231,6 +1232,7 @@ public:
 
         @throw std::length_error `size() + sv.size() > max_size()`
         @throw std::out_of_range `index > size()`
+        @throw std::out_of_range `index_str > sv.size()`
     */
     template<typename T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1954,6 +1956,7 @@ public:
 
         @throw std::length_error `size() + (std::min(str.size(), n2) - rcount) > max_size()`
         @throw std::out_of_range `pos1 > size()`
+        @throw std::out_of_range `pos2 > str.size()`
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     basic_static_string&
@@ -1995,6 +1998,7 @@ public:
 
         @throw std::length_error `size() + (std::min(str.size(), n2) - rcount) > max_size()`
         @throw std::out_of_range `pos1 > size()`
+        @throw std::out_of_range `pos2 > str.size()`
     */
     template<std::size_t M>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2090,6 +2094,7 @@ public:
 
         @throw std::length_error `size() + (std::min(n2, sv.size()) - rcount) > max_size()`
         @throw std::out_of_range `pos1 > size()`
+        @throw std::out_of_range `pos2 > sv.size()`
     */
     template<typename T>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
