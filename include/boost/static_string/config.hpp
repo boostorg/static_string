@@ -140,13 +140,6 @@ defined(__clang__) && \
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #endif
 
-#ifdef __clang__
-#pragma message "STATIC STRING CLANG DEBUG INFO"
-#pragma message "LIBSTDCXX OLD: " __GLIBCPP__
-#pragma message "LIBSTDCXX: " NEW __GLIBCXX__
-#pragma message "LIBCXX: " _LIBCPP_VERSION
-#endif
-
 #ifndef BOOST_STATIC_STRING_STANDALONE
 #include <boost/assert.hpp>
 #include <boost/container_hash/hash.hpp>
@@ -157,6 +150,16 @@ defined(__clang__) && \
 #include <cassert>
 #include <stdexcept>
 #include <string_view>
+#endif
+
+#ifdef __clang__
+#include <new>
+#define STRING_VALUE(...) STRING_VALUE__(__VA_ARGS__)
+#define STRING_VALUE__(...) #__VA_ARGS__
+#pragma message("STATIC STRING CLANG DEBUG INFO")
+#pragma message("LIBSTDCXX OLD: " STRING_VALUE(__GLIBCPP__)) 
+#pragma message("LIBSTDCXX NEW: " STRING_VALUE(__GLIBCXX__)) 
+#pragma message("LIBCXX: " STRING_VALUE(_LIBCPP_VERSION)) 
 #endif
 
 namespace boost {
