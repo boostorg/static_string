@@ -1964,7 +1964,7 @@ public:
         size_type pos2,
         size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
-      return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
+      return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
 
     /** Replace a substring with a substring.
@@ -2006,7 +2006,7 @@ public:
         size_type pos2,
         size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
-      return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
+      return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
 
     /** Replace a substring with an object convertible to `string_view_type`.
