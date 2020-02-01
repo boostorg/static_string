@@ -953,6 +953,9 @@ public:
         size_type index_str,
         size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
+        BOOST_STATIC_STRING_THROW_IF(
+          index_str > str.size(), std::out_of_range{"index_str > str.size()"}
+        );
         return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
     }
 
@@ -1967,6 +1970,9 @@ public:
         size_type pos2,
         size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
+      BOOST_STATIC_STRING_THROW_IF(
+        pos2 > str.size(), std::out_of_range{"pos2 > str.size()"}
+      );
       return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
 
@@ -2010,6 +2016,9 @@ public:
         size_type pos2,
         size_type n2 = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
+      BOOST_STATIC_STRING_THROW_IF(
+        pos2 > str.size(), std::out_of_range{"pos2 > str.size()"}
+      );
       return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
     }
 

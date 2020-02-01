@@ -45,7 +45,7 @@ using smallest_width =
 template<typename To>
 void is_nothrow_convertible_helper(To) noexcept;
 
-// MSVC is unable to parse this inline, so a helper is needed
+// MSVC is unable to parse this as a single expression, so a helper is needed
 template<typename From, typename To, typename = 
     decltype(is_nothrow_convertible_helper<To>(std::declval<From>()))>
 struct is_nothrow_convertible_msvc_helper
