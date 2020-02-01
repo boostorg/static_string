@@ -585,7 +585,8 @@ is_inside(
     const T* src_last,
     const T* ptr)
 {
-  return std::greater_equal<void>()(ptr, src_first) && std::less_equal<void>()(ptr, src_last);
+  return std::greater_equal<const T*>()(ptr, src_first) && 
+    std::less_equal<const T*>()(ptr, src_last);
 }
 
 } // detail
