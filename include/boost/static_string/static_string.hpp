@@ -12,7 +12,6 @@
 #define BOOST_STATIC_STRING_STATIC_STRING_HPP
 
 #include <boost/static_string/config.hpp>
-#include <boost/static_string/detail/static_string.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <initializer_list>
@@ -21,6 +20,601 @@
 
 namespace boost {
 namespace static_string {
+
+template<std::size_t, typename, typename>
+class basic_static_string;
+
+//------------------------------------------------------------------------------
+//
+// Aliases
+//
+//------------------------------------------------------------------------------
+
+template<std::size_t N>
+using static_string = basic_static_string<N, char, std::char_traits<char>>;
+
+template<std::size_t N>
+using static_wstring = basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
+
+template<std::size_t N>
+using static_u16string = basic_static_string<N, char16_t, std::char_traits<char16_t>>;
+
+template<std::size_t N>
+using static_u32string = basic_static_string<N, char32_t, std::char_traits<char32_t>>;
+
+//--------------------------------------------------------------------------
+//
+// Detail
+//
+//--------------------------------------------------------------------------
+#ifndef GENERATING_DOCUMENTATION
+namespace detail {
+
+// Find the smallest width integral type that can hold a value as large as N (Glen Fernandes)
+template<std::size_t N>
+using smallest_width =
+    typename std::conditional<(N <= (std::numeric_limits<unsigned char>::max)()), unsigned char,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned short>::max)()), unsigned short,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned int>::max)()), unsigned int,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned long>::max)()), unsigned long,
+    typename std::conditional<(N <= (std::numeric_limits<unsigned long long>::max)()), unsigned long long,
+    void>::type>::type>::type>::type>::type;
+
+// std::is_nothrow_convertible is C++20
+template<typename To>
+void is_nothrow_convertible_helper(To) noexcept;
+
+// MSVC is unable to parse this as a single expression, so a helper is needed
+template<typename From, typename To, typename = 
+    decltype(is_nothrow_convertible_helper<To>(std::declval<From>()))>
+struct is_nothrow_convertible_msvc_helper
+{
+  static const bool value =
+      noexcept(is_nothrow_convertible_helper<To>(std::declval<From>()));
+};
+
+template<typename From, typename To, typename = void>
+struct is_nothrow_convertible
+    : std::false_type { };
+
+template<typename From, typename To>
+struct is_nothrow_convertible<From, To, typename std::enable_if<
+    is_nothrow_convertible_msvc_helper<From, To>::value>::type>
+        : std::true_type { };
+
+// GCC 4.8, 4.9 workaround for void_t to make the defining-type-id dependant 
+template<typename...>
+struct void_t_helper
+{
+  using type = void;
+};
+
+// void_t for c++11
+template<typename... Ts>
+using void_t = typename void_t_helper<Ts...>::type;
+
+// Simplified check for if a type is an iterator
+template<class T, typename = void>
+struct is_iterator : std::false_type { };
+
+template<class T>
+struct is_iterator<T, 
+    typename std::enable_if<std::is_class<T>::value, 
+        void_t<typename T::iterator_category>>::type>
+            : std::true_type { };
+
+template<class T>
+struct is_iterator<T*, void>
+    : std::true_type { };
+
+template<class T, typename = void>
+struct is_input_iterator : std::false_type { };
+
+template<class T>
+struct is_input_iterator<T, typename std::enable_if<is_iterator<T>::value && 
+    std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
+        std::input_iterator_tag>::value>::type>
+            : std::true_type { };
+
+template<class T, typename = void>
+struct is_forward_iterator : std::false_type { };
+
+template<class T>
+struct is_forward_iterator<T, typename std::enable_if<is_iterator<T>::value &&
+    std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
+        std::forward_iterator_tag>::value>::type>
+            : std::true_type { };
+
+template<typename T, typename = void>
+struct is_subtractable 
+    : std::false_type { };
+
+template<typename T>
+struct is_subtractable<T, void_t<decltype(std::declval<T&>() - std::declval<T&>())>>
+    : std::true_type { };
+
+// constexpr distance for c++14
+template<typename InputIt, typename std::enable_if<!is_subtractable<InputIt>::value>::type* = nullptr>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR 
+typename std::iterator_traits<InputIt>::difference_type
+distance(InputIt first, InputIt last)
+{
+  std::size_t dist = 0;
+  for (; first != last; ++first, ++dist);
+  return dist;
+}
+
+template<typename RandomIt, typename std::enable_if<is_subtractable<RandomIt>::value>::type* = nullptr>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR 
+typename std::iterator_traits<RandomIt>::difference_type
+distance(RandomIt first, RandomIt last)
+{
+  return last - first;
+}
+
+// Copy using traits, respecting iterator rules
+template<typename Traits, typename InputIt, typename CharT>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+copy_with_traits(InputIt first, InputIt last, CharT* out)
+{
+  for (; first != last; ++first, ++out)
+    Traits::assign(*out, *first);
+}
+
+// Optimization for using the smallest possible type
+template<std::size_t N, typename CharT, typename Traits>
+class static_string_base_zero
+{
+public:
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero() noexcept { };
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero(std::size_t n) noexcept : size_(n) { }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT*
+  data_impl() noexcept
+  {
+    return data_;
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT const*
+  data_impl() const noexcept
+  {
+    return data_;
+  }
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  std::size_t
+  size_impl() const noexcept
+  {
+    return size_;
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  std::size_t
+  set_size(std::size_t n) noexcept
+  {
+    return size_ = n;
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  term_impl() noexcept
+  {
+    Traits::assign(data_[size_], CharT());
+  }
+
+  smallest_width<N> size_{0};
+#ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
+  CharT data_[N + 1];
+#else
+  CharT data_[N + 1]{};
+#endif
+};
+
+// Optimization for when the size is 0
+template<typename CharT, typename Traits>
+class static_string_base_zero<0, CharT, Traits>
+{
+public:
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero() noexcept { }
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  static_string_base_zero(std::size_t) noexcept { }
+
+  // Modifying the null terminator is UB
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  CharT*
+  data_impl() const noexcept
+  {
+    return const_cast<CharT*>(&null_);
+  }
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  std::size_t
+  size_impl() const noexcept
+  {
+    return 0;
+  }
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  std::size_t
+  set_size(std::size_t) noexcept
+  {
+    return 0;
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  term_impl() noexcept { }
+
+private:
+  static constexpr CharT null_{};
+};
+
+template<typename CharT, typename Traits>
+constexpr CharT static_string_base_zero<0, CharT, Traits>::null_;
+
+#ifdef BOOST_STATIC_STRING_NULL_OPTIMIZATION
+// Optimization for storing the size in the last element
+template<std::size_t N, typename CharT, typename Traits>
+class static_string_base_null
+{
+public:
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  static_string_base_null() noexcept { set_size(0); }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  static_string_base_null(std::size_t n) noexcept { set_size(n); }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT*
+  data_impl() noexcept
+  {
+    return data_;
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT const*
+  data_impl() const noexcept
+  {
+    return data_;
+  }
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  std::size_t
+  size_impl() const noexcept
+  {
+    return N - data_[N];
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  std::size_t
+  set_size(std::size_t n) noexcept
+  {
+    return data_[N] = (N - n);
+  }
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  term_impl() noexcept
+  {
+    // This requires the null terminator to be 0
+    Traits::assign(data_[size_impl()], 0);
+  }
+
+#ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
+  CharT data_[N + 1];
+#else
+  CharT data_[N + 1]{};
+#endif
+};
+#endif
+
+// Decides which size optimization to use
+// If the size is zero, the object will have no members
+// Otherwise, if CharT can hold the max size of the string, store the size in the last char
+// Otherwise, store the size of the string using a member of the smallest type possible
+template<std::size_t N, typename CharT, typename Traits>
+using optimization_base = 
+#ifdef BOOST_STATIC_STRING_USE_NULL_OPTIMIZATION
+    typename std::conditional<(N <= (std::numeric_limits<CharT>::max)()) && (N != 0), 
+        static_string_base_null<N, CharT, Traits>,
+        static_string_base_zero<N, CharT, Traits>>::type;
+#else
+    static_string_base_zero<N, CharT, Traits>;
+#endif
+
+template<typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+int
+lexicographical_compare(
+    CharT const* s1, std::size_t n1,
+    CharT const* s2, std::size_t n2) noexcept
+{
+    if(n1 < n2)
+        return Traits::compare(
+            s1, s2, n1) <= 0 ? -1 : 1;
+    if(n1 > n2)
+        return Traits::compare(
+            s1, s2, n2) >= 0 ? 1 : -1;
+    return Traits::compare(s1, s2, n1);
+}
+
+template<typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+int
+lexicographical_compare(
+    basic_string_view<CharT, Traits> s1,
+    CharT const* s2, std::size_t n2) noexcept
+{
+    return detail::lexicographical_compare<
+        CharT, Traits>(s1.data(), s1.size(), s2, n2);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+int
+lexicographical_compare(
+    const basic_static_string<N, CharT, Traits>& s1,
+    CharT const* s2, std::size_t n2) noexcept
+{
+    return detail::lexicographical_compare<
+        CharT, Traits>(s1.data(), s1.size(), s2, n2);
+}
+
+template<typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+int
+lexicographical_compare(
+    basic_string_view<CharT, Traits> s1,
+    basic_string_view<CharT, Traits> s2) noexcept
+{
+    return detail::lexicographical_compare<CharT, Traits>(
+        s1.data(), s1.size(), s2.data(), s2.size());
+}
+
+template<std::size_t N, std::size_t M, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+int 
+lexicographical_compare(
+    const basic_static_string<N, CharT, Traits>& s1, 
+    const basic_static_string<M, CharT, Traits>& s2) noexcept
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    s1.data(), s1.size(), s2.data(), s2.size());
+}
+
+template<typename Traits, typename Integer>
+inline
+char*
+integer_to_string(
+  char* str_end, Integer value, std::true_type) noexcept
+{
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, '0');
+    return str_end;
+  }
+  if (value < 0)
+  {
+    value = -value;
+    for (; value > 0; value /= 10)
+      Traits::assign(*--str_end, "0123456789"[value % 10]);
+    Traits::assign(*--str_end, '-');
+    return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, "0123456789"[value % 10]);
+  return str_end;
+}
+
+template<typename Traits, typename Integer>
+inline
+char*
+integer_to_string(
+  char* str_end, Integer value, std::false_type) noexcept
+{
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, '0');
+    return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, "0123456789"[value % 10]);
+  return str_end;
+}
+
+template<typename Traits, typename Integer>
+inline
+wchar_t*
+integer_to_wstring(
+  wchar_t* str_end, Integer value, std::true_type) noexcept
+{
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, L'0');
+    return str_end;
+  }
+  if (value < 0)
+  {
+    value = -value;
+    for (; value > 0; value /= 10)
+      Traits::assign(*--str_end, L"0123456789"[value % 10]);
+    Traits::assign(*--str_end, L'-');
+    return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, L"0123456789"[value % 10]);
+  return str_end;
+}
+
+template<typename Traits, typename Integer>
+inline
+wchar_t*
+integer_to_wstring(
+  wchar_t* str_end, Integer value, std::false_type) noexcept
+{
+  if (value == 0)
+  {
+    Traits::assign(*--str_end, L'0');
+    return str_end;
+  }
+  for (; value > 0; value /= 10)
+    Traits::assign(*--str_end, L"0123456789"[value % 10]);
+  return str_end;
+}
+
+template<std::size_t N, typename Integer>
+inline
+static_string<N>
+to_static_string_int_impl(Integer value) noexcept
+{
+  char buffer[N];
+  const auto digits_end = std::end(buffer);
+  const auto digits_begin = integer_to_string<std::char_traits<char>, Integer>(
+    digits_end, value, std::is_signed<Integer>{});
+  return static_string<N>(digits_begin, std::distance(digits_begin, digits_end));
+}
+
+template<std::size_t N, typename Integer>
+inline
+static_wstring<N>
+to_static_wstring_int_impl(Integer value) noexcept
+{
+  wchar_t buffer[N];
+  const auto digits_end = std::end(buffer);
+  const auto digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
+    digits_end, value, std::is_signed<Integer>{});
+  return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
+}
+
+template<std::size_t N, typename Floating>
+inline
+static_string<N>
+to_static_string_float_impl(Floating value) noexcept
+{
+  // extra one needed for null terminator
+  char buffer[N + 1];
+  std::sprintf(buffer, "%f", value);
+  // this will not throw
+  return static_string<N>(buffer);
+}
+
+template<std::size_t N, typename Floating>
+inline
+static_wstring<N>
+to_static_wstring_float_impl(Floating value) noexcept
+{
+  // extra one needed for null terminator
+  wchar_t buffer[N + 1];
+  std::swprintf(buffer, N + 1, L"%f", value);
+  // this will not throw
+  return static_wstring<N>(buffer);
+}
+
+template<
+    typename Traits,
+    typename CharT,
+    typename ForwardIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+ForwardIterator
+find_not_of(
+    ForwardIterator first, 
+    ForwardIterator last, 
+    const CharT* str, 
+    std::size_t n) noexcept
+{
+  for (; first != last; ++first)
+    if (!Traits::find(str, n, *first))
+      return first;
+  return last;
+}
+
+// constexpr search for C++14
+template<
+    typename ForwardIt1, 
+    typename ForwardIt2, 
+    typename BinaryPredicate>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR 
+inline
+ForwardIt1 
+search(
+    ForwardIt1 first,
+    ForwardIt1 last,
+    ForwardIt2 s_first,
+    ForwardIt2 s_last,
+    BinaryPredicate p)
+{
+  for (; ; ++first)
+  {
+    ForwardIt1 it = first;
+    for (ForwardIt2 s_it = s_first; ; ++it, ++s_it)
+    {
+      if (s_it == s_last)
+        return first;
+      if (it == last)
+        return last;
+      if (!p(*it, *s_it))
+        break;
+    }
+  }
+}
+
+template<
+    typename InputIt, 
+    typename ForwardIt, 
+    typename BinaryPredicate>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+InputIt 
+find_first_of(
+    InputIt first,
+    InputIt last,
+    ForwardIt s_first,
+    ForwardIt s_last,
+    BinaryPredicate p)
+{
+  for (; first != last; ++first)
+    for (ForwardIt it = s_first; it != s_last; ++it)
+      if (p(*first, *it))
+        return first;
+  return last;
+}
+
+// Check if a pointer lies within a range (inclusive) without unspecified behavior,
+// allowing it to be used in a constant evaluation
+template<typename T>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+is_inside(
+    const T* src_first, 
+    const T* src_last,
+    const T* ptr)
+{
+  return std::greater_equal<const T*>()(ptr, src_first) && 
+    std::less_equal<const T*>()(ptr, src_last);
+}
+} // detail
+#endif
+
+//--------------------------------------------------------------------------
+//
+// static_string
+//
+//--------------------------------------------------------------------------
 
 /** A fixed-capacity string.
 
@@ -3900,24 +4494,6 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 
 //------------------------------------------------------------------------------
 //
-// Aliases
-//
-//------------------------------------------------------------------------------
-
-template<std::size_t N>
-using static_string = basic_static_string<N, char>;
-
-template<std::size_t N>
-using static_wstring = basic_static_string<N, wchar_t>;
-
-template<std::size_t N>
-using static_u16string = basic_static_string<N, char16_t>;
-
-template<std::size_t N>
-using static_u32string = basic_static_string<N, char32_t>;
-
-//------------------------------------------------------------------------------
-//
 // Numeric conversions
 //
 //------------------------------------------------------------------------------
@@ -3925,92 +4501,164 @@ using static_u32string = basic_static_string<N, char32_t>;
 /// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<int>::digits10 + 1>
 inline
-to_static_string(int value) noexcept;
+to_static_string(int value) noexcept
+{
+  return detail::to_static_string_int_impl<
+    std::numeric_limits<int>::digits10 + 1>(value);
+}
 
 /// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<long>::digits10 + 1>
 inline
-to_static_string(long value) noexcept;
+to_static_string(long value) noexcept
+{
+  return detail::to_static_string_int_impl<
+    std::numeric_limits<long>::digits10 + 1>(value);
+}
 
 /// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<long long>::digits10 + 1>
 inline
-to_static_string(long long value) noexcept;
+to_static_string(long long value) noexcept
+{
+  return detail::to_static_string_int_impl<
+    std::numeric_limits<long long>::digits10 + 1>(value);
+}
 
 /// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
-to_static_string(unsigned int value) noexcept;
+to_static_string(unsigned int value) noexcept
+{
+  return detail::to_static_string_int_impl<
+    std::numeric_limits<unsigned int>::digits10 + 1>(value);
+}
 
 /// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
-to_static_string(unsigned long value) noexcept;
+to_static_string(unsigned long value) noexcept
+{
+  return detail::to_static_string_int_impl<
+    std::numeric_limits<unsigned long>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_string`
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
-to_static_string(unsigned long long value) noexcept;
+to_static_string(unsigned long long value) noexcept
+{
+  return detail::to_static_string_int_impl<
+    std::numeric_limits<unsigned long long>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_string`
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<float>::max_digits10 + 1>
 inline
-to_static_string(float value) noexcept;
+to_static_string(float value) noexcept
+{
+  return detail::to_static_string_float_impl<
+    std::numeric_limits<float>::max_digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_string`
+/// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<double>::max_digits10 + 1>
 inline
-to_static_string(double value) noexcept;
+to_static_string(double value) noexcept
+{
+  return detail::to_static_string_float_impl<
+    std::numeric_limits<double>::max_digits10 + 1>(value);
+}
 
 /// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<long double>::max_digits10 + 1>
 inline
-to_static_string(long double value) noexcept;
+to_static_string(long double value) noexcept
+{
+  return detail::to_static_string_float_impl<
+    std::numeric_limits<long double>::max_digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<int>::digits10 + 1>
 inline
-to_static_wstring(int value) noexcept;
+to_static_wstring(int value) noexcept
+{
+  return detail::to_static_wstring_int_impl<
+    std::numeric_limits<int>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<long>::digits10 + 1>
 inline
-to_static_wstring(long value) noexcept;
+to_static_wstring(long value) noexcept
+{
+  return detail::to_static_wstring_int_impl<
+    std::numeric_limits<long>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<long long>::digits10 + 1>
 inline
-to_static_wstring(long long value) noexcept;
+to_static_wstring(long long value) noexcept
+{
+  return detail::to_static_wstring_int_impl<
+    std::numeric_limits<long long>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<unsigned int>::digits10 + 1>
 inline
-to_static_wstring(unsigned int value) noexcept;
+to_static_wstring(unsigned int value) noexcept
+{
+  return detail::to_static_wstring_int_impl<
+    std::numeric_limits<unsigned int>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<unsigned long>::digits10 + 1>
 inline
-to_static_wstring(unsigned long value) noexcept;
+to_static_wstring(unsigned long value) noexcept
+{
+  return detail::to_static_wstring_int_impl<
+    std::numeric_limits<unsigned long>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<unsigned long long>::digits10 + 1>
 inline
-to_static_wstring(unsigned long long value) noexcept;
+to_static_wstring(unsigned long long value) noexcept
+{
+  return detail::to_static_wstring_int_impl<
+    std::numeric_limits<unsigned long long>::digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<float>::max_digits10 + 1>
 inline
-to_static_wstring(float value) noexcept;
+to_static_wstring(float value) noexcept
+{
+  return detail::to_static_wstring_float_impl<
+    std::numeric_limits<float>::max_digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<double>::max_digits10 + 1>
 inline
-to_static_wstring(double value) noexcept;
+to_static_wstring(double value) noexcept
+{
+  return detail::to_static_wstring_float_impl<
+    std::numeric_limits<double>::max_digits10 + 1>(value);
+}
 
-/// Converts `value` to a `static_wstring`
+/// Converts `value` to a `static_wstring` 
 static_wstring<std::numeric_limits<long double>::max_digits10 + 1>
 inline
-to_static_wstring(long double value) noexcept;
+to_static_wstring(long double value) noexcept
+{
+  return detail::to_static_wstring_float_impl<
+    std::numeric_limits<long double>::max_digits10 + 1>(value);
+}
 
 //------------------------------------------------------------------------------
 //
@@ -4049,6 +4697,7 @@ hash_value(
 /// std::hash partial specialization for basic_static_string
 namespace std
 {
+
   template <std::size_t N, typename CharT, typename Traits>
   struct hash<
 #if GENERATING_DOCUMENTATION
@@ -4072,5 +4721,912 @@ namespace std
   };
 } // std
 
-#include <boost/static_string/impl/static_string.hpp>
+//--------------------------------------------------------------------------
+//
+// Implementation
+//
+//--------------------------------------------------------------------------
+
+#ifndef GENERATING_DOCUMENTATION
+namespace boost {
+namespace static_string {
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP11_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string() noexcept
+{
+#ifdef BOOST_STATIC_STRING_CPP20_CONSTEXPR_USED
+  term();
+#endif
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(size_type count, CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(count, ch);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<std::size_t M>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(basic_static_string<M, CharT, Traits> const& other,
+    size_type pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(other, pos);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<std::size_t M>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
+    basic_static_string<M, CharT, Traits> const& other,
+    size_type pos,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(other, pos, count);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(CharT const* s, size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(s, count);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(CharT const* s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  auto const count = Traits::length(s);
+  BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
+                                std::length_error{"count > max_size()"});
+  Traits::copy(data(), s, count + 1);
+  this->set_size(count);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<class InputIterator,
+    typename std::enable_if<
+        detail::is_input_iterator<InputIterator>
+            ::value>::type*>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
+    InputIterator first,
+    InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(first, last);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
+    basic_static_string const& s) noexcept
+{
+  assign(s);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<std::size_t M>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(
+    basic_static_string<M, CharT, Traits> const& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(s);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(std::initializer_list<CharT> init) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(init.begin(), init.end());
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(string_view_type sv) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(sv);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<class T, class>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+basic_static_string<N, CharT, Traits>::
+basic_static_string(T const& t, size_type pos, size_type n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  assign(t, pos, n);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+assign(
+    size_type count,
+    CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string&
+{
+  BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
+                                std::length_error{"count > max_size()"});
+  this->set_size(count);
+  Traits::assign(data(), size(), ch);
+  term();
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+assign(
+    basic_static_string const& s) noexcept ->
+        basic_static_string&
+{
+  if(this == &s)
+      return *this;
+  this->set_size(s.size());
+  auto const n = size() + 1;
+  Traits::copy(data(), &s.data()[0], n);
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<std::size_t M>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+assign(
+    basic_static_string<M, CharT, Traits> const& s,
+    size_type pos,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+    basic_static_string&
+{
+  auto const ss = s.subview(pos, count);
+  return assign(ss.data(), ss.size());
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+assign(
+    CharT const* s,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string&
+{
+  BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
+                                std::length_error{"count > max_size()"});
+  this->set_size(count);
+  Traits::move(data(), s, size());
+  term();
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<class InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+assign(
+    InputIterator first,
+    InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        typename std::enable_if<
+            detail::is_input_iterator<InputIterator>::value,
+                basic_static_string&>::type
+{
+  auto ptr = data();
+  for (std::size_t i = 0; first != last; ++first, ++ptr, ++i)
+  {
+    if (1 > max_size() - i)
+    {
+      this->set_size(i);
+      BOOST_STATIC_STRING_THROW(std::length_error{"n > max_size()"});
+    }
+    Traits::assign(*ptr, *first);
+  }
+  this->set_size(ptr - data());
+  term();
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+at(size_type pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+    reference
+{
+  BOOST_STATIC_STRING_THROW_IF(
+      pos >= size(), std::out_of_range{"pos >= size()"});
+  return data()[pos];
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+at(size_type pos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+    const_reference
+{
+  BOOST_STATIC_STRING_THROW_IF(
+      pos >= size(), std::out_of_range{"pos >= size()"});
+  return data()[pos];
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+reserve(std::size_t n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  BOOST_STATIC_STRING_THROW_IF(
+      n > max_size(), std::length_error{"n > max_size()"});
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+clear() noexcept
+{
+  this->set_size(0);
+  term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+insert(
+    size_type index,
+    CharT const* s,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string&
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  BOOST_STATIC_STRING_THROW_IF(
+      index > curr_size, std::out_of_range{"index > size()"});
+  insert(curr_data + index, s, s + count);
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+insert(
+    const_iterator pos,
+    size_type count,
+    CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        iterator
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  BOOST_STATIC_STRING_THROW_IF(
+      count > max_size() - curr_size, std::length_error{"count() > max_size() - size()"});
+  auto const index = pos - curr_data;
+  Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
+  Traits::assign(&curr_data[index], count, ch);
+  this->set_size(curr_size + count);
+  term();
+  return &curr_data[index];
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<class ForwardIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+insert(
+    const_iterator pos,
+    ForwardIterator first,
+    ForwardIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        typename std::enable_if<
+            detail::is_forward_iterator<
+                ForwardIterator>::value, iterator>::type
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  const auto count = detail::distance(first, last);
+  const auto index = pos - curr_data;
+  const auto s = &*first;
+  BOOST_STATIC_STRING_THROW_IF(
+    count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
+  const bool inside = detail::is_inside(curr_data, curr_data + curr_size, s);
+  if (!inside || (inside && ((s - curr_data) + count <= index)))
+  {
+    Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+    detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
+  }
+  else
+  {
+    const size_type offset = s - curr_data;
+    Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+    if (offset < index)
+    {
+      const size_type diff = index - offset;
+      Traits::copy(&curr_data[index], &curr_data[offset], diff);
+      Traits::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
+    }
+    else
+    {
+      Traits::copy(&curr_data[index], &curr_data[offset + count], count);
+    }
+  }
+  this->set_size(curr_size + count);
+  return curr_data + index;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<class InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+insert(
+    const_iterator pos,
+    InputIterator first,
+    InputIterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        typename std::enable_if<
+            detail::is_input_iterator<
+                InputIterator>::value && 
+                    ! detail::is_forward_iterator<
+                          InputIterator>::value, iterator>::type
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  const auto count = read_back(first, last);
+  const auto index = pos - curr_data;
+  const auto s = curr_data + curr_size + 1;
+  BOOST_STATIC_STRING_THROW_IF(
+    index > curr_size, std::out_of_range{"index > size()"});
+  std::rotate(&curr_data[index], &curr_data[curr_size + 1], &curr_data[curr_size + count + 1]);
+  this->set_size(curr_size + count);
+  return curr_data + index;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+erase(
+    size_type index,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string&
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  BOOST_STATIC_STRING_THROW_IF(
+      index > curr_size, std::out_of_range{"index > size()"});
+  auto const n = (std::min)(count, curr_size - index);
+  Traits::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
+  this->set_size(curr_size - n);
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+erase(
+    const_iterator pos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        iterator
+{
+  erase(pos - begin(), 1);
+  return begin() + (pos - begin());
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+erase(
+    const_iterator first,
+    const_iterator last) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        iterator
+{
+  erase(first - begin(),
+      detail::distance(first, last));
+  return begin() + (first - begin());
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+push_back(
+    CharT ch) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+      curr_size >= max_size(), std::length_error{"size() >= max_size()"});
+  Traits::assign(data()[curr_size], ch);
+  this->set_size(curr_size + 1);
+  term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+append(
+    CharT const* s,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string&
+{
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+      count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
+  Traits::copy(&data()[curr_size], s, count);
+  this->set_size(curr_size + count);
+  term();
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+substr(size_type pos, size_type count) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+    basic_static_string
+{
+  BOOST_STATIC_STRING_THROW_IF(
+      pos > size(), std::out_of_range{"pos > size()"});
+  return {&data()[pos], (std::min)(count, size() - pos)};
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+subview(size_type pos, size_type count) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+    string_view_type
+{
+  BOOST_STATIC_STRING_THROW_IF(
+    pos > size(), std::out_of_range{"pos > size()"});
+  return {&data()[pos], (std::min)(count, size() - pos)};
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+copy(CharT* dest, size_type count, size_type pos) const BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+    size_type
+{
+  auto const s = subview(pos, count);
+  Traits::copy(dest, s.data(), s.size());
+  return s.size();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+resize(std::size_t n) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+      n > max_size(), std::length_error{"n > max_size()"});
+  if(n > curr_size)
+      Traits::assign(&data()[curr_size], n - curr_size, CharT{});
+  this->set_size(n);
+  term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+resize(std::size_t n, CharT c) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+      n > max_size(), std::length_error{"n > max_size()"});
+  if(n > curr_size)
+      Traits::assign(&data()[curr_size], n - curr_size, c);
+  this->set_size(n);
+  term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+swap(basic_static_string& s) noexcept
+{
+  const auto curr_size = size();
+  basic_static_string tmp(s);
+  s.set_size(curr_size);
+  Traits::copy(&s.data()[0], data(), curr_size + 1);
+  this->set_size(tmp.size());
+  Traits::copy(data(), tmp.data(), size() + 1);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<std::size_t M>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+swap(basic_static_string<M, CharT, Traits>& s) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+{
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+      curr_size > s.max_size(), std::length_error{"size() > s.max_size()"});
+  BOOST_STATIC_STRING_THROW_IF(
+      s.size() > max_size(), std::length_error{"s.size() > max_size()"});
+  basic_static_string tmp(s);
+  s.set_size(curr_size);
+  Traits::copy(&s.data()[0], data(), curr_size + 1);
+  this->set_size(tmp.size());
+  Traits::copy(data(), &tmp.data()[0], size() + 1);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace(
+    size_type pos,
+    size_type n1,
+    const CharT* s,
+    size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT -> 
+        basic_static_string<N, CharT, Traits>&
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  BOOST_STATIC_STRING_THROW_IF(
+      pos > curr_size, std::out_of_range{"pos > size()"});
+  n1 = (std::min)(n1, curr_size - pos);
+  return replace(curr_data + pos, curr_data + pos + n1, s, s + n2);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace(
+    size_type pos,
+    size_type n1,
+    size_type n2,
+    CharT c) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT -> basic_static_string<N, CharT, Traits> &
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  BOOST_STATIC_STRING_THROW_IF(
+      pos > curr_size, std::out_of_range{"pos > size()"});
+  BOOST_STATIC_STRING_THROW_IF(
+      curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+      std::length_error{"replaced string exceeds max_size()"});
+  n1 = (std::min)(n1, curr_size - pos);
+  Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+  Traits::assign(&curr_data[pos], n2, c);
+  this->set_size(curr_size + (n2 - n1));
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<typename ForwardIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace(
+      const_iterator i1,
+      const_iterator i2,
+      ForwardIterator j1,
+      ForwardIterator j2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+          typename std::enable_if<
+              detail::is_forward_iterator<ForwardIterator>::value,
+                  basic_static_string<N, CharT, Traits>&>::type
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  std::size_t n1 = detail::distance(i1, i2);
+  const std::size_t n2 = detail::distance(j1, j2);
+  const std::size_t pos = i1 - curr_data;
+  const auto s = &*j1;
+  BOOST_STATIC_STRING_THROW_IF(
+    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+    std::length_error{"replaced string exceeds max_size()"});
+  n1 = (std::min)(n1, curr_size - pos);
+  const bool inside = detail::is_inside(curr_data, curr_data + curr_size, s);
+  if (inside && size_type(s - curr_data) == pos && n1 == n2)
+    return *this;
+  if (!inside || (inside && ((s - curr_data) + n2 <= pos)))
+  {
+    // source outside
+    Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+    detail::copy_with_traits<Traits>(j1, j2, &curr_data[pos]);
+  }
+  else
+  {
+    // source inside
+    const size_type offset = s - curr_data;
+    if (n2 >= n1)
+    {
+      // grow/unchanged
+      // shift all right of splice point by n2 - n1 to the right
+      Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
+      // copy all before splice point
+      Traits::move(&curr_data[pos], &curr_data[offset], diff);
+      // copy all after splice point
+      Traits::move(&curr_data[pos + diff], &curr_data[offset + (n2 - n1) + diff], n2 - diff);
+    }
+    else
+    {
+      // shrink
+      // copy all elements into place
+      Traits::move(&curr_data[pos], &curr_data[offset], n2);
+      // shift all elements after splice point left
+      Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+    }
+  }
+  this->set_size(curr_size + (n2 - n1));
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<typename InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace(
+      const_iterator i1,
+      const_iterator i2,
+      InputIterator j1,
+      InputIterator j2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+          typename std::enable_if<
+            detail::is_input_iterator<
+                InputIterator>::value && 
+                    ! detail::is_forward_iterator<
+                         InputIterator>::value, 
+                             basic_static_string<N, CharT, Traits>&>::type
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  std::size_t n1 = detail::distance(i1, i2);
+  const std::size_t n2 = read_back(j1, j2);
+  const std::size_t pos = i1 - curr_data;
+  BOOST_STATIC_STRING_THROW_IF(
+    pos > curr_size, std::out_of_range{"pos > size()"});
+  BOOST_STATIC_STRING_THROW_IF(
+    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+    std::length_error{"replaced string exceeds max_size()"});
+  // Rotate to the correct order. [i2, end] will now start with the replaced string, continue to the existing string not being replaced, and end with a null terminator
+  std::rotate(&curr_data[pos], &curr_data[curr_size + 1], &curr_data[curr_size + n2 + 1]);
+  // Cap the size
+  n1 = (std::min)(n1, curr_size - pos);
+  // Move everything from the end of the splice point to the end of the rotated string to the begining of the splice point
+  Traits::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], (curr_size + (n2 - n1)) - pos);
+  this->set_size(curr_size + (n2 - n1));
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+find(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept ->
+        size_type
+{
+  const auto curr_size = size();
+  if (pos > curr_size || n > curr_size - pos)
+    return npos;
+  if (!n)
+    return pos;
+  const auto res = detail::search(&data()[pos], &data()[curr_size], s, &s[n], Traits::eq);
+  return res == end() ? npos : detail::distance(data(), res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+rfind(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept ->
+        size_type
+{
+  const auto curr_size = size();
+  const auto curr_data = data();
+  if (curr_size < n)
+    return npos;
+  if (pos > curr_size - n)
+    pos = curr_size - n;
+  if (!n)
+    return pos;
+  for (auto sub = &curr_data[pos]; sub >= curr_data; --sub)
+    if (!Traits::compare(sub, s, n))
+      return detail::distance(curr_data, sub);
+  return npos;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+find_first_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept ->
+        size_type
+{
+  const auto curr_data = data();
+  if (pos >= size() || !n)
+    return npos;
+  const auto res = detail::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], Traits::eq);
+  return res == end() ? npos : detail::distance(curr_data, res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+find_last_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept ->
+        size_type
+{
+  const auto curr_size = size();
+  if (!n)
+    return npos;
+  if (pos >= curr_size)
+    pos = 0;
+  else
+    pos = curr_size - (pos + 1);
+  const auto res = detail::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
+  return res == rend() ? npos : curr_size - 1 - detail::distance(rbegin(), res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+find_first_not_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept ->
+        size_type
+{
+  if (pos >= size())
+    return npos;
+  if (!n)
+    return pos;
+  const auto res = detail::find_not_of<Traits>(&data()[pos], &data()[size()], s, n);
+  return res == end() ? npos : detail::distance(data(), res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+find_last_not_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept ->
+        size_type
+{
+  const auto curr_size = size();
+  if (pos >= curr_size)
+    pos = curr_size - 1;
+  if (!n)
+    return pos;
+  pos = curr_size - (pos + 1);
+  const auto res = detail::find_not_of<Traits>(rbegin() + pos, rend(), s, n);
+  return res == rend() ? npos : curr_size - 1 - detail::distance(rbegin(), res);
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+assign_char(CharT ch, std::true_type) noexcept ->
+    basic_static_string&
+{
+  this->set_size(1);
+  Traits::assign(data()[0], ch);
+  term();
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+auto
+basic_static_string<N, CharT, Traits>::
+assign_char(CharT, std::false_type) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+    basic_static_string&
+{
+  BOOST_STATIC_STRING_THROW(std::length_error{"max_size() == 0"});
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<typename InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+read_back(
+    InputIterator first,
+    InputIterator last) -> 
+        std::size_t
+{
+  const auto curr_data = data();
+  auto new_size = size();
+  for (; first != last; ++first)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      1 > max_size() - new_size, std::length_error{"count > max_size() - size()"});
+    Traits::assign(curr_data[++new_size], *first);
+  }
+  return new_size - size();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+replace_unchecked(
+    size_type pos,
+    size_type n1,
+    const CharT* s,
+    size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string&
+{
+  const auto curr_data = data();
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+    pos > curr_size, std::out_of_range{"pos > size()"});
+  BOOST_STATIC_STRING_THROW_IF(
+    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+    std::length_error{"replaced string exceeds max_size()"});
+  if (pos + n1 >= curr_size)
+    n1 = curr_size - pos;
+  Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+  Traits::copy(&curr_data[pos], s, n2);
+  this->set_size(curr_size + (n2 - n1));
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+insert_unchecked(
+    size_type index,
+    const CharT* s,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string<N, CharT, Traits>&
+{
+  const auto curr_data = data();
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+    index > curr_size, std::out_of_range{"index > size()"});
+  BOOST_STATIC_STRING_THROW_IF(
+    count > max_size() - size(),
+    std::length_error{"count > max_size() - size()"});
+  Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+  Traits::copy(&curr_data[index], s, count);
+  this->set_size(curr_size + count);
+  return *this;
+}
+} // static_string
+} // boost
+#endif
 #endif

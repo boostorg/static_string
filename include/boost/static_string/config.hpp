@@ -88,17 +88,6 @@
 #define BOOST_STATIC_STRING_CPP11_CONSTEXPR_USED
 #endif
 
-#ifndef BOOST_STATIC_STRING_STANDALONE
-#include <boost/utility/string_view.hpp>
-#include <boost/container_hash/hash.hpp>
-#include <boost/assert.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/throw_exception.hpp>
-#else
-#include <cassert>
-#include <string_view>
-#endif
-
 #ifdef BOOST_STATIC_STRING_NO_EXCEPTIONS
 #define BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT noexcept
 #define BOOST_STATIC_STRING_THROW_IF(cond, ex)
@@ -147,6 +136,17 @@ defined(__clang__) && \
 #endif
 #undef BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#endif
+
+#ifndef BOOST_STATIC_STRING_STANDALONE
+#include <boost/utility/string_view.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/assert.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/throw_exception.hpp>
+#else
+#include <cassert>
+#include <string_view>
 #endif
 
 namespace boost {
