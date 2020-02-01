@@ -14,6 +14,8 @@
 #include <boost/static_string/config.hpp>
 #include <algorithm>
 #include <cstdint>
+#include <cstdio>
+#include <functional>
 #include <initializer_list>
 #include <iosfwd>
 #include <type_traits>

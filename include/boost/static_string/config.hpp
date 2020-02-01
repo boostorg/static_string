@@ -139,10 +139,10 @@ defined(__clang__) && \
 #endif
 
 #ifndef BOOST_STATIC_STRING_STANDALONE
-#include <boost/utility/string_view.hpp>
-#include <boost/container_hash/hash.hpp>
 #include <boost/assert.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/utility/string_view.hpp>
 #include <boost/throw_exception.hpp>
 #else
 #include <cassert>
