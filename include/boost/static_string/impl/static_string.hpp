@@ -423,28 +423,6 @@ insert(
   return curr_data + index;
 }
 
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-insert(
-    const_iterator pos,
-    std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
-        iterator
-{
-  const auto curr_size = size();
-  const auto curr_data = data();
-  const auto index = pos - curr_data;
-  BOOST_STATIC_STRING_THROW_IF(
-    index > curr_size, std::out_of_range{"index > size()"});
-  BOOST_STATIC_STRING_THROW_IF(
-    ilist.size() > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
-  Traits::move(&curr_data[index + ilist.size()], &curr_data[index], curr_size - index + 1);
-  detail::copy_with_traits<Traits>(ilist.begin(), ilist.end(), &curr_data[index]);
-  this->set_size(curr_size + ilist.size());
-  return curr_data + index;
-}
-
 //------------------------------------------------------------------------------
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -959,6 +937,29 @@ replace_unchecked(
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
   Traits::copy(&curr_data[pos], s, n2);
   this->set_size(curr_size + (n2 - n1));
+  return *this;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+insert_unchecked(
+    size_type index,
+    const CharT* s,
+    size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT ->
+        basic_static_string<N, CharT, Traits>&
+{
+  const auto curr_data = data();
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+    index > curr_size, std::out_of_range{"index > size()"});
+  BOOST_STATIC_STRING_THROW_IF(
+    count > max_size() - size(),
+    std::length_error{"count > max_size() - size()"});
+  Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+  Traits::copy(&curr_data[index], s, count);
+  this->set_size(curr_size + count);
   return *this;
 }
 

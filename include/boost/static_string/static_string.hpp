@@ -893,6 +893,10 @@ public:
 
         Strong guarantee.
 
+        @note
+        The insertion is done unchecked, as the source cannot be
+        within the destination.
+
         @note All references, pointers, or iterators
         referring to contained elements are invalidated. Any
         past-the-end iterators are also invalidated.
@@ -914,6 +918,36 @@ public:
         size_type index,
         const basic_static_string<M, CharT, Traits>& str) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
+        return insert_unchecked(index, str.data(), str.size());
+    }
+
+    /** Insert a string.
+
+        Inserts the string `str`
+        at the position `index`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @return `*this`
+
+        @param index The index to insert at.
+        @param str The string to insert.
+
+        @throw std::length_error `size() + str.size() > max_size()`
+        @throw std::out_of_range `index > size()`
+    */
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    basic_static_string&
+    insert(
+        size_type index,
+        const basic_static_string& str) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+    {
         return insert(index, str.data(), str.size());
     }
 
@@ -925,6 +959,10 @@ public:
         @par Exception Safety
 
         Strong guarantee.
+
+        @note
+        The insertion is done unchecked, as the source cannot be
+        within the destination.
 
         @note All references, pointers, or iterators
         referring to contained elements are invalidated. Any
@@ -950,6 +988,45 @@ public:
     insert(
         size_type index,
         const basic_static_string<M, CharT, Traits>& str,
+        size_type index_str,
+        size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+    {
+        BOOST_STATIC_STRING_THROW_IF(
+          index_str > str.size(), std::out_of_range{"index_str > str.size()"}
+        );
+        return insert_unchecked(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
+    }
+
+    /** Insert a string.
+
+        Inserts a string, obtained by `str.substr(index_str, count)`
+        at the position `index`.
+
+        @par Exception Safety
+
+        Strong guarantee.
+
+        @note All references, pointers, or iterators
+        referring to contained elements are invalidated. Any
+        past-the-end iterators are also invalidated.
+
+        @return `*this`
+
+        @param index The index to insert at.
+        @param str The string from which to insert.
+        @param index_str The index in `str` to start inserting from.
+        @param count The number of characters to insert.
+        The default argument for this parameter is @ref npos.
+
+        @throw std::length_error `size() + str.substr(index_str, count).size() > max_size()`
+        @throw std::out_of_range `index > size()`
+        @throw std::out_of_range `index_str > str.size()`
+    */
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    basic_static_string&
+    insert(
+        size_type index,
+        const basic_static_string& str,
         size_type index_str,
         size_type count = npos) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
     {
@@ -1152,7 +1229,11 @@ public:
     iterator
     insert(
         const_iterator pos,
-        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
+        std::initializer_list<CharT> ilist) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
+    {
+      const auto offset = pos - begin();
+      return insert_unchecked(offset, ilist.begin(), ilist.size()).begin() + offset;
+    }
 
     /** Insert characters from an object convertible to `string_view_type`.
 
@@ -3546,6 +3627,13 @@ private:
         size_type n1,
         const CharT* s,
         size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
+
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    basic_static_string&
+    insert_unchecked(
+        size_type index,
+        const CharT* s,
+        size_type count) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT;
 };
 
 //------------------------------------------------------------------------------
