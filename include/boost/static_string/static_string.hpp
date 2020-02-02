@@ -627,15 +627,6 @@ is_inside(
         return true;
     return false;
   }
-#elif defined(__clang__) && BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_constant_p)
-  // We can also try using __builtin_constant_p
-  if (__builtin_constant_p((ptr, src_first, src_last)))
-  {
-    for (; src_first != src_last; ++src_first)
-      if (src_first == ptr)
-        return true;
-    return false;
-  }
 #else
   // If library comparison functions don't work, and
   // we cannot use any of the above, we can use

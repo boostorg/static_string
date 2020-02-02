@@ -60,7 +60,6 @@
 #define BOOST_STATIC_STRING_NODISCARD
 #endif
 
-
 // MSVC doesn't define __cplusplus by default
 #ifdef _MSVC_LANG
 #define BOOST_STATIC_STRING_STANDARD_VERSION _MSVC_LANG
@@ -168,12 +167,9 @@ defined(__clang__) && \
 // that cannot use the library comparison function
 // objects at all in constant expresssions. In these
 // cases, we use whatever will make more constexpr work.
-#if defined(__clang__) 
-#if defined(__GLIBCXX__) && ((__GLIBCXX__ > 20181206 && __GLIBCXX__ <= 20190812))
+#if defined(__clang__) && defined(__GLIBCXX__) && \
+((__GLIBCXX__ >= 20180726 && __GLIBCXX__ <= 20190812))
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
-#elif BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_constant_p) || defined(BOOST_STATIC_STRING_IS_CONST_EVAL)
-#define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
-#endif
 #endif
 
 namespace boost {
