@@ -596,8 +596,9 @@ find_first_of(
   return last;
 }
 
-// Check if a pointer lies within a range (inclusive) without unspecified behavior,
-// allowing it to be used in a constant evaluation
+// Check if a pointer lies within the range [src_first, src_last) 
+// without unspecified behavior, allowing it to be used
+// in a constant evaluation.
 template<typename T>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -615,7 +616,7 @@ is_inside(
   // no applications in constant expressions.
 #ifdef BOOST_STATIC_STRING_CPP14
 #ifdef BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS 
-#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+#ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
   // Our second best option is to use is_constant_evaluated
   // and a loop that checks for equality, since equality for 
   // pointer to object types is never unspecified in this case.
@@ -626,18 +627,27 @@ is_inside(
         return true;
     return false;
   }
+#elif defined(__clang__) && __has_builtin(__builtin_constant_p)
+  // We can also try using __builtin_constant_p
+  if (__builtin_constant_p((ptr, src_first, src_last)))
+  {
+    for (; src_first != src_last; ++src_first)
+      if (src_first == ptr)
+        return true;
+    return false;
+  }
 #else
   // If library comparison functions don't work, and
-  // we cannot use is_constant_evaluated, we can use
-  // the builtin comparison operators instead.
-  return ptr >= src_first && ptr <= src_last;
+  // we cannot use any of the above, we can use
+  // try builtin comparison operators instead.
+  return ptr >= src_first && ptr < src_last;
 #endif
 #endif
 #endif
   // Use the library comparison functions if we can't use 
   // is_constant_evaluated or if we don't need to.
   return std::greater_equal<const T*>()(ptr, src_first) &&
-    std::less_equal<const T*>()(ptr, src_last);
+    std::less<const T*>()(ptr, src_last);
 }
 } // detail
 #endif
