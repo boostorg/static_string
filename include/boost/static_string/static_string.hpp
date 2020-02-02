@@ -622,7 +622,7 @@ is_inside(
   if (BOOST_STATIC_STRING_IS_CONST_EVAL)
   {
     for (; src_first != src_last; ++src_first)
-      if (src_first == ptr)
+      if (ptr == src_first)
         return true;
     return false;
   }
