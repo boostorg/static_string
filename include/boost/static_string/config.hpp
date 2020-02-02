@@ -146,7 +146,8 @@ defined(__clang__) && \
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #endif
 
-//(defined(_MSVC_LANG) && BOOST_STATIC_STRING_STANDARD_VERSION < 201703L)
+// For clang and msvc, constexpr does not work with library
+// comparison function objects.
 #if (defined(__clang__) && (__clang_major__ < 9)) || \
 (defined(_MSVC_LANG) && !defined(BOOST_STATIC_STRING_CPP20))
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
