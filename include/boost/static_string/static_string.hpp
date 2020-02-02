@@ -627,7 +627,7 @@ is_inside(
         return true;
     return false;
   }
-#elif defined(__clang__) && __has_builtin(__builtin_constant_p)
+#elif defined(__clang__) && BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_constant_p)
   // We can also try using __builtin_constant_p
   if (__builtin_constant_p((ptr, src_first, src_last)))
   {

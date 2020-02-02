@@ -32,11 +32,18 @@
 #endif
 #endif
 
+// Can we use __has_builtin?
+#ifdef __has_builtin
+#define BOOST_STATIC_STRING_HAS_BUILTIN(arg) __has_builtin(arg)
+#else
+#define BOOST_STATIC_STRING_HAS_BUILTIN(arg) 0
+#endif
+
 // Can we use is_constant_evaluated?
 // Standard version
 #if __cpp_lib_is_constant_evaluated >= 201811L
 #define BOOST_STATIC_STRING_IS_CONST_EVAL std::is_constant_evaluated()
-#elif defined(__clang__) && __has_builtin(__builtin_is_constant_evaluated)
+#elif defined(__clang__) && BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_is_constant_evaluated)
 // If we have clang version 9+, we can use the intrinsic
 // While gcc also has this, we don't need it
 #define BOOST_STATIC_STRING_IS_CONST_EVAL __builtin_is_constant_evaluated()
@@ -52,6 +59,7 @@
 #else
 #define BOOST_STATIC_STRING_NODISCARD
 #endif
+
 
 // MSVC doesn't define __cplusplus by default
 #ifdef _MSVC_LANG
@@ -160,10 +168,12 @@ defined(__clang__) && \
 // that cannot use the library comparison function
 // objects at all in constant expresssions. In these
 // cases, we use whatever will make more constexpr work.
-#if defined(__clang__) && defined(__GLIBCXX__) && ((__GLIBCXX__ > 20181206 && __GLIBCXX__ <= 20190812))
+#if defined(__clang__) 
+#if defined(__GLIBCXX__) && ((__GLIBCXX__ > 20181206 && __GLIBCXX__ <= 20190812))
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
-#elif __has_builtin(__builtin_constant_p) || defined(BOOST_STATIC_STRING_IS_CONST_EVAL)
+#elif BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_constant_p) || defined(BOOST_STATIC_STRING_IS_CONST_EVAL)
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
+#endif
 #endif
 
 namespace boost {
