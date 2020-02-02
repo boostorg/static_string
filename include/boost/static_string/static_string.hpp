@@ -614,8 +614,7 @@ is_inside(
   // of conformance, we will settle for the best option that is available.
   // We don't care about this in C++11, since this function would have
   // no applications in constant expressions.
-#ifdef BOOST_STATIC_STRING_CPP14
-#ifdef BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS 
+#if defined(BOOST_STATIC_STRING_CPP14) && defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS) 
 #ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
   // Our second best option is to use is_constant_evaluated
   // and a loop that checks for equality, since equality for 
@@ -632,7 +631,6 @@ is_inside(
   // we cannot use any of the above, we can use
   // try builtin comparison operators instead.
   return ptr >= src_first && ptr < src_last;
-#endif
 #endif
 #endif
   // Use the library comparison functions if we can't use 
