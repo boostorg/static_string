@@ -212,7 +212,7 @@ public:
   }
 
   smallest_width<N> size_{0};
-#ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
+#ifdef BOOST_STATIC_STRING_CPP20
   CharT data_[N + 1];
 #else
   CharT data_[N + 1]{};
@@ -311,7 +311,7 @@ public:
     Traits::assign(data_[size_impl()], 0);
   }
 
-#ifdef BOOST_STATIC_STRING_ALLOW_UNINIT_MEM
+#ifdef BOOST_STATIC_STRING_CPP20
   CharT data_[N + 1];
 #else
   CharT data_[N + 1]{};
@@ -607,7 +607,32 @@ is_inside(
     const T* src_last,
     const T* ptr)
 {
-  return std::greater_equal<const T*>()(ptr, src_first) && 
+  // We want to make this usable in constant expressions as much as possible
+  // while retaining the guarentee that the comparison has a strict total ordering.
+  // We also want this to be fast. Since different compilers have differing levels
+  // of conformance, we will settle for the best option that is available.
+#ifdef BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS 
+#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+  // Our second best option is to use is_constant_evaluated
+  // and a loop that checks for equality, since equality for 
+  // pointer to object types is never unspecified in this case.
+  if (BOOST_STATIC_STRING_IS_CONST_EVAL)
+  {
+    for (; src_first != src_last; ++src_first)
+      if (src_first == ptr)
+        return true;
+    return false;
+  }
+#else
+  // If library comparison functions don't work, then
+  // its almost certain that we can use the builtin
+  // comparison operator instead.
+  return ptr >= src_first && ptr <= src_last;
+#endif
+#endif
+  // Use the library comparison functions if we can't use 
+  // is_constant_evaluated or if we don't need to.
+  return std::greater_equal<const T*>()(ptr, src_first) &&
     std::less_equal<const T*>()(ptr, src_last);
 }
 } // detail
@@ -4739,7 +4764,7 @@ BOOST_STATIC_STRING_CPP11_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string() noexcept
 {
-#ifdef BOOST_STATIC_STRING_CPP20_CONSTEXPR_USED
+#ifdef BOOST_STATIC_STRING_CPP20
   term();
 #endif
 }
@@ -5316,7 +5341,7 @@ replace(
   n1 = (std::min)(n1, curr_size - pos);
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
   Traits::assign(&curr_data[pos], n2, c);
-  this->set_size(curr_size + (n2 - n1));
+  this->set_size((curr_size + n2) - n1);
   return *this;
 }
 
@@ -5377,7 +5402,7 @@ replace(
       Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
     }
   }
-  this->set_size(curr_size + (n2 - n1));
+  this->set_size((curr_size + n2) - n1);
   return *this;
 }
 
@@ -5414,7 +5439,7 @@ replace(
   n1 = (std::min)(n1, curr_size - pos);
   // Move everything from the end of the splice point to the end of the rotated string to the begining of the splice point
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], (curr_size + (n2 - n1)) - pos);
-  this->set_size(curr_size + (n2 - n1));
+  this->set_size((curr_size + n2) - n1);
   return *this;
 }
 
@@ -5603,7 +5628,7 @@ replace_unchecked(
     n1 = curr_size - pos;
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
   Traits::copy(&curr_data[pos], s, n2);
-  this->set_size(curr_size + (n2 - n1));
+  this->set_size((curr_size + n2) - n1);
   return *this;
 }
 

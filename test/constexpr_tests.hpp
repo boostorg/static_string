@@ -11,7 +11,7 @@
 #include <boost/static_string/static_string.hpp>
 
 // char_traits aren't constexpr until c++17
-#ifdef BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED
+#if BOOST_STATIC_STRING_STANDARD_VERSION <= 201703L
 struct cxper_char_traits
 {
   using char_type = char;
@@ -43,7 +43,7 @@ constexpr
 bool 
 testConstantEvaluation()
 {
-#ifdef BOOST_STATIC_STRING_CPP20_CONSTEXPR_USED
+#ifdef BOOST_STATIC_STRING_CPP20
   // c++20 constexpr tests
   cstatic_string a;
   cstatic_string b(1, 'a');
@@ -230,7 +230,7 @@ testConstantEvaluation()
   a.ends_with("a");
 
   return true;
-#elif defined(BOOST_STATIC_STRING_CPP17_CONSTEXPR_USED)
+#elif defined(BOOST_STATIC_STRING_CPP17)
   //c++17 constexpr tests
 
     // ctors
@@ -419,7 +419,7 @@ testConstantEvaluation()
   a.ends_with("a");
  
   return true;
-#elif defined(BOOST_STATIC_STRING_CPP14_CONSTEXPR_USED)
+#elif defined(BOOST_STATIC_STRING_CPP14)
   // c++14 constexpr tests
 
   // ctors
@@ -593,7 +593,7 @@ testConstantEvaluation()
   a.ends_with('a');
   a.ends_with("a");
   return true;
-#elif defined(BOOST_STATIC_STRING_CPP11_CONSTEXPR_USED)
+#elif defined(BOOST_STATIC_STRING_CPP11)
   // c++11 constexpr tests
   return cstatic_string().size() + 
     cstatic_string().empty() + 
