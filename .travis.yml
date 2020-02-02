@@ -191,7 +191,7 @@ jobs:
     - { os: "linux", env: [ "B2_TOOLSET=clang-7",     "B2_CXXSTD=17"    ], addons: *clang-7   }
     - { os: "linux", env: [ "B2_TOOLSET=clang-8",     "B2_CXXSTD=17"    ], addons: *clang-8   }
     -   os: "linux"
-        env: ["B2_TOOLSET=clang-9", "B2_CXXST D=17", "B2_CXXFLAGS=-stdlib=libstdc++"]
+        env: ["B2_TOOLSET=clang-9", "B2_CXXSTD=17", "B2_CXXFLAGS=-stdlib=libstdc++"]
         apt:
           sources:
             - ubuntu-toolchain-r-test
@@ -251,7 +251,7 @@ jobs:
     - { os: "linux", env: [ "COMMENT=STANDALONE",       "B2_TOOLSET=clang-8",     "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE",       "B2_CXXSTD=17"                                        ], addons: *clang-8   }
     - { os: "osx"  , env: [ "COMMENT=STANDALONE",       "B2_TOOLSET=clang",       "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE",       "B2_CXXSTD=17"     ]                     }
     -   os: "linux"
-        env: ["COMMENT=STANDALONE", "B2_TOOLSET=clang-9", "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE", "B2_CXXST D=17", "B2_CXXFLAGS=-stdlib=libstdc++"]
+        env: ["COMMENT=STANDALONE", "B2_TOOLSET=clang-9", "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE", "B2_CXXSTD=17", "B2_CXXFLAGS=-stdlib=libstdc++"]
         apt:
           sources:
             - ubuntu-toolchain-r-test
