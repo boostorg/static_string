@@ -100,6 +100,12 @@ anchors:
                                            "libc++-dev",
                                            "libstdc++-8-dev" ], sources: [ "llvm-toolchain-xenial-8",
                                                                            "ubuntu-toolchain-r-test"   ] } }
+  clang-9:  &clang-9  { apt: { packages: [ "clang-9",
+                                           "libc6-dbg",
+                                           "libc++-dev",
+                                           "libstdc++-9-dev" ], sources: [ "llvm-toolchain-xenial-9,
+                                                                           "ubuntu-toolchain-r-test"   ] } }                                                                         
+    
   gcc-48:   &gcc-48   { apt: { packages: [ "g++-4.8"         ]                                           } }
   gcc-49:   &gcc-49   { apt: { packages: [ "g++-4.9"         ], sources: [ "ubuntu-toolchain-r-test"   ] } }
   gcc-5:    &gcc-5    { apt: { packages: [ "g++-5"           ]                                           } }
