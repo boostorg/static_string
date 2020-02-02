@@ -131,8 +131,20 @@
 #endif
 #endif
 
+#ifndef BOOST_STATIC_STRING_STANDALONE
+#include <boost/assert.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/utility/string_view.hpp>
+#include <boost/throw_exception.hpp>
+#else
+#include <cassert>
+#include <stdexcept>
+#include <string_view>
+#endif
+
 // Compiler bug prevents constexpr from working with clang 4.x and 5.x
-// if it is detected, we disable constexpr
+// if it is detected, we disable constexpr.
 #if (BOOST_STATIC_STRING_STANDARD_VERSION >= 201402L && \
 BOOST_STATIC_STRING_STANDARD_VERSION < 201703L) && \
 defined(__clang__) && \
@@ -150,21 +162,9 @@ defined(__clang__) && \
 // that cannot use the library comparison function
 // objects at all in constant expresssions. In these
 // cases, we use whatever will make more constexpr work.
-#if (defined(__clang__) && defined(__GLIBCXX__) && \
-((__GLIBCXX__ > 20181206) && (__GLIBCXX__ < 20190812)))
+#if defined(__clang__) && defined(__GLIBCXX__) && \
+((__GLIBCXX__ > 20181206) && (__GLIBCXX__ < 20190812))
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
-#endif
-
-#ifndef BOOST_STATIC_STRING_STANDALONE
-#include <boost/assert.hpp>
-#include <boost/container_hash/hash.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/utility/string_view.hpp>
-#include <boost/throw_exception.hpp>
-#else
-#include <cassert>
-#include <stdexcept>
-#include <string_view>
 #endif
 
 namespace boost {
