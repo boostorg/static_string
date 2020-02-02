@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2019-2020 Krystian Stasiowski (sdkrystian at gmail dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+// Official repository: https://github.com/boostorg/static_string
+//
+
 #include <string>
 #include <boost/static_string/static_string.hpp>
 
@@ -283,18 +292,18 @@ testConstantEvaluation()
   }
 
   // reverse iterators
-  {
-    auto j = a.rbegin();
-  }
-  {
-    auto j = a.crbegin();
-  }
-  {
-    auto j = a.rend();
-  }
-  {
-    auto j = a.crend();
-  }
+  //{
+  //  auto j = a.rbegin();
+  //}
+  //{
+  //  auto j = a.crbegin();
+  //}
+  //{
+  //  auto j = a.rend();
+  //}
+  //{
+  //  auto j = a.crend();
+  //}
 
   // capacity and size
   auto j = cstatic_string().size() +
