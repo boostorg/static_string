@@ -509,7 +509,7 @@ to_static_string_float_impl(Floating value) noexcept
 {
   // extra one needed for null terminator
   char buffer[N + 1];
-  std::sprintf(buffer, "%f", value);
+  std::sprintf(buffer, "%Lf", value);
   // this will not throw
   return static_string<N>(buffer);
 }
@@ -521,7 +521,7 @@ to_static_wstring_float_impl(Floating value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
-  std::swprintf(buffer, N + 1, L"%f", value);
+  std::swprintf(buffer, N + 1, L"%Lf", value);
   // this will not throw
   return static_wstring<N>(buffer);
 }
@@ -611,6 +611,9 @@ is_inside(
   // while retaining the guarentee that the comparison has a strict total ordering.
   // We also want this to be fast. Since different compilers have differing levels
   // of conformance, we will settle for the best option that is available.
+  // We don't care about this in C++11, since this function would have
+  // no applications in constant expressions.
+#ifdef BOOST_STATIC_STRING_CPP14
 #ifdef BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS 
 #ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
   // Our second best option is to use is_constant_evaluated
@@ -624,10 +627,11 @@ is_inside(
     return false;
   }
 #else
-  // If library comparison functions don't work, then
-  // its almost certain that we can use the builtin
-  // comparison operator instead.
+  // If library comparison functions don't work, and
+  // we cannot use is_constant_evaluated, we can use
+  // the builtin comparison operators instead.
   return ptr >= src_first && ptr <= src_last;
+#endif
 #endif
 #endif
   // Use the library comparison functions if we can't use 

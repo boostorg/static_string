@@ -146,10 +146,12 @@ defined(__clang__) && \
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #endif
 
-// For clang and msvc, constexpr does not work with library
-// comparison function objects.
-#if (defined(__clang__) && (__clang_major__ < 9)) || \
-(defined(_MSVC_LANG) && !defined(BOOST_STATIC_STRING_CPP20))
+// These are for compiler/library configurations
+// that cannot use the library comparison function
+// objects at all in constant expresssions. In these
+// cases, we use whatever will make more constexpr work.
+#if (defined(__clang__) && defined(__GLIBCXX__) && \
+((__GLIBCXX__ > 20181206) && (__GLIBCXX__ < 20190812)))
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
 #endif
 
@@ -163,16 +165,6 @@ defined(__clang__) && \
 #include <cassert>
 #include <stdexcept>
 #include <string_view>
-#endif
-
-#ifdef __clang__
-#include <new>
-#define STRING_VALUE(...) STRING_VALUE__(__VA_ARGS__)
-#define STRING_VALUE__(...) #__VA_ARGS__
-#pragma message("STATIC STRING CLANG DEBUG INFO")
-#pragma message("LIBSTDCXX OLD: " STRING_VALUE(__GLIBCPP__)) 
-#pragma message("LIBSTDCXX NEW: " STRING_VALUE(__GLIBCXX__)) 
-#pragma message("LIBCXX: " STRING_VALUE(_LIBCPP_VERSION)) 
 #endif
 
 namespace boost {
