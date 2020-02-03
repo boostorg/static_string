@@ -688,7 +688,7 @@ template<
     typename Traits = std::char_traits<CharT>>
 class basic_static_string 
 #ifndef GENERATING_DOCUMENTATION
-  : detail::optimization_base<N, CharT, Traits>
+  : private detail::optimization_base<N, CharT, Traits>
 #endif
 {
 private:
@@ -701,9 +701,6 @@ private:
     {
         this->term_impl();
     }
-
-    using base = detail::optimization_base<N, CharT, Traits>;
-
 public:
     //--------------------------------------------------------------------------
     //

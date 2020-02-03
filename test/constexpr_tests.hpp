@@ -193,6 +193,7 @@ testConstantEvaluation()
   a.replace(a.begin(), a.end(), {'a'});
 
 #ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
+  a.clear();
   a.replace(a.begin(), a.end(), "a");
   a.replace(a.begin(), a.end(), "a", 1);
 #endif
@@ -382,6 +383,7 @@ testConstantEvaluation()
   a.replace(a.begin(), a.end(), {'a'});
 
 #ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
+  a.clear();
   a.replace(a.begin(), a.end(), "a");
   a.replace(a.begin(), a.end(), "a", 1);
 #endif
