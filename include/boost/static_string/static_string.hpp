@@ -257,11 +257,11 @@ public:
   term_impl() noexcept { }
 
 private:
-  static constexpr CharT null_{};
+  static constexpr const CharT null_{};
 };
 
 template<typename CharT, typename Traits>
-constexpr CharT static_string_base_zero<0, CharT, Traits>::null_;
+constexpr const CharT static_string_base_zero<0, CharT, Traits>::null_;
 
 #ifdef BOOST_STATIC_STRING_NULL_OPTIMIZATION
 // Optimization for storing the size in the last element
@@ -502,10 +502,22 @@ to_static_wstring_int_impl(Integer value) noexcept
   return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
 }
 
-template<std::size_t N, typename Floating>
+template<std::size_t N>
 inline
 static_string<N>
-to_static_string_float_impl(Floating value) noexcept
+to_static_string_float_impl(double value) noexcept
+{
+  // extra one needed for null terminator
+  char buffer[N + 1];
+  std::sprintf(buffer, "%f", value);
+  // this will not throw
+  return static_string<N>(buffer);
+}
+
+template<std::size_t N>
+inline
+static_string<N>
+to_static_string_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   char buffer[N + 1];
@@ -514,10 +526,22 @@ to_static_string_float_impl(Floating value) noexcept
   return static_string<N>(buffer);
 }
 
-template<std::size_t N, typename Floating>
+template<std::size_t N>
 inline
 static_wstring<N>
-to_static_wstring_float_impl(Floating value) noexcept
+to_static_wstring_float_impl(double value) noexcept
+{
+  // extra one needed for null terminator
+  wchar_t buffer[N + 1];
+  std::swprintf(buffer, N + 1, L"%f", value);
+  // this will not throw
+  return static_wstring<N>(buffer);
+}
+
+template<std::size_t N>
+inline
+static_wstring<N>
+to_static_wstring_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
