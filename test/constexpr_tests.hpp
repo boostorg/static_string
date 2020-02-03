@@ -10,8 +10,8 @@
 #include <string>
 #include <boost/static_string/static_string.hpp>
 
-// char_traits aren't constexpr until c++17
-#ifdef BOOST_STATIC_STRING_STANDARD_VERSION <= 201703L  && BOOST_STATIC_STRING_STANDARD_VERSION >= 201402L
+// char_traits aren't fully constexpr until c++20
+#if BOOST_STATIC_STRING_STANDARD_VERSION <= 201703L && BOOST_STATIC_STRING_STANDARD_VERSION >= 201402L
 struct cxper_char_traits
 {
   using char_type = char;
