@@ -254,6 +254,7 @@ jobs:
         env: ["COMMENT=STANDALONE", "B2_TOOLSET=clang-9", "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE", "B2_CXXSTD=17"]
         apt:
           sources:
+            - llvm-toolchain-xenial-8
             - ubuntu-toolchain-r-test
             - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main'
               key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
