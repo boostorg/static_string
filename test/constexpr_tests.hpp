@@ -11,7 +11,7 @@
 #include <boost/static_string/static_string.hpp>
 
 // char_traits aren't constexpr until c++17
-#ifdef BOOST_STATIC_STRING_CPP14
+#ifdef BOOST_STATIC_STRING_STANDARD_VERSION <= 201703L
 struct cxper_char_traits
 {
   using char_type = char;
@@ -192,7 +192,7 @@ testConstantEvaluation()
   a.replace(a.begin(), a.end(), a.begin(), a.end());
   a.replace(a.begin(), a.end(), {'a'});
 
-#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+#ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
   a.replace(a.begin(), a.end(), "a");
   a.replace(a.begin(), a.end(), "a", 1);
 #endif
@@ -381,7 +381,7 @@ testConstantEvaluation()
   a.replace(a.begin(), a.end(), a.begin(), a.end());
   a.replace(a.begin(), a.end(), {'a'});
 
-#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+#ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
   a.replace(a.begin(), a.end(), "a");
   a.replace(a.begin(), a.end(), "a", 1);
 #endif
@@ -556,7 +556,7 @@ testConstantEvaluation()
   a.replace(a.begin(), a.end(), a.begin(), a.end());
   a.replace(a.begin(), a.end(), {'a'});
 
-#ifdef BOOST_STATIC_STRING_USE_IS_CONST_EVAL
+#ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
   a.replace(a.begin(), a.end(), "a");
   a.replace(a.begin(), a.end(), "a", 1);
 #endif

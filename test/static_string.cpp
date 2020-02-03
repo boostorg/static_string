@@ -6911,6 +6911,15 @@ void testHash()
   BOOST_TEST(hasher(U("1234567890")) == hasher(U("1234567890")));
 }
 
+void testEmpty()
+{
+  using E = static_string<0>;
+  E a;
+  BOOST_TEST(a.size() == 0);
+  BOOST_TEST(a.data());
+  BOOST_TEST(!a.capacity());
+}
+
 int
 runTests()
 {
@@ -6946,6 +6955,8 @@ runTests()
   testStartsEnds();
 
   testHash();
+  testEmpty();
+
   return report_errors();
 }
 
