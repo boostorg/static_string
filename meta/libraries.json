@@ -5,7 +5,7 @@
         "Vinnie Falco"
 		"Krystian Stasiowski"
     ],
-    "description": "A fixed capacity, dynamically sized string.",
+    "description": "A fixed capacity dynamically sized string.",
     "category": [
         "Container",
         "String"
