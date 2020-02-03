@@ -1,0 +1,16 @@
+{
+    "key": "static_string",
+    "name": "StaticString",
+    "authors": [
+        "Vinnie Falco"
+		"Krystian Stasiowski"
+    ],
+    "description": "A fixed capacity, dynamically sized string.",
+    "category": [
+        "Container",
+        "String"
+    ],
+    "maintainers": [
+        "Krystian Stasiowski <sdkrystian@gmail.com>"
+    ]
+}
