@@ -21,7 +21,7 @@
 // #define BOOST_STATIC_STRING_NULL_OPTIMIZATION
 
 // Can we have deduction guides?
-#if __cpp_deduction_guides >= 201703
+#if __cpp_deduction_guides >= 201703L
 #define BOOST_STATIC_STRING_USE_DEDUCT
 #endif
 
@@ -60,8 +60,13 @@
 #define BOOST_STATIC_STRING_NODISCARD
 #endif
 
+// _MSVC_LANG isn't avaliable until after VS2015
+#if defined(_MSC_VER) && _MSC_VER < 1910L
+// The constexpr support in this version is effectively that of
+// c++11, so we treat it as such
+#define BOOST_STATIC_STRING_STANDARD_VERSION 201103L
+#elif defined(_MSVC_LANG)
 // MSVC doesn't define __cplusplus by default
-#ifdef _MSVC_LANG
 #define BOOST_STATIC_STRING_STANDARD_VERSION _MSVC_LANG
 #else
 #define BOOST_STATIC_STRING_STANDARD_VERSION __cplusplus
@@ -168,7 +173,7 @@ defined(__clang__) && \
 // objects at all in constant expresssions. In these
 // cases, we use whatever will make more constexpr work.
 #if defined(__clang__) && defined(__GLIBCXX__) && \
-(__GLIBCXX__ >= 20180726 && __GLIBCXX__ <= 20190812)
+(__GLIBCXX__ >= 20180726L && __GLIBCXX__ <= 20190812L)
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
 #endif
 
