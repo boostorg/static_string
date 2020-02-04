@@ -49,7 +49,7 @@ stages:
       matrix:
         GCC 8:
           B2_TOOLSET: gcc
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           CXX: g++-8
           PACKAGES: g++-8
         GCC 7:
@@ -69,36 +69,29 @@ stages:
           PACKAGES: g++-5
         GCC 4.9:
           B2_TOOLSET: gcc
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           CXX: g++-4.9
           PACKAGES: g++-4.9
         GCC 4.8:
           B2_TOOLSET: gcc
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           CXX: g++-4.8
           PACKAGES: g++-4.8
         Clang 8:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           CXX: clang++-8
           PACKAGES: clang-8
           LLVM_REPO: llvm-toolchain-xenial-8
         Clang 7:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           CXX: clang++-7
           PACKAGES: clang-7
           LLVM_REPO: llvm-toolchain-xenial-7
         Clang 6:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11,14,17,2a
-          B2_CXXFLAGS: -stdlib=libc++
-          CXX: clang++-6.0
-          PACKAGES: clang-6.0
-          LLVM_REPO: llvm-toolchain-xenial-6.0
-        Clang 6:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           CXX: clang++-6.0
           PACKAGES: clang-6.0
           LLVM_REPO: llvm-toolchain-xenial-6.0
@@ -116,27 +109,27 @@ stages:
           LLVM_REPO: llvm-toolchain-xenial-4.0
         Clang 3.9:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11,14
+          B2_CXXSTD: 11,14
           CXX: clang++-3.9
           PACKAGES: clang-3.9
         Clang 3.8:
           B2_TOOLSET: clang
           CXX: clang++-3.8
-          B2_CXXSTD: 03,11,14
+          B2_CXXSTD: 11,14
           PACKAGES: clang-3.8
         Clang 3.7:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           CXX: clang++-3.7
           PACKAGES: clang-3.7
         Clang 3.6:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           CXX: clang++-3.6
           PACKAGES: clang-3.6
         Clang 3.5:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           CXX: clang++-3.5
           PACKAGES: clang-3.5
     steps:
@@ -178,15 +171,15 @@ stages:
   - job: 'Windows'
     strategy:
       matrix:
-        VS 2019 C++2a Strict:
+        VS 2019 C++17 Strict:
           B2_TOOLSET: msvc-14.2
-          B2_CXXSTD: latest # 2a
+          B2_CXXSTD: 17
           B2_CXXFLAGS: cxxflags=-permissive-
           B2_ADDRESS_MODEL: address-model=64
           VM_IMAGE: 'windows-2019'
-        VS 2017 C++2a Strict:
+        VS 2017 C++17 Strict:
           B2_TOOLSET: msvc-14.1
-          B2_CXXSTD: latest # 2a
+          B2_CXXSTD: 17
           B2_CXXFLAGS: cxxflags=-permissive-
           B2_ADDRESS_MODEL: address-model=64
           VM_IMAGE: 'vs2017-win2016'
@@ -237,11 +230,11 @@ stages:
       matrix:
         Xcode 10.1:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           XCODE_APP: /Applications/Xcode_10.1.app
         Xcode 10.0:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17,2a
+          B2_CXXSTD: 14,17
           XCODE_APP: /Applications/Xcode_10.app
         Xcode 9.4.1:
           B2_TOOLSET: clang
@@ -265,19 +258,19 @@ stages:
           XCODE_APP: /Applications/Xcode_9.2.app
         Xcode 9.1:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           XCODE_APP: /Applications/Xcode_9.1.app
         Xcode 9.0.1:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           XCODE_APP: /Applications/Xcode_9.0.1.app
         Xcode 9.0:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           XCODE_APP: /Applications/Xcode_9.app
         Xcode 8.3.3:
           B2_TOOLSET: clang
-          B2_CXXSTD: 03,11
+          B2_CXXSTD: 11
           XCODE_APP: /Applications/Xcode_8.3.3.app
     steps:
     - bash: |
