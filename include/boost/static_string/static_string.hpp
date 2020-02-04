@@ -5365,7 +5365,7 @@ replace(
   n1 = (std::min)(n1, curr_size - pos);
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
   Traits::assign(&curr_data[pos], n2, c);
-  this->set_size((curr_size + n2) - n1);
+  this->set_size((curr_size - n1) + n2);
   return *this;
 }
 
@@ -5415,7 +5415,7 @@ replace(
       // copy all before splice point
       Traits::move(&curr_data[pos], &curr_data[offset], diff);
       // copy all after splice point
-      Traits::move(&curr_data[pos + diff], &curr_data[offset + (n2 - n1) + diff], n2 - diff);
+      Traits::move(&curr_data[pos + diff], &curr_data[(offset - n1) + n2 + diff], n2 - diff);
     }
     else
     {
@@ -5426,7 +5426,7 @@ replace(
       Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
     }
   }
-  this->set_size((curr_size + n2) - n1);
+  this->set_size((curr_size - n1) + n2);
   return *this;
 }
 
@@ -5462,8 +5462,8 @@ replace(
   // Cap the size
   n1 = (std::min)(n1, curr_size - pos);
   // Move everything from the end of the splice point to the end of the rotated string to the begining of the splice point
-  Traits::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], (curr_size + (n2 - n1)) - pos);
-  this->set_size((curr_size + n2) - n1);
+  Traits::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], ((curr_size - n1) + n2) - pos);
+  this->set_size((curr_size - n1) + n2);
   return *this;
 }
 
@@ -5652,7 +5652,7 @@ replace_unchecked(
     n1 = curr_size - pos;
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
   Traits::copy(&curr_data[pos], s, n2);
-  this->set_size((curr_size + n2) - n1);
+  this->set_size((curr_size - n1) + n2);
   return *this;
 }
 
