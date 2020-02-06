@@ -627,7 +627,7 @@ template<typename T>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
-is_inside(
+ptr_in_range(
     const T* src_first, 
     const T* src_last,
     const T* ptr)
@@ -5097,7 +5097,7 @@ insert(
   const auto s = &*first;
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
-  const bool inside = detail::is_inside(curr_data, curr_data + curr_size, s);
+  const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, s);
   if (!inside || (inside && ((s - curr_data) + count <= index)))
   {
     Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
@@ -5337,12 +5337,9 @@ replace(
     size_type n2) BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT -> 
         basic_static_string<N, CharT, Traits>&
 {
-  const auto curr_size = size();
-  const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
-      pos > curr_size, std::out_of_range{"pos > size()"});
-  n1 = (std::min)(n1, curr_size - pos);
-  return replace(curr_data + pos, curr_data + pos + n1, s, s + n2);
+      pos > size(), std::out_of_range{"pos > size()"});
+  return replace(data() + pos, data() + pos + n1, s, s + n2);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5393,8 +5390,8 @@ replace(
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
     std::length_error{"replaced string exceeds max_size()"});
   n1 = (std::min)(n1, curr_size - pos);
-  const bool inside = detail::is_inside(curr_data, curr_data + curr_size, s);
-  if (inside && size_type(s - curr_data) == pos && n1 == n2)
+  const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, s);
+  if (inside && s - curr_data == pos && n1 == n2)
     return *this;
   if (!inside || (inside && ((s - curr_data) + n2 <= pos)))
   {
@@ -5408,10 +5405,10 @@ replace(
     const size_type offset = s - curr_data;
     if (n2 >= n1)
     {
+      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
       // grow/unchanged
       // shift all right of splice point by n2 - n1 to the right
       Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
-      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
       // copy all before splice point
       Traits::move(&curr_data[pos], &curr_data[offset], diff);
       // copy all after splice point
