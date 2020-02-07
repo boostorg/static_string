@@ -77,7 +77,7 @@ maximum allowed size of the string, `std::length_error` is thrown if exceptions 
 algorithms which throw exceptions provide the strong exception safety
 guarantee. This is intended to be a drop in replacement for `std::string`.
 All the operations for `static_string` work when the source of the operation is within
-the string iteslf. 
+the string itself. 
 
 The API of `static_string` only diverges from `std::string` in few places,
 being `substr` for which this implementation returns a string view instead of `static_string`,
