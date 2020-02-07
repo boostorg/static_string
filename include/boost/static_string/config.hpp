@@ -14,12 +14,6 @@
 // Are we dependent on Boost?
 // #define BOOST_STATIC_STRING_STANDALONE
 
-// Disable exceptions and their associated checks
-// #define BOOST_STATIC_STRING_NO_EXCEPTIONS
-
-// Opt-in to the null terminator optimization
-// #define BOOST_STATIC_STRING_NULL_OPTIMIZATION
-
 // Can we have deduction guides?
 #if __cpp_deduction_guides >= 201703L
 #define BOOST_STATIC_STRING_USE_DEDUCT
@@ -102,14 +96,6 @@
 #define BOOST_STATIC_STRING_CPP17_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP11_CONSTEXPR constexpr
-#endif
-
-#ifdef BOOST_STATIC_STRING_NO_EXCEPTIONS
-#define BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT noexcept
-#define BOOST_STATIC_STRING_THROW_IF(cond, ex)
-#define BOOST_STATIC_STRING_THROW(ex)
-#else
-#define BOOST_STATIC_STRING_NO_EXCEPTIONS_NOEXCEPT
 #endif
 
 // Boost and non-Boost versions of utilities
