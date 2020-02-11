@@ -82,7 +82,7 @@ the string itself.
 The API of `static_string` only diverges from `std::string` in few places,
 being `substr` for which this implementation returns a string view instead of `static_string`,
 and certain functions that will never throw are marked as `noexcept`, which diverges from
-those of `std::string`. The avaliable overloads for `static_string` are identical to those
+those of `std::string`. The available overloads for `static_string` are identical to those
 of `std::string`.
 
 [/-----------------------------------------------------------------------------]
