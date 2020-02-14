@@ -34,16 +34,20 @@ class basic_static_string;
 //------------------------------------------------------------------------------
 
 template<std::size_t N>
-using static_string = basic_static_string<N, char, std::char_traits<char>>;
+using static_string =
+  basic_static_string<N, char, std::char_traits<char>>;
 
 template<std::size_t N>
-using static_wstring = basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
+using static_wstring =
+  basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
 
 template<std::size_t N>
-using static_u16string = basic_static_string<N, char16_t, std::char_traits<char16_t>>;
+using static_u16string =
+  basic_static_string<N, char16_t, std::char_traits<char16_t>>;
 
 template<std::size_t N>
-using static_u32string = basic_static_string<N, char32_t, std::char_traits<char32_t>>;
+using static_u32string =
+  basic_static_string<N, char32_t, std::char_traits<char32_t>>;
 
 //--------------------------------------------------------------------------
 //
@@ -56,12 +60,12 @@ namespace detail {
 // Find the smallest width integral type that can hold a value as large as N (Glen Fernandes)
 template<std::size_t N>
 using smallest_width =
-    typename std::conditional<(N <= (std::numeric_limits<unsigned char>::max)()), unsigned char,
-    typename std::conditional<(N <= (std::numeric_limits<unsigned short>::max)()), unsigned short,
-    typename std::conditional<(N <= (std::numeric_limits<unsigned int>::max)()), unsigned int,
-    typename std::conditional<(N <= (std::numeric_limits<unsigned long>::max)()), unsigned long,
-    typename std::conditional<(N <= (std::numeric_limits<unsigned long long>::max)()), unsigned long long,
-    void>::type>::type>::type>::type>::type;
+  typename std::conditional<(N <= (std::numeric_limits<unsigned char>::max)()), unsigned char,
+  typename std::conditional<(N <= (std::numeric_limits<unsigned short>::max)()), unsigned short,
+  typename std::conditional<(N <= (std::numeric_limits<unsigned int>::max)()), unsigned int,
+  typename std::conditional<(N <= (std::numeric_limits<unsigned long>::max)()), unsigned long,
+  typename std::conditional<(N <= (std::numeric_limits<unsigned long long>::max)()), unsigned long long,
+  void>::type>::type>::type>::type>::type;
 
 // std::is_nothrow_convertible is C++20
 template<typename To>
@@ -69,21 +73,21 @@ void is_nothrow_convertible_helper(To) noexcept;
 
 // MSVC is unable to parse this as a single expression, so a helper is needed
 template<typename From, typename To, typename = 
-    decltype(is_nothrow_convertible_helper<To>(std::declval<From>()))>
+  decltype(is_nothrow_convertible_helper<To>(std::declval<From>()))>
 struct is_nothrow_convertible_msvc_helper
 {
   static const bool value =
-      noexcept(is_nothrow_convertible_helper<To>(std::declval<From>()));
+    noexcept(is_nothrow_convertible_helper<To>(std::declval<From>()));
 };
 
 template<typename From, typename To, typename = void>
 struct is_nothrow_convertible
-    : std::false_type { };
+  : std::false_type { };
 
 template<typename From, typename To>
 struct is_nothrow_convertible<From, To, typename std::enable_if<
-    is_nothrow_convertible_msvc_helper<From, To>::value>::type>
-        : std::true_type { };
+  is_nothrow_convertible_msvc_helper<From, To>::value>::type>
+    : std::true_type { };
 
 // GCC 4.8, 4.9 workaround for void_t to make the defining-type-id dependant 
 template<typename...>
@@ -102,42 +106,44 @@ struct is_iterator : std::false_type { };
 
 template<class T>
 struct is_iterator<T, 
-    typename std::enable_if<std::is_class<T>::value, 
-        void_t<typename T::iterator_category>>::type>
-            : std::true_type { };
+  typename std::enable_if<std::is_class<T>::value, 
+    void_t<typename T::iterator_category>>::type>
+      : std::true_type { };
 
 template<class T>
 struct is_iterator<T*, void>
-    : std::true_type { };
+  : std::true_type { };
 
 template<class T, typename = void>
 struct is_input_iterator : std::false_type { };
 
 template<class T>
 struct is_input_iterator<T, typename std::enable_if<is_iterator<T>::value && 
-    std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
-        std::input_iterator_tag>::value>::type>
-            : std::true_type { };
+  std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
+    std::input_iterator_tag>::value>::type>
+      : std::true_type { };
 
 template<class T, typename = void>
 struct is_forward_iterator : std::false_type { };
 
 template<class T>
 struct is_forward_iterator<T, typename std::enable_if<is_iterator<T>::value &&
-    std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
-        std::forward_iterator_tag>::value>::type>
-            : std::true_type { };
+  std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
+    std::forward_iterator_tag>::value>::type>
+      : std::true_type { };
 
 template<typename T, typename = void>
 struct is_subtractable 
-    : std::false_type { };
+  : std::false_type { };
 
 template<typename T>
 struct is_subtractable<T, void_t<decltype(std::declval<T&>() - std::declval<T&>())>>
-    : std::true_type { };
+  : std::true_type { };
 
 // constexpr distance for c++14
-template<typename ForwardIt, typename std::enable_if<!is_subtractable<ForwardIt>::value>::type* = nullptr>
+template<
+  typename ForwardIt,
+  typename std::enable_if<!is_subtractable<ForwardIt>::value>::type* = nullptr>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR 
 std::size_t
 distance(ForwardIt first, ForwardIt last)
@@ -147,7 +153,9 @@ distance(ForwardIt first, ForwardIt last)
   return dist;
 }
 
-template<typename RandomIt, typename std::enable_if<is_subtractable<RandomIt>::value>::type* = nullptr>
+template<
+  typename RandomIt,
+  typename std::enable_if<is_subtractable<RandomIt>::value>::type* = nullptr>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR 
 std::size_t
 distance(RandomIt first, RandomIt last)
@@ -159,7 +167,10 @@ distance(RandomIt first, RandomIt last)
 template<typename Traits, typename InputIt, typename CharT>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
-copy_with_traits(InputIt first, InputIt last, CharT* out)
+copy_with_traits(
+  InputIt first,
+  InputIt last,
+  CharT* out)
 {
   for (; first != last; ++first, ++out)
     Traits::assign(*out, *first);
@@ -274,16 +285,18 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
-    CharT const* s1, std::size_t n1,
-    CharT const* s2, std::size_t n2) noexcept
+  CharT const* s1,
+  std::size_t n1,
+  CharT const* s2,
+  std::size_t n2) noexcept
 {
-    if(n1 < n2)
-        return Traits::compare(
-            s1, s2, n1) <= 0 ? -1 : 1;
-    if(n1 > n2)
-        return Traits::compare(
-            s1, s2, n2) >= 0 ? 1 : -1;
-    return Traits::compare(s1, s2, n1);
+  if(n1 < n2)
+    return Traits::compare(
+      s1, s2, n1) <= 0 ? -1 : 1;
+  if(n1 > n2)
+    return Traits::compare(
+      s1, s2, n2) >= 0 ? 1 : -1;
+  return Traits::compare(s1, s2, n1);
 }
 
 template<typename CharT, typename Traits>
@@ -291,11 +304,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
-    basic_string_view<CharT, Traits> s1,
-    CharT const* s2, std::size_t n2) noexcept
+  basic_string_view<CharT, Traits> s1,
+  CharT const* s2,
+  std::size_t n2) noexcept
 {
-    return detail::lexicographical_compare<
-        CharT, Traits>(s1.data(), s1.size(), s2, n2);
+  return detail::lexicographical_compare<
+    CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -303,11 +317,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
-    const basic_static_string<N, CharT, Traits>& s1,
-    CharT const* s2, std::size_t n2) noexcept
+  const basic_static_string<N, CharT, Traits>& s1,
+  CharT const* s2,
+  std::size_t n2) noexcept
 {
-    return detail::lexicographical_compare<
-        CharT, Traits>(s1.data(), s1.size(), s2, n2);
+  return detail::lexicographical_compare<
+    CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
 
 template<typename CharT, typename Traits>
@@ -318,8 +333,8 @@ lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
     basic_string_view<CharT, Traits> s2) noexcept
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        s1.data(), s1.size(), s2.data(), s2.size());
+  return detail::lexicographical_compare<CharT, Traits>(
+    s1.data(), s1.size(), s2.data(), s2.size());
 }
 
 template<std::size_t N, std::size_t M, typename CharT, typename Traits>
@@ -327,8 +342,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int 
 lexicographical_compare(
-    const basic_static_string<N, CharT, Traits>& s1, 
-    const basic_static_string<M, CharT, Traits>& s2) noexcept
+  const basic_static_string<N, CharT, Traits>& s1, 
+  const basic_static_string<M, CharT, Traits>& s2) noexcept
 {
   return detail::lexicographical_compare<CharT, Traits>(
     s1.data(), s1.size(), s2.data(), s2.size());
@@ -338,7 +353,9 @@ template<typename Traits, typename Integer>
 inline
 char*
 integer_to_string(
-  char* str_end, Integer value, std::true_type) noexcept
+  char* str_end,
+  Integer value,
+  std::true_type) noexcept
 {
   if (value == 0)
   {
@@ -362,7 +379,9 @@ template<typename Traits, typename Integer>
 inline
 char*
 integer_to_string(
-  char* str_end, Integer value, std::false_type) noexcept
+  char* str_end,
+  Integer value,
+  std::false_type) noexcept
 {
   if (value == 0)
   {
@@ -378,7 +397,9 @@ template<typename Traits, typename Integer>
 inline
 wchar_t*
 integer_to_wstring(
-  wchar_t* str_end, Integer value, std::true_type) noexcept
+  wchar_t* str_end,
+  Integer value,
+  std::true_type) noexcept
 {
   if (value == 0)
   {
@@ -402,7 +423,9 @@ template<typename Traits, typename Integer>
 inline
 wchar_t*
 integer_to_wstring(
-  wchar_t* str_end, Integer value, std::false_type) noexcept
+  wchar_t* str_end,
+  Integer value,
+  std::false_type) noexcept
 {
   if (value == 0)
   {
@@ -486,18 +509,15 @@ to_static_wstring_float_impl(long double value) noexcept
   return static_wstring<N>(buffer);
 }
 
-template<
-    typename Traits,
-    typename CharT,
-    typename ForwardIterator>
+template<typename Traits, typename CharT, typename ForwardIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 ForwardIterator
 find_not_of(
-    ForwardIterator first, 
-    ForwardIterator last, 
-    const CharT* str, 
-    std::size_t n) noexcept
+  ForwardIterator first, 
+  ForwardIterator last, 
+  const CharT* str, 
+  std::size_t n) noexcept
 {
   for (; first != last; ++first)
     if (!Traits::find(str, n, *first))
@@ -506,19 +526,16 @@ find_not_of(
 }
 
 // constexpr search for C++14
-template<
-    typename ForwardIt1, 
-    typename ForwardIt2, 
-    typename BinaryPredicate>
+template<typename ForwardIt1, typename ForwardIt2, typename BinaryPredicate>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR 
 inline
 ForwardIt1 
 search(
-    ForwardIt1 first,
-    ForwardIt1 last,
-    ForwardIt2 s_first,
-    ForwardIt2 s_last,
-    BinaryPredicate p)
+  ForwardIt1 first,
+  ForwardIt1 last,
+  ForwardIt2 s_first,
+  ForwardIt2 s_last,
+  BinaryPredicate p)
 {
   for (; ; ++first)
   {
@@ -535,19 +552,16 @@ search(
   }
 }
 
-template<
-    typename InputIt, 
-    typename ForwardIt, 
-    typename BinaryPredicate>
+template<typename InputIt, typename ForwardIt, typename BinaryPredicate>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 InputIt 
 find_first_of(
-    InputIt first,
-    InputIt last,
-    ForwardIt s_first,
-    ForwardIt s_last,
-    BinaryPredicate p)
+  InputIt first,
+  InputIt last,
+  ForwardIt s_first,
+  ForwardIt s_last,
+  BinaryPredicate p)
 {
   for (; first != last; ++first)
     for (ForwardIt it = s_first; it != s_last; ++it)
@@ -564,9 +578,9 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 ptr_in_range(
-    const T* src_first, 
-    const T* src_last,
-    const T* ptr)
+  const T* src_first, 
+  const T* src_last,
+  const T* ptr)
 {
   // We want to make this usable in constant expressions as much as possible
   // while retaining the guarentee that the comparison has a strict total ordering.
@@ -618,3443 +632,3419 @@ ptr_in_range(
 
     @see to_static_string 
 */
-template<
-    std::size_t N,
-    typename CharT,
-    typename Traits = std::char_traits<CharT>>
+template<std::size_t N, typename CharT,
+  typename Traits = std::char_traits<CharT>>
 class basic_static_string 
 #ifndef GENERATING_DOCUMENTATION
   : private detail::static_string_base<N, CharT, Traits>
 #endif
 {
 private:
-    template<std::size_t, class, class>
-    friend class basic_static_string;
+  template<std::size_t, class, class>
+  friend class basic_static_string;
 
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    term() noexcept
-    {
-        this->term_impl();
-    }
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  term() noexcept
+  {
+    this->term_impl();
+  }
 public:
-    //--------------------------------------------------------------------------
-    //
-    // Member types
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Member types
+  //
+  //--------------------------------------------------------------------------
 
-    using traits_type       = Traits;
-    using value_type        = typename Traits::char_type;
-    using size_type         = std::size_t;
-    using difference_type   = std::ptrdiff_t;
-    using pointer           = value_type*;
-    using reference         = value_type&;
-    using const_pointer     = value_type const*;
-    using const_reference   = value_type const&;
-    using iterator          = value_type*;
-    using const_iterator    = value_type const*;
+  using traits_type       = Traits;
+  using value_type        = typename Traits::char_type;
+  using size_type         = std::size_t;
+  using difference_type   = std::ptrdiff_t;
+  using pointer           = value_type*;
+  using reference         = value_type&;
+  using const_pointer     = value_type const*;
+  using const_reference   = value_type const&;
+  using iterator          = value_type*;
+  using const_iterator    = value_type const*;
     
-    using reverse_iterator =
-        std::reverse_iterator<iterator>;
+  using reverse_iterator =
+    std::reverse_iterator<iterator>;
     
-    using const_reverse_iterator =
-        std::reverse_iterator<const_iterator>;
+  using const_reverse_iterator =
+    std::reverse_iterator<const_iterator>;
 
-    /// The type of `string_view_type` returned by the interface
-    using string_view_type =
-        basic_string_view<CharT, Traits>;
+  /// The type of `string_view_type` returned by the interface
+  using string_view_type =
+    basic_string_view<CharT, Traits>;
 
-    //--------------------------------------------------------------------------
-    //
-    // Constants
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Constants
+  //
+  //--------------------------------------------------------------------------
 
-    /// Maximum size of the string excluding any null terminator
-    static constexpr size_type static_capacity = N;
+  /// Maximum size of the string excluding any null terminator
+  static constexpr size_type static_capacity = N;
 
-    /// A special index
-    static constexpr size_type npos = size_type(-1);
+  /// A special index
+  static constexpr size_type npos = size_type(-1);
 
-    //--------------------------------------------------------------------------
-    //
-    // Construction
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Construction
+  //
+  //--------------------------------------------------------------------------
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
 
-        Construct an empty string
-    */
-    BOOST_STATIC_STRING_CPP11_CONSTEXPR
-    basic_static_string() noexcept;
+      Construct an empty string
+  */
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  basic_static_string() noexcept;
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
     
-        Construct the string with `count` copies of character `ch`.
+      Construct the string with `count` copies of character `ch`.
     
-        The behavior is undefined if `count >= npos`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        size_type count,
-        CharT ch);
+      The behavior is undefined if `count >= npos`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(
+    size_type count,
+    CharT ch);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
         
-        Construct with a substring (pos, other.size()) of `other`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        basic_static_string<M, CharT, Traits> const& other,
-        size_type pos);
+      Construct with a substring (pos, other.size()) of `other`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(
+    basic_static_string<M, CharT, Traits> const& other,
+    size_type pos);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
     
-        Construct with a substring (pos, count) of `other`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        basic_static_string<M, CharT, Traits> const& other,
-        size_type pos,
-        size_type count);
+      Construct with a substring (pos, count) of `other`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(
+    basic_static_string<M, CharT, Traits> const& other,
+    size_type pos,
+    size_type count);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
         
-        Construct with the first `count` characters of `s`, including nulls.
-     */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        CharT const* s,
-        size_type count);
-
-    /** Construct a `basic_static_string`.
-        
-        Construct from a null terminated string.
+      Construct with the first `count` characters of `s`, including nulls.
     */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        CharT const* s);
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(
+    CharT const* s,
+    size_type count);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
+        
+      Construct from a null terminated string.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(CharT const* s);
+
+  /** Construct a `basic_static_string`.
     
-        Construct from a range of characters
-    */
-    template<class InputIterator
+      Construct from a range of characters
+  */
+  template<class InputIterator
 #ifndef GENERATING_DOCUMENTATION
-        , typename std::enable_if<
-              detail::is_input_iterator<InputIterator>
-                  ::value>::type* = nullptr
+    , typename std::enable_if<
+      detail::is_input_iterator<InputIterator>
+        ::value>::type* = nullptr
 #endif
-    >
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        InputIterator first,
-        InputIterator last);
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(
+    InputIterator first,
+    InputIterator last);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
         
-        Copy constructor.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        basic_static_string const& other) noexcept;
+      Copy constructor.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(basic_static_string const& other) noexcept;
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
         
-        Copy constructor.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        basic_static_string<M, CharT, Traits> const& other);
+      Copy constructor.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(
+      basic_static_string<M, CharT, Traits> const& other);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
         
-        Construct from an initializer list
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        std::initializer_list<CharT> init);
+      Construct from an initializer list
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(std::initializer_list<CharT> init);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
     
-        Construct from a `string_view_type`
-    */
-    explicit
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        string_view_type sv);
+      Construct from a `string_view_type`
+  */
+  explicit
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(string_view_type sv);
 
-    /** Construct a `basic_static_string`.
+  /** Construct a `basic_static_string`.
     
-        Construct from any object convertible to `string_view_type`.
+      Construct from any object convertible to `string_view_type`.
 
-        The range (pos, n) is extracted from the value
-        obtained by converting `t` to `string_view_type`,
-        and used to construct the string.
-    */
-    template<typename T
+      The range (pos, n) is extracted from the value
+      obtained by converting `t` to `string_view_type`,
+      and used to construct the string.
+  */
+  template<typename T
 #ifndef GENERATING_DOCUMENTATION
     , class = typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value>::type
+      std::is_convertible<T, string_view_type>::value>::type
 #endif
-    >
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string(
-        T const& t,
-        size_type pos,
-        size_type n);
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string(
+    T const& t,
+    size_type pos,
+    size_type n);
 
-    //--------------------------------------------------------------------------
-    //
-    // Assignment
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Assignment
+  //
+  //--------------------------------------------------------------------------
 
-    /** Assign to the string.
+  /** Assign to the string.
 
-        If `*this` and `s` are the same object,
-        this function has no effect.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator=(
-        basic_static_string const& s) noexcept
-    {
-        return assign(s);
-    }
+      If `*this` and `s` are the same object,
+      this function has no effect.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator=(basic_static_string const& s) noexcept
+  {
+    return assign(s);
+  }
 
-    /** Assign to the string.
+  /** Assign to the string.
     
-        Replace the contents with a copy of `s`
+      Replace the contents with a copy of `s`
 
-        @throw std::length_error if `s.size() > max_size()`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator=(
-        basic_static_string<M, CharT, Traits> const& s)
-    {
-        return assign(s);
-    }
+      @throw std::length_error if `s.size() > max_size()`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator=(basic_static_string<M, CharT, Traits> const& s)
+  {
+    return assign(s);
+  }
 
-    /** Assign to the string.
+  /** Assign to the string.
     
-        Replace the contents with those of the null-terminated string `s`
+      Replace the contents with those of the null-terminated string `s`
 
-        @throw std::length_error if `Traits::length(s) > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator=(
-        CharT const* s)
-    {
-        return assign(s);
-    }
+      @throw std::length_error if `Traits::length(s) > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator=(CharT const* s)
+  {
+    return assign(s);
+  }
 
-    /** Assign to the string.
+  /** Assign to the string.
     
-        Assign from single character.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator=(
-        CharT ch)
-    {
-        return assign_char(ch,
-            std::integral_constant<bool, (N > 0)>{});
-    }
+      Assign from single character.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator=(CharT ch)
+  {
+    return assign_char(ch,
+      std::integral_constant<bool, (N > 0)>{});
+  }
 
-    /** Assign to the string.
+  /** Assign to the string.
 
-        Assign from initializer list.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator=(
-        std::initializer_list<CharT> ilist)
-    {
-        return assign(ilist);
-    }
+      Assign from initializer list.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator=(std::initializer_list<CharT> ilist)
+  {
+    return assign(ilist);
+  }
 
-    /** Assign to the string.
+  /** Assign to the string.
     
-        Assign from `string_view_type`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator=(
-        string_view_type sv)
-    {
-        return assign(sv);
-    }
+      Assign from `string_view_type`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator=(string_view_type sv)
+  {
+    return assign(sv);
+  }
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with `count` copies of character `ch`
+      Replace the contents with `count` copies of character `ch`
 
-        @throw std::length_error if `count > max_size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign(
-        size_type count,
-        CharT ch);
+      @throw std::length_error if `count > max_size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(
+    size_type count,
+    CharT ch);
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with a copy of another `basic_static_string`
+      Replace the contents with a copy of another `basic_static_string`
 
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign(
-        basic_static_string const& s) noexcept;
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(basic_static_string const& s) noexcept;
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with a copy of another `basic_static_string`
+      Replace the contents with a copy of another `basic_static_string`
 
-        @throw std::length_error if `s.size() > max_size()`
-        @return `*this`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign(
-        basic_static_string<M, CharT, Traits> const& s)
-    {
-        // VFALCO this could come in two flavors,
-        //        N>M and N<M, and skip the exception
-        //        check when N>M
-        return assign(s.data(), s.size());
-    }
+      @throw std::length_error if `s.size() > max_size()`
+      @return `*this`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(basic_static_string<M, CharT, Traits> const& s)
+  {
+    // VFALCO this could come in two flavors,
+    //        N>M and N<M, and skip the exception
+    //        check when N>M
+    return assign(s.data(), s.size());
+  }
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with a copy of `count` characters starting at `npos` from `s`.
+      Replace the contents with a copy of `count` characters starting at `npos` from `s`.
 
-        @throw std::length_error if `count > max_size()`
-        @return `*this`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign(
-        basic_static_string<M, CharT, Traits> const& s,
-        size_type pos,
-        size_type count = npos);
+      @throw std::length_error if `count > max_size()`
+      @return `*this`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(
+    basic_static_string<M, CharT, Traits> const& s,
+    size_type pos,
+    size_type count = npos);
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with the first `count` characters of `s`, including nulls.
+      Replace the contents with the first `count` characters of `s`, including nulls.
 
-        @throw std::length_error if `count > max_size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign(
-        CharT const* s,
-        size_type count);
+      @throw std::length_error if `count > max_size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(
+    CharT const* s,
+    size_type count);
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with a copy of a null terminated string `s`
+      Replace the contents with a copy of a null terminated string `s`
 
-        @throw std::length_error if `Traits::length(s) > max_size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign(
-        CharT const* s)
-    {
-        return assign(s, Traits::length(s));
-    }
+      @throw std::length_error if `Traits::length(s) > max_size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(CharT const* s)
+  {
+    return assign(s, Traits::length(s));
+  }
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with a copy of characters from the range `(first, last)`
+      Replace the contents with a copy of characters from the range `(first, last)`
       
-        @throw std::length_error if `std::distance(first, last) > max_size()`
-        @return `*this`
-    */
-    template<typename InputIterator>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error if `std::distance(first, last) > max_size()`
+      @return `*this`
+  */
+  template<typename InputIterator>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #ifdef GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        detail::is_input_iterator<InputIterator>::value,
-            basic_static_string&>::type
+  typename std::enable_if<
+    detail::is_input_iterator<InputIterator>::value,
+      basic_static_string&>::type
 #endif
-    assign(
-        InputIterator first,
-        InputIterator last);
+  assign(
+    InputIterator first,
+    InputIterator last);
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with the characters in an initializer list
+      Replace the contents with the characters in an initializer list
 
-        @throw std::length_error if `ilist.size() > max_size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign(
-        std::initializer_list<CharT> ilist)
-    {
-        return assign(ilist.begin(), ilist.end());
-    }
+      @throw std::length_error if `ilist.size() > max_size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(
+    std::initializer_list<CharT> ilist)
+  {
+      return assign(ilist.begin(), ilist.end());
+  }
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with a copy of the characters from `string_view_type{t}`
+      Replace the contents with a copy of the characters from `string_view_type{t}`
 
-        @throw std::length_error if `string_view_type{t}.size() > max_size()`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error if `string_view_type{t}.size() > max_size()`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            basic_static_string&>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        basic_static_string&>::type
 #endif
-    assign(T const& t)
-    {
-        string_view_type ss{t};
-        return assign(ss.data(), ss.size());
-    }
+  assign(T const& t)
+  {
+    string_view_type ss{t};
+    return assign(ss.data(), ss.size());
+  }
 
-    /** Replace the contents.
+  /** Replace the contents.
     
-        Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
+      Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
 
-        The range `[pos, count)` is extracted from the value
-        obtained by converting `t` to `string_view_type`,
-        and used to assign the string.
+      The range `[pos, count)` is extracted from the value
+      obtained by converting `t` to `string_view_type`,
+      and used to assign the string.
 
-        @throw std::out_of_range if `pos > string_view_type{t}.size()`
-        @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size()`
-    */
+      @throw std::out_of_range if `pos > string_view_type{t}.size()`
+      @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size()`
+  */
 
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            basic_static_string&>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        basic_static_string&>::type
 #endif
-    assign(
-        T const& t,
-        size_type pos,
-        size_type count = npos)
-    {
-        return assign(string_view_type{t}.substr(pos, count));
-    }
+  assign(
+    T const& t,
+    size_type pos,
+    size_type count = npos)
+  {
+    return assign(string_view_type{t}.substr(pos, count));
+  }
 
-    //--------------------------------------------------------------------------
-    //
-    // Element access
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Element access
+  //
+  //--------------------------------------------------------------------------
 
-    /** Access specified character with bounds checking.
+  /** Access specified character with bounds checking.
 
-        @throw std::out_of_range if `pos >= size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    reference
-    at(size_type pos);
+      @throw std::out_of_range if `pos >= size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  reference
+  at(size_type pos);
 
-    /** Access specified character with bounds checking.
+  /** Access specified character with bounds checking.
 
-        @throw std::out_of_range if `pos >= size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    const_reference
-    at(size_type pos) const;
+      @throw std::out_of_range if `pos >= size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  const_reference
+  at(size_type pos) const;
 
-    /** Access specified character
+  /** Access specified character
 
-        Undefined behavior if `pos > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    reference
-    operator[](size_type pos) noexcept
-    {
-        return data()[pos];
-    }
+      Undefined behavior if `pos > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  reference
+  operator[](size_type pos) noexcept
+  {
+    return data()[pos];
+  }
 
-    /** Access specified character.
+  /** Access specified character.
 
-        Undefined behavior if `pos > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    const_reference
-    operator[](size_type pos) const noexcept
-    {
-        return data()[pos];
-    }
+      Undefined behavior if `pos > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  const_reference
+  operator[](size_type pos) const noexcept
+  {
+    return data()[pos];
+  }
 
-    /** Accesses the first character.
+  /** Accesses the first character.
 
-        Undefined behavior if `empty() == true`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    CharT&
-    front() noexcept
-    {
-        return data()[0];
-    }
+      Undefined behavior if `empty() == true`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT&
+  front() noexcept
+  {
+    return data()[0];
+  }
 
-    /** Accesses the first character.
+  /** Accesses the first character.
 
-        Undefined behavior if `empty() == true`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    CharT const&
-    front() const noexcept
-    {
-        return data()[0];
-    }
+      Undefined behavior if `empty() == true`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT const&
+  front() const noexcept
+  {
+    return data()[0];
+  }
 
-    /** Accesses the last character.
+  /** Accesses the last character.
 
-        Undefined behavior if `empty() == true`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    CharT&
-    back() noexcept
-    {
-        return data()[size() - 1];
-    }
+      Undefined behavior if `empty() == true`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT&
+  back() noexcept
+  {
+    return data()[size() - 1];
+  }
 
-    /** Accesses the last character.
+  /** Accesses the last character.
 
-        Undefined behavior if `empty() == true`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    CharT const&
-    back() const noexcept
-    {
-        return data()[size() - 1];
-    }
+      Undefined behavior if `empty() == true`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT const&
+  back() const noexcept
+  {
+    return data()[size() - 1];
+  }
 
-    /// Returns a pointer to the first character of the string.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    CharT*
-    data() noexcept
-    {
-        return this->data_impl();
-    }
+  /// Returns a pointer to the first character of the string.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT*
+  data() noexcept
+  {
+    return this->data_impl();
+  }
 
-    /// Returns a pointer to the first character of a string.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    CharT const*
-    data() const noexcept
-    {
-        return this->data_impl();
-    }
+  /// Returns a pointer to the first character of a string.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT const*
+  data() const noexcept
+  {
+    return this->data_impl();
+  }
 
-    /// Returns a non-modifiable standard C character array version of the string.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    CharT const*
-    c_str() const noexcept
-    {
-        return data();
-    }
+  /// Returns a non-modifiable standard C character array version of the string.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  CharT const*
+  c_str() const noexcept
+  {
+    return data();
+  }
 
-    /// Convert a static string to a `string_view_type`
-    BOOST_STATIC_STRING_CPP11_CONSTEXPR
-    operator string_view_type() const noexcept
-    {
-        return string_view_type{data(), size()};
-    }
+  /// Convert a static string to a `string_view_type`
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  operator string_view_type() const noexcept
+  {
+    return string_view_type{data(), size()};
+  }
 
-    //--------------------------------------------------------------------------
-    //
-    // Iterators
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Iterators
+  //
+  //--------------------------------------------------------------------------
 
-    /// Returns an iterator to the beginning.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    begin() noexcept
-    {
-        return data();
-    }
+  /// Returns an iterator to the beginning.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  iterator
+  begin() noexcept
+  {
+    return data();
+  }
 
-    /// Returns an iterator to the beginning.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    const_iterator
-    begin() const noexcept
-    {
-        return data();
-    }
+  /// Returns an iterator to the beginning.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  const_iterator
+  begin() const noexcept
+  {
+    return data();
+  }
 
-    /// Returns an iterator to the beginning.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    const_iterator
-    cbegin() const noexcept
-    {
-        return data();
-    }
+  /// Returns an iterator to the beginning.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  const_iterator
+  cbegin() const noexcept
+  {
+    return data();
+  }
 
-    /// Returns an iterator to the end.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    end() noexcept
-    {
-        return &data()[size()];
-    }
+  /// Returns an iterator to the end.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  iterator
+  end() noexcept
+  {
+    return &data()[size()];
+  }
 
-    /// Returns an iterator to the end.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    const_iterator
-    end() const noexcept
-    {
-        return &data()[size()];
-    }
+  /// Returns an iterator to the end.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  const_iterator
+  end() const noexcept
+  {
+    return &data()[size()];
+  }
 
-    /// Returns an iterator to the end.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    const_iterator
-    cend() const noexcept
-    {
-        return &data()[size()];
-    }
+  /// Returns an iterator to the end.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  const_iterator
+  cend() const noexcept
+  {
+    return &data()[size()];
+  }
 
-    /// Returns a reverse iterator to the beginning.
-    BOOST_STATIC_STRING_CPP17_CONSTEXPR
-    reverse_iterator
-    rbegin() noexcept
-    {
-        return reverse_iterator{end()};
-    }
+  /// Returns a reverse iterator to the beginning.
+  BOOST_STATIC_STRING_CPP17_CONSTEXPR
+  reverse_iterator
+  rbegin() noexcept
+  {
+    return reverse_iterator{end()};
+  }
 
-    /// Returns a reverse iterator to the beginning.
-    BOOST_STATIC_STRING_CPP17_CONSTEXPR
-    const_reverse_iterator
-    rbegin() const noexcept
-    {
-        return const_reverse_iterator{cend()};
-    }
+  /// Returns a reverse iterator to the beginning.
+  BOOST_STATIC_STRING_CPP17_CONSTEXPR
+  const_reverse_iterator
+  rbegin() const noexcept
+  {
+    return const_reverse_iterator{cend()};
+  }
 
-    /// Returns a reverse iterator to the beginning.
-    BOOST_STATIC_STRING_CPP17_CONSTEXPR
-    const_reverse_iterator
-    crbegin() const noexcept
-    {
-        return const_reverse_iterator{cend()};
-    }
+  /// Returns a reverse iterator to the beginning.
+  BOOST_STATIC_STRING_CPP17_CONSTEXPR
+  const_reverse_iterator
+  crbegin() const noexcept
+  {
+    return const_reverse_iterator{cend()};
+  }
 
-    /// Returns a reverse iterator to the end.
-    BOOST_STATIC_STRING_CPP17_CONSTEXPR
-    reverse_iterator
-    rend() noexcept
-    {
-        return reverse_iterator{begin()};
-    }
+  /// Returns a reverse iterator to the end.
+  BOOST_STATIC_STRING_CPP17_CONSTEXPR
+  reverse_iterator
+  rend() noexcept
+  {
+    return reverse_iterator{begin()};
+  }
 
-    /// Returns a reverse iterator to the end.
-    BOOST_STATIC_STRING_CPP17_CONSTEXPR
-    const_reverse_iterator
-    rend() const noexcept
-    {
-        return const_reverse_iterator{cbegin()};
-    }
+  /// Returns a reverse iterator to the end.
+  BOOST_STATIC_STRING_CPP17_CONSTEXPR
+  const_reverse_iterator
+  rend() const noexcept
+  {
+    return const_reverse_iterator{cbegin()};
+  }
 
-    /// Returns a reverse iterator to the end.
-    BOOST_STATIC_STRING_CPP17_CONSTEXPR
-    const_reverse_iterator
-    crend() const noexcept
-    {
-        return const_reverse_iterator{cbegin()};
-    }
+  /// Returns a reverse iterator to the end.
+  BOOST_STATIC_STRING_CPP17_CONSTEXPR
+  const_reverse_iterator
+  crend() const noexcept
+  {
+    return const_reverse_iterator{cbegin()};
+  }
 
-    //--------------------------------------------------------------------------
-    //
-    // Capacity
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Capacity
+  //
+  //--------------------------------------------------------------------------
 
-    /// Returns `true` if the string is empty.
-    BOOST_STATIC_STRING_NODISCARD
-    BOOST_STATIC_STRING_CPP11_CONSTEXPR
-    bool
-    empty() const noexcept
-    {
-        return size() == 0;
-    }
+  /// Returns `true` if the string is empty.
+  BOOST_STATIC_STRING_NODISCARD
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  bool
+  empty() const noexcept
+  {
+    return size() == 0;
+  }
 
-    /// Returns the number of characters, excluding the null terminator.
-    BOOST_STATIC_STRING_CPP11_CONSTEXPR
-    size_type
-    size() const noexcept
-    {
-        return this->size_impl();
-    }
+  /// Returns the number of characters, excluding the null terminator.
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  size_type
+  size() const noexcept
+  {
+    return this->size_impl();
+  }
 
-    /** Returns the number of characters, excluding the null terminator
+  /** Returns the number of characters, excluding the null terminator
 
-        Equivalent to calling `size()`.
-    */
-    BOOST_STATIC_STRING_CPP11_CONSTEXPR
-    size_type
-    length() const noexcept
-    {
-        return size();
-    }
+      Equivalent to calling `size()`.
+  */
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  size_type
+  length() const noexcept
+  {
+    return size();
+  }
 
-    /// Returns the maximum number of characters that can be stored, excluding the null terminator.
-    BOOST_STATIC_STRING_CPP11_CONSTEXPR
-    size_type
-    max_size() const noexcept
-    {
-        return N;
-    }
+  /// Returns the maximum number of characters that can be stored, excluding the null terminator.
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  size_type
+  max_size() const noexcept
+  {
+    return N;
+  }
 
-    /** Reserve space for `n` characters, excluding the null terminator
+  /** Reserve space for `n` characters, excluding the null terminator
 
-        This function has no effect when `n <= max_size()`.
+      This function has no effect when `n <= max_size()`.
 
-        @throw std::length_error if `n > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    reserve(size_type n);
+      @throw std::length_error if `n > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  reserve(size_type n);
 
-    /** Returns the number of characters that can be held in currently allocated storage.
+  /** Returns the number of characters that can be held in currently allocated storage.
 
-        This function always returns `max_size()`.
-    */
-    BOOST_STATIC_STRING_CPP11_CONSTEXPR
-    size_type
-    capacity() const noexcept
-    {
-        return max_size();
-    }
+      This function always returns `max_size()`.
+  */
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  size_type
+  capacity() const noexcept
+  {
+    return max_size();
+  }
     
-    /** Reduces memory usage by freeing unused memory.
+  /** Reduces memory usage by freeing unused memory.
 
-        This function call has no effect.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    shrink_to_fit() noexcept
-    {
-    }
+      This function call has no effect.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  shrink_to_fit() noexcept { }
 
-    //--------------------------------------------------------------------------
-    //
-    // Operations
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Operations
+  //
+  //--------------------------------------------------------------------------
 
-    /// Clears the contents
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    clear() noexcept;
+  /// Clears the contents
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  clear() noexcept;
 
-    /** Insert a character.
+  /** Insert a character.
 
-        Inserts `count` copies of `ch` at the position `index`.
+      Inserts `count` copies of `ch` at the position `index`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param index The index to insert at.
-        @param count The number of characters to insert.
-        @param ch The character to insert.
+      @param index The index to insert at.
+      @param count The number of characters to insert.
+      @param ch The character to insert.
 
-        @throw std::length_error `size() + count > max_size()`
-        @throw std::out_of_range `index > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert(
-        size_type index,
-        size_type count,
-        CharT ch)
-    {
-      BOOST_STATIC_STRING_THROW_IF(
-        index > size(), std::out_of_range{"index > size()"});
-      insert(begin() + index, count, ch);
-      return *this;
-    }
+      @throw std::length_error `size() + count > max_size()`
+      @throw std::out_of_range `index > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert(
+    size_type index,
+    size_type count,
+    CharT ch)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      index > size(), std::out_of_range{"index > size()"});
+    insert(begin() + index, count, ch);
+    return *this;
+  }
     
-    /** Insert a string.
+  /** Insert a string.
 
-        Inserts the null-terminated character string pointed to by `s`
-        of length `count` at the position `index` where `count`
-        is `Traits::length(s)`.
+      Inserts the null-terminated character string pointed to by `s`
+      of length `count` at the position `index` where `count`
+      is `Traits::length(s)`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param index The index to insert at.
-        @param s The string to insert.
+      @param index The index to insert at.
+      @param s The string to insert.
 
-        @throw std::length_error `size() + count > max_size()`
-        @throw std::out_of_range `index > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert(
-        size_type index,
-        CharT const* s)
-    {
-        return insert(index, s, Traits::length(s));
-    }
+      @throw std::length_error `size() + count > max_size()`
+      @throw std::out_of_range `index > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert(
+    size_type index,
+    CharT const* s)
+  {
+    return insert(index, s, Traits::length(s));
+  }
 
-    /** Insert a string.
+  /** Insert a string.
 
-        Inserts `count` characters of the string pointed to by `s`
-        at the position `index`.
+      Inserts `count` characters of the string pointed to by `s`
+      at the position `index`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param index The index to insert at.
-        @param s The string to insert.
-        @param count The length of the string to insert.
+      @param index The index to insert at.
+      @param s The string to insert.
+      @param count The length of the string to insert.
 
-        @throw std::length_error `size() + count > max_size()`
-        @throw std::out_of_range `index > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert(
-        size_type index,
-        CharT const* s,
-        size_type count);
+      @throw std::length_error `size() + count > max_size()`
+      @throw std::out_of_range `index > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert(
+    size_type index,
+    CharT const* s,
+    size_type count);
 
-    /** Insert a string.
+  /** Insert a string.
 
-        Inserts the string `str`
-        at the position `index`.
+      Inserts the string `str`
+      at the position `index`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note The insertion is done unchecked when
-        the capacity of `str` differs from that of the
-        string the function is called on.
+      @note The insertion is done unchecked when
+      the capacity of `str` differs from that of the
+      string the function is called on.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam M The size of the input string.
+      @tparam M The size of the input string.
 
-        @return `*this`
+      @return `*this`
 
-        @param index The index to insert at.
-        @param str The string to insert.
+      @param index The index to insert at.
+      @param str The string to insert.
 
-        @throw std::length_error `size() + str.size() > max_size()`
-        @throw std::out_of_range `index > size()`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert(
-        size_type index,
-        const basic_static_string<M, CharT, Traits>& str)
-    {
-        return insert_unchecked(index, str.data(), str.size());
-    }
+      @throw std::length_error `size() + str.size() > max_size()`
+      @throw std::out_of_range `index > size()`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert(
+    size_type index,
+    const basic_static_string<M, CharT, Traits>& str)
+  {
+    return insert_unchecked(index, str.data(), str.size());
+  }
 
 #ifndef GENERATING_DOCUMENTATION
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert(
-        size_type index,
-        const basic_static_string& str)
-    {
-        return insert(index, str.data(), str.size());
-    }
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert(
+    size_type index,
+    const basic_static_string& str)
+  {
+    return insert(index, str.data(), str.size());
+  }
 #endif
 
-    /** Insert a string.
+  /** Insert a string.
 
-        Inserts a string, obtained by `str.substr(index_str, count)`
-        at the position `index`.
+      Inserts a string, obtained by `str.substr(index_str, count)`
+      at the position `index`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note The insertion is done unchecked when
-        the capacity of `str` differs from that of the
-        string the function is called on.
+      @note The insertion is done unchecked when
+      the capacity of `str` differs from that of the
+      string the function is called on.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam M The size of the input string.
+      @tparam M The size of the input string.
 
-        @return `*this`
+      @return `*this`
 
-        @param index The index to insert at.
-        @param str The string from which to insert.
-        @param index_str The index in `str` to start inserting from.
-        @param count The number of characters to insert.
-        The default argument for this parameter is @ref npos.
+      @param index The index to insert at.
+      @param str The string from which to insert.
+      @param index_str The index in `str` to start inserting from.
+      @param count The number of characters to insert.
+      The default argument for this parameter is @ref npos.
 
-        @throw std::length_error `size() + str.substr(index_str, count).size() > max_size()`
-        @throw std::out_of_range `index > size()`
-        @throw std::out_of_range `index_str > str.size()`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert(
-        size_type index,
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type index_str,
-        size_type count = npos)
-    {
-        BOOST_STATIC_STRING_THROW_IF(
-          index_str > str.size(), std::out_of_range{"index_str > str.size()"}
-        );
-        return insert_unchecked(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
-    }
+      @throw std::length_error `size() + str.substr(index_str, count).size() > max_size()`
+      @throw std::out_of_range `index > size()`
+      @throw std::out_of_range `index_str > str.size()`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert(
+    size_type index,
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type index_str,
+    size_type count = npos)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      index_str > str.size(), std::out_of_range{"index_str > str.size()"});
+    return insert_unchecked(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
+  }
 
 #ifndef GENERATING_DOCUMENTATION
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert(
-        size_type index,
-        const basic_static_string& str,
-        size_type index_str,
-        size_type count = npos)
-    {
-        BOOST_STATIC_STRING_THROW_IF(
-          index_str > str.size(), std::out_of_range{"index_str > str.size()"}
-        );
-        return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
-    }
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert(
+    size_type index,
+    const basic_static_string& str,
+    size_type index_str,
+    size_type count = npos)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      index_str > str.size(), std::out_of_range{"index_str > str.size()"});
+    return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
+  }
 #endif
 
-    /** Insert a character.
+  /** Insert a character.
 
-        Inserts the character `ch` before the character pointed by `pos`.
+      Inserts the character `ch` before the character pointed by `pos`.
 
-        @par Precondition
+      @par Precondition
 
-        `pos` shall be vaild within `[data(), data() + size()]`
+      `pos` shall be vaild within `[data(), data() + size()]`
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return An iterator which refers to the first inserted character
-        or `pos` if no characters were inserted
+      @return An iterator which refers to the first inserted character
+      or `pos` if no characters were inserted
 
-        @param pos The index to insert at.
-        @param ch The character to insert.
+      @param pos The index to insert at.
+      @param ch The character to insert.
 
-        @throw std::length_error `size() + 1 > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    insert(
-        const_iterator pos,
-        CharT ch)
-    {
-        return insert(pos, 1, ch);
-    }
+      @throw std::length_error `size() + 1 > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  iterator
+  insert(
+    const_iterator pos,
+    CharT ch)
+  {
+    return insert(pos, 1, ch);
+  }
 
-    /** Insert characters.
+  /** Insert characters.
 
-        Inserts `count` copies of `ch` before the character pointed by `pos`.
+      Inserts `count` copies of `ch` before the character pointed by `pos`.
 
-        @par Precondition
+      @par Precondition
 
-        `pos` shall be valid within `[data(), data() + size()]`
+      `pos` shall be valid within `[data(), data() + size()]`
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return An iterator which refers to the first inserted character
-        or `pos` if no characters were inserted
+      @return An iterator which refers to the first inserted character
+      or `pos` if no characters were inserted
 
-        @param pos The position to insert at.
-        @param count The number of characters to insert.
-        @param ch The character to insert.
+      @param pos The position to insert at.
+      @param count The number of characters to insert.
+      @param ch The character to insert.
 
-        @throw std::length_error `size() + count > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    insert(
-        const_iterator pos,
-        size_type count,
-        CharT ch);
+      @throw std::length_error `size() + count > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  iterator
+  insert(
+    const_iterator pos,
+    size_type count,
+    CharT ch);
 
-    /** Insert a range of characters.
+  /** Insert a range of characters.
 
-        Inserts characters from the range `[first, last)` before the
-        character pointed to by `pos`.
+      Inserts characters from the range `[first, last)` before the
+      character pointed to by `pos`.
 
-        @par Precondition
+      @par Precondition
 
-        `pos` shall be valid within `[data(), data() + size()]`,
+      `pos` shall be valid within `[data(), data() + size()]`,
 
-        `[first, last)` shall be a valid range
+      `[first, last)` shall be a valid range
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam InputIterator The type of the iterators.
+      @tparam InputIterator The type of the iterators.
 
-        @par Constraints
+      @par Constraints
 
-        `InputIterator` satisfies __InputIterator__ and does not 
-        satisfy __ForwardIterator__.
+      `InputIterator` satisfies __InputIterator__ and does not 
+      satisfy __ForwardIterator__.
 
-        @return An iterator which refers to the first inserted character
-        or `pos` if no characters were inserted
+      @return An iterator which refers to the first inserted character
+      or `pos` if no characters were inserted
 
-        @param pos The position to insert at.
-        @param first An iterator representing the first character to insert.
-        @param last An iterator representing one past the last character to insert.
+      @param pos The position to insert at.
+      @param first An iterator representing the first character to insert.
+      @param last An iterator representing one past the last character to insert.
 
-        @throw std::length_error `size() + insert_count > max_size()`
-    */
-    template<typename InputIterator>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error `size() + insert_count > max_size()`
+  */
+  template<typename InputIterator>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    iterator
+  iterator
 #else
-    typename std::enable_if<
-      detail::is_input_iterator<
-          InputIterator>::value && 
-              ! detail::is_forward_iterator<
-                    InputIterator>::value, iterator>::type
+  typename std::enable_if<
+    detail::is_input_iterator<
+      InputIterator>::value && 
+        !detail::is_forward_iterator<
+          InputIterator>::value, iterator>::type
 #endif
-    insert(
-        const_iterator pos,
-        InputIterator first,
-        InputIterator last);
+  insert(
+    const_iterator pos,
+    InputIterator first,
+    InputIterator last);
 
 #ifndef GENERATING_DOCUMENTATION
-    template<typename ForwardIterator>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    typename std::enable_if<
-        detail::is_forward_iterator<
-            ForwardIterator>::value, 
-                iterator>::type
-    insert(
-        const_iterator pos,
-        ForwardIterator first,
-        ForwardIterator last);
+  template<typename ForwardIterator>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  typename std::enable_if<
+    detail::is_forward_iterator<
+      ForwardIterator>::value, 
+        iterator>::type
+  insert(
+    const_iterator pos,
+    ForwardIterator first,
+    ForwardIterator last);
 #endif
 
-    /** Insert characters from an initializer list.
+  /** Insert characters from an initializer list.
 
-        Inserts characters from `ilist` before `pos`.
+      Inserts characters from `ilist` before `pos`.
 
-        @par Precondition
+      @par Precondition
 
-        `pos` shall be valid within `[data(), data() + size()]`
+      `pos` shall be valid within `[data(), data() + size()]`
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return An iterator which refers to the first inserted character
-        or `pos` if no characters were inserted
+      @return An iterator which refers to the first inserted character
+      or `pos` if no characters were inserted
 
-        @param pos The position to insert at.
-        @param ilist The initializer list from which to insert.
+      @param pos The position to insert at.
+      @param ilist The initializer list from which to insert.
 
-        @throw std::length_error `size() + ilist.size() > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    insert(
-        const_iterator pos,
-        std::initializer_list<CharT> ilist)
-    {
-      const auto offset = pos - begin();
-      return insert_unchecked(offset, ilist.begin(), ilist.size()).begin() + offset;
-    }
+      @throw std::length_error `size() + ilist.size() > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  iterator
+  insert(
+    const_iterator pos,
+    std::initializer_list<CharT> ilist)
+  {
+    const auto offset = pos - begin();
+    return insert_unchecked(offset, ilist.begin(), ilist.size()).begin() + offset;
+  }
 
-    /** Insert characters from an object convertible to `string_view_type`.
+  /** Insert characters from an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view_type` object `sv` from `t` and
-        inserts `[sv.begin(), sv.end())` at `index`.
+      Constructs a temporary `string_view_type` object `sv` from `t` and
+      inserts `[sv.begin(), sv.end())` at `index`.
 
-        @par Precondition
+      @par Precondition
 
-        `index` shall be valid within `[data(), data() + size()]`
+      `index` shall be valid within `[data(), data() + size()]`
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @param index The index to insert at.
-        @param t The string to insert from.
+      @param index The index to insert at.
+      @param t The string to insert from.
 
-        @throw std::length_error `size() + sv.size() > max_size()`
-        @throw std::out_of_range `index > size()`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error `size() + sv.size() > max_size()`
+      @throw std::out_of_range `index > size()`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        std::is_convertible<
-            T const&, string_view_type>::value &&
-        ! std::is_convertible<
-            T const&, CharT const*>::value,
-                basic_static_string&>::type
-#endif
-    insert(
-        size_type index,
-        T const& t)
-    {
-      return insert(index, t, 0, npos);
-    }
-
-    /** Insert characters from an object convertible to `string_view_type`.
-
-        Constructs a temporary `string_view_type` object `sv` from `t`
-        and inserts `sv.substr(index_str, count)` at `index`.
-
-        @par Exception Safety
-
-        Strong guarantee.
-
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
-
-        @tparam T The type of the object to convert.
-
-        @par Constraints
-
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, CharT const*>::value`.
-
-        @return `*this`
-
-        @param index The index to insert at.
-        @param t The string to insert from.
-        @param index_str The index in the temporary `string_view_type` object
-        to start the substring from.
-        @param count The number of characters to insert.
-
-        @throw std::length_error `size() + sv.size() > max_size()`
-        @throw std::out_of_range `index > size()`
-        @throw std::out_of_range `index_str > sv.size()`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-    basic_static_string&
-#else
-    typename std::enable_if<
-        std::is_convertible<T const&, string_view_type>::value &&
-        ! std::is_convertible<T const&, CharT const*>::value,
+  typename std::enable_if<
+    std::is_convertible<
+      T const&, string_view_type>::value &&
+        !std::is_convertible<
+          T const&, CharT const*>::value,
             basic_static_string&>::type
 #endif
-    insert(
-        size_type index,
-        T const& t,
-        size_type index_str,
-        size_type count = npos)
-    {
-      auto const s = string_view_type(t).substr(index_str, count);
-      return insert(index, s.data(), s.size());
-    }
+  insert(
+    size_type index,
+    T const& t)
+  {
+    return insert(index, t, 0, npos);
+  }
 
-    /** Removes `min(count, size() - index)` characters starting at `index`
+  /** Insert characters from an object convertible to `string_view_type`.
 
-        @throw std::out_of_range if `index > size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    erase(
-        size_type index = 0,
-        size_type count = npos);
+      Constructs a temporary `string_view_type` object `sv` from `t`
+      and inserts `sv.substr(index_str, count)` at `index`.
 
-    /** Removes the character at `pos`
+      @par Exception Safety
 
-        @return iterator pointing to the character immediately following the character erased, or `end()` if no such character exists
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    erase(
-        const_iterator pos);
+      Strong guarantee.
 
-    /** Removes the characters in the range `(first, last)`
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return iterator pointing to the character last pointed to before the erase, or `end()` if no such character exists
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    iterator
-    erase(
-        const_iterator first,
-        const_iterator last);
+      @tparam T The type of the object to convert.
 
-    /** Appends the given character `ch` to the end of the string.
+      @par Constraints
 
-        @throw std::length_error if `1 > max_size() - size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    push_back(
-        CharT ch);
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, CharT const*>::value`.
 
-    /** Removes the last character from the string
+      @return `*this`
 
-        The behavior is undefined if the string is empty.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    pop_back() noexcept
-    {
-      BOOST_STATIC_STRING_ASSERT(size() > 0);
-      this->set_size(size() - 1);
-      term();
-    }
+      @param index The index to insert at.
+      @param t The string to insert from.
+      @param index_str The index in the temporary `string_view_type` object
+      to start the substring from.
+      @param count The number of characters to insert.
 
-    /** Appends `count` copies of character `ch`
-
-        The appended characters may be null.
-
-        @throw std::length_error if `count > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    append(
-        size_type count,
-        CharT ch)
-    {
-        return insert(size(), count, ch);
-    }
-
-    /** Append to the string.
-    
-        Appends the contents of string view `sv`
-
-        The appended string can contain null characters.
-
-        @throw std::length_error if `sv.size() > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    append(
-        string_view_type sv)
-    {
-        return append(sv.data(), sv.size());
-    }
-
-    /** Append to the string.
-    
-        Appends the contents of `sv.substr(pos, count)`
-
-        The appended string can contain null characters.
-
-        @throw std::out_of_range if `pos > sv.size()`
-        @throw std::length_error if `sv.substr(pos, count).size() > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    append(
-        string_view_type sv,
-        size_type pos,
-        size_type count = npos)
-    {
-        return append(sv.substr(pos, count));
-    }
-
-    /** Append to the string.
-    
-        Appends characters in the range `(s, s + count)`
-    
-        The appended string can contain null characters.
-
-        @throw std::length_error if `count > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    append(
-        CharT const* s,
-        size_type count);
-
-    /** Append to the string.
-    
-        Appends the null-terminated character string pointed to by `s`
-    
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`.
-
-        @throw std::length_error if `Traits::length(s) > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    append(
-        CharT const* s)
-    {
-        return append(s, Traits::length(s));
-    }
-
-    /** Append to the string.
-    
-        Appends characters from the range `(first, last)`
-
-        The inserted string can contain null characters.
-        This function does not participate in overload resolution if
-        `InputIterator` does not satisfy <em>LegacyInputIterator</em>
-
-        @throw std::length_error if `std::distance(first, last) > max_size() - size()`
-        @return `*this`
-    */
-    template<typename InputIterator>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error `size() + sv.size() > max_size()`
+      @throw std::out_of_range `index > size()`
+      @throw std::out_of_range `index_str > sv.size()`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        detail::is_input_iterator<InputIterator>::value,
+  typename std::enable_if<
+    std::is_convertible<T const&, string_view_type>::value &&
+      !std::is_convertible<T const&, CharT const*>::value,
+        basic_static_string&>::type
+#endif
+  insert(
+    size_type index,
+    T const& t,
+    size_type index_str,
+    size_type count = npos)
+  {
+    auto const s = string_view_type(t).substr(index_str, count);
+    return insert(index, s.data(), s.size());
+  }
+
+  /** Removes `min(count, size() - index)` characters starting at `index`
+
+      @throw std::out_of_range if `index > size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  erase(
+    size_type index = 0,
+    size_type count = npos);
+
+  /** Removes the character at `pos`
+
+      @return iterator pointing to the character immediately following the character erased, or `end()` if no such character exists
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  iterator
+  erase(
+    const_iterator pos);
+
+  /** Removes the characters in the range `(first, last)`
+
+      @return iterator pointing to the character last pointed to before the erase, or `end()` if no such character exists
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  iterator
+  erase(
+    const_iterator first,
+    const_iterator last);
+
+  /** Appends the given character `ch` to the end of the string.
+
+      @throw std::length_error if `1 > max_size() - size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  push_back(CharT ch);
+
+  /** Removes the last character from the string
+
+      The behavior is undefined if the string is empty.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  pop_back() noexcept
+  {
+    BOOST_STATIC_STRING_ASSERT(size() > 0);
+    this->set_size(size() - 1);
+    term();
+  }
+
+  /** Appends `count` copies of character `ch`
+
+      The appended characters may be null.
+
+      @throw std::length_error if `count > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(
+    size_type count,
+    CharT ch)
+  {
+    return insert(size(), count, ch);
+  }
+
+  /** Append to the string.
+    
+      Appends the contents of string view `sv`
+
+      The appended string can contain null characters.
+
+      @throw std::length_error if `sv.size() > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(
+    string_view_type sv)
+  {
+    return append(sv.data(), sv.size());
+  }
+
+  /** Append to the string.
+    
+      Appends the contents of `sv.substr(pos, count)`
+
+      The appended string can contain null characters.
+
+      @throw std::out_of_range if `pos > sv.size()`
+      @throw std::length_error if `sv.substr(pos, count).size() > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(
+    string_view_type sv,
+    size_type pos,
+    size_type count = npos)
+  {
+    return append(sv.substr(pos, count));
+  }
+
+  /** Append to the string.
+    
+      Appends characters in the range `(s, s + count)`
+    
+      The appended string can contain null characters.
+
+      @throw std::length_error if `count > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(
+    CharT const* s,
+    size_type count);
+
+  /** Append to the string.
+    
+      Appends the null-terminated character string pointed to by `s`
+    
+      The length of the string is determined by the first
+      null character using `Traits::length(s)`.
+
+      @throw std::length_error if `Traits::length(s) > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(
+    CharT const* s)
+  {
+    return append(s, Traits::length(s));
+  }
+
+  /** Append to the string.
+    
+      Appends characters from the range `(first, last)`
+
+      The inserted string can contain null characters.
+      This function does not participate in overload resolution if
+      `InputIterator` does not satisfy <em>LegacyInputIterator</em>
+
+      @throw std::length_error if `std::distance(first, last) > max_size() - size()`
+      @return `*this`
+  */
+  template<typename InputIterator>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#if GENERATING_DOCUMENTATION
+  basic_static_string&
+#else
+  typename std::enable_if<
+    detail::is_input_iterator<InputIterator>::value,
+      basic_static_string&>::type
+#endif
+  append(
+    InputIterator first,
+    InputIterator last)
+  {
+    insert(end(), first, last);
+    return *this;
+  }
+
+  /** Append to the string.
+    
+      Appends characters from initializer list `ilist`
+
+      The appended string can contain null characters.
+
+      @throw std::length_error if `ilist.size() > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(
+    std::initializer_list<CharT> ilist)
+  {
+    insert(end(), ilist);
+    return *this;
+  }
+
+  /** Append to the string.
+    
+      Appends characters from `string_view_type{t}`
+
+      The appended string can contain null characters.
+      This function participates in overload resolution if
+      `T` is convertible to `string_view_type` and `T` is not
+      convertible to `CharT const*`.
+
+      @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
+      @return `*this`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#if GENERATING_DOCUMENTATION
+  basic_static_string&
+#else
+  typename std::enable_if<
+    std::is_convertible<
+      T const&, string_view_type>::value &&
+        !std::is_convertible<
+          T const&, CharT const*>::value,
             basic_static_string&>::type
 #endif
-    append(
-        InputIterator first,
-        InputIterator last)
-    {
-        insert(end(), first, last);
-        return *this;
-    }
+  append(
+    T const& t)
+  {
+    return append(string_view_type{t});
+  }
 
-    /** Append to the string.
+  /** Append to the string.
     
-        Appends characters from initializer list `ilist`
+      Appends characters from `string_view_type{t}.substr{pos, count}`
 
-        The appended string can contain null characters.
+      The appended string can contain null characters.
+      This function participates in overload resolution if
+      `T` is convertible to `string_view_type` and `T` is not
+      convertible to `CharT const*`.
 
-        @throw std::length_error if `ilist.size() > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    append(
-        std::initializer_list<CharT> ilist)
-    {
-        insert(end(), ilist);
-        return *this;
-    }
-
-    /** Append to the string.
-    
-        Appends characters from `string_view_type{t}`
-
-        The appended string can contain null characters.
-        This function participates in overload resolution if
-        `T` is convertible to `string_view_type` and `T` is not
-        convertible to `CharT const*`.
-
-        @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
-        @return `*this`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::out_of_range if `pos > string_view_type{t}.size()`
+      @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
+      @return `*this`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        std::is_convertible<
-            T const&, string_view_type>::value &&
-        ! std::is_convertible<
-            T const&, CharT const*>::value,
-                basic_static_string&>::type
-#endif
-    append(
-        T const& t)
-    {
-        return append(string_view_type{t});
-    }
-
-    /** Append to the string.
-    
-        Appends characters from `string_view_type{t}.substr{pos, count}`
-
-        The appended string can contain null characters.
-        This function participates in overload resolution if
-        `T` is convertible to `string_view_type` and `T` is not
-        convertible to `CharT const*`.
-
-        @throw std::out_of_range if `pos > string_view_type{t}.size()`
-        @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
-        @return `*this`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-    basic_static_string&
-#else
-    typename std::enable_if<
-        std::is_convertible<
-            T const&, string_view_type>::value &&
-        ! std::is_convertible<
-            T const&, CharT const*>::value,
-                basic_static_string&>::type
-#endif
-    append(
-        T const& t,
-        size_type pos,
-        size_type count = npos)
-    {
-        return append(string_view_type{t}.substr(pos, count));
-    }
-
-    /** Append to the string.
-
-        @throw std::length_error if `s.size() > max_size() - size()`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator+=(
-        basic_static_string<M, CharT, Traits> const& s)
-    {
-        return append(s.data(), s.size());
-    }
-
-    /** Append to the string.
-    
-        Appends the given character `ch` to the end of the string.
-
-        @throw std::length_error if `1 > max_size() - size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator+=(
-        CharT ch)
-    {
-        push_back(ch);
-        return *this;
-    }
-
-    /** Append to the string.
-    
-        Appends the null-terminated character string pointed to by `s`
-    
-        The length of the string is determined by the first
-        null character using `Traits::length(s)`.
-
-        @throw std::length_error if `Traits::length(s) > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator+=(
-        CharT const* s)
-    {
-        return append(s);
-    }
-
-    /** Append to the string.
-    
-        Appends characters from initializer list `ilist`
-
-        The appended string can contain null characters.
-
-        @throw std::length_error if `ilist.size() > max_size() - size()`
-        @return `*this`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    operator+=(
-        std::initializer_list<CharT> ilist)
-    {
-        return append(ilist);
-    }
-
-    /** Append to the string.
-    
-        Appends a copy of the characters from `string_view_type{t}`
-
-        The appended string can contain null characters.
-        This function participates in overload resolution if
-        `T` is convertible to `string_view_type` and `T` is not
-        convertible to `CharT const*`.
-
-        @throw std::length_error if `string_view_type{t}.size() > max_size()`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-    basic_static_string&
-#else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
+  typename std::enable_if<
+    std::is_convertible<
+      T const&, string_view_type>::value &&
+        !std::is_convertible<
+          T const&, CharT const*>::value,
             basic_static_string&>::type
 #endif
-    operator+=(
-        T const& t)
-    {
-        return append(t);
-    }
+  append(
+    T const& t,
+    size_type pos,
+    size_type count = npos)
+  {
+    return append(string_view_type{t}.substr(pos, count));
+  }
 
-    /** Compare the string with another.
+  /** Append to the string.
+
+      @throw std::length_error if `s.size() > max_size() - size()`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator+=(
+    basic_static_string<M, CharT, Traits> const& s)
+  {
+    return append(s.data(), s.size());
+  }
+
+  /** Append to the string.
+    
+      Appends the given character `ch` to the end of the string.
+
+      @throw std::length_error if `1 > max_size() - size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator+=(
+    CharT ch)
+  {
+    push_back(ch);
+    return *this;
+  }
+
+  /** Append to the string.
+    
+      Appends the null-terminated character string pointed to by `s`
+    
+      The length of the string is determined by the first
+      null character using `Traits::length(s)`.
+
+      @throw std::length_error if `Traits::length(s) > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator+=(
+    CharT const* s)
+  {
+    return append(s);
+  }
+
+  /** Append to the string.
+    
+      Appends characters from initializer list `ilist`
+
+      The appended string can contain null characters.
+
+      @throw std::length_error if `ilist.size() > max_size() - size()`
+      @return `*this`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator+=(
+    std::initializer_list<CharT> ilist)
+  {
+    return append(ilist);
+  }
+
+  /** Append to the string.
+    
+      Appends a copy of the characters from `string_view_type{t}`
+
+      The appended string can contain null characters.
+      This function participates in overload resolution if
+      `T` is convertible to `string_view_type` and `T` is not
+      convertible to `CharT const*`.
+
+      @throw std::length_error if `string_view_type{t}.size() > max_size()`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#if GENERATING_DOCUMENTATION
+  basic_static_string&
+#else
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        basic_static_string&>::type
+#endif
+  operator+=(
+    T const& t)
+  {
+    return append(t);
+  }
+
+  /** Compare the string with another.
         
-        Compares this string to `s`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        basic_static_string<M, CharT, Traits> const& s) const noexcept
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            data(), size(), s.data(), s.size());
-    }
+      Compares this string to `s`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    basic_static_string<M, CharT, Traits> const& s) const noexcept
+  {
+    return detail::lexicographical_compare<CharT, Traits>(
+      data(), size(), s.data(), s.size());
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
         
-        Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        size_type pos1,
-        size_type count1,
-        basic_static_string<M, CharT, Traits> const& s) const
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            subview(pos1, count1), s.data(), s.size());
-    }
+      Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    size_type pos1,
+    size_type count1,
+    basic_static_string<M, CharT, Traits> const& s) const
+  {
+    return detail::lexicographical_compare<CharT, Traits>(
+      subview(pos1, count1), s.data(), s.size());
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
         
-        Compares a `[pos1, pos1+count1)` substring of this string to a substring `[pos2, pos2+count2)` of `s`. 
-        If `count1 > size() - pos1` the first substring is `[pos1, size())`. Likewise, if `count2 > s.size() - pos2` the
-        second substring is `[pos2, s.size())`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        size_type pos1,
-        size_type count1,
-        basic_static_string<M, CharT, Traits> const& s,
-        size_type pos2,
-        size_type count2 = npos) const
-    {
-        return detail::lexicographical_compare(
-            subview(pos1, count1), s.subview(pos2, count2));
-    }
+      Compares a `[pos1, pos1+count1)` substring of this string to a substring `[pos2, pos2+count2)` of `s`. 
+      If `count1 > size() - pos1` the first substring is `[pos1, size())`. Likewise, if `count2 > s.size() - pos2` the
+      second substring is `[pos2, s.size())`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    size_type pos1,
+    size_type count1,
+    basic_static_string<M, CharT, Traits> const& s,
+    size_type pos2,
+    size_type count2 = npos) const
+  {
+    return detail::lexicographical_compare(
+      subview(pos1, count1), s.subview(pos2, count2));
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
         
-        Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `Traits::length(s)`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        CharT const* s) const noexcept
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            data(), size(), s, Traits::length(s));
-    }
+      Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `Traits::length(s)`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    CharT const* s) const noexcept
+  {
+    return detail::lexicographical_compare<CharT, Traits>(
+      data(), size(), s, Traits::length(s));
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
         
-        Compares a `[pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
-        length `Traits::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        size_type pos1,
-        size_type count1,
-        CharT const* s) const
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            subview(pos1, count1), s, Traits::length(s));
-    }
+      Compares a `[pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
+      length `Traits::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    size_type pos1,
+    size_type count1,
+    CharT const* s) const
+  {
+    return detail::lexicographical_compare<CharT, Traits>(
+      subview(pos1, count1), s, Traits::length(s));
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
         
-        Compares a `[pos1, pos1+count1)` substring of this string to the characters in the range `[s, s + count2)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        size_type pos1,
-        size_type count1,
-        CharT const* s,
-        size_type count2) const
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            subview(pos1, count1), s, count2);
-    }
+      Compares a `[pos1, pos1+count1)` substring of this string to the characters in the range `[s, s + count2)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    size_type pos1,
+    size_type count1,
+    CharT const* s,
+    size_type count2) const
+  {
+    return detail::lexicographical_compare<CharT, Traits>(
+      subview(pos1, count1), s, count2);
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
       
-        Compares this string to `s`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        string_view_type s) const noexcept
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            data(), size(), s.data(), s.size());
-    }
+      Compares this string to `s`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    string_view_type s) const noexcept
+  {
+    return detail::lexicographical_compare<CharT, Traits>(
+      data(), size(), s.data(), s.size());
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
 
-        Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    int
-    compare(
-        size_type pos1,
-        size_type count1,
-        string_view_type s) const
-    {
-        return detail::lexicographical_compare<CharT, Traits>(
-            subview(pos1, count1), s);
-    }
+      Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
+  compare(
+    size_type pos1,
+    size_type count1,
+    string_view_type s) const
+  {
+    return detail::lexicographical_compare<CharT, Traits>(
+      subview(pos1, count1), s);
+  }
 
-    /** Compare the string with another.
+  /** Compare the string with another.
         
-        Replaces the part of the string indicated by `[pos1, pos1 + count1)` with a substring `[pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
+      Replaces the part of the string indicated by `[pos1, pos1 + count1)` with a substring `[pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
 
-        This function participates in overload resolution if
-        `T` is convertible to `string_view_type` and `T` is not
-        convertible to `CharT const*`.
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      This function participates in overload resolution if
+      `T` is convertible to `string_view_type` and `T` is not
+      convertible to `CharT const*`.
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    int
+  int
 #else
-    typename std::enable_if<
-        std::is_convertible<T const&, string_view_type>::value &&
-        ! std::is_convertible<T const&, CharT const*>::value,
-            int>::type
+  typename std::enable_if<
+    std::is_convertible<T const&, string_view_type>::value &&
+      !std::is_convertible<T const&, CharT const*>::value,
+        int>::type
 #endif
-    compare(
-        size_type pos1,
-        size_type count1,
-        T const& t,
-        size_type pos2,
-        size_type count2 = npos) const
-    {
-        return compare(pos1, count1,
-            string_view_type(t).substr(pos2, count2));
-    }
+  compare(
+    size_type pos1,
+    size_type count1,
+    T const& t,
+    size_type pos2,
+    size_type count2 = npos) const
+  {
+    return compare(pos1, count1,
+      string_view_type(t).substr(pos2, count2));
+  }
 
-    /** Return a substring.
+  /** Return a substring.
 
-        Returns a substring of the string.
+      Returns a substring of the string.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @return A string object containing the characters
-        `[data() + pos, std::min(count, size() - pos))`.
+      @return A string object containing the characters
+      `[data() + pos, std::min(count, size() - pos))`.
 
-        @param pos The index to being the substring at. The
-        default arugment for this parameter is `0`.
-        @param count The length of the substring. The default arugment
-        for this parameter is @ref npos.
+      @param pos The index to being the substring at. The
+      default arugment for this parameter is `0`.
+      @param count The length of the substring. The default arugment
+      for this parameter is @ref npos.
 
-        @throw std::out_of_range `pos > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string
-    substr(
-        size_type pos = 0,
-        size_type count = npos) const;
+      @throw std::out_of_range `pos > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string
+  substr(
+    size_type pos = 0,
+    size_type count = npos) const;
 
-    /** Return a view of a substring.
+  /** Return a view of a substring.
 
-        Returns a view of a substring.
+      Returns a view of a substring.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @return A `string_view_type` object referring 
-        to `[data() + pos, std::min(count, size() - pos))`.
+      @return A `string_view_type` object referring 
+      to `[data() + pos, std::min(count, size() - pos))`.
 
-        @param pos The index to being the substring at. The
-        default arugment for this parameter is `0`.
-        @param count The length of the substring. The default arugment
-        for this parameter is @ref npos.
+      @param pos The index to being the substring at. The
+      default arugment for this parameter is `0`.
+      @param count The length of the substring. The default arugment
+      for this parameter is @ref npos.
 
-        @throw std::out_of_range `pos > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    string_view_type
-    subview(
-        size_type pos = 0,
-        size_type count = npos) const;
+      @throw std::out_of_range `pos > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  string_view_type
+  subview(
+    size_type pos = 0,
+    size_type count = npos) const;
 
-    /** Copy a substring to another string.
+  /** Copy a substring to another string.
 
-        Copies `std::min(count, size() - pos)` characters starting at
-        index `pos` to the string pointed to by `dest`.
+      Copies `std::min(count, size() - pos)` characters starting at
+      index `pos` to the string pointed to by `dest`.
 
-        @note The resulting string is not null terminated.
+      @note The resulting string is not null terminated.
 
-        @return The number of characters copied.
+      @return The number of characters copied.
 
-        @param count The number of characters to copy.
-        @param dest The string to copy to.
-        @param pos The index to begin copying from. The
-        default argument for this parameter is `0`.
+      @param count The number of characters to copy.
+      @param dest The string to copy to.
+      @param pos The index to begin copying from. The
+      default argument for this parameter is `0`.
 
-        @throw std::out_of_range `pos > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    copy(
-        CharT* dest,
-        size_type count,
-        size_type pos = 0) const;
+      @throw std::out_of_range `pos > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  copy(
+    CharT* dest,
+    size_type count,
+    size_type pos = 0) const;
 
-    /** Change the size of the string.
+  /** Change the size of the string.
+
+      Resizes the string to contain `n` characters. If
+      `n > size()`, characters with the value `CharT()` are
+      appended. Otherwise, `size()` is reduced to `n`.
+
+      @param n The size to resize the string to.
+
+      @throw std::out_of_range `n > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  resize(
+    size_type n);
+
+  /** Change the size of the string.
 
         Resizes the string to contain `n` characters. If
-        `n > size()`, characters with the value `CharT()` are
+        `n > size()`, copies of `c` are
         appended. Otherwise, `size()` is reduced to `n`.
 
         @param n The size to resize the string to.
+        @param c The characters to append if the size
+        increases.
 
         @throw std::out_of_range `n > max_size()`
     */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    resize(
-        size_type n);
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  resize(
+    size_type n,
+    CharT c);
 
-    /** Change the size of the string.
+  /// Exchange the contents of this string with another.
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  swap(basic_static_string& s) noexcept;
 
-         Resizes the string to contain `n` characters. If
-         `n > size()`, copies of `c` are
-         appended. Otherwise, `size()` is reduced to `n`.
+  /// Exchange the contents of this string with another.
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  swap(basic_static_string<M, CharT, Traits>& s); 
 
-         @param n The size to resize the string to.
-         @param c The characters to append if the size
-         increases.
+  /** Replace a substring with a string.
 
-         @throw std::out_of_range `n > max_size()`
-     */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    resize(
-        size_type n,
-        CharT c);
+      Replaces `rcount` characters starting at index `pos1` with those
+      of `str`, where `rcount` is `std::min(n1, size() - pos1)`.
 
-    /// Exchange the contents of this string with another.
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    swap(
-        basic_static_string& s) noexcept;
+      @par Exception Safety
 
-    /// Exchange the contents of this string with another.
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    void
-    swap(
-        basic_static_string<M, CharT, Traits>& s); 
+      Strong guarantee.
 
-   /** Replace a substring with a string.
-
-        Replaces `rcount` characters starting at index `pos1` with those
-        of `str`, where `rcount` is `std::min(n1, size() - pos1)`.
-
-        @par Exception Safety
-
-        Strong guarantee.
-
-        @note The replacement is done unchecked when
-        the capacity of `str` differs from that of the
-        string the function is called on.
+      @note The replacement is done unchecked when
+      the capacity of `str` differs from that of the
+      string the function is called on.
         
-        All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam M The size of the input string.
+      @tparam M The size of the input string.
 
-        @return `*this`
+      @return `*this`
 
-        @param pos1 The index to replace at.
-        @param n1 The number of characters to replace.
-        @param str The string to replace with.
+      @param pos1 The index to replace at.
+      @param n1 The number of characters to replace.
+      @param str The string to replace with.
 
-        @throw std::length_error `size() + (str.size() - rcount) > max_size()`
-        @throw std::out_of_range `pos1 > size()`
-    */
-    template<size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos1,
-        size_type n1,
-        const basic_static_string<M, CharT, Traits>& str)
-    {
-      return replace_unchecked(pos1, n1, str.data(), str.size());
-    }
+      @throw std::length_error `size() + (str.size() - rcount) > max_size()`
+      @throw std::out_of_range `pos1 > size()`
+  */
+  template<size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    size_type pos1,
+    size_type n1,
+    const basic_static_string<M, CharT, Traits>& str)
+  {
+    return replace_unchecked(pos1, n1, str.data(), str.size());
+  }
 
 #ifndef GENERATING_DOCUMENTATION
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos1,
-        size_type n1,
-        const basic_static_string& str)
-    {
-      return replace(pos1, n1, str.data(), str.size());
-    }
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    size_type pos1,
+    size_type n1,
+    const basic_static_string& str)
+  {
+    return replace(pos1, n1, str.data(), str.size());
+  }
 #endif
 
-    /** Replace a substring with a substring.
+  /** Replace a substring with a substring.
 
-        Replaces `rcount` characters starting at index `pos1` with those of
-        `str.subview(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos1)`.
+      Replaces `rcount` characters starting at index `pos1` with those of
+      `str.subview(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos1)`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note The replacement is done unchecked when
-        the capacity of `str` differs from that of the
-        string the function is called on.
+      @note The replacement is done unchecked when
+      the capacity of `str` differs from that of the
+      string the function is called on.
         
-        All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param pos1 The index to replace at.
-        @param n1 The number of characters to replace.
-        @param str The string to replace with.
-        @param pos2 The index to begin the substring.
-        @param n2 The length of the substring.
-        The default argument for this parameter is @ref npos.
+      @param pos1 The index to replace at.
+      @param n1 The number of characters to replace.
+      @param str The string to replace with.
+      @param pos2 The index to begin the substring.
+      @param n2 The length of the substring.
+      The default argument for this parameter is @ref npos.
 
-        @throw std::length_error `size() + (std::min(str.size(), n2) - rcount) > max_size()`
-        @throw std::out_of_range `pos1 > size()`
-        @throw std::out_of_range `pos2 > str.size()`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos1,
-        size_type n1,
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type pos2,
-        size_type n2 = npos)
-    {
-      BOOST_STATIC_STRING_THROW_IF(
-        pos2 > str.size(), std::out_of_range{"pos2 > str.size()"}
-      );
-      return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
-    }
+      @throw std::length_error `size() + (std::min(str.size(), n2) - rcount) > max_size()`
+      @throw std::out_of_range `pos1 > size()`
+      @throw std::out_of_range `pos2 > str.size()`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    size_type pos1,
+    size_type n1,
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type pos2,
+    size_type n2 = npos)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      pos2 > str.size(), std::out_of_range{"pos2 > str.size()"});
+    return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
+  }
 
 #ifndef GENERATING_DOCUMENTATION
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos1,
-        size_type n1,
-        const basic_static_string& str,
-        size_type pos2,
-        size_type n2 = npos)
-    {
-      BOOST_STATIC_STRING_THROW_IF(
-        pos2 > str.size(), std::out_of_range{"pos2 > str.size()"}
-      );
-      return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
-    }
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    size_type pos1,
+    size_type n1,
+    const basic_static_string& str,
+    size_type pos2,
+    size_type n2 = npos)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      pos2 > str.size(), std::out_of_range{"pos2 > str.size()"});
+    return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
+  }
 #endif
 
-    /** Replace a substring with an object convertible to `string_view_type`.
+  /** Replace a substring with an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and
-        replaces `rcount` characters starting at index `pos1` with those
-        of `sv`, where `rcount` is `std::min(n1, size() - pos1)`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and
+      replaces `rcount` characters starting at index `pos1` with those
+      of `sv`, where `rcount` is `std::min(n1, size() - pos1)`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return `*this`
+      @return `*this`
 
-        @param pos1 The index to replace at.
-        @param n1 The number of characters to replace.
-        @param t The object to replace with.
+      @param pos1 The index to replace at.
+      @param n1 The number of characters to replace.
+      @param t The object to replace with.
 
-        @throw std::length_error `size() + (sv.size() - rcount) > max_size()`
-        @throw std::out_of_range `pos1 > size()`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error `size() + (sv.size() - rcount) > max_size()`
+      @throw std::out_of_range `pos1 > size()`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            basic_static_string&>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        basic_static_string&>::type
 #endif
-    replace(
-        size_type pos1,
-        size_type n1,
-        const T& t)
-    {
-      string_view_type sv = t;
-      return replace(pos1, n1, sv.data(), sv.size());
-    }
+  replace(
+    size_type pos1,
+    size_type n1,
+    const T& t)
+  {
+    string_view_type sv = t;
+    return replace(pos1, n1, sv.data(), sv.size());
+  }
 
-    /** Replace a substring with a substring of an object convertible to `string_view_type`.
+  /** Replace a substring with a substring of an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and
-        replaces `rcount` characters starting at index `pos1` with those
-        of `sv.substr(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos)`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and
+      replaces `rcount` characters starting at index `pos1` with those
+      of `sv.substr(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos)`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return `*this`
+      @return `*this`
 
-        @param pos1 The index to replace at.
-        @param n1 The number of characters to replace.
-        @param t The object to replace with.
-        @param pos2 The index to begin the substring.
-        @param n2 The length of the substring.
-        The default argument for this parameter is @ref npos.
+      @param pos1 The index to replace at.
+      @param n1 The number of characters to replace.
+      @param t The object to replace with.
+      @param pos2 The index to begin the substring.
+      @param n2 The length of the substring.
+      The default argument for this parameter is @ref npos.
 
-        @throw std::length_error `size() + (std::min(n2, sv.size()) - rcount) > max_size()`
-        @throw std::out_of_range `pos1 > size()`
-        @throw std::out_of_range `pos2 > sv.size()`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error `size() + (std::min(n2, sv.size()) - rcount) > max_size()`
+      @throw std::out_of_range `pos1 > size()`
+      @throw std::out_of_range `pos2 > sv.size()`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            basic_static_string&>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        basic_static_string&>::type
 #endif
-    replace(
-        size_type pos1,
-        size_type n1,
-        const T& t,
-        size_type pos2,
-        size_type n2 = npos)
-    {
-      string_view_type sv = t;
-      return replace(pos1, n1, sv.substr(pos2, n2));
-    }
+  replace(
+    size_type pos1,
+    size_type n1,
+    const T& t,
+    size_type pos2,
+    size_type n2 = npos)
+  {
+    string_view_type sv = t;
+    return replace(pos1, n1, sv.substr(pos2, n2));
+  }
 
-    /** Replace a substring with a string.
+  /** Replace a substring with a string.
 
-        Replaces `rcount` characters starting at index `pos` with those of
-        `[s, s + n2)`, where `rcount` is `std::min(n1, size() - pos)`.
+      Replaces `rcount` characters starting at index `pos` with those of
+      `[s, s + n2)`, where `rcount` is `std::min(n1, size() - pos)`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param pos The index to replace at.
-        @param n1 The number of characters to replace.
-        @param s The string to replace with.
-        @param n2 The length of the string to replace with.
+      @param pos The index to replace at.
+      @param n1 The number of characters to replace.
+      @param s The string to replace with.
+      @param n2 The length of the string to replace with.
 
-        @throw std::length_error `size() + (n2 - rcount) > max_size()`
-        @throw std::out_of_range `pos > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos,
-        size_type n1,
-        const CharT* s,
-        size_type n2);
+      @throw std::length_error `size() + (n2 - rcount) > max_size()`
+      @throw std::out_of_range `pos > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    size_type pos,
+    size_type n1,
+    const CharT* s,
+    size_type n2);
 
 
-    /** Replace a substring with a string.
+  /** Replace a substring with a string.
 
-        Replaces `rcount` characters starting at index `pos` with those of
-        `[s, s + len)`, where the length of the string `len` is `Traits::length(s)` and `rcount`
-        is `std::min(n1, size() - pos)`.
+      Replaces `rcount` characters starting at index `pos` with those of
+      `[s, s + len)`, where the length of the string `len` is `Traits::length(s)` and `rcount`
+      is `std::min(n1, size() - pos)`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param pos The index to replace at.
-        @param n1 The number of characters to replace.
-        @param s The string to replace with.
+      @param pos The index to replace at.
+      @param n1 The number of characters to replace.
+      @param s The string to replace with.
 
-        @throw std::length_error `size() + (len - rcount) > max_size()`
-        @throw std::out_of_range `pos > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos,
-        size_type n1,
-        const CharT* s)
-    {
-      return replace(pos, n1, s, Traits::length(s));
-    }
+      @throw std::length_error `size() + (len - rcount) > max_size()`
+      @throw std::out_of_range `pos > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    size_type pos,
+    size_type n1,
+    const CharT* s)
+  {
+    return replace(pos, n1, s, Traits::length(s));
+  }
 
-    /** Replace a substring with copies of a character.
+  /** Replace a substring with copies of a character.
 
-        Replaces `rcount` characters starting at index `pos` with `n2` copies
-        of `c`, where `rcount` is `std::min(n1, size() - pos)`.
+      Replaces `rcount` characters starting at index `pos` with `n2` copies
+      of `c`, where `rcount` is `std::min(n1, size() - pos)`.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param pos The index to replace at.
-        @param n1 The number of characters to replace.
-        @param n2 The number of characters to replace with.
-        @param c The character to replace with.
+      @param pos The index to replace at.
+      @param n1 The number of characters to replace.
+      @param n2 The number of characters to replace with.
+      @param c The character to replace with.
 
-        @throw std::length_error `size() + (n2 - rcount) > max_size()`
-        @throw std::out_of_range `pos > size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        size_type pos,
-        size_type n1,
-        size_type n2,
-        CharT c);
+      @throw std::length_error `size() + (n2 - rcount) > max_size()`
+      @throw std::out_of_range `pos > size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    size_type pos,
+    size_type n1,
+    size_type n2,
+    CharT c);
 
-    /** Replace a range with a string.
+  /** Replace a range with a string.
 
-        Replaces the characters in the range `[i1, i2)`
-        with those of `str`.
+      Replaces the characters in the range `[i1, i2)`
+      with those of `str`.
 
-        @par Precondition
+      @par Precondition
 
-        `[i1, i2)` is a valid range.
+      `[i1, i2)` is a valid range.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam M The size of the input string.
+      @tparam M The size of the input string.
 
-        @return `*this`
+      @return `*this`
 
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator referring past the end of
-        the last character to replace.
-        @param str The string to replace with.
+      @param i1 An iterator referring to the first character to replace.
+      @param i2 An iterator referring past the end of
+      the last character to replace.
+      @param str The string to replace with.
 
-        @throw std::length_error `size() + (str.size() - std::distance(i1, i2)) > max_size()`
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        const basic_static_string<M, CharT, Traits>& str)
-    {
-      return replace(i1, i2, str.data(), str.size());
-    }
+      @throw std::length_error `size() + (str.size() - std::distance(i1, i2)) > max_size()`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    const basic_static_string<M, CharT, Traits>& str)
+  {
+    return replace(i1, i2, str.data(), str.size());
+  }
 
-    /** Replace a range with an object convertible to `string_view_type`.
+  /** Replace a range with an object convertible to `string_view_type`.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and
-        replaces the characters in the range `[i1, i2)` with those
-        of `sv`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and
+      replaces the characters in the range `[i1, i2)` with those
+      of `sv`.
 
-        @par Precondition
+      @par Precondition
 
-        `[i1, i2)` is a valid range.
+      `[i1, i2)` is a valid range.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return `*this`
+      @return `*this`
 
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator referring past the end of
-        the last character to replace.
-        @param t The object to replace with.
+      @param i1 An iterator referring to the first character to replace.
+      @param i2 An iterator referring past the end of
+      the last character to replace.
+      @param t The object to replace with.
 
-        @throw std::length_error `size() + (sv.size() - std::distance(i1, i2)) > max_size()`
-    */
-    template<typename T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error `size() + (sv.size() - std::distance(i1, i2)) > max_size()`
+  */
+  template<typename T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            basic_static_string&>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        basic_static_string&>::type
 #endif
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        const T& t)
-    {
-      string_view_type sv = t;
-      return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
-    }
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    const T& t)
+  {
+    string_view_type sv = t;
+    return replace(i1 - begin(), i2 - i1, sv.data(), sv.size());
+  }
 
-    /** Replace a range with a string.
+  /** Replace a range with a string.
 
-        Replaces the characters in the range `[i1, i2)` with those of
-        `[s, s + n)`.
+      Replaces the characters in the range `[i1, i2)` with those of
+      `[s, s + n)`.
 
-        @par Precondition
+      @par Precondition
 
-        `[i1, i2)` is a valid range.
+      `[i1, i2)` is a valid range.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator referring past the end of
-        the last character to replace.
-        @param s The string to replace with.
-        @param n The length of the string to replace with.
+      @param i1 An iterator referring to the first character to replace.
+      @param i2 An iterator referring past the end of
+      the last character to replace.
+      @param s The string to replace with.
+      @param n The length of the string to replace with.
 
-        @throw std::length_error `size() + (n - std::distance(i1, i2)) > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        const CharT* s,
-        size_type n)
-    {
-      return replace(i1 - begin(), i2 - i1, s, n);
-    }
+      @throw std::length_error `size() + (n - std::distance(i1, i2)) > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    const CharT* s,
+    size_type n)
+  {
+    return replace(i1 - begin(), i2 - i1, s, n);
+  }
 
-    /** Replace a range with a string.
+  /** Replace a range with a string.
 
-        Replaces the characters in the range `[i1, i2)` with those of
-        `[s, s + len)`, where the length of the string `len` is `Traits::length(s)`.
+      Replaces the characters in the range `[i1, i2)` with those of
+      `[s, s + len)`, where the length of the string `len` is `Traits::length(s)`.
 
-        @par Precondition
+      @par Precondition
 
-        `[i1, i2)` shall be a valid range.
+      `[i1, i2)` shall be a valid range.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator referring past the end of
-        the last character to replace.
-        @param s The string to replace with.
+      @param i1 An iterator referring to the first character to replace.
+      @param i2 An iterator referring past the end of
+      the last character to replace.
+      @param s The string to replace with.
 
-        @throw std::length_error `size() + (len - std::distance(i1, i2)) > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        const CharT* s)
-    {
-      return replace(i1, i2, s, Traits::length(s));
-    }
+      @throw std::length_error `size() + (len - std::distance(i1, i2)) > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    const CharT* s)
+  {
+    return replace(i1, i2, s, Traits::length(s));
+  }
 
-    /** Replace a range with copies of a character.
+  /** Replace a range with copies of a character.
 
-        Replaces the characters in the range `[i1, i2)` with
-        `n` copies of `c`.
+      Replaces the characters in the range `[i1, i2)` with
+      `n` copies of `c`.
 
-        @par Precondition
+      @par Precondition
 
-        `[i1, i2)` is a valid range.
+      `[i1, i2)` is a valid range.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator past the end of
-        the last character to replace.
-        @param n The number of characters to replace with.
-        @param c The character to replace with.
+      @param i1 An iterator referring to the first character to replace.
+      @param i2 An iterator past the end of
+      the last character to replace.
+      @param n The number of characters to replace with.
+      @param c The character to replace with.
 
-        @throw std::length_error `size() + (n - std::distance(i1, i2)) > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        size_type n,
-        CharT c)
-    {
-      return replace(i1 - begin(), i2 - i1, n, c);
-    }
+      @throw std::length_error `size() + (n - std::distance(i1, i2)) > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    size_type n,
+    CharT c)
+  {
+    return replace(i1 - begin(), i2 - i1, n, c);
+  }
 
-    /** Replace a range with a range.
+  /** Replace a range with a range.
 
-        Replaces the characters in the range `[i1, i2)`
-        with those of `[j1, j2)`.
+      Replaces the characters in the range `[i1, i2)`
+      with those of `[j1, j2)`.
 
-        @par Precondition
+      @par Precondition
 
-        `[i1, i2)` is a valid range.
+      `[i1, i2)` is a valid range.
 
-        `[j1, j2)` is a valid range.
+      `[j1, j2)` is a valid range.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @tparam InputIterator The type of the iterators.
+      @tparam InputIterator The type of the iterators.
 
-        @par Constraints
+      @par Constraints
 
-        `InputIterator` satisfies __InputIterator__ and does not 
-        satisfy __ForwardIterator__.
+      `InputIterator` satisfies __InputIterator__ and does not 
+      satisfy __ForwardIterator__.
 
-        @return `*this`
+      @return `*this`
 
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator referring past the end of
-        the last character to replace.
-        @param j1 An iterator referring to the first character to replace with.
-        @param j2 An iterator referring past the end of
-        the last character to replace with.
+      @param i1 An iterator referring to the first character to replace.
+      @param i2 An iterator referring past the end of
+      the last character to replace.
+      @param j1 An iterator referring to the first character to replace with.
+      @param j2 An iterator referring past the end of
+      the last character to replace with.
 
-        @throw std::length_error `size() + (inserted - std::distance(i1, i2)) > max_size()`
-    */
-    template<typename InputIterator>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @throw std::length_error `size() + (inserted - std::distance(i1, i2)) > max_size()`
+  */
+  template<typename InputIterator>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    basic_static_string&
+  basic_static_string&
 #else
-    typename std::enable_if<
-        detail::is_input_iterator<
-            InputIterator>::value && 
-                ! detail::is_forward_iterator<
-                      InputIterator>::value, 
-                          basic_static_string<N, CharT, Traits>&>::type
+  typename std::enable_if<
+    detail::is_input_iterator<
+      InputIterator>::value && 
+        !detail::is_forward_iterator<
+          InputIterator>::value, 
+            basic_static_string<N, CharT, Traits>&>::type
 #endif
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        InputIterator j1,
-        InputIterator j2);
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    InputIterator j1,
+    InputIterator j2);
 
 #ifndef GENERATING_DOCUMENTATION
-    template<typename ForwardIterator>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    typename std::enable_if<
-        detail::is_forward_iterator<
-            ForwardIterator>::value,
-                basic_static_string<N, CharT, Traits>&>::type
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        ForwardIterator j1,
-        ForwardIterator j2);
+  template<typename ForwardIterator>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  typename std::enable_if<
+    detail::is_forward_iterator<
+      ForwardIterator>::value,
+        basic_static_string<N, CharT, Traits>&>::type
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    ForwardIterator j1,
+    ForwardIterator j2);
 #endif
 
-    /** Replace a range with an initializer list.
+  /** Replace a range with an initializer list.
 
-        Replaces the characters in the range `[i1, i2)`
-        with those of contained in the initializer list `il`.
+      Replaces the characters in the range `[i1, i2)`
+      with those of contained in the initializer list `il`.
 
-        @par Precondition
+      @par Precondition
 
-        `[i1, i2)` is a valid range.
+      `[i1, i2)` is a valid range.
 
-        @par Exception Safety
+      @par Exception Safety
 
-        Strong guarantee.
+      Strong guarantee.
 
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
 
-        @return `*this`
+      @return `*this`
 
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator past the end of
-        the last character to replace.
-        @param il The initializer list to replace with.
+      @param i1 An iterator referring to the first character to replace.
+      @param i2 An iterator past the end of
+      the last character to replace.
+      @param il The initializer list to replace with.
 
-        @throw std::length_error `size() + (il.size() - std::distance(i1, i2)) > max_size()`
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace(
-        const_iterator i1,
-        const_iterator i2,
-        std::initializer_list<CharT> il)
-    {
-        return replace_unchecked(i1 - begin(), i2 - i1, il.begin(), il.size());
-    }
+      @throw std::length_error `size() + (il.size() - std::distance(i1, i2)) > max_size()`
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace(
+    const_iterator i1,
+    const_iterator i2,
+    std::initializer_list<CharT> il)
+  {
+      return replace_unchecked(i1 - begin(), i2 - i1, il.begin(), il.size());
+  }
 
-    //--------------------------------------------------------------------------
-    //
-    // Search
-    //
-    //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //
+  // Search
+  //
+  //--------------------------------------------------------------------------
 
-    /** Find the first occurrence of a string within the string.
+  /** Find the first occurrence of a string within the string.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
-        the first occurrence of `sv` within the string starting at the index `pos`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and finds
+      the first occurrence of `sv` within the string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @note An empty string is always found.
+      @note An empty string is always found.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return The lowest index `idx` greater than or equal to `pos`
-        where each element of `[sv.begin(), sv.end())` is equal to
-        that of `[begin() + idx, begin() + idx + count)` if one exists,
-        and @ref npos otherwise.
+      @return The lowest index `idx` greater than or equal to `pos`
+      where each element of `[sv.begin(), sv.end())` is equal to
+      that of `[begin() + idx, begin() + idx + count)` if one exists,
+      and @ref npos otherwise.
 
-        @param t The string to search for.
-        @param pos The index to start searching at. The default argument
-        for this parameter is `0`.
-    */
-    template<class T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @param t The string to search for.
+      @param pos The index to start searching at. The default argument
+      for this parameter is `0`.
+  */
+  template<class T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    size_type
+  size_type
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            size_type>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        size_type>::type
 #endif
-    find(
-        const T& t,
-        size_type pos = 0) const noexcept(detail::is_nothrow_convertible<const T&,
-                                          string_view_type>::value)
-    {
-      string_view_type sv = t;
-      return find(sv.data(), pos, sv.size());
-    }
+  find(
+    const T& t,
+    size_type pos = 0) const
+      noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+  {
+    string_view_type sv = t;
+    return find(sv.data(), pos, sv.size());
+  }
     
-     /** Find the first occurrence of a string within the string.
+    /** Find the first occurrence of a string within the string.
         
-        Finds the first occurrence of `str` within the
-        string starting at the index `pos`.
+      Finds the first occurrence of `str` within the
+      string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The lowest index `idx` greater than or equal to `pos` 
-        where each element of `str` is equal to that of 
-        `[begin() + idx, begin() + idx + str.size())` 
-        if one exists, and @ref npos otherwise.
+      @return The lowest index `idx` greater than or equal to `pos` 
+      where each element of `str` is equal to that of 
+      `[begin() + idx, begin() + idx + str.size())` 
+      if one exists, and @ref npos otherwise.
 
-        @param str The string to search for.
-        @param pos The index to start searching at. The default argument for
-        this parameter is `0`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-      find(
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type pos = 0) const noexcept
-    {
-      return find(str.data(), pos, str.size());
-    }
+      @param str The string to search for.
+      @param pos The index to start searching at. The default argument for
+      this parameter is `0`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find(
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type pos = 0) const noexcept
+  {
+    return find(str.data(), pos, str.size());
+  }
 
-    /** Find the first occurrence of a string within the string.
+  /** Find the first occurrence of a string within the string.
 
-        Finds the first occurrence of the string pointed to
-        by `s` within the string starting at the index `pos`.
+      Finds the first occurrence of the string pointed to
+      by `s` within the string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @note An empty string is always found.
+      @note An empty string is always found.
 
-        @return The lowest index `idx` greater than or equal to `pos`
-        where each element of `[s, s + n)` is equal to that of
-        `[begin() + idx, begin() + idx + n)` if one exists,
-        and @ref npos otherwise.
+      @return The lowest index `idx` greater than or equal to `pos`
+      where each element of `[s, s + n)` is equal to that of
+      `[begin() + idx, begin() + idx + n)` if one exists,
+      and @ref npos otherwise.
 
-        @param s The string to search for.
-        @param pos The index to start searching at.
-        @param n The length of the string to search for.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find(
-        const CharT* s, 
-        size_type pos,
-        size_type n) const noexcept;
+      @param s The string to search for.
+      @param pos The index to start searching at.
+      @param n The length of the string to search for.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find(
+    const CharT* s, 
+    size_type pos,
+    size_type n) const noexcept;
 
-    /** Find the first occurrence of a string within the string.
+  /** Find the first occurrence of a string within the string.
 
-        Finds the first occurrence of the string pointed to by `s`
-        of length `count` within the string starting at the index `pos`,
-        where `count` is `Traits::length(s)`.
+      Finds the first occurrence of the string pointed to by `s`
+      of length `count` within the string starting at the index `pos`,
+      where `count` is `Traits::length(s)`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @note An empty string is always found.
+      @note An empty string is always found.
 
-        @return The lowest index `idx` greater than or equal to `pos`
-        where each element of `[s, s + count)` is equal to that of
-        `[begin() + idx, begin() + idx + count)` if one exists,
-        and @ref npos otherwise.
+      @return The lowest index `idx` greater than or equal to `pos`
+      where each element of `[s, s + count)` is equal to that of
+      `[begin() + idx, begin() + idx + count)` if one exists,
+      and @ref npos otherwise.
 
-        @param s The string to search for.
-        @param pos The index to start searching at. The default argument
-        for this parameter is `0`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find(
-        const CharT* s,
-        size_type pos = 0) const noexcept
-    {
-      return find(s, pos, Traits::length(s));
-    }
+      @param s The string to search for.
+      @param pos The index to start searching at. The default argument
+      for this parameter is `0`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find(
+    const CharT* s,
+    size_type pos = 0) const noexcept
+  {
+    return find(s, pos, Traits::length(s));
+  }
 
-    /** Find the first occurrence of a character within the string.
+  /** Find the first occurrence of a character within the string.
 
-        Finds the first occurrence of `c` within the string
-        starting at the index `pos`.
+      Finds the first occurrence of `c` within the string
+      starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first occurrence of `c` within
-        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first occurrence of `c` within
+      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
 
-        @param c The character to search for.
-        @param pos The index to start searching at. The default argument
-        for this parameter is `0`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find(
-        CharT c,
-        size_type pos = 0) const noexcept
-    {
-      return find(&c, pos, 1);
-    }
+      @param c The character to search for.
+      @param pos The index to start searching at. The default argument
+      for this parameter is `0`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find(
+    CharT c,
+    size_type pos = 0) const noexcept
+  {
+    return find(&c, pos, 1);
+  }
 
 
-    /** Find the last occurrence of a string within the string.
+  /** Find the last occurrence of a string within the string.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
-        the last occurrence of `sv` within the string starting before or at
-        the index `pos`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and finds
+      the last occurrence of `sv` within the string starting before or at
+      the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return The highest index `idx` less than or equal to `pos`
-        where each element of `[sv.begin(), sv.end())` is equal to
-        that of `[begin() + idx, begin() + idx + count)` if one exists,
-        and @ref npos otherwise.
+      @return The highest index `idx` less than or equal to `pos`
+      where each element of `[sv.begin(), sv.end())` is equal to
+      that of `[begin() + idx, begin() + idx + count)` if one exists,
+      and @ref npos otherwise.
 
-        @param t The string to search for.
-        @param pos The index to start searching at. The default argument
-        for this parameter is @ref npos.
-    */
-    template<class T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @param t The string to search for.
+      @param pos The index to start searching at. The default argument
+      for this parameter is @ref npos.
+  */
+  template<class T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    size_type
+  size_type
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            size_type>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        size_type>::type
 #endif
-    rfind(
-        const T& t,
-        size_type pos = npos) const noexcept(detail::is_nothrow_convertible<const T&,
-                                             string_view_type>::value)
-    {
-      string_view_type sv = t;
-      return rfind(sv.data(), pos, sv.size());
-    }
+  rfind(
+    const T& t,
+    size_type pos = npos) const 
+      noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+  {
+    string_view_type sv = t;
+    return rfind(sv.data(), pos, sv.size());
+  }
 
-    /** Find the last occurrence of a string within the string.
+  /** Find the last occurrence of a string within the string.
 
-        Finds the last occurrence of `str` within the string
-        starting before or at the index `pos`.
+      Finds the last occurrence of `str` within the string
+      starting before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The highest index `idx` less than or equal to `pos`
-        where each element of `str` is equal to that
-        of `[begin() + idx, begin() + idx + str.size())`
-        if one exists, and @ref npos otherwise.
+      @return The highest index `idx` less than or equal to `pos`
+      where each element of `str` is equal to that
+      of `[begin() + idx, begin() + idx + str.size())`
+      if one exists, and @ref npos otherwise.
 
-        @param str The string to search for.
-        @param pos The index to start searching at. The default argument for
-        this parameter is @ref npos.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-      rfind(
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type pos = npos) const noexcept
-    {
-      return rfind(str.data(), pos, str.size());
-    }
+      @param str The string to search for.
+      @param pos The index to start searching at. The default argument for
+      this parameter is @ref npos.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  rfind(
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type pos = npos) const noexcept
+  {
+    return rfind(str.data(), pos, str.size());
+  }
 
-    /** Find the last occurrence of a string within the string.
+  /** Find the last occurrence of a string within the string.
 
-        Finds the last occurrence of the string pointed to
-        by `s` within the string starting before or at
-        the index `pos`.
+      Finds the last occurrence of the string pointed to
+      by `s` within the string starting before or at
+      the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The highest index `idx` less than or equal to `pos`
-        where each element of `[s, s + n)` is equal to that of
-        `[begin() + idx, begin() + idx + n)` if one exists,
-        and @ref npos otherwise.
+      @return The highest index `idx` less than or equal to `pos`
+      where each element of `[s, s + n)` is equal to that of
+      `[begin() + idx, begin() + idx + n)` if one exists,
+      and @ref npos otherwise.
 
-        @param s The string to search for.
-        @param pos The index to start searching at.
-        @param n The length of the string to search for.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    rfind(
-        const CharT* s, 
-        size_type pos,
-        size_type n) const noexcept;
+      @param s The string to search for.
+      @param pos The index to start searching at.
+      @param n The length of the string to search for.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  rfind(
+    const CharT* s, 
+    size_type pos,
+    size_type n) const noexcept;
 
-    /** Find the last occurrence of a string within the string.
+  /** Find the last occurrence of a string within the string.
 
-        Finds the last occurrence of the string pointed to by `s`
-        of length `count` within the string starting before or at the
-        index `pos`, where `count` is `Traits::length(s)`.
+      Finds the last occurrence of the string pointed to by `s`
+      of length `count` within the string starting before or at the
+      index `pos`, where `count` is `Traits::length(s)`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The highest index `idx` less than or equal to `pos`
-        where each element of `[s, s + count)` is equal to that of
-        `[begin() + idx, begin() + idx + count)` if one exists,
-        and @ref npos otherwise.
+      @return The highest index `idx` less than or equal to `pos`
+      where each element of `[s, s + count)` is equal to that of
+      `[begin() + idx, begin() + idx + count)` if one exists,
+      and @ref npos otherwise.
 
-        @param s The string to search for.
-        @param pos The index to stop searching at. The default argument
-        for this parameter is @ref npos.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    rfind(
-        const CharT* s,
-        size_type pos = npos) const noexcept
-    {
-      return rfind(s, pos, Traits::length(s));
-    }
+      @param s The string to search for.
+      @param pos The index to stop searching at. The default argument
+      for this parameter is @ref npos.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  rfind(
+    const CharT* s,
+    size_type pos = npos) const noexcept
+  {
+    return rfind(s, pos, Traits::length(s));
+  }
 
-    /** Find the last occurrence of a character within the string.
+  /** Find the last occurrence of a character within the string.
 
-        Finds the last occurrence of `c` within the string
-        starting before or at the index `pos`.
+      Finds the last occurrence of `c` within the string
+      starting before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last occurrence of `c` within
-        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last occurrence of `c` within
+      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
 
-        @param c The character to search for.
-        @param pos The index to stop searching at. The default argument
-        for this parameter is @ref npos.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    rfind(
-        CharT c,
-        size_type pos = npos) const noexcept
-    {
-      return rfind(&c, pos, 1);
-    }
+      @param c The character to search for.
+      @param pos The index to stop searching at. The default argument
+      for this parameter is @ref npos.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  rfind(
+    CharT c,
+    size_type pos = npos) const noexcept
+  {
+    return rfind(&c, pos, 1);
+  }
 
-    /** Find the first occurrence of any of the characters within the string.
+  /** Find the first occurrence of any of the characters within the string.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
-        the first occurrence of any of the characters in `sv`
-        within the string starting at the index `pos`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and finds
+      the first occurrence of any of the characters in `sv`
+      within the string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return The index corrosponding to the first occurrence of
-        any of the characters in `[sv.begin(), sv.end())` within
-        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first occurrence of
+      any of the characters in `[sv.begin(), sv.end())` within
+      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
 
-        @param t The characters to search for.
-        @param pos The index to start searching at. The default argument
-        for this parameter is `0`.
-    */
-    template<class T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @param t The characters to search for.
+      @param pos The index to start searching at. The default argument
+      for this parameter is `0`.
+  */
+  template<class T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    size_type
+  size_type
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            size_type>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        size_type>::type
 #endif
-    find_first_of(
-        const T& t,
-        size_type pos = 0) const noexcept(detail::is_nothrow_convertible<const T&,
-                                          string_view_type>::value)
-    {
-      string_view_type sv = t;
-      return find_first_of(sv.data(), pos, sv.size());
-    }
+  find_first_of(
+    const T& t,
+    size_type pos = 0) const
+      noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+  {
+    string_view_type sv = t;
+    return find_first_of(sv.data(), pos, sv.size());
+  }
 
-    /** Find the first occurrence of any of the characters within the string.
+  /** Find the first occurrence of any of the characters within the string.
 
-        Finds the first occurrence of any of the characters within `str` within the
-        string starting at the index `pos`.
+      Finds the first occurrence of any of the characters within `str` within the
+      string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first occurrence of any of the characters
-        of `str` within `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first occurrence of any of the characters
+      of `str` within `[begin() + pos, end())` if it exists, and @ref npos otherwise.
 
-        @param str The characters to search for.
-        @param pos The index to start searching at. The default argument for
-        this parameter is `0`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-      find_first_of(
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type pos = 0) const noexcept
-    {
-      return find_first_of(str.data(), pos, str.size());
-    }
+      @param str The characters to search for.
+      @param pos The index to start searching at. The default argument for
+      this parameter is `0`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_of(
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type pos = 0) const noexcept
+  {
+    return find_first_of(str.data(), pos, str.size());
+  }
 
-    /** Find the first occurrence of any of the characters within the string.
+  /** Find the first occurrence of any of the characters within the string.
 
-        Finds the first occurrence of any of the characters within the string pointed to
-        by `s` within the string starting at the index `pos`.
+      Finds the first occurrence of any of the characters within the string pointed to
+      by `s` within the string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first occurrence
-        of any of the characters in `[s, s + n)` within `[begin() + pos, end())`
-        if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first occurrence
+      of any of the characters in `[s, s + n)` within `[begin() + pos, end())`
+      if it exists, and @ref npos otherwise.
 
-        @param s The characters to search for.
-        @param pos The index to start searching at.
-        @param n The length of the string to search for.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_first_of(
-        const CharT* s,
-        size_type pos,
-        size_type n) const noexcept;
+      @param s The characters to search for.
+      @param pos The index to start searching at.
+      @param n The length of the string to search for.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept;
 
-    /** Find the first occurrence of any of the characters within the string.
+  /** Find the first occurrence of any of the characters within the string.
 
-        Finds the first occurrence of the any of the characters within string
-        pointed to by `s` of length `count` within the string starting at the
-        index `pos`, where `count` is `Traits::length(s)`.
+      Finds the first occurrence of the any of the characters within string
+      pointed to by `s` of length `count` within the string starting at the
+      index `pos`, where `count` is `Traits::length(s)`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first occurrence of any of
-        the characters in `[s, s + count)` within
-        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first occurrence of any of
+      the characters in `[s, s + count)` within
+      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
 
-        @param s The characters to search for.
-        @param pos The index to start searching at. The default argument
-        for this parameter is `0`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_first_of(
-        const CharT* s,
-        size_type pos = 0) const noexcept
-    {
-      return find_first_of(s, pos, Traits::length(s));
-    }
+      @param s The characters to search for.
+      @param pos The index to start searching at. The default argument
+      for this parameter is `0`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_of(
+    const CharT* s,
+    size_type pos = 0) const noexcept
+  {
+    return find_first_of(s, pos, Traits::length(s));
+  }
 
-    /** Find the first occurrence of a character within the string.
+  /** Find the first occurrence of a character within the string.
 
-        Finds the first occurrence of `c` within the string
-        starting at the index `pos`.
+      Finds the first occurrence of `c` within the string
+      starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first occurrence of `c` within
-        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first occurrence of `c` within
+      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
 
-        @param c The character to search for.
-        @param pos The index to start searching at. The default argument
-        for this parameter is `0`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_first_of(
-        CharT c,
-        size_type pos = 0) const noexcept
-    {
-      return find_first_of(&c, pos, 1);
-    }
+      @param c The character to search for.
+      @param pos The index to start searching at. The default argument
+      for this parameter is `0`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_of(
+    CharT c,
+    size_type pos = 0) const noexcept
+  {
+    return find_first_of(&c, pos, 1);
+  }
 
-    /** Find the last occurrence of any of the characters within the string.
+  /** Find the last occurrence of any of the characters within the string.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
-        the last occurrence of any of the characters in `sv`
-        within the string before or at the index `pos`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and finds
+      the last occurrence of any of the characters in `sv`
+      within the string before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return The index corrosponding to the last occurrence of
-        any of the characters in `[sv.begin(), sv.end())` within
-        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last occurrence of
+      any of the characters in `[sv.begin(), sv.end())` within
+      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
 
-        @param t The characters to search for.
-        @param pos The index to stop searching at. The default argument
-        for this parameter is @ref npos.
-    */
-    template<class T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @param t The characters to search for.
+      @param pos The index to stop searching at. The default argument
+      for this parameter is @ref npos.
+  */
+  template<class T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    size_type
+  size_type
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            size_type>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        size_type>::type
 #endif
-    find_last_of(
-        const T& t,
-        size_type pos = npos) const noexcept(detail::is_nothrow_convertible<const T&,
-                                             string_view_type>::value)
-    {
-      string_view_type sv = t;
-      return find_last_of(sv.data(), pos, sv.size());
-    }
+  find_last_of(
+    const T& t,
+    size_type pos = npos) const
+      noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+  {
+    string_view_type sv = t;
+    return find_last_of(sv.data(), pos, sv.size());
+  }
      
-    /** Find the last occurrence of any of the characters within the string.
+  /** Find the last occurrence of any of the characters within the string.
 
-        Finds the last occurrence of any of the characters within `str` within the
-        string starting before or at the index `pos`.
+      Finds the last occurrence of any of the characters within `str` within the
+      string starting before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last occurrence of any of the characters
-        of `str` within `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last occurrence of any of the characters
+      of `str` within `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
 
-        @param str The characters to search for.
-        @param pos The index to stop searching at. The default argument for
-        this parameter is @ref npos.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-      find_last_of(
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type pos = npos) const noexcept
-    {
-      return find_last_of(str.data(), pos, str.size());
-    }
+      @param str The characters to search for.
+      @param pos The index to stop searching at. The default argument for
+      this parameter is @ref npos.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_of(
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type pos = npos) const noexcept
+  {
+    return find_last_of(str.data(), pos, str.size());
+  }
 
-    /** Find the last occurrence of any of the characters within the string.
+  /** Find the last occurrence of any of the characters within the string.
 
-        Finds the last occurrence of any of the characters within the string pointed to
-        by `s` within the string before or at the index `pos`.
+      Finds the last occurrence of any of the characters within the string pointed to
+      by `s` within the string before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last occurrence
-        of any of the characters in `[s, s + n)` within `[begin(), begin() + pos]`
-        if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last occurrence
+      of any of the characters in `[s, s + n)` within `[begin(), begin() + pos]`
+      if it exists, and @ref npos otherwise.
 
-        @param s The characters to search for.
-        @param pos The index to stop searching at.
-        @param n The length of the string to search for.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_last_of(
-        const CharT* s,
-        size_type pos,
-        size_type n) const noexcept;
+      @param s The characters to search for.
+      @param pos The index to stop searching at.
+      @param n The length of the string to search for.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept;
 
-    /** Find the last occurrence of any of the characters within the string.
+  /** Find the last occurrence of any of the characters within the string.
 
-        Finds the last occurrence of any of the characters within the string pointed to
-        by `s` of length `count` within the string before or at the index `pos`,
-        where `count` is `Traits::length(s)`.
+      Finds the last occurrence of any of the characters within the string pointed to
+      by `s` of length `count` within the string before or at the index `pos`,
+      where `count` is `Traits::length(s)`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last occurrence
-        of any of the characters in `[s, s + count)` within `[begin(), begin() + pos]`
-        if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last occurrence
+      of any of the characters in `[s, s + count)` within `[begin(), begin() + pos]`
+      if it exists, and @ref npos otherwise.
 
-        @param s The characters to search for.
-        @param pos The index to stop searching at. The default argument for
-        this parameter is @ref npos.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_last_of(
-        const CharT* s,
-        size_type pos = npos) const noexcept
-    {
-      return find_last_of(s, pos, Traits::length(s));
-    }
+      @param s The characters to search for.
+      @param pos The index to stop searching at. The default argument for
+      this parameter is @ref npos.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_of(
+    const CharT* s,
+    size_type pos = npos) const noexcept
+  {
+    return find_last_of(s, pos, Traits::length(s));
+  }
 
-    /** Find the last occurrence of a character within the string.
+  /** Find the last occurrence of a character within the string.
 
-        Finds the last occurrence of `c` within the string
-        before or at the index `pos`.
+      Finds the last occurrence of `c` within the string
+      before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last occurrence of `c` within
-        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last occurrence of `c` within
+      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
 
-        @param c The character to search for.
-        @param pos The index to stop searching at. The default argument
-        for this parameter is @ref npos.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_last_of(
-        CharT c,
-        size_type pos = npos) const noexcept
-    {
-      return find_last_of(&c, pos, 1);
-    }
+      @param c The character to search for.
+      @param pos The index to stop searching at. The default argument
+      for this parameter is @ref npos.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_of(
+    CharT c,
+    size_type pos = npos) const noexcept
+  {
+    return find_last_of(&c, pos, 1);
+  }
 
-    /** Find the first occurrence of a character not within the string.
+  /** Find the first occurrence of a character not within the string.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
-        the first character that is not within `sv`, starting at the index `pos`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and finds
+      the first character that is not within `sv`, starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return The index corrosponding to the first occurrence of
-        a character that is not in `[sv.begin(), sv.end())` within
-        `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first occurrence of
+      a character that is not in `[sv.begin(), sv.end())` within
+      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
 
-        @param t The characters to ignore.
-        @param pos The index to start searching at. The default argument
-        for this parameter is `0`.
-    */
-    template<class T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @param t The characters to ignore.
+      @param pos The index to start searching at. The default argument
+      for this parameter is `0`.
+  */
+  template<class T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    size_type
+  size_type
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            size_type>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        size_type>::type
 #endif
-    find_first_not_of(
-        const T& t,
-        size_type pos = 0) const noexcept(detail::is_nothrow_convertible<const T&,
-                                          string_view_type>::value)
-    {
-      string_view_type sv = t;
-      return find_first_not_of(sv.data(), pos, sv.size());
-    }
+  find_first_not_of(
+    const T& t,
+    size_type pos = 0) const
+      noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+  {
+    string_view_type sv = t;
+    return find_first_not_of(sv.data(), pos, sv.size());
+  }
 
-    /** Find the first occurrence of any of the characters not within the string.
+  /** Find the first occurrence of any of the characters not within the string.
 
-        Finds the first occurrence of a character that is not within `str`
-        within the string starting at the index `pos`.
+      Finds the first occurrence of a character that is not within `str`
+      within the string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first character of `[begin() + pos, end())`
-        that is not within `str` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first character of `[begin() + pos, end())`
+      that is not within `str` if it exists, and @ref npos otherwise.
 
-        @param str The characters to ignore.
-        @param pos The index to start searching at. The default argument for
-        this parameter is `0`.
-    */
-    template<std::size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-      find_first_not_of(
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type pos = 0) const noexcept
-    {
-      return find_first_not_of(str.data(), pos, str.size());
-    }
+      @param str The characters to ignore.
+      @param pos The index to start searching at. The default argument for
+      this parameter is `0`.
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_not_of(
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type pos = 0) const noexcept
+  {
+    return find_first_not_of(str.data(), pos, str.size());
+  }
 
-    /** Find the first occurrence of any of the characters not within the string.
+  /** Find the first occurrence of any of the characters not within the string.
 
-        Finds the first occurrence of a character that is not within the string
-        pointed to by `s` within the string starting at the index `pos`.
+      Finds the first occurrence of a character that is not within the string
+      pointed to by `s` within the string starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first character of `[begin() + pos, end())`
-        that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first character of `[begin() + pos, end())`
+      that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
 
-        @param s The characters to ignore.
-        @param pos The index to start searching at. The default argument for
-        this parameter is `0`.
-        @param n The length of the characters to ignore.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_first_not_of(
-        const CharT* s,
-        size_type pos, 
-        size_type n) const noexcept;
+      @param s The characters to ignore.
+      @param pos The index to start searching at. The default argument for
+      this parameter is `0`.
+      @param n The length of the characters to ignore.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_not_of(
+    const CharT* s,
+    size_type pos, 
+    size_type n) const noexcept;
 
-    /** Find the first occurrence of any of the characters not within the string.
+  /** Find the first occurrence of any of the characters not within the string.
 
-        Finds the first occurrence of a character that is not within the string
-        pointed to by `s` of length `count` within the string starting
-        at the index `pos`, where `count` is `Traits::length(s)`.
+      Finds the first occurrence of a character that is not within the string
+      pointed to by `s` of length `count` within the string starting
+      at the index `pos`, where `count` is `Traits::length(s)`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first character of `[begin() + pos, end())`
-        that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first character of `[begin() + pos, end())`
+      that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
 
-        @param s The characters to ignore.
-        @param pos The index to start searching at. The default argument for
-        this parameter is `0`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_first_not_of(
-        const CharT* s,
-        size_type pos = 0) const noexcept
-    {
-      return find_first_not_of(s, pos, Traits::length(s));
-    }
+      @param s The characters to ignore.
+      @param pos The index to start searching at. The default argument for
+      this parameter is `0`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_not_of(
+    const CharT* s,
+    size_type pos = 0) const noexcept
+  {
+    return find_first_not_of(s, pos, Traits::length(s));
+  }
 
-    /** Find the first occurrence of a character not equal to `c`.
+  /** Find the first occurrence of a character not equal to `c`.
 
-        Finds the first occurrence of a character that is not equal
-        to `c`.
+      Finds the first occurrence of a character that is not equal
+      to `c`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the first character of `[begin() + pos, end())`
-        that is not equal to `c` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first character of `[begin() + pos, end())`
+      that is not equal to `c` if it exists, and @ref npos otherwise.
 
-        @param c The character to ignore.
-        @param pos The index to start searching at. The default argument for
-        this parameter is `0`.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_first_not_of(
-        CharT c,
-        size_type pos = 0) const noexcept
-    {
-      return find_first_not_of(&c, pos, 1);
-    }
+      @param c The character to ignore.
+      @param pos The index to start searching at. The default argument for
+      this parameter is `0`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_first_not_of(
+    CharT c,
+    size_type pos = 0) const noexcept
+  {
+    return find_first_not_of(&c, pos, 1);
+  }
 
-    /** Find the last occurrence of a character not within the string.
+  /** Find the last occurrence of a character not within the string.
 
-        Constructs a temporary `string_view_type` object `sv` from `t`, and finds
-        the last character that is not within `sv`, starting at the index `pos`.
+      Constructs a temporary `string_view_type` object `sv` from `t`, and finds
+      the last character that is not within `sv`, starting at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @tparam T The type of the object to convert.
+      @tparam T The type of the object to convert.
 
-        @par Constraints
+      @par Constraints
 
-        `std::is_convertible<T const&, string_view>::value &&
-        !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char CharT*>::value`.
 
-        @return The index corrosponding to the last occurrence of
-        a character that is not in `[sv.begin(), sv.end())` within
-        `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last occurrence of
+      a character that is not in `[sv.begin(), sv.end())` within
+      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
 
-        @param t The characters to ignore.
-        @param pos The index to start searching at. The default argument
-        for this parameter is @ref npos.
-    */
-    template<class T>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+      @param t The characters to ignore.
+      @param pos The index to start searching at. The default argument
+      for this parameter is @ref npos.
+  */
+  template<class T>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #if GENERATING_DOCUMENTATION
-    size_type
+  size_type
 #else
-    typename std::enable_if<
-        std::is_convertible<T, string_view_type>::value &&
-        ! std::is_convertible<T, CharT const*>::value,
-            size_type>::type
+  typename std::enable_if<
+    std::is_convertible<T, string_view_type>::value &&
+      !std::is_convertible<T, CharT const*>::value,
+        size_type>::type
 #endif
-    find_last_not_of(
-        const T& t,
-        size_type pos = npos) const noexcept(detail::is_nothrow_convertible<const T&,
-                                             string_view_type>::value)
-    {
-      string_view_type sv = t;
-      return find_last_not_of(sv.data(), pos, sv.size());
-    }
+  find_last_not_of(
+    const T& t,
+    size_type pos = npos) const
+      noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+  {
+    string_view_type sv = t;
+    return find_last_not_of(sv.data(), pos, sv.size());
+  }
 
-    /** Find the last occurrence of a character not within the string.
+  /** Find the last occurrence of a character not within the string.
 
-        Finds the last occurrence of a character that is not within `str`
-        within the string before or at the index `pos`.
+      Finds the last occurrence of a character that is not within `str`
+      within the string before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
-        that is not within `str` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+      that is not within `str` if it exists, and @ref npos otherwise.
 
-        @param str The characters to ignore.
-        @param pos The index to stop searching at. The default argument for
-        this parameter is @ref npos.
-    */
-    template<size_t M>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-      find_last_not_of(
-        const basic_static_string<M, CharT, Traits>& str,
-        size_type pos = npos) const noexcept
-    {
-      return find_last_not_of(str.data(), pos, str.size());
-    }
+      @param str The characters to ignore.
+      @param pos The index to stop searching at. The default argument for
+      this parameter is @ref npos.
+  */
+  template<size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_not_of(
+    const basic_static_string<M, CharT, Traits>& str,
+    size_type pos = npos) const noexcept
+  {
+    return find_last_not_of(str.data(), pos, str.size());
+  }
 
-    /** Find the last occurrence of a character not within the string.
+  /** Find the last occurrence of a character not within the string.
 
-        Finds the last occurrence of a character that is not within the
-        string pointed to by `s` within the string before or at the index `pos`.
+      Finds the last occurrence of a character that is not within the
+      string pointed to by `s` within the string before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
-        that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+      that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
 
-        @param s The characters to ignore.
-        @param pos The index to stop searching at. The default argument for
-        this parameter is @ref npos.
-        @param n The length of the characters to ignore.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_last_not_of(
-        const CharT* s,
-        size_type pos,
-        size_type n) const noexcept;
+      @param s The characters to ignore.
+      @param pos The index to stop searching at. The default argument for
+      this parameter is @ref npos.
+      @param n The length of the characters to ignore.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_not_of(
+    const CharT* s,
+    size_type pos,
+    size_type n) const noexcept;
 
 
-    /** Find the last occurrence of a character not within the string.
+  /** Find the last occurrence of a character not within the string.
 
-        Finds the last occurrence of a character that is not within the
-        string pointed to by `s` of length `count` within the string
-        before or at the index `pos`, where `count` is `Traits::length(s)`.
+      Finds the last occurrence of a character that is not within the
+      string pointed to by `s` of length `count` within the string
+      before or at the index `pos`, where `count` is `Traits::length(s)`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
-        that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+      that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
 
-        @param s The characters to ignore.
-        @param pos The index to stop searching at. The default argument for
-        this parameter is @ref npos.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_last_not_of(
-        const CharT* s,
-        size_type pos = npos) const noexcept
-    {
-      return find_last_not_of(s, pos, Traits::length(s));
-    }
+      @param s The characters to ignore.
+      @param pos The index to stop searching at. The default argument for
+      this parameter is @ref npos.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_not_of(
+    const CharT* s,
+    size_type pos = npos) const noexcept
+  {
+    return find_last_not_of(s, pos, Traits::length(s));
+  }
 
-    /** Find the last occurrence of a character not equal to `c`.
+  /** Find the last occurrence of a character not equal to `c`.
 
-        Finds the last occurrence of a character that is not equal
-        to `c` before or at the index `pos`.
+      Finds the last occurrence of a character that is not equal
+      to `c` before or at the index `pos`.
 
-        @par Complexity
+      @par Complexity
 
-        Linear.
+      Linear.
 
-        @return The index corrosponding to the last character of `[begin(), begin() + pos]`
-        that is not equal to `c` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+      that is not equal to `c` if it exists, and @ref npos otherwise.
 
-        @param c The character to ignore.
-        @param pos The index to start searching at. The default argument for
-        this parameter is @ref npos.
-    */
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    find_last_not_of(
-        CharT c,
-        size_type pos = npos) const noexcept
-    {
-      return find_last_not_of(&c, pos, 1);
-    }
+      @param c The character to ignore.
+      @param pos The index to start searching at. The default argument for
+      this parameter is @ref npos.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  find_last_not_of(
+    CharT c,
+    size_type pos = npos) const noexcept
+  {
+    return find_last_not_of(&c, pos, 1);
+  }
 
-    /// Returns whether the string begins with `s` 
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    bool 
-    starts_with(
-        string_view_type s) const noexcept
-    {
-      const size_type len = s.size();
-      return size() >= len && !Traits::compare(data(), s.data(), len);
-    }
+  /// Returns whether the string begins with `s` 
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  bool 
+  starts_with(
+    string_view_type s) const noexcept
+  {
+    const size_type len = s.size();
+    return size() >= len && !Traits::compare(data(), s.data(), len);
+  }
     
-    /// Returns whether the string begins with `c`
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    bool 
-    starts_with(
-        CharT c) const noexcept
-    {
-      return !empty() && Traits::eq(front(), c);
-    }
+  /// Returns whether the string begins with `c`
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  bool 
+  starts_with(
+    CharT c) const noexcept
+  {
+    return !empty() && Traits::eq(front(), c);
+  }
     
-    /// Returns whether the string begins with `s`
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    bool 
-    starts_with(
-        const CharT* s) const noexcept
-    {
-      const size_type len = Traits::length(s);
-      return size() >= len && !Traits::compare(data(), s, len);
-    }
+  /// Returns whether the string begins with `s`
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  bool 
+  starts_with(
+    const CharT* s) const noexcept
+  {
+    const size_type len = Traits::length(s);
+    return size() >= len && !Traits::compare(data(), s, len);
+  }
     
-    /// Returns whether the string ends with `s`
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    bool 
-    ends_with(
-        string_view_type s) const noexcept
-    {
-      const size_type len = s.size();
-      return size() >= len && !Traits::compare(data() + (size() - len), s.data(), len);
-    }
+  /// Returns whether the string ends with `s`
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  bool 
+  ends_with(
+    string_view_type s) const noexcept
+  {
+    const size_type len = s.size();
+    return size() >= len && !Traits::compare(data() + (size() - len), s.data(), len);
+  }
     
-    /// Returns whether the string ends with `c`
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    bool
-    ends_with(
-        CharT c) const noexcept
-    {
-      return !empty() && Traits::eq(back(), c);
-    }
+  /// Returns whether the string ends with `c`
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  bool
+  ends_with(
+    CharT c) const noexcept
+  {
+    return !empty() && Traits::eq(back(), c);
+  }
     
-    /// Returns whether the string begins with `s`
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    bool 
-    ends_with(
-        const CharT* s) const noexcept
-    {
-      const size_type len = Traits::length(s);
-      return size() >= len && !Traits::compare(data() + (size() - len), s, len);
-    }
+  /// Returns whether the string begins with `s`
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  bool 
+  ends_with(
+    const CharT* s) const noexcept
+  {
+    const size_type len = Traits::length(s);
+    return size() >= len && !Traits::compare(data() + (size() - len), s, len);
+  }
 
 private:
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    assign_char(CharT ch, std::true_type) noexcept;
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign_char(CharT ch, std::true_type) noexcept;
 
-    basic_static_string&
-    assign_char(CharT ch, std::false_type);
+  basic_static_string&
+  assign_char(CharT ch, std::false_type);
 
-    // Returns the size of data read from input iterator. Read data begins at data() + size() + 1.
-    template<typename InputIterator>
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    size_type
-    read_back(
-        InputIterator first, 
-        InputIterator last);
+  // Returns the size of data read from input iterator. Read data begins at data() + size() + 1.
+  template<typename InputIterator>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  read_back(
+    InputIterator first, 
+    InputIterator last);
 
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    replace_unchecked(
-        size_type pos,
-        size_type n1,
-        const CharT* s,
-        size_type n2);
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  replace_unchecked(
+    size_type pos,
+    size_type n1,
+    const CharT* s,
+    size_type n2);
 
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    basic_static_string&
-    insert_unchecked(
-        size_type index,
-        const CharT* s,
-        size_type count);
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  insert_unchecked(
+    size_type index,
+    const CharT* s,
+    size_type count);
 };
 
 //------------------------------------------------------------------------------
@@ -4064,94 +4054,81 @@ private:
 //------------------------------------------------------------------------------
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  basic_static_string<M, CharT, Traits> const& rhs)
 {
-    return lhs.compare(rhs) == 0;
+  return lhs.compare(rhs) == 0;
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  basic_static_string<M, CharT, Traits> const& rhs)
 {
-    return lhs.compare(rhs) != 0;
+  return lhs.compare(rhs) != 0;
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  basic_static_string<M, CharT, Traits> const& rhs)
 {
-    return lhs.compare(rhs) < 0;
+  return lhs.compare(rhs) < 0;
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  basic_static_string<M, CharT, Traits> const& rhs)
 {
-    return lhs.compare(rhs) <= 0;
+  return lhs.compare(rhs) <= 0;
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  basic_static_string<M, CharT, Traits> const& rhs)
 {
-    return lhs.compare(rhs) > 0;
+  return lhs.compare(rhs) > 0;
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    basic_static_string<M, CharT, Traits> const& rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  basic_static_string<M, CharT, Traits> const& rhs)
 {
-    return lhs.compare(rhs) >= 0;
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-inline
-bool
-operator==(
-    CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs)
-{
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs, Traits::length(lhs),
-        rhs.data(), rhs.size()) == 0;
+  return lhs.compare(rhs) >= 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4159,12 +4136,25 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs)
+  CharT const* lhs,
+  basic_static_string<N, CharT, Traits> const& rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs.data(), lhs.size(),
-        rhs, Traits::length(rhs)) == 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs, Traits::length(lhs),
+    rhs.data(), rhs.size()) == 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  basic_static_string<N, CharT, Traits> const& lhs,
+  CharT const* rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs, Traits::length(rhs)) == 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4172,12 +4162,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
-    CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs)
+  CharT const* lhs,
+  basic_static_string<N, CharT, Traits> const& rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs, Traits::length(lhs),
-        rhs.data(), rhs.size()) != 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs, Traits::length(lhs),
+    rhs.data(), rhs.size()) != 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4185,12 +4175,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  CharT const* rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs.data(), lhs.size(),
-        rhs, Traits::length(rhs)) != 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs, Traits::length(rhs)) != 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4198,12 +4188,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
-    CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs)
+  CharT const* lhs,
+  basic_static_string<N, CharT, Traits> const& rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs, Traits::length(lhs),
-        rhs.data(), rhs.size()) < 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs, Traits::length(lhs),
+    rhs.data(), rhs.size()) < 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4211,12 +4201,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  CharT const* rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs.data(), lhs.size(),
-        rhs, Traits::length(rhs)) < 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs, Traits::length(rhs)) < 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4224,12 +4214,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
-    CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs)
+  CharT const* lhs,
+  basic_static_string<N, CharT, Traits> const& rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs, Traits::length(lhs),
-        rhs.data(), rhs.size()) <= 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs, Traits::length(lhs),
+    rhs.data(), rhs.size()) <= 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4237,12 +4227,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  CharT const* rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs.data(), lhs.size(),
-        rhs, Traits::length(rhs)) <= 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs, Traits::length(rhs)) <= 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4250,12 +4240,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
-    CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs)
+  CharT const* lhs,
+  basic_static_string<N, CharT, Traits> const& rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs, Traits::length(lhs),
-        rhs.data(), rhs.size()) > 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs, Traits::length(lhs),
+    rhs.data(), rhs.size()) > 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4263,12 +4253,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  CharT const* rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs.data(), lhs.size(),
-        rhs, Traits::length(rhs)) > 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs, Traits::length(rhs)) > 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4276,12 +4266,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
-    CharT const* lhs,
-    basic_static_string<N, CharT, Traits> const& rhs)
+  CharT const* lhs,
+  basic_static_string<N, CharT, Traits> const& rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs, Traits::length(lhs),
-        rhs.data(), rhs.size()) >= 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs, Traits::length(lhs),
+    rhs.data(), rhs.size()) >= 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4289,25 +4279,25 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT const* rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  CharT const* rhs)
 {
-    return detail::lexicographical_compare<CharT, Traits>(
-        lhs.data(), lhs.size(),
-        rhs, Traits::length(rhs)) >= 0;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs, Traits::length(rhs)) >= 0;
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
-    basic_static_string<N, CharT, Traits>const& lhs,
-    basic_static_string<M, CharT, Traits>const& rhs)
+  basic_static_string<N, CharT, Traits>const& lhs,
+  basic_static_string<M, CharT, Traits>const& rhs)
 {
-    return basic_static_string<N + M, CharT, Traits>(lhs) += rhs;
+  return basic_static_string<N + M, CharT, Traits>(lhs) += rhs;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4315,10 +4305,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + 1, CharT, Traits>
 operator+(
-    basic_static_string<N, CharT, Traits> const& lhs,
-    CharT rhs)
+  basic_static_string<N, CharT, Traits> const& lhs,
+  CharT rhs)
 {
-    return basic_static_string<N + 1, CharT, Traits>(lhs) += rhs;
+  return basic_static_string<N + 1, CharT, Traits>(lhs) += rhs;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4326,36 +4316,36 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + 1, CharT, Traits>
 operator+(
-    CharT lhs,
-    basic_static_string<N, CharT, Traits> const& rhs)
+  CharT lhs,
+  basic_static_string<N, CharT, Traits> const& rhs)
 {
-    return basic_static_string<N + 1, CharT, Traits>(rhs).insert(0, lhs);
+  return basic_static_string<N + 1, CharT, Traits>(rhs).insert(0, lhs);
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
-    basic_static_string<N, CharT, Traits>const& lhs,
-    const CharT(&rhs)[M])
+  basic_static_string<N, CharT, Traits>const& lhs,
+  const CharT(&rhs)[M])
 {
-    return basic_static_string<N + M, CharT, Traits>(lhs).append(+rhs, M);
+  return basic_static_string<N + M, CharT, Traits>(lhs).append(+rhs, M);
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
-    const CharT(&lhs)[N],
-    basic_static_string<M, CharT, Traits>const& rhs)
+  const CharT(&lhs)[N],
+  basic_static_string<M, CharT, Traits>const& rhs)
 {
-    return basic_static_string<N + M, CharT, Traits>(rhs).insert(0, +rhs, N);
+  return basic_static_string<N + M, CharT, Traits>(rhs).insert(0, +rhs, N);
 }
 
 //------------------------------------------------------------------------------
@@ -4364,31 +4354,28 @@ operator+(
 //
 //------------------------------------------------------------------------------
 
-template<
-    std::size_t N, 
-    typename CharT, 
-    typename Traits>
+template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 void
 swap(
-    basic_static_string<N, CharT, Traits>& lhs,
-    basic_static_string<N, CharT, Traits>& rhs)
+  basic_static_string<N, CharT, Traits>& lhs,
+  basic_static_string<N, CharT, Traits>& rhs)
 {
-    lhs.swap(rhs);
+  lhs.swap(rhs);
 }
 
 template<
-    std::size_t N, std::size_t M,
-    typename CharT, typename Traits>
+  std::size_t N, std::size_t M,
+  typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 void
 swap(
-    basic_static_string<N, CharT, Traits>& lhs,
-    basic_static_string<M, CharT, Traits>& rhs)
+  basic_static_string<N, CharT, Traits>& lhs,
+  basic_static_string<M, CharT, Traits>& rhs)
 {
-    lhs.swap(rhs);
+  lhs.swap(rhs);
 }
 
 //------------------------------------------------------------------------------
@@ -4400,10 +4387,11 @@ swap(
 template<std::size_t N, typename CharT, typename Traits>
 inline
 std::basic_ostream<CharT, Traits>& 
-operator<<(std::basic_ostream<CharT, Traits>& os, 
-    basic_static_string<N, CharT, Traits> const& s)
+operator<<(
+  std::basic_ostream<CharT, Traits>& os, 
+  basic_static_string<N, CharT, Traits> const& s)
 {
-    return os << basic_string_view<CharT, Traits>(s.data(), s.size());
+  return os << basic_string_view<CharT, Traits>(s.data(), s.size());
 }
 
 //------------------------------------------------------------------------------
@@ -4583,7 +4571,7 @@ to_static_wstring(long double value) noexcept
 #ifdef BOOST_STATIC_STRING_USE_DEDUCT
 template<std::size_t N, typename CharT>
 basic_static_string(CharT(&)[N]) -> 
-    basic_static_string<N, CharT, std::char_traits<CharT>>;
+  basic_static_string<N, CharT, std::char_traits<CharT>>;
 #endif
 
 //------------------------------------------------------------------------------
@@ -4595,13 +4583,13 @@ basic_static_string(CharT(&)[N]) ->
 #ifndef BOOST_STATIC_STRING_STANDALONE
 /// hash_value overload for Boost.Container_Hash
 template <std::size_t N, 
-    typename CharT, 
-    typename Traits>
+  typename CharT, 
+  typename Traits>
 std::size_t 
 hash_value(
-    const basic_static_string<N, CharT, Traits>& str)
+  const basic_static_string<N, CharT, Traits>& str)
 {
-    return boost::hash_range(str.begin(), str.end());
+  return boost::hash_range(str.begin(), str.end());
 }
 #endif
 
@@ -4611,7 +4599,6 @@ hash_value(
 /// std::hash partial specialization for basic_static_string
 namespace std
 {
-
   template<std::size_t N, typename CharT, typename Traits>
   struct hash<
 #if GENERATING_DOCUMENTATION
@@ -4623,13 +4610,13 @@ namespace std
   {
     std::size_t 
     operator()(
-        const boost::static_string::basic_static_string<N, CharT, Traits>& str) const noexcept
+      const boost::static_string::basic_static_string<N, CharT, Traits>& str) const noexcept
     {
 #ifndef BOOST_STATIC_STRING_STANDALONE
-        return boost::hash_range(str.begin(), str.end());
+      return boost::hash_range(str.begin(), str.end());
 #else
-        using sv = boost::static_string::basic_string_view<CharT, Traits>;
-        return std::hash<sv>()(sv(str.data(), str.size()));
+      using sv = boost::static_string::basic_string_view<CharT, Traits>;
+      return std::hash<sv>()(sv(str.data(), str.size()));
 #endif
     }
   };
@@ -4667,8 +4654,9 @@ template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(basic_static_string<M, CharT, Traits> const& other,
-    size_type pos)
+basic_static_string(
+  basic_static_string<M, CharT, Traits> const& other,
+  size_type pos)
 {
   assign(other, pos);
 }
@@ -4678,9 +4666,9 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-    basic_static_string<M, CharT, Traits> const& other,
-    size_type pos,
-    size_type count)
+  basic_static_string<M, CharT, Traits> const& other,
+  size_type pos,
+  size_type count)
 {
   assign(other, pos, count);
 }
@@ -4700,21 +4688,21 @@ basic_static_string(CharT const* s)
 {
   auto const count = Traits::length(s);
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
-                                std::length_error{"count > max_size()"});
+    std::length_error{"count > max_size()"});
   Traits::copy(data(), s, count + 1);
   this->set_size(count);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
 template<class InputIterator,
-    typename std::enable_if<
-        detail::is_input_iterator<InputIterator>
-            ::value>::type*>
+  typename std::enable_if<
+    detail::is_input_iterator<InputIterator>
+      ::value>::type*>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-    InputIterator first,
-    InputIterator last)
+  InputIterator first,
+  InputIterator last)
 {
   assign(first, last);
 }
@@ -4723,7 +4711,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-    basic_static_string const& s) noexcept
+  basic_static_string const& s) noexcept
 {
   assign(s);
 }
@@ -4733,7 +4721,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-    basic_static_string<M, CharT, Traits> const& s)
+  basic_static_string<M, CharT, Traits> const& s)
 {
   assign(s);
 }
@@ -4768,12 +4756,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
-    size_type count,
-    CharT ch) ->
-        basic_static_string&
+  size_type count,
+  CharT ch) ->
+    basic_static_string&
 {
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
-                                std::length_error{"count > max_size()"});
+    std::length_error{"count > max_size()"});
   this->set_size(count);
   Traits::assign(data(), size(), ch);
   term();
@@ -4789,7 +4777,7 @@ assign(
         basic_static_string&
 {
   if(this == &s)
-      return *this;
+    return *this;
   this->set_size(s.size());
   auto const n = size() + 1;
   Traits::copy(data(), &s.data()[0], n);
@@ -4802,9 +4790,9 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
-    basic_static_string<M, CharT, Traits> const& s,
-    size_type pos,
-    size_type count) ->
+  basic_static_string<M, CharT, Traits> const& s,
+  size_type pos,
+  size_type count) ->
     basic_static_string&
 {
   auto const ss = s.subview(pos, count);
@@ -4816,12 +4804,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
-    CharT const* s,
-    size_type count) ->
-        basic_static_string&
+  CharT const* s,
+  size_type count) ->
+    basic_static_string&
 {
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
-                                std::length_error{"count > max_size()"});
+    std::length_error{"count > max_size()"});
   this->set_size(count);
   Traits::move(data(), s, size());
   term();
@@ -4834,11 +4822,11 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
-    InputIterator first,
-    InputIterator last) ->
-        typename std::enable_if<
-            detail::is_input_iterator<InputIterator>::value,
-                basic_static_string&>::type
+  InputIterator first,
+  InputIterator last) ->
+    typename std::enable_if<
+      detail::is_input_iterator<InputIterator>::value,
+        basic_static_string&>::type
 {
   auto ptr = data();
   for (std::size_t i = 0; first != last; ++first, ++ptr, ++i)
@@ -4860,10 +4848,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 at(size_type pos) ->
-    reference
+  reference
 {
   BOOST_STATIC_STRING_THROW_IF(
-      pos >= size(), std::out_of_range{"pos >= size()"});
+    pos >= size(), std::out_of_range{"pos >= size()"});
   return data()[pos];
 }
 
@@ -4872,10 +4860,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 at(size_type pos) const ->
-    const_reference
+  const_reference
 {
   BOOST_STATIC_STRING_THROW_IF(
-      pos >= size(), std::out_of_range{"pos >= size()"});
+    pos >= size(), std::out_of_range{"pos >= size()"});
   return data()[pos];
 }
 
@@ -4886,7 +4874,7 @@ basic_static_string<N, CharT, Traits>::
 reserve(std::size_t n)
 {
   BOOST_STATIC_STRING_THROW_IF(
-      n > max_size(), std::length_error{"n > max_size()"});
+    n > max_size(), std::length_error{"n > max_size()"});
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -4904,15 +4892,15 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 insert(
-    size_type index,
-    CharT const* s,
-    size_type count) ->
-        basic_static_string&
+  size_type index,
+  CharT const* s,
+  size_type count) ->
+    basic_static_string&
 {
   const auto curr_size = size();
   const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
-      index > curr_size, std::out_of_range{"index > size()"});
+    index > curr_size, std::out_of_range{"index > size()"});
   insert(curr_data + index, s, s + count);
   return *this;
 }
@@ -4922,15 +4910,15 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 insert(
-    const_iterator pos,
-    size_type count,
-    CharT ch) ->
-        iterator
+  const_iterator pos,
+  size_type count,
+  CharT ch) ->
+    iterator
 {
   const auto curr_size = size();
   const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
-      count > max_size() - curr_size, std::length_error{"count() > max_size() - size()"});
+    count > max_size() - curr_size, std::length_error{"count() > max_size() - size()"});
   auto const index = pos - curr_data;
   Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
   Traits::assign(&curr_data[index], count, ch);
@@ -4945,12 +4933,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 insert(
-    const_iterator pos,
-    ForwardIterator first,
-    ForwardIterator last) ->
-        typename std::enable_if<
-            detail::is_forward_iterator<
-                ForwardIterator>::value, iterator>::type
+  const_iterator pos,
+  ForwardIterator first,
+  ForwardIterator last) ->
+    typename std::enable_if<
+      detail::is_forward_iterator<
+        ForwardIterator>::value, iterator>::type
 {
   const auto curr_size = size();
   const auto curr_data = data();
@@ -4990,14 +4978,14 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 insert(
-    const_iterator pos,
-    InputIterator first,
-    InputIterator last) ->
-        typename std::enable_if<
-            detail::is_input_iterator<
-                InputIterator>::value && 
-                    ! detail::is_forward_iterator<
-                          InputIterator>::value, iterator>::type
+  const_iterator pos,
+  InputIterator first,
+  InputIterator last) ->
+    typename std::enable_if<
+      detail::is_input_iterator<
+        InputIterator>::value && 
+          !detail::is_forward_iterator<
+            InputIterator>::value, iterator>::type
 {
   const auto curr_size = size();
   const auto curr_data = data();
@@ -5015,14 +5003,14 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 erase(
-    size_type index,
-    size_type count) ->
-        basic_static_string&
+  size_type index,
+  size_type count) ->
+    basic_static_string&
 {
   const auto curr_size = size();
   const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
-      index > curr_size, std::out_of_range{"index > size()"});
+    index > curr_size, std::out_of_range{"index > size()"});
   auto const n = (std::min)(count, curr_size - index);
   Traits::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
   this->set_size(curr_size - n);
@@ -5034,8 +5022,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 erase(
-    const_iterator pos) ->
-        iterator
+  const_iterator pos) ->
+    iterator
 {
   erase(pos - begin(), 1);
   return begin() + (pos - begin());
@@ -5046,12 +5034,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 erase(
-    const_iterator first,
-    const_iterator last) ->
-        iterator
+  const_iterator first,
+  const_iterator last) ->
+    iterator
 {
   erase(first - begin(),
-      detail::distance(first, last));
+    detail::distance(first, last));
   return begin() + (first - begin());
 }
 
@@ -5060,11 +5048,11 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
 push_back(
-    CharT ch)
+  CharT ch)
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
-      curr_size >= max_size(), std::length_error{"size() >= max_size()"});
+    curr_size >= max_size(), std::length_error{"size() >= max_size()"});
   Traits::assign(data()[curr_size], ch);
   this->set_size(curr_size + 1);
   term();
@@ -5075,13 +5063,13 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 append(
-    CharT const* s,
-    size_type count) ->
-        basic_static_string&
+  CharT const* s,
+  size_type count) ->
+    basic_static_string&
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
-      count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
+    count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
   Traits::copy(&data()[curr_size], s, count);
   this->set_size(curr_size + count);
   term();
@@ -5093,10 +5081,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 substr(size_type pos, size_type count) const ->
-    basic_static_string
+  basic_static_string
 {
   BOOST_STATIC_STRING_THROW_IF(
-      pos > size(), std::out_of_range{"pos > size()"});
+    pos > size(), std::out_of_range{"pos > size()"});
   return {&data()[pos], (std::min)(count, size() - pos)};
 }
 
@@ -5105,7 +5093,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 subview(size_type pos, size_type count) const ->
-    string_view_type
+  string_view_type
 {
   BOOST_STATIC_STRING_THROW_IF(
     pos > size(), std::out_of_range{"pos > size()"});
@@ -5117,7 +5105,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 copy(CharT* dest, size_type count, size_type pos) const ->
-    size_type
+  size_type
 {
   auto const s = subview(pos, count);
   Traits::copy(dest, s.data(), s.size());
@@ -5132,9 +5120,9 @@ resize(std::size_t n)
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
-      n > max_size(), std::length_error{"n > max_size()"});
+    n > max_size(), std::length_error{"n > max_size()"});
   if(n > curr_size)
-      Traits::assign(&data()[curr_size], n - curr_size, CharT{});
+    Traits::assign(&data()[curr_size], n - curr_size, CharT{});
   this->set_size(n);
   term();
 }
@@ -5147,9 +5135,9 @@ resize(std::size_t n, CharT c)
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
-      n > max_size(), std::length_error{"n > max_size()"});
+    n > max_size(), std::length_error{"n > max_size()"});
   if(n > curr_size)
-      Traits::assign(&data()[curr_size], n - curr_size, c);
+    Traits::assign(&data()[curr_size], n - curr_size, c);
   this->set_size(n);
   term();
 }
@@ -5177,9 +5165,9 @@ swap(basic_static_string<M, CharT, Traits>& s)
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
-      curr_size > s.max_size(), std::length_error{"size() > s.max_size()"});
+    curr_size > s.max_size(), std::length_error{"size() > s.max_size()"});
   BOOST_STATIC_STRING_THROW_IF(
-      s.size() > max_size(), std::length_error{"s.size() > max_size()"});
+    s.size() > max_size(), std::length_error{"s.size() > max_size()"});
   basic_static_string tmp(s);
   s.set_size(curr_size);
   Traits::copy(&s.data()[0], data(), curr_size + 1);
@@ -5192,14 +5180,14 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 replace(
-    size_type pos,
-    size_type n1,
-    const CharT* s,
-    size_type n2) -> 
-        basic_static_string<N, CharT, Traits>&
+  size_type pos,
+  size_type n1,
+  const CharT* s,
+  size_type n2) -> 
+    basic_static_string<N, CharT, Traits>&
 {
   BOOST_STATIC_STRING_THROW_IF(
-      pos > size(), std::out_of_range{"pos > size()"});
+    pos > size(), std::out_of_range{"pos > size()"});
   return replace(data() + pos, data() + pos + n1, s, s + n2);
 }
 
@@ -5208,18 +5196,19 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 replace(
-    size_type pos,
-    size_type n1,
-    size_type n2,
-    CharT c) -> basic_static_string<N, CharT, Traits> &
+  size_type pos,
+  size_type n1,
+  size_type n2,
+  CharT c) -> 
+    basic_static_string<N, CharT, Traits>&
 {
   const auto curr_size = size();
   const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
-      pos > curr_size, std::out_of_range{"pos > size()"});
+    pos > curr_size, std::out_of_range{"pos > size()"});
   BOOST_STATIC_STRING_THROW_IF(
-      curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
-      std::length_error{"replaced string exceeds max_size()"});
+    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
+    std::length_error{"replaced string exceeds max_size()"});
   n1 = (std::min)(n1, curr_size - pos);
   Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
   Traits::assign(&curr_data[pos], n2, c);
@@ -5233,13 +5222,13 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 replace(
-      const_iterator i1,
-      const_iterator i2,
-      ForwardIterator j1,
-      ForwardIterator j2) ->
-          typename std::enable_if<
-              detail::is_forward_iterator<ForwardIterator>::value,
-                  basic_static_string<N, CharT, Traits>&>::type
+  const_iterator i1,
+  const_iterator i2,
+  ForwardIterator j1,
+  ForwardIterator j2) ->
+    typename std::enable_if<
+      detail::is_forward_iterator<ForwardIterator>::value,
+        basic_static_string<N, CharT, Traits>&>::type
 {
   const auto curr_size = size();
   const auto curr_data = data();
@@ -5297,16 +5286,16 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 replace(
-      const_iterator i1,
-      const_iterator i2,
-      InputIterator j1,
-      InputIterator j2) ->
-          typename std::enable_if<
-            detail::is_input_iterator<
-                InputIterator>::value && 
-                    ! detail::is_forward_iterator<
-                         InputIterator>::value, 
-                             basic_static_string<N, CharT, Traits>&>::type
+  const_iterator i1,
+  const_iterator i2,
+  InputIterator j1,
+  InputIterator j2) ->
+    typename std::enable_if<
+      detail::is_input_iterator<
+        InputIterator>::value &&
+          !detail::is_forward_iterator<
+            InputIterator>::value, 
+              basic_static_string<N, CharT, Traits>&>::type
 {
   const auto curr_size = size();
   const auto curr_data = data();
@@ -5333,10 +5322,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find(
-    const CharT* s,
-    size_type pos,
-    size_type n) const noexcept ->
-        size_type
+  const CharT* s,
+  size_type pos,
+  size_type n) const noexcept ->
+    size_type
 {
   const auto curr_size = size();
   if (pos > curr_size || n > curr_size - pos)
@@ -5352,10 +5341,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 rfind(
-    const CharT* s,
-    size_type pos,
-    size_type n) const noexcept ->
-        size_type
+  const CharT* s,
+  size_type pos,
+  size_type n) const noexcept ->
+    size_type
 {
   const auto curr_size = size();
   const auto curr_data = data();
@@ -5376,10 +5365,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_first_of(
-    const CharT* s,
-    size_type pos,
-    size_type n) const noexcept ->
-        size_type
+  const CharT* s,
+  size_type pos,
+  size_type n) const noexcept ->
+    size_type
 {
   const auto curr_data = data();
   if (pos >= size() || !n)
@@ -5393,10 +5382,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_last_of(
-    const CharT* s,
-    size_type pos,
-    size_type n) const noexcept ->
-        size_type
+  const CharT* s,
+  size_type pos,
+  size_type n) const noexcept ->
+    size_type
 {
   const auto curr_size = size();
   if (!n)
@@ -5414,10 +5403,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_first_not_of(
-    const CharT* s,
-    size_type pos,
-    size_type n) const noexcept ->
-        size_type
+  const CharT* s,
+  size_type pos,
+  size_type n) const noexcept ->
+    size_type
 {
   if (pos >= size())
     return npos;
@@ -5432,10 +5421,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_last_not_of(
-    const CharT* s,
-    size_type pos,
-    size_type n) const noexcept ->
-        size_type
+  const CharT* s,
+  size_type pos,
+  size_type n) const noexcept ->
+    size_type
 {
   const auto curr_size = size();
   if (pos >= curr_size)
@@ -5452,7 +5441,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign_char(CharT ch, std::true_type) noexcept ->
-    basic_static_string&
+  basic_static_string&
 {
   this->set_size(1);
   Traits::assign(data()[0], ch);
@@ -5464,7 +5453,7 @@ template<std::size_t N, typename CharT, typename Traits>
 auto
 basic_static_string<N, CharT, Traits>::
 assign_char(CharT, std::false_type) ->
-    basic_static_string&
+  basic_static_string&
 {
   BOOST_STATIC_STRING_THROW(std::length_error{"max_size() == 0"});
   return *this;
@@ -5476,9 +5465,9 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 read_back(
-    InputIterator first,
-    InputIterator last) -> 
-        std::size_t
+  InputIterator first,
+  InputIterator last) -> 
+    size_type
 {
   const auto curr_data = data();
   auto new_size = size();
@@ -5496,11 +5485,11 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 replace_unchecked(
-    size_type pos,
-    size_type n1,
-    const CharT* s,
-    size_type n2) ->
-        basic_static_string&
+  size_type pos,
+  size_type n1,
+  const CharT* s,
+  size_type n2) ->
+    basic_static_string&
 {
   const auto curr_data = data();
   const auto curr_size = size();
@@ -5522,10 +5511,10 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 insert_unchecked(
-    size_type index,
-    const CharT* s,
-    size_type count) ->
-        basic_static_string<N, CharT, Traits>&
+  size_type index,
+  const CharT* s,
+  size_type count) ->
+    basic_static_string<N, CharT, Traits>&
 {
   const auto curr_data = data();
   const auto curr_size = size();

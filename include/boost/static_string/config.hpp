@@ -171,9 +171,9 @@ namespace static_string {
 template<typename CharT, typename Traits>
 using basic_string_view =
 #ifndef BOOST_STATIC_STRING_STANDALONE
-    boost::basic_string_view<CharT, Traits>;
+  boost::basic_string_view<CharT, Traits>;
 #else
-    std::basic_string_view<CharT, Traits>;
+  std::basic_string_view<CharT, Traits>;
 #endif
 } // static_string
 } // boost
