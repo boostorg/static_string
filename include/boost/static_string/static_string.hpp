@@ -4619,8 +4619,9 @@ struct hash<
 #ifndef BOOST_STATIC_STRING_STANDALONE
     return boost::hash_range(str.begin(), str.end());
 #else
-    using sv = boost::static_string::basic_string_view<typename Traits::value_type, Traits>;
-    return std::hash<sv>()(sv(str.data(), str.size()));
+    using view_type = typename boost::static_string::
+      basic_static_string<N, CharT, Traits>::string_view_type;
+    return std::hash<view_type>()(view_type(str.data(), str.size()));
 #endif
   }
 };
