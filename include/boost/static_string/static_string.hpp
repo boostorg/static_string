@@ -243,7 +243,6 @@ class static_string_base<0, CharT, Traits>
 private:
   using value_type = typename Traits::char_type;
   using pointer = value_type*;
-  using const_pointer = const value_type*;
 public:
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   static_string_base() noexcept { }
