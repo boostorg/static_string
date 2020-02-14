@@ -137,10 +137,10 @@ struct is_subtractable<T, void_t<decltype(std::declval<T&>() - std::declval<T&>(
     : std::true_type { };
 
 // constexpr distance for c++14
-template<typename InputIt, typename std::enable_if<!is_subtractable<InputIt>::value>::type* = nullptr>
+template<typename ForwardIt, typename std::enable_if<!is_subtractable<ForwardIt>::value>::type* = nullptr>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR 
-typename std::iterator_traits<InputIt>::difference_type
-distance(InputIt first, InputIt last)
+std::size_t
+distance(ForwardIt first, ForwardIt last)
 {
   std::size_t dist = 0;
   for (; first != last; ++first, ++dist);
@@ -149,7 +149,7 @@ distance(InputIt first, InputIt last)
 
 template<typename RandomIt, typename std::enable_if<is_subtractable<RandomIt>::value>::type* = nullptr>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR 
-typename std::iterator_traits<RandomIt>::difference_type
+std::size_t
 distance(RandomIt first, RandomIt last)
 {
   return last - first;
@@ -169,6 +169,8 @@ copy_with_traits(InputIt first, InputIt last, CharT* out)
 template<std::size_t N, typename CharT, typename Traits>
 class static_string_base
 {
+private:
+  using size_type = smallest_width<N>;
 public:
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   static_string_base() noexcept { };
@@ -201,7 +203,11 @@ public:
   std::size_t
   set_size(std::size_t n) noexcept
   {
-    return size_ = n;
+    // Functions that set size will throw
+    // if the new size would exceed max_size()
+    // therefore we can guarantee that this will
+    // not lose data.
+    return size_ = size_type(n);
   }
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -211,7 +217,7 @@ public:
     Traits::assign(data_[size_], CharT());
   }
 
-  smallest_width<N> size_{0};
+  size_type size_{0};
 #ifdef BOOST_STATIC_STRING_CPP20
   CharT data_[N + 1];
 #else
@@ -1332,7 +1338,7 @@ public:
     */
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
-    reserve(std::size_t n);
+    reserve(size_type n);
 
     /** Returns the number of characters that can be held in currently allocated storage.
 
@@ -1686,54 +1692,18 @@ public:
         InputIterator first,
         InputIterator last);
 
-    /** Insert a range of characters.
-
-       Inserts characters from the range `[first, last)` before the
-       character pointed to by `pos`.
-
-       @par Precondition
-
-       `pos` shall be valid within `[data(), data() + size()]`,
-
-       `[first, last)` shall be a valid range
-
-       @par Exception Safety
-
-       Strong guarantee.
-
-       @note All references, pointers, or iterators
-       referring to contained elements are invalidated. Any
-       past-the-end iterators are also invalidated.
-
-       @tparam ForwardIterator The type of the iterators.
-
-       @par Constraints
-
-       `InputIterator` satisfies __ForwardIterator__.
-
-       @return An iterator which refers to the first inserted character
-       or `pos` if no characters were inserted
-
-       @param pos The position to insert at.
-       @param first An iterator representing the first character to insert.
-       @param last An iterator representing one past the last character to insert.
-
-       @throw std::length_error `size() + insert_count > max_size()`
-   */
+#ifndef GENERATING_DOCUMENTATION
     template<typename ForwardIterator>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-    iterator
-#else
     typename std::enable_if<
         detail::is_forward_iterator<
             ForwardIterator>::value, 
                 iterator>::type
-#endif
     insert(
         const_iterator pos,
         ForwardIterator first,
         ForwardIterator last);
+#endif
 
     /** Insert characters from an initializer list.
 
@@ -2445,7 +2415,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     resize(
-        std::size_t n);
+        size_type n);
 
     /** Change the size of the string.
 
@@ -2462,7 +2432,7 @@ public:
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
     void
     resize(
-        std::size_t n,
+        size_type n,
         CharT c);
 
     /// Exchange the contents of this string with another.
@@ -3051,57 +3021,19 @@ public:
         InputIterator j1,
         InputIterator j2);
 
-    /** Replace a range with a range.
-
-        Replaces the characters in the range `[i1, i2)`
-        with those of `[j1, j2)`.
-
-        @par Precondition
-
-        `[i1, i2)` is a valid range.
-
-        `[j1, j2)` is a valid range.
-
-        @par Exception Safety
-
-        Strong guarantee.
-
-        @note All references, pointers, or iterators
-        referring to contained elements are invalidated. Any
-        past-the-end iterators are also invalidated.
-
-        @tparam ForwardIterator The type of the iterators.
-
-        @par Constraints
-
-        `ForwardIterator` satisfies __ForwardIterator__.
-
-        @return `*this`
-
-        @param i1 An iterator referring to the first character to replace.
-        @param i2 An iterator referring past the end of
-        the last character to replace.
-        @param j1 An iterator referring to the first character to replace with.
-        @param j2 An iterator referring past the end of
-        the last character to replace with.
-
-        @throw std::length_error `size() + (std::distance(j1, j2) - std::distance(i1, i2)) > max_size()`
-    */
+#ifndef GENERATING_DOCUMENTATION
     template<typename ForwardIterator>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-    basic_static_string&
-#else
     typename std::enable_if<
         detail::is_forward_iterator<
             ForwardIterator>::value,
                 basic_static_string<N, CharT, Traits>&>::type
-#endif
     replace(
         const_iterator i1,
         const_iterator i2,
         ForwardIterator j1,
         ForwardIterator j2);
+#endif
 
     /** Replace a range with an initializer list.
 
@@ -4104,7 +4036,7 @@ private:
     // Returns the size of data read from input iterator. Read data begins at data() + size() + 1.
     template<typename InputIterator>
     BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    std::size_t
+    size_type
     read_back(
         InputIterator first, 
         InputIterator last);
@@ -4680,7 +4612,7 @@ hash_value(
 namespace std
 {
 
-  template <std::size_t N, typename CharT, typename Traits>
+  template<std::size_t N, typename CharT, typename Traits>
   struct hash<
 #if GENERATING_DOCUMENTATION
     basic_static_string
@@ -5022,8 +4954,8 @@ insert(
 {
   const auto curr_size = size();
   const auto curr_data = data();
-  const auto count = detail::distance(first, last);
-  const auto index = pos - curr_data;
+  const std::size_t count = detail::distance(first, last);
+  const std::size_t index = pos - curr_data;
   const auto s = &*first;
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
@@ -5071,7 +5003,6 @@ insert(
   const auto curr_data = data();
   const auto count = read_back(first, last);
   const auto index = pos - curr_data;
-  const auto s = curr_data + curr_size + 1;
   BOOST_STATIC_STRING_THROW_IF(
     index > curr_size, std::out_of_range{"index > size()"});
   std::rotate(&curr_data[index], &curr_data[curr_size + 1], &curr_data[curr_size + count + 1]);
@@ -5315,15 +5246,18 @@ replace(
   std::size_t n1 = detail::distance(i1, i2);
   const std::size_t n2 = detail::distance(j1, j2);
   const std::size_t pos = i1 - curr_data;
-  const auto s = &*j1;
+  const auto first_addr = &*j1;
   BOOST_STATIC_STRING_THROW_IF(
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
     std::length_error{"replaced string exceeds max_size()"});
   n1 = (std::min)(n1, curr_size - pos);
-  const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, s);
-  if (inside && s - curr_data == pos && n1 == n2)
+  const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
+  // due to short circuit evaluation, the second operand of the logical
+  // AND expression will only be evaluated if s is within the string,
+  // which means that operand of the cast will never be negative.
+  if (inside && std::size_t(first_addr - curr_data) == pos && n1 == n2)
     return *this;
-  if (!inside || (inside && ((s - curr_data) + n2 <= pos)))
+  if (!inside || (inside && ((first_addr - curr_data) + n2 <= pos)))
   {
     // source outside
     Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
@@ -5332,11 +5266,11 @@ replace(
   else
   {
     // source inside
-    const size_type offset = s - curr_data;
+    const size_type offset = first_addr - curr_data;
     if (n2 >= n1)
     {
-      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
       // grow/unchanged
+      const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
       // shift all right of splice point by n2 - n1 to the right
       Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
       // copy all before splice point
