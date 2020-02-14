@@ -182,22 +182,22 @@ class static_string_base
 {
 private:
   using size_type = smallest_width<N>;
+  using value_type = typename Traits::char_type;
+  using pointer = value_type*;
+  using const_pointer = const value_type*;
 public:
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   static_string_base() noexcept { };
 
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  static_string_base(std::size_t n) noexcept : size_(n) { }
-
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT*
+  pointer
   data_impl() noexcept
   {
     return data_;
   }
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT const*
+  const_pointer
   data_impl() const noexcept
   {
     return data_;
@@ -225,14 +225,14 @@ public:
   void
   term_impl() noexcept
   {
-    Traits::assign(data_[size_], CharT());
+    Traits::assign(data_[size_], value_type());
   }
 
   size_type size_{0};
 #ifdef BOOST_STATIC_STRING_CPP20
-  CharT data_[N + 1];
+  value_type data_[N + 1];
 #else
-  CharT data_[N + 1]{};
+  value_type data_[N + 1]{};
 #endif
 };
 
@@ -240,19 +240,20 @@ public:
 template<typename CharT, typename Traits>
 class static_string_base<0, CharT, Traits>
 {
+private:
+  using value_type = typename Traits::char_type;
+  using pointer = value_type*;
+  using const_pointer = const value_type*;
 public:
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   static_string_base() noexcept { }
 
-  BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  static_string_base(std::size_t) noexcept { }
-
   // Modifying the null terminator is UB
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
-  CharT*
+  pointer
   data_impl() const noexcept
   {
-    return const_cast<CharT*>(&null_);
+    return const_cast<pointer>(&null_);
   }
 
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
@@ -274,20 +275,24 @@ public:
   term_impl() noexcept { }
 
 private:
-  static constexpr const CharT null_{};
+  static constexpr const value_type null_{};
 };
 
 template<typename CharT, typename Traits>
-constexpr const CharT static_string_base<0, CharT, Traits>::null_;
+constexpr
+const
+typename static_string_base<0, CharT, Traits>::value_type
+static_string_base<0, CharT, Traits>::
+null_;
 
 template<typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 int
 lexicographical_compare(
-  CharT const* s1,
+  const CharT* s1,
   std::size_t n1,
-  CharT const* s2,
+  const CharT* s2,
   std::size_t n2) noexcept
 {
   if(n1 < n2)
@@ -305,7 +310,7 @@ inline
 int
 lexicographical_compare(
   basic_string_view<CharT, Traits> s1,
-  CharT const* s2,
+  const CharT* s2,
   std::size_t n2) noexcept
 {
   return detail::lexicographical_compare<
@@ -318,7 +323,7 @@ inline
 int
 lexicographical_compare(
   const basic_static_string<N, CharT, Traits>& s1,
-  CharT const* s2,
+  const CharT* s2,
   std::size_t n2) noexcept
 {
   return detail::lexicographical_compare<
@@ -657,15 +662,15 @@ public:
   //--------------------------------------------------------------------------
 
   using traits_type       = Traits;
-  using value_type        = typename Traits::char_type;
+  using value_type        = typename traits_type::char_type;
   using size_type         = std::size_t;
   using difference_type   = std::ptrdiff_t;
   using pointer           = value_type*;
   using reference         = value_type&;
-  using const_pointer     = value_type const*;
-  using const_reference   = value_type const&;
+  using const_pointer     = const value_type*;
+  using const_reference   = const value_type&;
   using iterator          = value_type*;
-  using const_iterator    = value_type const*;
+  using const_iterator    = const value_type*;
     
   using reverse_iterator =
     std::reverse_iterator<iterator>;
@@ -675,7 +680,7 @@ public:
 
   /// The type of `string_view_type` returned by the interface
   using string_view_type =
-    basic_string_view<CharT, Traits>;
+    basic_string_view<value_type, traits_type>;
 
   //--------------------------------------------------------------------------
   //
@@ -711,7 +716,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(
     size_type count,
-    CharT ch);
+    value_type ch);
 
   /** Construct a `basic_static_string`.
         
@@ -720,7 +725,7 @@ public:
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(
-    basic_static_string<M, CharT, Traits> const& other,
+    const basic_static_string<M, CharT, Traits>& other,
     size_type pos);
 
   /** Construct a `basic_static_string`.
@@ -730,7 +735,7 @@ public:
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(
-    basic_static_string<M, CharT, Traits> const& other,
+    const basic_static_string<M, CharT, Traits>& other,
     size_type pos,
     size_type count);
 
@@ -740,7 +745,7 @@ public:
     */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(
-    CharT const* s,
+    const_pointer s,
     size_type count);
 
   /** Construct a `basic_static_string`.
@@ -748,7 +753,7 @@ public:
       Construct from a null terminated string.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string(CharT const* s);
+  basic_static_string(const_pointer s);
 
   /** Construct a `basic_static_string`.
     
@@ -771,7 +776,7 @@ public:
       Copy constructor.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string(basic_static_string const& other) noexcept;
+  basic_static_string(const basic_static_string& other) noexcept;
 
   /** Construct a `basic_static_string`.
         
@@ -780,14 +785,14 @@ public:
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(
-      basic_static_string<M, CharT, Traits> const& other);
+    const basic_static_string<M, CharT, Traits>& other);
 
   /** Construct a `basic_static_string`.
         
       Construct from an initializer list
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string(std::initializer_list<CharT> init);
+  basic_static_string(std::initializer_list<value_type> init);
 
   /** Construct a `basic_static_string`.
     
@@ -813,7 +818,7 @@ public:
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(
-    T const& t,
+    const T& t,
     size_type pos,
     size_type n);
 
@@ -830,7 +835,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator=(basic_static_string const& s) noexcept
+  operator=(const basic_static_string& s) noexcept
   {
     return assign(s);
   }
@@ -844,7 +849,7 @@ public:
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator=(basic_static_string<M, CharT, Traits> const& s)
+  operator=(const basic_static_string<M, CharT, Traits>& s)
   {
     return assign(s);
   }
@@ -853,11 +858,11 @@ public:
     
       Replace the contents with those of the null-terminated string `s`
 
-      @throw std::length_error if `Traits::length(s) > max_size()`
+      @throw std::length_error if `traits_type::length(s) > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator=(CharT const* s)
+  operator=(const_pointer s)
   {
     return assign(s);
   }
@@ -868,7 +873,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator=(CharT ch)
+  operator=(value_type ch)
   {
     return assign_char(ch,
       std::integral_constant<bool, (N > 0)>{});
@@ -880,7 +885,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator=(std::initializer_list<CharT> ilist)
+  operator=(std::initializer_list<value_type> ilist)
   {
     return assign(ilist);
   }
@@ -907,7 +912,7 @@ public:
   basic_static_string&
   assign(
     size_type count,
-    CharT ch);
+    value_type ch);
 
   /** Replace the contents.
     
@@ -917,7 +922,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  assign(basic_static_string const& s) noexcept;
+  assign(const basic_static_string& s) noexcept;
 
   /** Replace the contents.
     
@@ -929,7 +934,7 @@ public:
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  assign(basic_static_string<M, CharT, Traits> const& s)
+  assign(const basic_static_string<M, CharT, Traits>& s)
   {
     // VFALCO this could come in two flavors,
     //        N>M and N<M, and skip the exception
@@ -948,7 +953,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(
-    basic_static_string<M, CharT, Traits> const& s,
+    const basic_static_string<M, CharT, Traits>& s,
     size_type pos,
     size_type count = npos);
 
@@ -962,21 +967,21 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(
-    CharT const* s,
+    const_pointer s,
     size_type count);
 
   /** Replace the contents.
     
       Replace the contents with a copy of a null terminated string `s`
 
-      @throw std::length_error if `Traits::length(s) > max_size()`
+      @throw std::length_error if `traits_type::length(s) > max_size()`
       @return `*this`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  assign(CharT const* s)
+  assign(const_pointer s)
   {
-    return assign(s, Traits::length(s));
+    return assign(s, traits_type::length(s));
   }
 
   /** Replace the contents.
@@ -1009,7 +1014,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(
-    std::initializer_list<CharT> ilist)
+    std::initializer_list<value_type> ilist)
   {
       return assign(ilist.begin(), ilist.end());
   }
@@ -1027,10 +1032,10 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         basic_static_string&>::type
 #endif
-  assign(T const& t)
+  assign(const T& t)
   {
     string_view_type ss{t};
     return assign(ss.data(), ss.size());
@@ -1055,11 +1060,11 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         basic_static_string&>::type
 #endif
   assign(
-    T const& t,
+    const T& t,
     size_type pos,
     size_type count = npos)
   {
@@ -1115,7 +1120,7 @@ public:
       Undefined behavior if `empty() == true`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT&
+  reference
   front() noexcept
   {
     return data()[0];
@@ -1126,7 +1131,7 @@ public:
       Undefined behavior if `empty() == true`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT const&
+  const_reference
   front() const noexcept
   {
     return data()[0];
@@ -1137,7 +1142,7 @@ public:
       Undefined behavior if `empty() == true`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT&
+  reference
   back() noexcept
   {
     return data()[size() - 1];
@@ -1148,7 +1153,7 @@ public:
       Undefined behavior if `empty() == true`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT const&
+  const_reference
   back() const noexcept
   {
     return data()[size() - 1];
@@ -1156,7 +1161,7 @@ public:
 
   /// Returns a pointer to the first character of the string.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT*
+  pointer
   data() noexcept
   {
     return this->data_impl();
@@ -1164,7 +1169,7 @@ public:
 
   /// Returns a pointer to the first character of a string.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT const*
+  const_pointer
   data() const noexcept
   {
     return this->data_impl();
@@ -1172,7 +1177,7 @@ public:
 
   /// Returns a non-modifiable standard C character array version of the string.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  CharT const*
+  const_pointer
   c_str() const noexcept
   {
     return data();
@@ -1395,7 +1400,7 @@ public:
   insert(
     size_type index,
     size_type count,
-    CharT ch)
+    value_type ch)
   {
     BOOST_STATIC_STRING_THROW_IF(
       index > size(), std::out_of_range{"index > size()"});
@@ -1407,7 +1412,7 @@ public:
 
       Inserts the null-terminated character string pointed to by `s`
       of length `count` at the position `index` where `count`
-      is `Traits::length(s)`.
+      is `traits_type::length(s)`.
 
       @par Exception Safety
 
@@ -1429,9 +1434,9 @@ public:
   basic_static_string&
   insert(
     size_type index,
-    CharT const* s)
+    const_pointer s)
   {
-    return insert(index, s, Traits::length(s));
+    return insert(index, s, traits_type::length(s));
   }
 
   /** Insert a string.
@@ -1460,7 +1465,7 @@ public:
   basic_static_string&
   insert(
     size_type index,
-    CharT const* s,
+    const_pointer s,
     size_type count);
 
   /** Insert a string.
@@ -1599,7 +1604,7 @@ public:
   iterator
   insert(
     const_iterator pos,
-    CharT ch)
+    value_type ch)
   {
     return insert(pos, 1, ch);
   }
@@ -1634,7 +1639,7 @@ public:
   insert(
     const_iterator pos,
     size_type count,
-    CharT ch);
+    value_type ch);
 
   /** Insert a range of characters.
 
@@ -1728,7 +1733,7 @@ public:
   iterator
   insert(
     const_iterator pos,
-    std::initializer_list<CharT> ilist)
+    std::initializer_list<value_type> ilist)
   {
     const auto offset = pos - begin();
     return insert_unchecked(offset, ilist.begin(), ilist.size()).begin() + offset;
@@ -1757,8 +1762,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @param index The index to insert at.
       @param t The string to insert from.
@@ -1773,14 +1778,14 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<
-      T const&, string_view_type>::value &&
+      const T&, string_view_type>::value &&
         !std::is_convertible<
-          T const&, CharT const*>::value,
+          const T&, const_pointer>::value,
             basic_static_string&>::type
 #endif
   insert(
     size_type index,
-    T const& t)
+    const T& t)
   {
     return insert(index, t, 0, npos);
   }
@@ -1802,8 +1807,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, CharT const*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const_pointer>::value`.
 
       @return `*this`
 
@@ -1823,17 +1828,17 @@ public:
   basic_static_string&
 #else
   typename std::enable_if<
-    std::is_convertible<T const&, string_view_type>::value &&
-      !std::is_convertible<T const&, CharT const*>::value,
+    std::is_convertible<const T&, string_view_type>::value &&
+      !std::is_convertible<const T&, const_pointer>::value,
         basic_static_string&>::type
 #endif
   insert(
     size_type index,
-    T const& t,
+    const T& t,
     size_type index_str,
     size_type count = npos)
   {
-    auto const s = string_view_type(t).substr(index_str, count);
+    const auto s = string_view_type(t).substr(index_str, count);
     return insert(index, s.data(), s.size());
   }
 
@@ -1873,7 +1878,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
-  push_back(CharT ch);
+  push_back(value_type ch);
 
   /** Removes the last character from the string
 
@@ -1899,7 +1904,7 @@ public:
   basic_static_string&
   append(
     size_type count,
-    CharT ch)
+    value_type ch)
   {
     return insert(size(), count, ch);
   }
@@ -1953,7 +1958,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   append(
-    CharT const* s,
+    const_pointer s,
     size_type count);
 
   /** Append to the string.
@@ -1961,17 +1966,17 @@ public:
       Appends the null-terminated character string pointed to by `s`
     
       The length of the string is determined by the first
-      null character using `Traits::length(s)`.
+      null character using `traits_type::length(s)`.
 
-      @throw std::length_error if `Traits::length(s) > max_size() - size()`
+      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
       @return `*this`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   append(
-    CharT const* s)
+    const_pointer s)
   {
-    return append(s, Traits::length(s));
+    return append(s, traits_type::length(s));
   }
 
   /** Append to the string.
@@ -2014,7 +2019,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   append(
-    std::initializer_list<CharT> ilist)
+    std::initializer_list<value_type> ilist)
   {
     insert(end(), ilist);
     return *this;
@@ -2027,7 +2032,7 @@ public:
       The appended string can contain null characters.
       This function participates in overload resolution if
       `T` is convertible to `string_view_type` and `T` is not
-      convertible to `CharT const*`.
+      convertible to `const_pointer`.
 
       @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
       @return `*this`
@@ -2039,13 +2044,13 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<
-      T const&, string_view_type>::value &&
+      const T&, string_view_type>::value &&
         !std::is_convertible<
-          T const&, CharT const*>::value,
+          const T&, const_pointer>::value,
             basic_static_string&>::type
 #endif
   append(
-    T const& t)
+    const T& t)
   {
     return append(string_view_type{t});
   }
@@ -2057,7 +2062,7 @@ public:
       The appended string can contain null characters.
       This function participates in overload resolution if
       `T` is convertible to `string_view_type` and `T` is not
-      convertible to `CharT const*`.
+      convertible to `const_pointer`.
 
       @throw std::out_of_range if `pos > string_view_type{t}.size()`
       @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
@@ -2070,13 +2075,13 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<
-      T const&, string_view_type>::value &&
+      const T&, string_view_type>::value &&
         !std::is_convertible<
-          T const&, CharT const*>::value,
+          const T&, const_pointer>::value,
             basic_static_string&>::type
 #endif
   append(
-    T const& t,
+    const T& t,
     size_type pos,
     size_type count = npos)
   {
@@ -2091,7 +2096,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   operator+=(
-    basic_static_string<M, CharT, Traits> const& s)
+    const basic_static_string<M, CharT, Traits>& s)
   {
     return append(s.data(), s.size());
   }
@@ -2105,7 +2110,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   operator+=(
-    CharT ch)
+    value_type ch)
   {
     push_back(ch);
     return *this;
@@ -2116,15 +2121,15 @@ public:
       Appends the null-terminated character string pointed to by `s`
     
       The length of the string is determined by the first
-      null character using `Traits::length(s)`.
+      null character using `traits_type::length(s)`.
 
-      @throw std::length_error if `Traits::length(s) > max_size() - size()`
+      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
       @return `*this`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   operator+=(
-    CharT const* s)
+    const_pointer s)
   {
     return append(s);
   }
@@ -2141,7 +2146,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   operator+=(
-    std::initializer_list<CharT> ilist)
+    std::initializer_list<value_type> ilist)
   {
     return append(ilist);
   }
@@ -2153,7 +2158,7 @@ public:
       The appended string can contain null characters.
       This function participates in overload resolution if
       `T` is convertible to `string_view_type` and `T` is not
-      convertible to `CharT const*`.
+      convertible to `const_pointer`.
 
       @throw std::length_error if `string_view_type{t}.size() > max_size()`
   */
@@ -2164,11 +2169,11 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         basic_static_string&>::type
 #endif
   operator+=(
-    T const& t)
+    const T& t)
   {
     return append(t);
   }
@@ -2181,7 +2186,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
   compare(
-    basic_static_string<M, CharT, Traits> const& s) const noexcept
+    const basic_static_string<M, CharT, Traits>& s) const noexcept
   {
     return detail::lexicographical_compare<CharT, Traits>(
       data(), size(), s.data(), s.size());
@@ -2197,7 +2202,7 @@ public:
   compare(
     size_type pos1,
     size_type count1,
-    basic_static_string<M, CharT, Traits> const& s) const
+    const basic_static_string<M, CharT, Traits>& s) const
   {
     return detail::lexicographical_compare<CharT, Traits>(
       subview(pos1, count1), s.data(), s.size());
@@ -2215,7 +2220,7 @@ public:
   compare(
     size_type pos1,
     size_type count1,
-    basic_static_string<M, CharT, Traits> const& s,
+    const basic_static_string<M, CharT, Traits>& s,
     size_type pos2,
     size_type count2 = npos) const
   {
@@ -2225,31 +2230,31 @@ public:
 
   /** Compare the string with another.
         
-      Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `Traits::length(s)`.
+      Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `traits_type::length(s)`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
   compare(
-    CharT const* s) const noexcept
+    const_pointer s) const noexcept
   {
     return detail::lexicographical_compare<CharT, Traits>(
-      data(), size(), s, Traits::length(s));
+      data(), size(), s, traits_type::length(s));
   }
 
   /** Compare the string with another.
         
       Compares a `[pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
-      length `Traits::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+      length `traits_type::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
   compare(
     size_type pos1,
     size_type count1,
-    CharT const* s) const
+    const_pointer s) const
   {
     return detail::lexicographical_compare<CharT, Traits>(
-      subview(pos1, count1), s, Traits::length(s));
+      subview(pos1, count1), s, traits_type::length(s));
   }
 
   /** Compare the string with another.
@@ -2261,7 +2266,7 @@ public:
   compare(
     size_type pos1,
     size_type count1,
-    CharT const* s,
+    const_pointer s,
     size_type count2) const
   {
     return detail::lexicographical_compare<CharT, Traits>(
@@ -2302,7 +2307,7 @@ public:
 
       This function participates in overload resolution if
       `T` is convertible to `string_view_type` and `T` is not
-      convertible to `CharT const*`.
+      convertible to `const_pointer`.
   */
   template<typename T>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2310,14 +2315,14 @@ public:
   int
 #else
   typename std::enable_if<
-    std::is_convertible<T const&, string_view_type>::value &&
-      !std::is_convertible<T const&, CharT const*>::value,
+    std::is_convertible<const T&, string_view_type>::value &&
+      !std::is_convertible<const T&, const_pointer>::value,
         int>::type
 #endif
   compare(
     size_type pos1,
     size_type count1,
-    T const& t,
+    const T& t,
     size_type pos2,
     size_type count2 = npos) const
   {
@@ -2427,7 +2432,7 @@ public:
   void
   resize(
     size_type n,
-    CharT c);
+    value_type c);
 
   /// Exchange the contents of this string with another.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2570,8 +2575,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return `*this`
 
@@ -2589,7 +2594,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         basic_static_string&>::type
 #endif
   replace(
@@ -2619,8 +2624,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return `*this`
 
@@ -2642,7 +2647,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         basic_static_string&>::type
 #endif
   replace(
@@ -2684,14 +2689,14 @@ public:
   replace(
     size_type pos,
     size_type n1,
-    const CharT* s,
+    const_pointer s,
     size_type n2);
 
 
   /** Replace a substring with a string.
 
       Replaces `rcount` characters starting at index `pos` with those of
-      `[s, s + len)`, where the length of the string `len` is `Traits::length(s)` and `rcount`
+      `[s, s + len)`, where the length of the string `len` is `traits_type::length(s)` and `rcount`
       is `std::min(n1, size() - pos)`.
 
       @par Exception Safety
@@ -2716,9 +2721,9 @@ public:
   replace(
     size_type pos,
     size_type n1,
-    const CharT* s)
+    const_pointer s)
   {
-    return replace(pos, n1, s, Traits::length(s));
+    return replace(pos, n1, s, traits_type::length(s));
   }
 
   /** Replace a substring with copies of a character.
@@ -2750,7 +2755,7 @@ public:
     size_type pos,
     size_type n1,
     size_type n2,
-    CharT c);
+    value_type c);
 
   /** Replace a range with a string.
 
@@ -2813,8 +2818,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return `*this`
 
@@ -2832,7 +2837,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         basic_static_string&>::type
 #endif
   replace(
@@ -2876,7 +2881,7 @@ public:
   replace(
     const_iterator i1,
     const_iterator i2,
-    const CharT* s,
+    const_pointer s,
     size_type n)
   {
     return replace(i1 - begin(), i2 - i1, s, n);
@@ -2885,7 +2890,7 @@ public:
   /** Replace a range with a string.
 
       Replaces the characters in the range `[i1, i2)` with those of
-      `[s, s + len)`, where the length of the string `len` is `Traits::length(s)`.
+      `[s, s + len)`, where the length of the string `len` is `traits_type::length(s)`.
 
       @par Precondition
 
@@ -2913,9 +2918,9 @@ public:
   replace(
     const_iterator i1,
     const_iterator i2,
-    const CharT* s)
+    const_pointer s)
   {
-    return replace(i1, i2, s, Traits::length(s));
+    return replace(i1, i2, s, traits_type::length(s));
   }
 
   /** Replace a range with copies of a character.
@@ -2951,7 +2956,7 @@ public:
     const_iterator i1,
     const_iterator i2,
     size_type n,
-    CharT c)
+    value_type c)
   {
     return replace(i1 - begin(), i2 - i1, n, c);
   }
@@ -3056,7 +3061,7 @@ public:
   replace(
     const_iterator i1,
     const_iterator i2,
-    std::initializer_list<CharT> il)
+    std::initializer_list<value_type> il)
   {
       return replace_unchecked(i1 - begin(), i2 - i1, il.begin(), il.size());
   }
@@ -3082,8 +3087,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The lowest index `idx` greater than or equal to `pos`
       where each element of `[sv.begin(), sv.end())` is equal to
@@ -3101,7 +3106,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         size_type>::type
 #endif
   find(
@@ -3164,7 +3169,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find(
-    const CharT* s, 
+    const_pointer s, 
     size_type pos,
     size_type n) const noexcept;
 
@@ -3172,7 +3177,7 @@ public:
 
       Finds the first occurrence of the string pointed to by `s`
       of length `count` within the string starting at the index `pos`,
-      where `count` is `Traits::length(s)`.
+      where `count` is `traits_type::length(s)`.
 
       @par Complexity
 
@@ -3192,10 +3197,10 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find(
-    const CharT* s,
+    const_pointer s,
     size_type pos = 0) const noexcept
   {
-    return find(s, pos, Traits::length(s));
+    return find(s, pos, traits_type::length(s));
   }
 
   /** Find the first occurrence of a character within the string.
@@ -3217,7 +3222,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find(
-    CharT c,
+    value_type c,
     size_type pos = 0) const noexcept
   {
     return find(&c, pos, 1);
@@ -3238,8 +3243,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The highest index `idx` less than or equal to `pos`
       where each element of `[sv.begin(), sv.end())` is equal to
@@ -3257,7 +3262,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         size_type>::type
 #endif
   rfind(
@@ -3319,7 +3324,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   rfind(
-    const CharT* s, 
+    const_pointer s, 
     size_type pos,
     size_type n) const noexcept;
 
@@ -3327,7 +3332,7 @@ public:
 
       Finds the last occurrence of the string pointed to by `s`
       of length `count` within the string starting before or at the
-      index `pos`, where `count` is `Traits::length(s)`.
+      index `pos`, where `count` is `traits_type::length(s)`.
 
       @par Complexity
 
@@ -3345,10 +3350,10 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   rfind(
-    const CharT* s,
+    const_pointer s,
     size_type pos = npos) const noexcept
   {
-    return rfind(s, pos, Traits::length(s));
+    return rfind(s, pos, traits_type::length(s));
   }
 
   /** Find the last occurrence of a character within the string.
@@ -3370,7 +3375,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   rfind(
-    CharT c,
+    value_type c,
     size_type pos = npos) const noexcept
   {
     return rfind(&c, pos, 1);
@@ -3390,8 +3395,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the first occurrence of
       any of the characters in `[sv.begin(), sv.end())` within
@@ -3408,7 +3413,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         size_type>::type
 #endif
   find_first_of(
@@ -3466,7 +3471,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_first_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos,
     size_type n) const noexcept;
 
@@ -3474,7 +3479,7 @@ public:
 
       Finds the first occurrence of the any of the characters within string
       pointed to by `s` of length `count` within the string starting at the
-      index `pos`, where `count` is `Traits::length(s)`.
+      index `pos`, where `count` is `traits_type::length(s)`.
 
       @par Complexity
 
@@ -3491,10 +3496,10 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_first_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos = 0) const noexcept
   {
-    return find_first_of(s, pos, Traits::length(s));
+    return find_first_of(s, pos, traits_type::length(s));
   }
 
   /** Find the first occurrence of a character within the string.
@@ -3516,7 +3521,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_first_of(
-    CharT c,
+    value_type c,
     size_type pos = 0) const noexcept
   {
     return find_first_of(&c, pos, 1);
@@ -3536,8 +3541,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the last occurrence of
       any of the characters in `[sv.begin(), sv.end())` within
@@ -3554,7 +3559,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         size_type>::type
 #endif
   find_last_of(
@@ -3612,7 +3617,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_last_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos,
     size_type n) const noexcept;
 
@@ -3620,7 +3625,7 @@ public:
 
       Finds the last occurrence of any of the characters within the string pointed to
       by `s` of length `count` within the string before or at the index `pos`,
-      where `count` is `Traits::length(s)`.
+      where `count` is `traits_type::length(s)`.
 
       @par Complexity
 
@@ -3637,10 +3642,10 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_last_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos = npos) const noexcept
   {
-    return find_last_of(s, pos, Traits::length(s));
+    return find_last_of(s, pos, traits_type::length(s));
   }
 
   /** Find the last occurrence of a character within the string.
@@ -3662,7 +3667,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_last_of(
-    CharT c,
+    value_type c,
     size_type pos = npos) const noexcept
   {
     return find_last_of(&c, pos, 1);
@@ -3681,8 +3686,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the first occurrence of
       a character that is not in `[sv.begin(), sv.end())` within
@@ -3699,7 +3704,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         size_type>::type
 #endif
   find_first_not_of(
@@ -3757,7 +3762,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_first_not_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos, 
     size_type n) const noexcept;
 
@@ -3765,7 +3770,7 @@ public:
 
       Finds the first occurrence of a character that is not within the string
       pointed to by `s` of length `count` within the string starting
-      at the index `pos`, where `count` is `Traits::length(s)`.
+      at the index `pos`, where `count` is `traits_type::length(s)`.
 
       @par Complexity
 
@@ -3781,10 +3786,10 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_first_not_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos = 0) const noexcept
   {
-    return find_first_not_of(s, pos, Traits::length(s));
+    return find_first_not_of(s, pos, traits_type::length(s));
   }
 
   /** Find the first occurrence of a character not equal to `c`.
@@ -3806,7 +3811,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_first_not_of(
-    CharT c,
+    value_type c,
     size_type pos = 0) const noexcept
   {
     return find_first_not_of(&c, pos, 1);
@@ -3825,8 +3830,8 @@ public:
 
       @par Constraints
 
-      `std::is_convertible<T const&, string_view>::value &&
-      !std::is_convertible<T const&, char CharT*>::value`.
+      `std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the last occurrence of
       a character that is not in `[sv.begin(), sv.end())` within
@@ -3843,7 +3848,7 @@ public:
 #else
   typename std::enable_if<
     std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, CharT const*>::value,
+      !std::is_convertible<T, const_pointer>::value,
         size_type>::type
 #endif
   find_last_not_of(
@@ -3901,7 +3906,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_last_not_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos,
     size_type n) const noexcept;
 
@@ -3910,7 +3915,7 @@ public:
 
       Finds the last occurrence of a character that is not within the
       string pointed to by `s` of length `count` within the string
-      before or at the index `pos`, where `count` is `Traits::length(s)`.
+      before or at the index `pos`, where `count` is `traits_type::length(s)`.
 
       @par Complexity
 
@@ -3926,10 +3931,10 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_last_not_of(
-    const CharT* s,
+    const_pointer s,
     size_type pos = npos) const noexcept
   {
-    return find_last_not_of(s, pos, Traits::length(s));
+    return find_last_not_of(s, pos, traits_type::length(s));
   }
 
   /** Find the last occurrence of a character not equal to `c`.
@@ -3951,7 +3956,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   find_last_not_of(
-    CharT c,
+    value_type c,
     size_type pos = npos) const noexcept
   {
     return find_last_not_of(&c, pos, 1);
@@ -3964,26 +3969,26 @@ public:
     string_view_type s) const noexcept
   {
     const size_type len = s.size();
-    return size() >= len && !Traits::compare(data(), s.data(), len);
+    return size() >= len && !traits_type::compare(data(), s.data(), len);
   }
     
   /// Returns whether the string begins with `c`
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   starts_with(
-    CharT c) const noexcept
+    value_type c) const noexcept
   {
-    return !empty() && Traits::eq(front(), c);
+    return !empty() && traits_type::eq(front(), c);
   }
     
   /// Returns whether the string begins with `s`
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   starts_with(
-    const CharT* s) const noexcept
+    const_pointer s) const noexcept
   {
-    const size_type len = Traits::length(s);
-    return size() >= len && !Traits::compare(data(), s, len);
+    const size_type len = traits_type::length(s);
+    return size() >= len && !traits_type::compare(data(), s, len);
   }
     
   /// Returns whether the string ends with `s`
@@ -3993,35 +3998,35 @@ public:
     string_view_type s) const noexcept
   {
     const size_type len = s.size();
-    return size() >= len && !Traits::compare(data() + (size() - len), s.data(), len);
+    return size() >= len && !traits_type::compare(data() + (size() - len), s.data(), len);
   }
     
   /// Returns whether the string ends with `c`
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool
   ends_with(
-    CharT c) const noexcept
+    value_type c) const noexcept
   {
-    return !empty() && Traits::eq(back(), c);
+    return !empty() && traits_type::eq(back(), c);
   }
     
   /// Returns whether the string begins with `s`
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   ends_with(
-    const CharT* s) const noexcept
+    const_pointer s) const noexcept
   {
-    const size_type len = Traits::length(s);
-    return size() >= len && !Traits::compare(data() + (size() - len), s, len);
+    const size_type len = traits_type::length(s);
+    return size() >= len && !traits_type::compare(data() + (size() - len), s, len);
   }
 
 private:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  assign_char(CharT ch, std::true_type) noexcept;
+  assign_char(value_type ch, std::true_type) noexcept;
 
   basic_static_string&
-  assign_char(CharT ch, std::false_type);
+  assign_char(value_type ch, std::false_type);
 
   // Returns the size of data read from input iterator. Read data begins at data() + size() + 1.
   template<typename InputIterator>
@@ -4036,14 +4041,14 @@ private:
   replace_unchecked(
     size_type pos,
     size_type n1,
-    const CharT* s,
+    const_pointer s,
     size_type n2);
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   insert_unchecked(
     size_type index,
-    const CharT* s,
+    const_pointer s,
     size_type count);
 };
 
@@ -4060,8 +4065,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  basic_static_string<M, CharT, Traits> const& rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return lhs.compare(rhs) == 0;
 }
@@ -4073,8 +4078,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  basic_static_string<M, CharT, Traits> const& rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return lhs.compare(rhs) != 0;
 }
@@ -4086,8 +4091,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  basic_static_string<M, CharT, Traits> const& rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return lhs.compare(rhs) < 0;
 }
@@ -4099,8 +4104,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  basic_static_string<M, CharT, Traits> const& rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return lhs.compare(rhs) <= 0;
 }
@@ -4112,8 +4117,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  basic_static_string<M, CharT, Traits> const& rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return lhs.compare(rhs) > 0;
 }
@@ -4125,8 +4130,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  basic_static_string<M, CharT, Traits> const& rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return lhs.compare(rhs) >= 0;
 }
@@ -4136,8 +4141,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
-  CharT const* lhs,
-  basic_static_string<N, CharT, Traits> const& rhs)
+  const CharT* lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs, Traits::length(lhs),
@@ -4149,8 +4154,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator==(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  CharT const* rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const CharT* rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
@@ -4162,8 +4167,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
-  CharT const* lhs,
-  basic_static_string<N, CharT, Traits> const& rhs)
+  const CharT* lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs, Traits::length(lhs),
@@ -4175,8 +4180,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator!=(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  CharT const* rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const CharT* rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
@@ -4188,8 +4193,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
-  CharT const* lhs,
-  basic_static_string<N, CharT, Traits> const& rhs)
+  const CharT* lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs, Traits::length(lhs),
@@ -4201,8 +4206,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  CharT const* rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const CharT* rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
@@ -4214,8 +4219,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
-  CharT const* lhs,
-  basic_static_string<N, CharT, Traits> const& rhs)
+  const CharT* lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs, Traits::length(lhs),
@@ -4227,8 +4232,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator<=(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  CharT const* rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const CharT* rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
@@ -4240,8 +4245,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
-  CharT const* lhs,
-  basic_static_string<N, CharT, Traits> const& rhs)
+  const CharT* lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs, Traits::length(lhs),
@@ -4253,8 +4258,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  CharT const* rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const CharT* rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
@@ -4266,8 +4271,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
-  CharT const* lhs,
-  basic_static_string<N, CharT, Traits> const& rhs)
+  const CharT* lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs, Traits::length(lhs),
@@ -4279,8 +4284,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 bool
 operator>=(
-  basic_static_string<N, CharT, Traits> const& lhs,
-  CharT const* rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const CharT* rhs)
 {
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
@@ -4294,8 +4299,8 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
-  basic_static_string<N, CharT, Traits>const& lhs,
-  basic_static_string<M, CharT, Traits>const& rhs)
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return basic_static_string<N + M, CharT, Traits>(lhs) += rhs;
 }
@@ -4305,7 +4310,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + 1, CharT, Traits>
 operator+(
-  basic_static_string<N, CharT, Traits> const& lhs,
+  const basic_static_string<N, CharT, Traits>& lhs,
   CharT rhs)
 {
   return basic_static_string<N + 1, CharT, Traits>(lhs) += rhs;
@@ -4317,7 +4322,7 @@ inline
 basic_static_string<N + 1, CharT, Traits>
 operator+(
   CharT lhs,
-  basic_static_string<N, CharT, Traits> const& rhs)
+  const basic_static_string<N, CharT, Traits>& rhs)
 {
   return basic_static_string<N + 1, CharT, Traits>(rhs).insert(0, lhs);
 }
@@ -4329,7 +4334,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
-  basic_static_string<N, CharT, Traits>const& lhs,
+  const basic_static_string<N, CharT, Traits>& lhs,
   const CharT(&rhs)[M])
 {
   return basic_static_string<N + M, CharT, Traits>(lhs).append(+rhs, M);
@@ -4343,7 +4348,7 @@ inline
 basic_static_string<N + M, CharT, Traits>
 operator+(
   const CharT(&lhs)[N],
-  basic_static_string<M, CharT, Traits>const& rhs)
+  const basic_static_string<M, CharT, Traits>& rhs)
 {
   return basic_static_string<N + M, CharT, Traits>(rhs).insert(0, +rhs, N);
 }
@@ -4389,7 +4394,7 @@ inline
 std::basic_ostream<CharT, Traits>& 
 operator<<(
   std::basic_ostream<CharT, Traits>& os, 
-  basic_static_string<N, CharT, Traits> const& s)
+  const basic_static_string<N, CharT, Traits>& s)
 {
   return os << basic_string_view<CharT, Traits>(s.data(), s.size());
 }
@@ -4597,29 +4602,29 @@ hash_value(
 } // boost
 
 /// std::hash partial specialization for basic_static_string
-namespace std
-{
-  template<std::size_t N, typename CharT, typename Traits>
-  struct hash<
+namespace std {
+
+template<std::size_t N, typename CharT, typename Traits>
+struct hash<
 #if GENERATING_DOCUMENTATION
-    basic_static_string
+  basic_static_string
 #else
-    boost::static_string::basic_static_string<N, CharT, Traits>
+  boost::static_string::basic_static_string<N, CharT, Traits>
 #endif
   >
+{
+  std::size_t 
+  operator()(
+    const boost::static_string::basic_static_string<N, CharT, Traits>& str) const noexcept
   {
-    std::size_t 
-    operator()(
-      const boost::static_string::basic_static_string<N, CharT, Traits>& str) const noexcept
-    {
 #ifndef BOOST_STATIC_STRING_STANDALONE
-      return boost::hash_range(str.begin(), str.end());
+    return boost::hash_range(str.begin(), str.end());
 #else
-      using sv = boost::static_string::basic_string_view<CharT, Traits>;
-      return std::hash<sv>()(sv(str.data(), str.size()));
+    using sv = boost::static_string::basic_string_view<typename Traits::value_type, Traits>;
+    return std::hash<sv>()(sv(str.data(), str.size()));
 #endif
-    }
-  };
+  }
+};
 } // std
 
 //--------------------------------------------------------------------------
@@ -4645,7 +4650,7 @@ basic_static_string() noexcept
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(size_type count, CharT ch)
+basic_static_string(size_type count, value_type ch)
 {
   assign(count, ch);
 }
@@ -4655,7 +4660,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-  basic_static_string<M, CharT, Traits> const& other,
+  const basic_static_string<M, CharT, Traits>& other,
   size_type pos)
 {
   assign(other, pos);
@@ -4666,7 +4671,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-  basic_static_string<M, CharT, Traits> const& other,
+  const basic_static_string<M, CharT, Traits>& other,
   size_type pos,
   size_type count)
 {
@@ -4676,7 +4681,7 @@ basic_static_string(
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(CharT const* s, size_type count)
+basic_static_string(const_pointer s, size_type count)
 {
   assign(s, count);
 }
@@ -4684,12 +4689,12 @@ basic_static_string(CharT const* s, size_type count)
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(CharT const* s)
+basic_static_string(const_pointer s)
 {
-  auto const count = Traits::length(s);
+  const auto count = traits_type::length(s);
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
     std::length_error{"count > max_size()"});
-  Traits::copy(data(), s, count + 1);
+  traits_type::copy(data(), s, count + 1);
   this->set_size(count);
 }
 
@@ -4711,7 +4716,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-  basic_static_string const& s) noexcept
+  const basic_static_string& s) noexcept
 {
   assign(s);
 }
@@ -4721,7 +4726,7 @@ template<std::size_t M>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
 basic_static_string(
-  basic_static_string<M, CharT, Traits> const& s)
+  const basic_static_string<M, CharT, Traits>& s)
 {
   assign(s);
 }
@@ -4729,7 +4734,7 @@ basic_static_string(
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(std::initializer_list<CharT> init)
+basic_static_string(std::initializer_list<value_type> init)
 {
   assign(init.begin(), init.end());
 }
@@ -4746,7 +4751,7 @@ template<std::size_t N, typename CharT, typename Traits>
 template<class T, class>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 basic_static_string<N, CharT, Traits>::
-basic_static_string(T const& t, size_type pos, size_type n)
+basic_static_string(const T& t, size_type pos, size_type n)
 {
   assign(t, pos, n);
 }
@@ -4757,13 +4762,13 @@ auto
 basic_static_string<N, CharT, Traits>::
 assign(
   size_type count,
-  CharT ch) ->
+  value_type ch) ->
     basic_static_string&
 {
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
     std::length_error{"count > max_size()"});
   this->set_size(count);
-  Traits::assign(data(), size(), ch);
+  traits_type::assign(data(), size(), ch);
   term();
   return *this;
 }
@@ -4773,14 +4778,14 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
-    basic_static_string const& s) noexcept ->
+    const basic_static_string& s) noexcept ->
         basic_static_string&
 {
   if(this == &s)
     return *this;
   this->set_size(s.size());
-  auto const n = size() + 1;
-  Traits::copy(data(), &s.data()[0], n);
+  const auto n = size() + 1;
+  traits_type::copy(data(), &s.data()[0], n);
   return *this;
 }
 
@@ -4790,12 +4795,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
-  basic_static_string<M, CharT, Traits> const& s,
+  const basic_static_string<M, CharT, Traits>& s,
   size_type pos,
   size_type count) ->
     basic_static_string&
 {
-  auto const ss = s.subview(pos, count);
+  const auto ss = s.subview(pos, count);
   return assign(ss.data(), ss.size());
 }
 
@@ -4804,14 +4809,14 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
-  CharT const* s,
+  const_pointer s,
   size_type count) ->
     basic_static_string&
 {
   BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
     std::length_error{"count > max_size()"});
   this->set_size(count);
-  Traits::move(data(), s, size());
+  traits_type::move(data(), s, size());
   term();
   return *this;
 }
@@ -4836,7 +4841,7 @@ assign(
       this->set_size(i);
       BOOST_STATIC_STRING_THROW(std::length_error{"n > max_size()"});
     }
-    Traits::assign(*ptr, *first);
+    traits_type::assign(*ptr, *first);
   }
   this->set_size(ptr - data());
   term();
@@ -4871,7 +4876,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-reserve(std::size_t n)
+reserve(size_type n)
 {
   BOOST_STATIC_STRING_THROW_IF(
     n > max_size(), std::length_error{"n > max_size()"});
@@ -4893,7 +4898,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 insert(
   size_type index,
-  CharT const* s,
+  const_pointer s,
   size_type count) ->
     basic_static_string&
 {
@@ -4912,16 +4917,16 @@ basic_static_string<N, CharT, Traits>::
 insert(
   const_iterator pos,
   size_type count,
-  CharT ch) ->
+  value_type ch) ->
     iterator
 {
   const auto curr_size = size();
   const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - curr_size, std::length_error{"count() > max_size() - size()"});
-  auto const index = pos - curr_data;
-  Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index);
-  Traits::assign(&curr_data[index], count, ch);
+  const auto index = pos - curr_data;
+  traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index);
+  traits_type::assign(&curr_data[index], count, ch);
   this->set_size(curr_size + count);
   term();
   return &curr_data[index];
@@ -4950,22 +4955,22 @@ insert(
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, s);
   if (!inside || (inside && ((s - curr_data) + count <= index)))
   {
-    Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
     detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
   }
   else
   {
     const size_type offset = s - curr_data;
-    Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
     if (offset < index)
     {
       const size_type diff = index - offset;
-      Traits::copy(&curr_data[index], &curr_data[offset], diff);
-      Traits::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
+      traits_type::copy(&curr_data[index], &curr_data[offset], diff);
+      traits_type::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
     }
     else
     {
-      Traits::copy(&curr_data[index], &curr_data[offset + count], count);
+      traits_type::copy(&curr_data[index], &curr_data[offset + count], count);
     }
   }
   this->set_size(curr_size + count);
@@ -5011,8 +5016,8 @@ erase(
   const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
     index > curr_size, std::out_of_range{"index > size()"});
-  auto const n = (std::min)(count, curr_size - index);
-  Traits::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
+  const auto n = (std::min)(count, curr_size - index);
+  traits_type::move(&curr_data[index], &curr_data[index + n], curr_size - (index + n) + 1);
   this->set_size(curr_size - n);
   return *this;
 }
@@ -5048,12 +5053,12 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
 push_back(
-  CharT ch)
+  value_type ch)
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
     curr_size >= max_size(), std::length_error{"size() >= max_size()"});
-  Traits::assign(data()[curr_size], ch);
+  traits_type::assign(data()[curr_size], ch);
   this->set_size(curr_size + 1);
   term();
 }
@@ -5063,14 +5068,14 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 append(
-  CharT const* s,
+  const_pointer s,
   size_type count) ->
     basic_static_string&
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
-  Traits::copy(&data()[curr_size], s, count);
+  traits_type::copy(&data()[curr_size], s, count);
   this->set_size(curr_size + count);
   term();
   return *this;
@@ -5107,8 +5112,8 @@ basic_static_string<N, CharT, Traits>::
 copy(CharT* dest, size_type count, size_type pos) const ->
   size_type
 {
-  auto const s = subview(pos, count);
-  Traits::copy(dest, s.data(), s.size());
+  const auto s = subview(pos, count);
+  traits_type::copy(dest, s.data(), s.size());
   return s.size();
 }
 
@@ -5116,13 +5121,13 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-resize(std::size_t n)
+resize(size_type n)
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
     n > max_size(), std::length_error{"n > max_size()"});
   if(n > curr_size)
-    Traits::assign(&data()[curr_size], n - curr_size, CharT{});
+    traits_type::assign(&data()[curr_size], n - curr_size, value_type());
   this->set_size(n);
   term();
 }
@@ -5131,13 +5136,13 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-resize(std::size_t n, CharT c)
+resize(size_type n, value_type c)
 {
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
     n > max_size(), std::length_error{"n > max_size()"});
   if(n > curr_size)
-    Traits::assign(&data()[curr_size], n - curr_size, c);
+    traits_type::assign(&data()[curr_size], n - curr_size, c);
   this->set_size(n);
   term();
 }
@@ -5151,9 +5156,9 @@ swap(basic_static_string& s) noexcept
   const auto curr_size = size();
   basic_static_string tmp(s);
   s.set_size(curr_size);
-  Traits::copy(&s.data()[0], data(), curr_size + 1);
+  traits_type::copy(&s.data()[0], data(), curr_size + 1);
   this->set_size(tmp.size());
-  Traits::copy(data(), tmp.data(), size() + 1);
+  traits_type::copy(data(), tmp.data(), size() + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5170,9 +5175,9 @@ swap(basic_static_string<M, CharT, Traits>& s)
     s.size() > max_size(), std::length_error{"s.size() > max_size()"});
   basic_static_string tmp(s);
   s.set_size(curr_size);
-  Traits::copy(&s.data()[0], data(), curr_size + 1);
+  traits_type::copy(&s.data()[0], data(), curr_size + 1);
   this->set_size(tmp.size());
-  Traits::copy(data(), &tmp.data()[0], size() + 1);
+  traits_type::copy(data(), &tmp.data()[0], size() + 1);
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5182,7 +5187,7 @@ basic_static_string<N, CharT, Traits>::
 replace(
   size_type pos,
   size_type n1,
-  const CharT* s,
+  const_pointer s,
   size_type n2) -> 
     basic_static_string<N, CharT, Traits>&
 {
@@ -5199,7 +5204,7 @@ replace(
   size_type pos,
   size_type n1,
   size_type n2,
-  CharT c) -> 
+  value_type c) ->
     basic_static_string<N, CharT, Traits>&
 {
   const auto curr_size = size();
@@ -5210,8 +5215,8 @@ replace(
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
     std::length_error{"replaced string exceeds max_size()"});
   n1 = (std::min)(n1, curr_size - pos);
-  Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
-  Traits::assign(&curr_data[pos], n2, c);
+  traits_type::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+  traits_type::assign(&curr_data[pos], n2, c);
   this->set_size((curr_size - n1) + n2);
   return *this;
 }
@@ -5249,7 +5254,7 @@ replace(
   if (!inside || (inside && ((first_addr - curr_data) + n2 <= pos)))
   {
     // source outside
-    Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+    traits_type::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
     detail::copy_with_traits<Traits>(j1, j2, &curr_data[pos]);
   }
   else
@@ -5261,19 +5266,19 @@ replace(
       // grow/unchanged
       const size_type diff = offset <= pos + n1 ? (std::min)((pos + n1) - offset, n2) : 0;
       // shift all right of splice point by n2 - n1 to the right
-      Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      traits_type::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
       // copy all before splice point
-      Traits::move(&curr_data[pos], &curr_data[offset], diff);
+      traits_type::move(&curr_data[pos], &curr_data[offset], diff);
       // copy all after splice point
-      Traits::move(&curr_data[pos + diff], &curr_data[(offset - n1) + n2 + diff], n2 - diff);
+      traits_type::move(&curr_data[pos + diff], &curr_data[(offset - n1) + n2 + diff], n2 - diff);
     }
     else
     {
       // shrink
       // copy all elements into place
-      Traits::move(&curr_data[pos], &curr_data[offset], n2);
+      traits_type::move(&curr_data[pos], &curr_data[offset], n2);
       // shift all elements after splice point left
-      Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+      traits_type::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
     }
   }
   this->set_size((curr_size - n1) + n2);
@@ -5312,7 +5317,7 @@ replace(
   // Cap the size
   n1 = (std::min)(n1, curr_size - pos);
   // Move everything from the end of the splice point to the end of the rotated string to the begining of the splice point
-  Traits::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], ((curr_size - n1) + n2) - pos);
+  traits_type::move(&curr_data[pos + n2], &curr_data[pos + n2 + n1], ((curr_size - n1) + n2) - pos);
   this->set_size((curr_size - n1) + n2);
   return *this;
 }
@@ -5322,7 +5327,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find(
-  const CharT* s,
+  const_pointer s,
   size_type pos,
   size_type n) const noexcept ->
     size_type
@@ -5332,7 +5337,7 @@ find(
     return npos;
   if (!n)
     return pos;
-  const auto res = detail::search(&data()[pos], &data()[curr_size], s, &s[n], Traits::eq);
+  const auto res = detail::search(&data()[pos], &data()[curr_size], s, &s[n], traits_type::eq);
   return res == end() ? npos : detail::distance(data(), res);
 }
 
@@ -5341,7 +5346,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 rfind(
-  const CharT* s,
+  const_pointer s,
   size_type pos,
   size_type n) const noexcept ->
     size_type
@@ -5355,7 +5360,7 @@ rfind(
   if (!n)
     return pos;
   for (auto sub = &curr_data[pos]; sub >= curr_data; --sub)
-    if (!Traits::compare(sub, s, n))
+    if (!traits_type::compare(sub, s, n))
       return detail::distance(curr_data, sub);
   return npos;
 }
@@ -5365,7 +5370,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_first_of(
-  const CharT* s,
+  const_pointer s,
   size_type pos,
   size_type n) const noexcept ->
     size_type
@@ -5373,7 +5378,7 @@ find_first_of(
   const auto curr_data = data();
   if (pos >= size() || !n)
     return npos;
-  const auto res = detail::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], Traits::eq);
+  const auto res = detail::find_first_of(&curr_data[pos], &curr_data[size()], s, &s[n], traits_type::eq);
   return res == end() ? npos : detail::distance(curr_data, res);
 }
 
@@ -5382,7 +5387,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_last_of(
-  const CharT* s,
+  const_pointer s,
   size_type pos,
   size_type n) const noexcept ->
     size_type
@@ -5394,7 +5399,7 @@ find_last_of(
     pos = 0;
   else
     pos = curr_size - (pos + 1);
-  const auto res = detail::find_first_of(rbegin() + pos, rend(), s, &s[n], Traits::eq);
+  const auto res = detail::find_first_of(rbegin() + pos, rend(), s, &s[n], traits_type::eq);
   return res == rend() ? npos : curr_size - 1 - detail::distance(rbegin(), res);
 }
 
@@ -5403,7 +5408,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_first_not_of(
-  const CharT* s,
+  const_pointer s,
   size_type pos,
   size_type n) const noexcept ->
     size_type
@@ -5421,7 +5426,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 find_last_not_of(
-  const CharT* s,
+  const_pointer s,
   size_type pos,
   size_type n) const noexcept ->
     size_type
@@ -5440,11 +5445,11 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-assign_char(CharT ch, std::true_type) noexcept ->
+assign_char(value_type ch, std::true_type) noexcept ->
   basic_static_string&
 {
   this->set_size(1);
-  Traits::assign(data()[0], ch);
+  traits_type::assign(data()[0], ch);
   term();
   return *this;
 }
@@ -5452,7 +5457,7 @@ assign_char(CharT ch, std::true_type) noexcept ->
 template<std::size_t N, typename CharT, typename Traits>
 auto
 basic_static_string<N, CharT, Traits>::
-assign_char(CharT, std::false_type) ->
+assign_char(value_type, std::false_type) ->
   basic_static_string&
 {
   BOOST_STATIC_STRING_THROW(std::length_error{"max_size() == 0"});
@@ -5475,7 +5480,7 @@ read_back(
   {
     BOOST_STATIC_STRING_THROW_IF(
       1 > max_size() - new_size, std::length_error{"count > max_size() - size()"});
-    Traits::assign(curr_data[++new_size], *first);
+    traits_type::assign(curr_data[++new_size], *first);
   }
   return new_size - size();
 }
@@ -5487,7 +5492,7 @@ basic_static_string<N, CharT, Traits>::
 replace_unchecked(
   size_type pos,
   size_type n1,
-  const CharT* s,
+  const_pointer s,
   size_type n2) ->
     basic_static_string&
 {
@@ -5500,8 +5505,8 @@ replace_unchecked(
     std::length_error{"replaced string exceeds max_size()"});
   if (pos + n1 >= curr_size)
     n1 = curr_size - pos;
-  Traits::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
-  Traits::copy(&curr_data[pos], s, n2);
+  traits_type::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
+  traits_type::copy(&curr_data[pos], s, n2);
   this->set_size((curr_size - n1) + n2);
   return *this;
 }
@@ -5512,7 +5517,7 @@ auto
 basic_static_string<N, CharT, Traits>::
 insert_unchecked(
   size_type index,
-  const CharT* s,
+  const_pointer s,
   size_type count) ->
     basic_static_string<N, CharT, Traits>&
 {
@@ -5523,8 +5528,8 @@ insert_unchecked(
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - size(),
     std::length_error{"count > max_size() - size()"});
-  Traits::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
-  Traits::copy(&curr_data[index], s, count);
+  traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+  traits_type::copy(&curr_data[index], s, count);
   this->set_size(curr_size + count);
   return *this;
 }
