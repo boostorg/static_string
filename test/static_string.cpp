@@ -210,9 +210,12 @@ testR(S s, typename S::size_type pos, typename S::size_type n1, const typename S
     s.size();
   if (pos <= old_size)
   {
-    s.replace(pos, n1, str, n2);
-    s0.replace(s0.begin() + pos, s0.begin() + pos + n1, str, str + n2);
-    return s == expected && s0 == expected;
+    if (pos + n1 > s0.size())
+      // this is a precondition violation for the const_iterator overload
+      return s.replace(pos, n1, str, n2) == expected;
+    else
+      return s.replace(pos, n1, str, n2) == expected && 
+        s0.replace(s0.begin() + pos, s0.begin() + pos + n1, str, str + n2) == expected;
   }
   else
   {
@@ -3595,6 +3598,7 @@ void
 testToStaticString()
 {
     BOOST_TEST(to_static_string(0) == "0");
+    BOOST_TEST(to_static_string(0u) == "0");
     BOOST_TEST(to_static_string(1) == "1");
     BOOST_TEST(to_static_string(0xffff) == "65535");
     BOOST_TEST(to_static_string(0x10000) == "65536");
@@ -5668,6 +5672,8 @@ testFind()
   BOOST_TEST(testFLN(S("hnbrcplsjfgiktoedmaq"), "qprlsfojamgndekthibc", 21, 20, S::npos));
 }
 
+#include <iostream>
+
 // done
 void
 testReplace()
@@ -6635,6 +6641,10 @@ testReplace()
   BOOST_TEST(testR(S("abcdefghijklmnopqrst"), 20, 1, "12345678901234567890", 10, S("abcdefghijklmnopqrst1234567890")));
   BOOST_TEST(testR(S("abcdefghijklmnopqrst"), 20, 1, "12345678901234567890", 19, S("abcdefghijklmnopqrst1234567890123456789")));
   BOOST_TEST(testR(S("abcdefghijklmnopqrst"), 20, 1, "12345678901234567890", 20, S("abcdefghijklmnopqrst12345678901234567890")));
+
+  using T = static_string<10>;
+  BOOST_TEST_THROWS(T("12345").replace(0, 1, 500, 'a'), std::length_error);
+  BOOST_TEST_THROWS(T("12345").replace(0, 1, "aaaaaaaaaaaaaa"), std::length_error);
 }
 
 // done
@@ -6901,6 +6911,13 @@ testStartsEnds()
   BOOST_TEST(!S("1234567890").ends_with("234"));
   BOOST_TEST(!S("1234567890").ends_with("12345678900"));
   BOOST_TEST(S("1234567890").ends_with(string_view("1234567890")));
+
+  BOOST_TEST(!S().starts_with('0'));
+  BOOST_TEST(!S().starts_with("0"));
+  BOOST_TEST(!S().starts_with(string_view("0")));
+  BOOST_TEST(!S().ends_with('0'));
+  BOOST_TEST(!S().ends_with("0"));
+  BOOST_TEST(!S().ends_with(string_view("0")));
 }
 
 void
