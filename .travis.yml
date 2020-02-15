@@ -122,7 +122,6 @@ jobs:
         - B2_CXXSTD=11
         - B2_TOOLSET=gcc-8
         - B2_DEFINES="define=BOOST_NO_STRESS_TEST=1"
-        - B2_CXXFLAGS="-O0"
       addons: *gcc-8
       script:
         - cd $BOOST_ROOT/libs/$SELF
