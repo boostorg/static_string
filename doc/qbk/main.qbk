@@ -76,8 +76,6 @@ The over-arching design goal is to resemble the interface and behavior of
 maximum allowed size of the string, `std::length_error` is thrown if exceptions are enabled. All
 algorithms which throw exceptions provide the strong exception safety
 guarantee. This is intended to be a drop in replacement for `std::string`.
-All the operations for `static_string` work when the source of the operation is within
-the string itself. 
 
 The API of `static_string` only diverges from `std::string` in few places,
 being `substr` for which this implementation returns a string view instead of `static_string`,
