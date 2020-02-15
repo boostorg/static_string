@@ -6903,7 +6903,8 @@ testStartsEnds()
   BOOST_TEST(S("1234567890").ends_with(string_view("1234567890")));
 }
 
-void testHash()
+void
+testHash()
 {
   using U = static_string<30>;
   std::hash<U> hasher;
@@ -6911,13 +6912,26 @@ void testHash()
   BOOST_TEST(hasher(U("1234567890")) == hasher(U("1234567890")));
 }
 
-void testEmpty()
+void
+testEmpty()
 {
-  using E = static_string<0>;
-  E a;
+  static_string<0> a;
   BOOST_TEST(a.size() == 0);
   BOOST_TEST(a.data());
   BOOST_TEST(!a.capacity());
+}
+
+void
+testResize()
+{
+  static_string<10> a = "a";
+  a.resize(a.size() + 1);
+  BOOST_TEST(a.size() == 2);
+
+  static_string<10> b = "a";
+  b.resize(b.size() + 1, 'a');
+  BOOST_TEST(b == "aa");
+  BOOST_TEST(b.size() == 2);
 }
 
 int
@@ -6947,6 +6961,7 @@ runTests()
   testSwap();
   testGeneral();
   testToStaticString();
+  testResize();
 
   testFind();
 
@@ -6959,17 +6974,6 @@ runTests()
 
   return report_errors();
 }
-
-static_assert(std::is_base_of<
-    detail::static_string_base<0, char, std::char_traits<char>>,
-    static_string<0>>::value, 
-    "the zero size optimization shall be used for N = 0");
-
-static_assert(std::is_base_of<
-    detail::static_string_base<(std::numeric_limits<char>::max)() + 1, char, std::char_traits<char>>,
-    static_string<(std::numeric_limits<char>::max)() + 1>>::value,
-    "the minimum size type optimization shall be used for N > 0");
-
 } // static_string
 } // boost
 

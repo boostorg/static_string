@@ -2412,8 +2412,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
-  resize(
-    size_type n);
+  resize(size_type n);
 
   /** Change the size of the string.
 
@@ -5123,9 +5122,9 @@ void
 basic_static_string<N, CharT, Traits>::
 resize(size_type n)
 {
-  const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
     n > max_size(), std::length_error{"n > max_size()"});
+  const auto curr_size = size();
   if(n > curr_size)
     traits_type::assign(&data()[curr_size], n - curr_size, value_type());
   this->set_size(n);
@@ -5138,9 +5137,9 @@ void
 basic_static_string<N, CharT, Traits>::
 resize(size_type n, value_type c)
 {
-  const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
     n > max_size(), std::length_error{"n > max_size()"});
+  const auto curr_size = size();
   if(n > curr_size)
     traits_type::assign(&data()[curr_size], n - curr_size, c);
   this->set_size(n);
