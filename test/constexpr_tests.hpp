@@ -134,7 +134,7 @@ testConstantEvaluation()
   a.insert(a.begin(), {'a'});
 
   // erase
-  a.erase();
+  a.erase(0, 1);
   a.erase(a.begin());
   a.erase(a.begin(), a.end());
 
@@ -324,7 +324,7 @@ testConstantEvaluation()
   a.insert(a.begin(), {'a'});
 
   // erase
-  a.erase();
+  a.erase(0, 1);
   a.erase(a.begin());
   a.erase(a.begin(), a.end());
 
@@ -500,7 +500,7 @@ testConstantEvaluation()
   a.insert(a.begin(), {'a'});
 
   // erase
-  a.erase();
+  a.erase(0, 1);
   a.erase(a.begin());
   a.erase(a.begin(), a.end());
 

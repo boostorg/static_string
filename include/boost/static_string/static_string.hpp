@@ -1863,8 +1863,11 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   iterator
-  erase(
-    const_iterator pos);
+  erase(const_iterator pos)
+  {
+    BOOST_STATIC_STRING_ASSERT(!empty());
+    return erase(pos, pos + 1);
+  }
 
   /** Removes the characters in the range `(first, last)`
 
@@ -1892,7 +1895,7 @@ public:
   void
   pop_back() noexcept
   {
-    BOOST_STATIC_STRING_ASSERT(size() > 0);
+    BOOST_STATIC_STRING_ASSERT(!empty());
     this->set_size(size() - 1);
     term();
   }
@@ -5043,25 +5046,10 @@ erase(
   size_type count) ->
     basic_static_string&
 {
-  const auto curr_size = size();
-  const auto curr_data = data();
   BOOST_STATIC_STRING_THROW_IF(
-    index > curr_size, std::out_of_range{"index > size()"});
-  count = (std::min)(count, curr_size - index);
-  traits_type::move(&curr_data[index], &curr_data[index + count], curr_size - (index + count) + 1);
-  this->set_size(curr_size - count);
+    index > size(), std::out_of_range{"index > size()"});
+  erase(data() + index, data() + index + (std::min)(count, size() - index));
   return *this;
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-erase(const_iterator pos) ->
-  iterator
-{
-  erase(pos - begin(), 1);
-  return begin() + (pos - begin());
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5073,9 +5061,11 @@ erase(
   const_iterator last) ->
     iterator
 {
-  erase(first - begin(),
-    detail::distance(first, last));
-  return begin() + (first - begin());
+  const auto curr_data = data();
+  const std::size_t index = first - curr_data;
+  traits_type::move(&curr_data[index], last, (end() - last) + 1);
+  this->set_size(size() - std::size_t(last - first));
+  return curr_data + index;
 }
 
 template<std::size_t N, typename CharT, typename Traits>

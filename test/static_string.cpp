@@ -1608,11 +1608,6 @@ testErase()
         BOOST_TEST(s.erase(s.begin() + 1) == s.begin() + 1);
         BOOST_TEST(s == "ac");
     }
-    {
-        static_string<3> s{"abc"};
-        BOOST_TEST(s.erase(s.begin() + 3) == s.end());
-        BOOST_TEST(s == "abc");
-    }
 
     // erase(const_iterator first, const_iterator last)
     {
