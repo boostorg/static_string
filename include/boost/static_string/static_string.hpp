@@ -4891,9 +4891,10 @@ assign(
   auto ptr = data();
   for (std::size_t i = 0; first != last; ++first, ++ptr, ++i)
   {
-    if (1 > max_size() - i)
+    if (i >= max_size())
     {
       this->set_size(i);
+      term();
       BOOST_STATIC_STRING_THROW(std::length_error{"n > max_size()"});
     }
     traits_type::assign(*ptr, *first);
@@ -5482,7 +5483,7 @@ read_back(
   for (; first != last; ++first)
   {
     BOOST_STATIC_STRING_THROW_IF(
-      1 > max_size() - new_size, std::length_error{"count > max_size() - size()"});
+      new_size >= max_size(), std::length_error{"count > max_size() - size()"});
     traits_type::assign(curr_data[++new_size], *first);
   }
   return new_size - size();
