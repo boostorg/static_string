@@ -15,7 +15,7 @@
 
 #include "constexpr_tests.hpp"
 
-#include <iostream>
+#include <sstream>
 
 namespace boost {
 namespace static_string {
@@ -6946,6 +6946,15 @@ testResize()
   BOOST_TEST(b.size() == 2);
 }
 
+void
+testStream()
+{
+  std::stringstream a;
+  static_string<10> b;
+  a << b;
+  BOOST_TEST(a.str() == b.subview());
+}
+
 int
 runTests()
 {
@@ -6983,6 +6992,7 @@ runTests()
 
   testHash();
   testEmpty();
+  testStream();
 
   return report_errors();
 }
