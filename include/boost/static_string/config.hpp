@@ -37,9 +37,7 @@
 // Standard version
 #if __cpp_lib_is_constant_evaluated >= 201811L
 #define BOOST_STATIC_STRING_IS_CONST_EVAL std::is_constant_evaluated()
-#elif defined(__clang__) && BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_is_constant_evaluated)
-// If we have clang version 9+, we can use the intrinsic
-// While gcc also has this, we don't need it
+#elif BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_is_constant_evaluated)
 #define BOOST_STATIC_STRING_IS_CONST_EVAL __builtin_is_constant_evaluated()
 #endif
 
