@@ -125,7 +125,7 @@ jobs:
       addons: *gcc-8
       script:
         - cd $BOOST_ROOT/libs/$SELF
-        - ci/travis/codecov.sh
+        - tools/codecov.sh
 
     - os: linux
       env:
