@@ -937,6 +937,20 @@ testInsert()
         BOOST_TEST(s == "abcd");
     }
 
+    // insert(size_type, static_string) checked
+    {
+        static_string<10> s1 = "ad";
+        static_string<10> s2 = "bc";
+        BOOST_TEST(s1.insert(1, s2) == "abcd");
+    }
+
+     // insert(size_type, static_string, size_type, size_type)
+    {
+        static_string<10> s1 = "ad";
+        static_string<10> s2 = "abcd";
+        BOOST_TEST(s1.insert(1, s2, 1, 2) == "abcd");
+    }
+
     // insert(size_type index, T const& t)
     {
         struct T
@@ -5735,10 +5749,22 @@ testReplace()
     static_string<20> fs1 = "helloworld";
     BOOST_TEST(fs1.replace(0, fs1.size(), fs1) == "helloworld");
   }
+  // replace(size_type pos1, size_type n1, const basic_string& str); unchecked
+  {
+    static_string<20> fs1 = "helloworld";
+    static_string<15> fs2 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), fs2) == "helloworld");
+  }
   // replace(size_type pos1, size_type n1, const basic_string& str, size_type pos2, size_type n2 = npos);
   {
     static_string<20> fs1 = "helloworld";
     BOOST_TEST(fs1.replace(0, fs1.size(), fs1, 0, fs1.size()) == "helloworld");
+  }
+  // replace(size_type pos1, size_type n1, const basic_string& str, size_type pos2, size_type n2 = npos); unchecked
+  {
+    static_string<20> fs1 = "helloworld";
+    static_string<15> fs2 = "helloworld";
+    BOOST_TEST(fs1.replace(0, fs1.size(), fs2, 0, fs2.size()) == "helloworld");
   }
   // replace(size_type pos1, size_type n1, const T& t);
   {
@@ -5764,6 +5790,12 @@ testReplace()
   {
     static_string<20> fs1 = "helloworld";
     BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs1) == "helloworld");
+  }
+  // replace(const_iterator i1, const_iterator i2, const basic_string& str); unchecked
+  {
+    static_string<20> fs1 = "helloworld";
+    static_string<15> fs2 = "helloworld";
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), fs2) == "helloworld");
   }
   // replace(const_iterator i1, const_iterator i2, const T& t);
   {
