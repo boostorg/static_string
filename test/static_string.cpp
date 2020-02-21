@@ -2173,6 +2173,28 @@ testCompare()
         s2 = "22";
         BOOST_TEST(s1.compare(s2) < 0);
         BOOST_TEST(s2.compare(s1) > 0);
+
+        BOOST_TEST(s1.compare(0, 1, s2) < 0);
+        BOOST_TEST(s2.compare(0, 2, s1) > 0);
+
+        BOOST_TEST(s1.compare(0, 2, s2, 0, 1) < 0);
+        BOOST_TEST(s2.compare(0, 1, s1, 0, 2) > 0);
+
+        BOOST_TEST(s1.compare(s2.data()) < 0);
+        BOOST_TEST(s2.compare(s1.data()) > 0);
+
+        BOOST_TEST(s1.compare(0, 2, s2.data()) < 0);
+        BOOST_TEST(s2.compare(0, 1, s1.data()) > 0);
+
+        BOOST_TEST(s1.compare(s2.subview()) < 0);
+        BOOST_TEST(s2.compare(s1.subview()) > 0);
+
+        BOOST_TEST(s1.compare(0, 2, s2.subview()) < 0);
+        BOOST_TEST(s2.compare(0, 1, s1.subview()) > 0);
+
+        BOOST_TEST(s1.compare(0, 2, s2.subview(), 0, 1) < 0);
+        BOOST_TEST(s2.compare(0, 1, s1.subview(), 0, 2) > 0);
+
         BOOST_TEST(s1 < "10");
         BOOST_TEST(s2 > "1");
         BOOST_TEST("10" > s1);
