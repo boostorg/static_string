@@ -316,19 +316,6 @@ lexicographical_compare(
     CharT, Traits>(s1.data(), s1.size(), s2, n2);
 }
 
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-inline
-int
-lexicographical_compare(
-  const basic_static_string<N, CharT, Traits>& s1,
-  const CharT* s2,
-  std::size_t n2) noexcept
-{
-  return detail::lexicographical_compare<
-    CharT, Traits>(s1.data(), s1.size(), s2, n2);
-}
-
 template<typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -336,18 +323,6 @@ int
 lexicographical_compare(
     basic_string_view<CharT, Traits> s1,
     basic_string_view<CharT, Traits> s2) noexcept
-{
-  return detail::lexicographical_compare<CharT, Traits>(
-    s1.data(), s1.size(), s2.data(), s2.size());
-}
-
-template<std::size_t N, std::size_t M, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-inline
-int 
-lexicographical_compare(
-  const basic_static_string<N, CharT, Traits>& s1, 
-  const basic_static_string<M, CharT, Traits>& s2) noexcept
 {
   return detail::lexicographical_compare<CharT, Traits>(
     s1.data(), s1.size(), s2.data(), s2.size());
