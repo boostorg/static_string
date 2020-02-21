@@ -927,7 +927,14 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  assign(const basic_static_string& s) noexcept;
+  assign(const basic_static_string& s) noexcept
+  {
+    if (this == &s)
+      return *this;
+    this->set_size(s.size());
+    traits_type::copy(data(), &s.data()[0], size() + 1);
+    return *this;
+  }
 
   /** Replace the contents.
     
@@ -942,8 +949,8 @@ public:
   assign(const basic_static_string<M, CharT, Traits>& s)
   {
     // VFALCO this could come in two flavors,
-    //        N>M and N<M, and skip the exception
-    //        check when N>M
+    // N > M and N < M, and skip the exception
+    // check when N > M
     return assign(s.data(), s.size());
   }
 
@@ -4781,19 +4788,19 @@ assign(
   return term();
 }
 
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-assign(const basic_static_string& s) noexcept ->
-        basic_static_string&
-{
-  if(this == &s)
-    return *this;
-  this->set_size(s.size());
-  traits_type::copy(data(), &s.data()[0], size() + 1);
-  return *this;
-}
+//template<std::size_t N, typename CharT, typename Traits>
+//BOOST_STATIC_STRING_CPP14_CONSTEXPR
+//auto
+//basic_static_string<N, CharT, Traits>::
+//assign(const basic_static_string& s) noexcept ->
+//        basic_static_string&
+//{
+//  if(this == &s)
+//    return *this;
+//  this->set_size(s.size());
+//  traits_type::copy(data(), &s.data()[0], size() + 1);
+//  return *this;
+//}
 
 template<std::size_t N, typename CharT, typename Traits>
 template<std::size_t M>

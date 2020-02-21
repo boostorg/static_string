@@ -7042,37 +7042,37 @@ testOperatorPlus()
     BOOST_TEST(res.size() == 10);
   }
 
-  //// operator+(static_string, CharT)
-  //{
-  //  auto res = s1 + '!';
-  //  BOOST_TEST(res == "hello!");
-  //  BOOST_TEST(res.capacity() == 11);
-  //  BOOST_TEST(res.size() == 6);
-  //}
+  // operator+(static_string, CharT)
+  {
+    auto res = s1 + '!';
+    BOOST_TEST(res == "hello!");
+    BOOST_TEST(res.capacity() == 11);
+    BOOST_TEST(res.size() == 6);
+  }
 
-  //// operator+(CharT, static_string)
-  //{
-  //  auto res = '!' + s1;
-  //  BOOST_TEST(res == "!hello");
-  //  BOOST_TEST(res.capacity() == 11);
-  //  BOOST_TEST(res.size() == 6);
-  //}
+  // operator+(CharT, static_string)
+  {
+    auto res = '!' + s1;
+    BOOST_TEST(res == "!hello");
+    BOOST_TEST(res.capacity() == 11);
+    BOOST_TEST(res.size() == 6);
+  }
 
-  //// operator+(static_string, CharT(&)[N])
-  //{
-  //  auto res = s1 + "world";
-  //  BOOST_TEST(res == "helloworld");
-  //  BOOST_TEST(res.capacity() == 15);
-  //  BOOST_TEST(res.size() == 10);
-  //}
+  // operator+(static_string, CharT(&)[N])
+  {
+    auto res = s1 + "world";
+    BOOST_TEST(res == "helloworld");
+    BOOST_TEST(res.capacity() == 15);
+    BOOST_TEST(res.size() == 10);
+  }
 
-  //// operator+(CharT(&)[N], static_string)
-  //{
-  //  auto res = "hello" + s2;
-  //  BOOST_TEST(res == "helloworld");
-  //  BOOST_TEST(res.capacity() == 15);
-  //  BOOST_TEST(res.size() == 10);
-  //}
+  // operator+(CharT(&)[N], static_string)
+  {
+    auto res = "hello" + s2;
+    BOOST_TEST(res == "helloworld");
+    BOOST_TEST(res.capacity() == 15);
+    BOOST_TEST(res.size() == 10);
+  }
 }
 
 int
