@@ -2438,7 +2438,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   copy(
-    CharT* dest,
+    pointer dest,
     size_type count,
     size_type pos = 0) const;
 
@@ -4102,7 +4102,7 @@ private:
   }
 
   basic_static_string&
-  assign_char(value_type ch, std::false_type)
+  assign_char(value_type, std::false_type)
   {
     BOOST_STATIC_STRING_THROW(
       std::length_error{"max_size() == 0"});
@@ -4785,15 +4785,13 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-assign(
-    const basic_static_string& s) noexcept ->
+assign(const basic_static_string& s) noexcept ->
         basic_static_string&
 {
   if(this == &s)
     return *this;
   this->set_size(s.size());
-  const auto n = size() + 1;
-  traits_type::copy(data(), &s.data()[0], n);
+  traits_type::copy(data(), &s.data()[0], size() + 1);
   return *this;
 }
 
@@ -5012,7 +5010,7 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
-copy(CharT* dest, size_type count, size_type pos) const ->
+copy(pointer dest, size_type count, size_type pos) const ->
   size_type
 {
   const auto s = subview(pos, count);

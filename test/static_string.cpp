@@ -3622,6 +3622,25 @@ testGeneral()
             s1.resize(2),
             std::length_error);
     }
+    // copy
+    {
+      {
+        static_string<20> str = "helloworld";
+        char arr[20]{};
+        BOOST_TEST(str.copy(arr, str.size()) ==
+          str.size());
+        BOOST_TEST(str == arr);
+        BOOST_TEST_THROWS(
+          str.copy(arr, str.size(), str.size() + 1),
+          std::out_of_range);
+      }
+      {
+        static_string<20> str = "helloworld";
+        char arr[20]{};
+        BOOST_TEST(str.copy(arr, 2, 2) == 2);
+        BOOST_TEST(arr[0] == 'l' && arr[1] == 'l');
+      }
+    }
 }
 
 // done
