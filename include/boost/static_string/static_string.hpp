@@ -4456,33 +4456,41 @@ operator+(
   CharT lhs,
   const basic_static_string<N, CharT, Traits>& rhs)
 {
-  return basic_static_string<N + 1, CharT, Traits>(rhs).insert(0, lhs);
+  // The cast to std::size_t is needed here since 0 is a null pointer constant
+  return basic_static_string<N + 1, CharT, Traits>(rhs).insert(
+    std::size_t(0), 1, lhs);
 }
 
+// Add a null-terminated character array to a string.
 template<
   std::size_t N, std::size_t M,
   typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
-basic_static_string<N + M, CharT, Traits>
+basic_static_string<(N + M) - 1, CharT, Traits>
 operator+(
   const basic_static_string<N, CharT, Traits>& lhs,
   const CharT(&rhs)[M])
 {
-  return basic_static_string<N + M, CharT, Traits>(lhs).append(+rhs, M);
+  // Subtract 1 to account for the null terminator, as "hello" is a char[6]
+  return basic_static_string<(N + M) - 1, CharT, Traits>(lhs).append(+rhs, M - 1);
 }
 
+// Add a string to a null-terminated character array.
 template<
   std::size_t N, std::size_t M,
   typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
-basic_static_string<N + M, CharT, Traits>
+basic_static_string<(N + M) - 1, CharT, Traits>
 operator+(
   const CharT(&lhs)[N],
   const basic_static_string<M, CharT, Traits>& rhs)
 {
-  return basic_static_string<N + M, CharT, Traits>(rhs).insert(0, +rhs, N);
+  // Subtract 1 to account for the null terminator, as "hello" is a char[6]
+  // The cast to std::size_t is needed here since 0 is a null pointer constant
+  return basic_static_string<(N + M) - 1, CharT, Traits>(rhs).insert(
+    std::size_t(0), +lhs, N - 1);
 }
 
 //------------------------------------------------------------------------------
