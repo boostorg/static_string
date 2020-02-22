@@ -1993,7 +1993,7 @@ testAppend()
           std::out_of_range);
       static_string<3> s5("12");
       BOOST_TEST_THROWS(
-          (s5.append(s1, 1)),
+          (s5.append(s1, 1, 2)),
           std::length_error);
   }
   {

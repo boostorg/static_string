@@ -100,6 +100,24 @@ struct void_t_helper
 template<typename... Ts>
 using void_t = typename void_t_helper<Ts...>::type;
 
+// Check if a type can be used for templated
+// overloads string_view_type
+
+template<typename T, typename CharT, typename Traits, typename = void>
+struct enable_if_viewable { };
+
+template<typename T, typename CharT, typename Traits>
+struct enable_if_viewable<T, CharT, Traits,
+  typename std::enable_if<
+    std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value &&
+      !std::is_convertible<const T&, const CharT*>::value>::type>  
+{
+  using type = void;
+};
+
+template<typename T, typename CharT, typename Traits>
+using enable_if_viewable_t = typename enable_if_viewable<T, CharT, Traits>::type;
+
 // Simplified check for if a type is an iterator
 template<class T, typename = void>
 struct is_iterator : std::false_type { };
@@ -814,8 +832,7 @@ public:
   */
   template<typename T
 #ifndef GENERATING_DOCUMENTATION
-    , class = typename std::enable_if<
-      std::is_convertible<T, string_view_type>::value>::type
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1037,16 +1054,13 @@ public:
 
       @throw std::length_error if `string_view_type{t}.size() > max_size()`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   assign(const T& t)
   {
     string_view_type ss{t};
@@ -1065,22 +1079,18 @@ public:
       @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size()`
   */
 
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  basic_static_string&
   assign(
     const T& t,
     size_type pos,
     size_type count = npos)
   {
-    return assign(string_view_type{t}.substr(pos, count));
+    return assign(string_view_type(t).substr(pos, count));
   }
 
   //--------------------------------------------------------------------------
@@ -1209,7 +1219,7 @@ public:
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   operator string_view_type() const noexcept
   {
-    return string_view_type{data(), size()};
+    return string_view_type(data(), size());
   }
 
   //--------------------------------------------------------------------------
@@ -1592,9 +1602,7 @@ public:
     size_type index_str,
     size_type count = npos)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      index_str > str.size(), std::out_of_range{"index_str > str.size()"});
-    return insert_unchecked(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
+    return insert_unchecked(index, str.data() + index_str, str.capped_length(index_str, count));
   }
 
 #ifndef GENERATING_DOCUMENTATION
@@ -1606,9 +1614,7 @@ public:
     size_type index_str,
     size_type count = npos)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      index_str > str.size(), std::out_of_range{"index_str > str.size()"});
-    return insert(index, str.data() + index_str, (std::min)(count, str.size() - index_str));
+    return insert(index, str.data() + index_str, str.capped_length(index_str, count));
   }
 #endif
 
@@ -1714,7 +1720,7 @@ public:
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
+#ifdef GENERATING_DOCUMENTATION
   iterator
 #else
   typename std::enable_if<
@@ -1806,18 +1812,13 @@ public:
       @throw std::length_error `size() + sv.size() > max_size()`
       @throw std::out_of_range `index > size()`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<
-      const T&, string_view_type>::value &&
-        !std::is_convertible<
-          const T&, const_pointer>::value,
-            basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   insert(
     size_type index,
     const T& t)
@@ -1857,16 +1858,13 @@ public:
       @throw std::out_of_range `index > size()`
       @throw std::out_of_range `index_str > sv.size()`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<const T&, string_view_type>::value &&
-      !std::is_convertible<const T&, const_pointer>::value,
-        basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   insert(
     size_type index,
     const T& t,
@@ -1886,7 +1884,11 @@ public:
   basic_static_string&
   erase(
     size_type index = 0,
-    size_type count = npos);
+    size_type count = npos)
+  {
+    erase(data() + index, data() + index + capped_length(index, count));
+    return *this;
+  }
 
   /** Removes the character at `pos`
 
@@ -1942,46 +1944,45 @@ public:
   basic_static_string&
   append(
     size_type count,
-    value_type ch)
+    value_type ch);
+
+  /** Append to the string.
+    
+      Appends the string `s`.
+
+      The appended string can contain null characters.
+
+      @throw std::length_error if `s.size() > max_size() - size()`
+      @return `*this`
+  */
+  template<std::size_t M>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(
+    const basic_static_string<M, CharT, Traits>& s)
   {
-    return insert(size(), count, ch);
+    return append(s.data(), s.size());
   }
 
   /** Append to the string.
     
-      Appends the contents of string view `sv`
+      Appends the contents of `s.substr(pos, count)`
 
       The appended string can contain null characters.
 
-      @throw std::length_error if `sv.size() > max_size() - size()`
+      @throw std::out_of_range if `pos > s.size()`
+      @throw std::length_error if `s.substr(pos, count).size() > max_size() - size()`
       @return `*this`
   */
+  template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   append(
-    string_view_type sv)
-  {
-    return append(sv.data(), sv.size());
-  }
-
-  /** Append to the string.
-    
-      Appends the contents of `sv.substr(pos, count)`
-
-      The appended string can contain null characters.
-
-      @throw std::out_of_range if `pos > sv.size()`
-      @throw std::length_error if `sv.substr(pos, count).size() > max_size() - size()`
-      @return `*this`
-  */
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string&
-  append(
-    string_view_type sv,
+    const basic_static_string<M, CharT, Traits>& s,
     size_type pos,
     size_type count = npos)
   {
-    return append(sv.substr(pos, count));
+    return append(s.data() + pos, s.capped_length(pos, count));
   }
 
   /** Append to the string.
@@ -2011,8 +2012,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  append(
-    const_pointer s)
+  append(const_pointer s)
   {
     return append(s, traits_type::length(s));
   }
@@ -2030,7 +2030,7 @@ public:
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
+#ifdef GENERATING_DOCUMENTATION
   basic_static_string&
 #else
   typename std::enable_if<
@@ -2039,11 +2039,7 @@ public:
 #endif
   append(
     InputIterator first,
-    InputIterator last)
-  {
-    insert(end(), first, last);
-    return *this;
-  }
+    InputIterator last);
 
   /** Append to the string.
     
@@ -2059,8 +2055,7 @@ public:
   append(
     std::initializer_list<value_type> ilist)
   {
-    insert(end(), ilist);
-    return *this;
+    return append(ilist.begin(), ilist.size());
   }
 
   /** Append to the string.
@@ -2075,22 +2070,17 @@ public:
       @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
       @return `*this`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<
-      const T&, string_view_type>::value &&
-        !std::is_convertible<
-          const T&, const_pointer>::value,
-            basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
-  append(
-    const T& t)
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  append(const T& t)
   {
-    return append(string_view_type{t});
+    const string_view_type sv = t;
+    return append(sv.data(), sv.size());
   }
 
   /** Append to the string.
@@ -2106,24 +2096,19 @@ public:
       @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
       @return `*this`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<
-      const T&, string_view_type>::value &&
-        !std::is_convertible<
-          const T&, const_pointer>::value,
-            basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   append(
     const T& t,
     size_type pos,
     size_type count = npos)
   {
-    return append(string_view_type{t}.substr(pos, count));
+    return append(string_view_type(t).substr(pos, count));
   }
 
   /** Append to the string.
@@ -2136,7 +2121,7 @@ public:
   operator+=(
     const basic_static_string<M, CharT, Traits>& s)
   {
-    return append(s.data(), s.size());
+    return append(s);
   }
 
   /** Append to the string.
@@ -2147,8 +2132,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator+=(
-    value_type ch)
+  operator+=(value_type ch)
   {
     push_back(ch);
     return *this;
@@ -2166,8 +2150,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator+=(
-    const_pointer s)
+  operator+=(const_pointer s)
   {
     return append(s);
   }
@@ -2200,16 +2183,13 @@ public:
 
       @throw std::length_error if `string_view_type{t}.size() > max_size()`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   operator+=(
     const T& t)
   {
@@ -2347,16 +2327,13 @@ public:
       `T` is convertible to `string_view_type` and `T` is not
       convertible to `const_pointer`.
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  int
-#else
-  typename std::enable_if<
-    std::is_convertible<const T&, string_view_type>::value &&
-      !std::is_convertible<const T&, const_pointer>::value,
-        int>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  int
   compare(
     size_type pos1,
     size_type count1,
@@ -2392,9 +2369,7 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos > size(), std::out_of_range{"pos > size()"});
-    return basic_static_string(&data()[pos], (std::min)(count, size() - pos));
+    return basic_static_string(&data()[pos], capped_length(pos, count));
   }
 
   /** Return a view of a substring.
@@ -2421,9 +2396,7 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos > size(), std::out_of_range{"pos > size()"});
-    return string_view_type(&data()[pos], (std::min)(count, size() - pos));
+    return string_view_type(&data()[pos], capped_length(pos, count));
   }
 
   /** Copy a substring to another string.
@@ -2583,10 +2556,7 @@ public:
     size_type pos2,
     size_type n2 = npos)
   {
-    // this check is not redundant, its for the substr operation performed on str
-    BOOST_STATIC_STRING_THROW_IF(
-      pos2 > str.size(), std::out_of_range{"pos2 > str.size()"});
-    return replace_unchecked(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
+    return replace_unchecked(pos1, n1, str.data() + pos2, str.capped_length(pos2, n2));
   }
 
 #ifndef GENERATING_DOCUMENTATION
@@ -2599,9 +2569,7 @@ public:
     size_type pos2,
     size_type n2 = npos)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos2 > str.size(), std::out_of_range{"pos2 > str.size()"});
-    return replace(pos1, n1, str.data() + pos2, (std::min)(n2, str.size() - pos2));
+    return replace(pos1, n1, str.data() + pos2, str.capped_length(pos2, n2));
   }
 #endif
 
@@ -2635,16 +2603,13 @@ public:
       @throw std::length_error `size() + (sv.size() - rcount) > max_size()`
       @throw std::out_of_range `pos1 > size()`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   replace(
     size_type pos1,
     size_type n1,
@@ -2688,16 +2653,13 @@ public:
       @throw std::out_of_range `pos1 > size()`
       @throw std::out_of_range `pos2 > sv.size()`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   replace(
     size_type pos1,
     size_type n1,
@@ -2740,9 +2702,7 @@ public:
     const_pointer s,
     size_type n2)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos > size(), std::out_of_range{"pos > size()"});
-    return replace(data() + pos, data() + pos + (std::min)(n1, size() - pos), s, n2);
+    return replace(data() + pos, data() + pos + capped_length(pos, n1), s, n2);
   }
 
   /** Replace a substring with a string.
@@ -2809,9 +2769,7 @@ public:
     size_type n2,
     value_type c)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos > size(), std::out_of_range{"pos > size()"});
-    return replace(data() + pos, data() + pos + (std::min)(n1, size() - pos), n2, c);
+    return replace(data() + pos, data() + pos + capped_length(pos, n1), n2, c);
   }
 
   /** Replace a range with a string.
@@ -2903,16 +2861,13 @@ public:
 
       @throw std::length_error `size() + (sv.size() - std::distance(i1, i2)) > max_size()`
   */
-  template<typename T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  basic_static_string&
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        basic_static_string&>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
   replace(
     const_iterator i1,
     const_iterator i2,
@@ -3070,7 +3025,7 @@ public:
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
+#ifdef GENERATING_DOCUMENTATION
   basic_static_string&
 #else
   typename std::enable_if<
@@ -3169,16 +3124,13 @@ public:
       @param pos The index to start searching at. The default argument
       for this parameter is `0`.
   */
-  template<class T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  size_type
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        size_type>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
   find(
     const T& t,
     size_type pos = 0) const
@@ -3325,16 +3277,13 @@ public:
       @param pos The index to start searching at. The default argument
       for this parameter is @ref npos.
   */
-  template<class T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  size_type
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        size_type>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
   rfind(
     const T& t,
     size_type pos = npos) const 
@@ -3476,16 +3425,13 @@ public:
       @param pos The index to start searching at. The default argument
       for this parameter is `0`.
   */
-  template<class T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  size_type
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        size_type>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
   find_first_of(
     const T& t,
     size_type pos = 0) const
@@ -3622,16 +3568,13 @@ public:
       @param pos The index to stop searching at. The default argument
       for this parameter is @ref npos.
   */
-  template<class T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  size_type
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        size_type>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
   find_last_of(
     const T& t,
     size_type pos = npos) const
@@ -3767,16 +3710,13 @@ public:
       @param pos The index to start searching at. The default argument
       for this parameter is `0`.
   */
-  template<class T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  size_type
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        size_type>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
   find_first_not_of(
     const T& t,
     size_type pos = 0) const
@@ -3911,16 +3851,13 @@ public:
       @param pos The index to start searching at. The default argument
       for this parameter is @ref npos.
   */
-  template<class T>
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#if GENERATING_DOCUMENTATION
-  size_type
-#else
-  typename std::enable_if<
-    std::is_convertible<T, string_view_type>::value &&
-      !std::is_convertible<T, const_pointer>::value,
-        size_type>::type
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
   find_last_not_of(
     const T& t,
     size_type pos = npos) const
@@ -4121,6 +4058,7 @@ private:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   read_back(
+    bool overwrite_null,
     InputIterator first, 
     InputIterator last);
 
@@ -4134,7 +4072,7 @@ private:
   {
     BOOST_STATIC_STRING_THROW_IF(
       pos > size(), std::out_of_range{"pos > size()"});
-    return replace_unchecked(data() + pos, data() + pos + n1, s, n2);
+    return replace_unchecked(data() + pos, data() + pos + capped_length(pos, n1), s, n2);
   }
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -4164,6 +4102,17 @@ private:
     const_iterator pos,
     const_pointer s,
     size_type count);
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  size_type
+  capped_length(
+    size_type index,
+    size_type length) const
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      index > size(), std::out_of_range{"index > size()"});
+    return (std::min)(length, size() - index);
+  }
 };
 
 //------------------------------------------------------------------------------
@@ -4518,7 +4467,7 @@ operator<<(
   std::basic_ostream<CharT, Traits>& os, 
   const basic_static_string<N, CharT, Traits>& s)
 {
-  return os << typename basic_static_string<N, CharT, Traits>::string_view_type(s.data(), s.size());
+  return os << boost::static_string::basic_string_view<CharT, Traits>(s.data(), s.size());
 }
 
 //------------------------------------------------------------------------------
@@ -4728,7 +4677,7 @@ namespace std {
 
 template<std::size_t N, typename CharT, typename Traits>
 struct hash<
-#if GENERATING_DOCUMENTATION
+#ifdef GENERATING_DOCUMENTATION
   basic_static_string
 #else
   boost::static_string::basic_static_string<N, CharT, Traits>
@@ -4943,26 +4892,11 @@ insert(
 {
   const auto curr_size = size();
   const auto curr_data = data();
-  const auto count = read_back(first, last);
+  const auto count = read_back(false, first, last);
   const std::size_t index = pos - curr_data;
   std::rotate(&curr_data[index], &curr_data[curr_size + 1], &curr_data[curr_size + count + 1]);
   this->set_size(curr_size + count);
   return curr_data + index;
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-erase(
-  size_type index,
-  size_type count) ->
-    basic_static_string&
-{
-  BOOST_STATIC_STRING_THROW_IF(
-    index > size(), std::out_of_range{"index > size()"});
-  erase(data() + index, data() + index + (std::min)(count, size() - index));
-  return *this;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5001,6 +4935,23 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 append(
+  size_type count,
+  value_type ch) ->
+    basic_static_string&
+{
+  const auto curr_size = size();
+  BOOST_STATIC_STRING_THROW_IF(
+    count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
+  traits_type::assign(end(), count, ch);
+  this->set_size(curr_size + count);
+  return term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+append(
   const_pointer s,
   size_type count) ->
     basic_static_string&
@@ -5008,8 +4959,24 @@ append(
   const auto curr_size = size();
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
-  traits_type::copy(&data()[curr_size], s, count);
+  traits_type::copy(end(), s, count);
   this->set_size(curr_size + count);
+  return term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<class InputIterator>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+append(
+  InputIterator first,
+  InputIterator last) ->
+    typename std::enable_if<
+      detail::is_input_iterator<InputIterator>::value,
+        basic_static_string&>::type
+{
+  this->set_size(size() + read_back(true, first, last));
   return term();
 }
 
@@ -5197,7 +5164,7 @@ replace(
   const auto curr_size = size();
   const auto curr_data = data();
   const std::size_t n1 = detail::distance(i1, i2);
-  const std::size_t n2 = read_back(j1, j2);
+  const std::size_t n2 = read_back(false, j1, j2);
   const std::size_t pos = i1 - curr_data;
   BOOST_STATIC_STRING_THROW_IF(
     n2 > max_size() ||
@@ -5338,6 +5305,7 @@ BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 read_back(
+  bool overwrite_null,
   InputIterator first,
   InputIterator last) -> 
     size_type
@@ -5346,9 +5314,14 @@ read_back(
   auto new_size = size();
   for (; first != last; ++first)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      new_size >= max_size(), std::length_error{"count > max_size() - size()"});
-    traits_type::assign(curr_data[++new_size], *first);
+    if (new_size >= max_size())
+    {
+      if (overwrite_null)
+        term();
+      BOOST_STATIC_STRING_THROW(
+        std::length_error{"count > max_size() - size()"});
+    }
+    traits_type::assign(curr_data[new_size++ + (!overwrite_null)], *first);
   }
   return new_size - size();
 }
