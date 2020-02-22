@@ -246,7 +246,7 @@ public:
     Traits::assign(data_[size_], value_type());
   }
 
-  size_type size_{0};
+  size_type size_ = 0;
 #ifdef BOOST_STATIC_STRING_CPP20
   value_type data_[N + 1];
 #else
@@ -336,9 +336,20 @@ integer_to_string(
   }
   if (value < 0)
   {
-    value = -value;
+    const bool is_min = value == std::numeric_limits<Integer>::min();
+    // negation of a min value cannot be represented
+    if (is_min)
+      value = std::numeric_limits<Integer>::max();
+    else
+      value = -value;
+    const auto last_char = str_end - 1;
     for (; value > 0; value /= 10)
       Traits::assign(*--str_end, "0123456789"[value % 10]);
+    // minimum values are powers of 2, so it will
+    // never terminate with a 9.
+    if (is_min)
+      Traits::assign(*last_char, Traits::to_char_type(
+        Traits::to_int_type(*last_char) + 1));
     Traits::assign(*--str_end, '-');
     return str_end;
   }
@@ -380,9 +391,20 @@ integer_to_wstring(
   }
   if (value < 0)
   {
-    value = -value;
+    const bool is_min = value == std::numeric_limits<Integer>::min();
+    // negation of a min value cannot be represented
+    if (is_min)
+      value = std::numeric_limits<Integer>::max();
+    else
+      value = -value;
+    const auto last_char = str_end - 1;
     for (; value > 0; value /= 10)
       Traits::assign(*--str_end, L"0123456789"[value % 10]);
+    // minimum values are powers of 2, so it will
+    // never terminate with a 9.
+    if (is_min)
+      Traits::assign(*last_char, Traits::to_char_type(
+        Traits::to_int_type(*last_char) + 1));
     Traits::assign(*--str_end, L'-');
     return str_end;
   }
@@ -433,6 +455,13 @@ to_static_wstring_int_impl(Integer value) noexcept
   return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
 }
 
+BOOST_STATIC_STRING_CPP11_CONSTEXPR
+inline
+std::size_t count_digits(std::size_t value)
+{
+  return value < 10 ? 1 : count_digits(value / 10) + 1;
+}
+
 template<std::size_t N>
 inline
 static_string<N>
@@ -440,7 +469,27 @@ to_static_string_float_impl(double value) noexcept
 {
   // extra one needed for null terminator
   char buffer[N + 1];
-  std::sprintf(buffer, "%f", value);
+  const auto write_count =
+    std::snprintf(buffer, N + 1, "%f", value);
+  // since our buffer has a fixed size, if the number of characters
+  // that would be written exceeds the size of the buffer,
+  // we need touse scientific notation instead.
+  // the number is converted into the format
+  // [-]d.ddde(+/-)dd; the exponent will contain at least
+  // 2 digits, the integral part will be 1 digit, the fractional
+  // part will be the length of the specified precision, and 3
+  // characters will be needed for e, the sign of the exponent
+  // and the potential sign of the integral part, total of 6 chars.
+  // we will reserve 7 characters just in case the size of the exponent
+  // is 3 characters.
+  if (write_count > N)
+  {
+    const auto period =
+      std::char_traits<char>::find(buffer, N, '.');
+    // we want at least 2 decimal places
+    if (!period || std::size_t(period - buffer) > N - 3)
+      std::snprintf(buffer, N + 1, "%.*e", int(N > 7 ? N - 7 : 0), value);
+  }
   // this will not throw
   return static_string<N>(buffer);
 }
@@ -452,7 +501,17 @@ to_static_string_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   char buffer[N + 1];
-  std::sprintf(buffer, "%Lf", value);
+  // number of characters written
+  const auto write_count =
+    std::snprintf(buffer, N + 1, "%Lf", value);
+  if (write_count > N)
+  {
+    const auto period = 
+      std::char_traits<char>::find(buffer, N, '.');
+    // we want at least 2 decimal places
+    if (!period || std::size_t(period - buffer) > N - 3)
+      std::snprintf(buffer, N + 1, "%.*e", int(N > 7 ? N - 7 : 0), value);
+  }
   // this will not throw
   return static_string<N>(buffer);
 }
@@ -464,7 +523,16 @@ to_static_wstring_float_impl(double value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
-  std::swprintf(buffer, N + 1, L"%f", value);
+  const auto write_count =
+    std::swprintf(buffer, N + 1, L"%f", value);
+  if (write_count > N)
+  {
+    const auto period =
+      std::char_traits<wchar_t>::find(buffer, N, '.');
+    // we want at least 2 decimal places
+    if (!period || std::size_t(period - buffer) > N - 3)
+      std::swprintf(buffer, N + 1, L"%.*e", int(N > 7 ? N - 7 : 0), value);
+  }
   // this will not throw
   return static_wstring<N>(buffer);
 }
@@ -476,7 +544,16 @@ to_static_wstring_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
-  std::swprintf(buffer, N + 1, L"%Lf", value);
+  const auto write_count =
+    std::swprintf(buffer, N + 1, L"%Lf", value);
+  if (write_count > N)
+  {
+    const auto period =
+      std::char_traits<wchar_t>::find(buffer, N, '.');
+    // we want at least 2 decimal places
+    if (!period || std::size_t(period - buffer) > N - 3)
+      std::swprintf(buffer, N + 1, L"%.*e", int(N > 7 ? N - 7 : 0), value);
+  }
   // this will not throw
   return static_wstring<N>(buffer);
 }
@@ -4510,30 +4587,30 @@ operator<<(
 //------------------------------------------------------------------------------
 
 /// Converts `value` to a `static_string` 
-static_string<std::numeric_limits<int>::digits10 + 1>
+static_string<std::numeric_limits<int>::digits10 + 2>
 inline
 to_static_string(int value) noexcept
 {
   return detail::to_static_string_int_impl<
-    std::numeric_limits<int>::digits10 + 1>(value);
+    std::numeric_limits<int>::digits10 + 2>(value);
 }
 
 /// Converts `value` to a `static_string` 
-static_string<std::numeric_limits<long>::digits10 + 1>
+static_string<std::numeric_limits<long>::digits10 + 2>
 inline
 to_static_string(long value) noexcept
 {
   return detail::to_static_string_int_impl<
-    std::numeric_limits<long>::digits10 + 1>(value);
+    std::numeric_limits<long>::digits10 + 2>(value);
 }
 
 /// Converts `value` to a `static_string` 
-static_string<std::numeric_limits<long long>::digits10 + 1>
+static_string<std::numeric_limits<long long>::digits10 + 2>
 inline
 to_static_string(long long value) noexcept
 {
   return detail::to_static_string_int_impl<
-    std::numeric_limits<long long>::digits10 + 1>(value);
+    std::numeric_limits<long long>::digits10 + 2>(value);
 }
 
 /// Converts `value` to a `static_string` 
@@ -4591,30 +4668,30 @@ to_static_string(long double value) noexcept
 }
 
 /// Converts `value` to a `static_wstring` 
-static_wstring<std::numeric_limits<int>::digits10 + 1>
+static_wstring<std::numeric_limits<int>::digits10 + 2>
 inline
 to_static_wstring(int value) noexcept
 {
   return detail::to_static_wstring_int_impl<
-    std::numeric_limits<int>::digits10 + 1>(value);
+    std::numeric_limits<int>::digits10 + 2>(value);
 }
 
 /// Converts `value` to a `static_wstring` 
-static_wstring<std::numeric_limits<long>::digits10 + 1>
+static_wstring<std::numeric_limits<long>::digits10 + 2>
 inline
 to_static_wstring(long value) noexcept
 {
   return detail::to_static_wstring_int_impl<
-    std::numeric_limits<long>::digits10 + 1>(value);
+    std::numeric_limits<long>::digits10 + 2>(value);
 }
 
 /// Converts `value` to a `static_wstring` 
-static_wstring<std::numeric_limits<long long>::digits10 + 1>
+static_wstring<std::numeric_limits<long long>::digits10 + 2>
 inline
 to_static_wstring(long long value) noexcept
 {
   return detail::to_static_wstring_int_impl<
-    std::numeric_limits<long long>::digits10 + 1>(value);
+    std::numeric_limits<long long>::digits10 + 2>(value);
 }
 
 /// Converts `value` to a `static_wstring` 

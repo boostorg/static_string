@@ -15,7 +15,10 @@
 
 #include "constexpr_tests.hpp"
 
+#include <cstdlib>
+#include <cwchar>
 #include <sstream>
+#include <string>
 
 namespace boost {
 namespace static_string {
@@ -224,8 +227,36 @@ testR(S s, typename S::size_type pos, typename S::size_type n1, const typename S
   }
 }
 
-// done
+template<typename Arithmetic>
+bool
+testTS(Arithmetic value, const char* str_expected = "", const wchar_t* wstr_expected = L"", bool test_expected = false)
+{
+  const auto str = to_static_string(value);
+  const auto wstr = to_static_wstring(value);
+  if (std::is_floating_point<Arithmetic>::value)
+  {
+    const auto std_res = std::to_string(value);
+    const auto wstd_res = std::to_wstring(value);
+    return str == std_res.data() && wstr == wstd_res.data();
+  }
+  else
+  {
+    if (std::is_signed<Arithmetic>::value)
+    {
+      return std::strtoll(str.begin(), nullptr, 10) == value &&
+        std::wcstoll(wstr.begin(), nullptr, 10) == value &&
+        (test_expected ? str == str_expected && wstr == wstr_expected : true);
+    }
+    else
+    {
+      return std::strtoull(str.begin(), nullptr, 10) == value &&
+        std::wcstoull(wstr.begin(), nullptr, 10) == value &&
+        (test_expected ? str == str_expected && wstr == wstr_expected : true);
+    }
+  }
+}
 
+// done
 static
 void
 testConstruct()
@@ -3647,24 +3678,30 @@ testGeneral()
 void
 testToStaticString()
 {
-    BOOST_TEST(to_static_string(0) == "0");
-    BOOST_TEST(to_static_string(0u) == "0");
-    BOOST_TEST(to_static_string(1) == "1");
-    BOOST_TEST(to_static_string(0xffff) == "65535");
-    BOOST_TEST(to_static_string(0x10000) == "65536");
-    BOOST_TEST(to_static_string(0xffffffff) == "4294967295");
+    BOOST_TEST(testTS(0, "0", L"0", true));
+    BOOST_TEST(testTS(0xffff, "65535", L"65535", true));
+    BOOST_TEST(testTS(0x10000, "65536", L"65536", true));
+    BOOST_TEST(testTS(0xffffffff, "4294967295", L"4294967295", true));
+    BOOST_TEST(testTS(-65535, "-65535", L"-65535", true));
+    BOOST_TEST(testTS(-65536, "-65536", L"-65536", true));
+    BOOST_TEST(testTS(-4294967295, "-4294967295", L"-4294967295", true));
+    BOOST_TEST(testTS(1, "1", L"1", true));
+    BOOST_TEST(testTS(-1, "-1", L"-1", true));
+    BOOST_TEST(testTS(0.1));
+    BOOST_TEST(testTS(0.0000001));
+    BOOST_TEST(testTS(-0.0000001));
+    BOOST_TEST(testTS(-0.1));
+    BOOST_TEST(testTS(1234567890.0001));
+    BOOST_TEST(testTS(1.123456789012345));
+    BOOST_TEST(testTS(-1234567890.1234));
+    BOOST_TEST(testTS(-1.123456789012345));
 
-    BOOST_TEST(to_static_string(-1) == "-1");
-    BOOST_TEST(to_static_string(-65535) == "-65535");
-    BOOST_TEST(to_static_string(-65536) == "-65536");
-    BOOST_TEST(to_static_string(-4294967295ll) == "-4294967295");
-
-    BOOST_TEST(to_static_string(0) == "0");
-
-    BOOST_TEST(to_static_string(1) == "1");
-    BOOST_TEST(to_static_string(0xffff) == "65535");
-    BOOST_TEST(to_static_string(0x10000) == "65536");
-    BOOST_TEST(to_static_string(0xffffffff) == "4294967295");
+    BOOST_TEST(testTS(std::numeric_limits<long long>::max()));
+    BOOST_TEST(testTS(std::numeric_limits<long long>::min()));
+    BOOST_TEST(testTS(std::numeric_limits<unsigned long long>::max()));
+    BOOST_TEST(testTS(std::numeric_limits<unsigned long long>::max()));
+    BOOST_TEST(testTS(std::numeric_limits<long double>::min()));
+    BOOST_TEST(testTS(std::numeric_limits<float>::min()));
 }
 
 // done
