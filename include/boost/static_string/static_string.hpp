@@ -2026,7 +2026,11 @@ public:
 #endif
   append(
     InputIterator first,
-    InputIterator last);
+    InputIterator last)
+  {
+    this->set_size(size() + read_back(true, first, last));
+    return term();
+  }
 
   /** Append to the string.
     
@@ -2430,7 +2434,12 @@ public:
   copy(
     pointer dest,
     size_type count,
-    size_type pos = 0) const;
+    size_type pos = 0) const
+  {
+    const auto num_copied = capped_length(pos, count);
+    traits_type::copy(dest, data() + pos, num_copied);
+    return num_copied;
+  }
 
   /** Change the size of the string.
 
@@ -4120,7 +4129,12 @@ private:
   basic_static_string&
   assign_unchecked(
     const_pointer s,
-    size_type count) noexcept;
+    size_type count) noexcept
+  {
+    this->set_size(count);
+    traits_type::copy(data(), s, size() + 1);
+    return *this;
+  }
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
@@ -4486,7 +4500,7 @@ operator<<(
   std::basic_ostream<CharT, Traits>& os, 
   const basic_static_string<N, CharT, Traits>& s)
 {
-  return os << boost::static_string::basic_string_view<CharT, Traits>(s.data(), s.size());
+  return os << basic_string_view<CharT, Traits>(s.data(), s.size());
 }
 
 //------------------------------------------------------------------------------
@@ -4955,34 +4969,6 @@ append(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<typename InputIterator>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-append(
-  InputIterator first,
-  InputIterator last) ->
-    typename std::enable_if<
-      detail::is_input_iterator<InputIterator>::value,
-        basic_static_string&>::type
-{
-  this->set_size(size() + read_back(true, first, last));
-  return term();
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-copy(pointer dest, size_type count, size_type pos) const ->
-  size_type
-{
-  const auto num_copied = capped_length(pos, count);
-  traits_type::copy(dest, data() + pos, num_copied);
-  return num_copied;
-}
-
-template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
@@ -5347,21 +5333,6 @@ insert_unchecked(
   this->set_size(curr_size + count);
   return curr_data + index;
 }
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-assign_unchecked(
-  const_pointer s,
-  size_type count) noexcept ->
-    basic_static_string&
-{
-  this->set_size(count);
-  traits_type::copy(data(), s, size() + 1);
-  return *this;
-}
-
 } // static_string
 } // boost
 #endif
