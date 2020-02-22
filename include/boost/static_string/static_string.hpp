@@ -119,32 +119,32 @@ template<typename T, typename CharT, typename Traits>
 using enable_if_viewable_t = typename enable_if_viewable<T, CharT, Traits>::type;
 
 // Simplified check for if a type is an iterator
-template<class T, typename = void>
+template<typename T, typename = void>
 struct is_iterator : std::false_type { };
 
-template<class T>
+template<typename T>
 struct is_iterator<T, 
   typename std::enable_if<std::is_class<T>::value, 
     void_t<typename T::iterator_category>>::type>
       : std::true_type { };
 
-template<class T>
+template<typename T>
 struct is_iterator<T*, void>
   : std::true_type { };
 
-template<class T, typename = void>
+template<typename T, typename = void>
 struct is_input_iterator : std::false_type { };
 
-template<class T>
+template<typename T>
 struct is_input_iterator<T, typename std::enable_if<is_iterator<T>::value && 
   std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
     std::input_iterator_tag>::value>::type>
       : std::true_type { };
 
-template<class T, typename = void>
+template<typename T, typename = void>
 struct is_forward_iterator : std::false_type { };
 
-template<class T>
+template<typename T>
 struct is_forward_iterator<T, typename std::enable_if<is_iterator<T>::value &&
   std::is_convertible<typename std::iterator_traits<T>::iterator_category, 
     std::forward_iterator_tag>::value>::type>
@@ -763,7 +763,7 @@ public:
     
       Construct from a range of characters
   */
-  template<class InputIterator
+  template<typename InputIterator
 #ifndef GENERATING_DOCUMENTATION
     , typename std::enable_if<
       detail::is_input_iterator<InputIterator>
@@ -1067,8 +1067,8 @@ public:
   basic_static_string&
   assign(const T& t)
   {
-    string_view_type ss{t};
-    return assign(ss.data(), ss.size());
+    string_view_type sv = t;
+    return assign(sv.data(), sv.size());
   }
 
   /** Replace the contents.
@@ -2297,30 +2297,51 @@ public:
 
   /** Compare the string with another.
       
-      Compares this string to `s`.
+      Compares this string to `t` after converting `t` to `string_view_type`.
+
+      This function participates in overload resolution if
+      `T` is convertible to `string_view_type` and `T` is not
+      convertible to `const_pointer`.
   */
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+  >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
   compare(
-    string_view_type s) const noexcept
+    const T& t) const noexcept
   {
+    string_view_type sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
-      data(), size(), s.data(), s.size());
+      data(), size(), t.data(), t.size());
   }
 
   /** Compare the string with another.
 
-      Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+      Compares a `[pos1, pos1+count1)` substring of this string to `t` after converting it to
+      `string_view_type`. If `count1 > size() - pos1` 
+      the substring is `[pos1, size())`.
+
+      This function participates in overload resolution if
+      `T` is convertible to `string_view_type` and `T` is not
+      convertible to `const_pointer`.
   */
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+  >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
   compare(
     size_type pos1,
     size_type count1,
-    string_view_type s) const
+    const T& t) const
   {
     return detail::lexicographical_compare<CharT, Traits>(
-      subview(pos1, count1), s);
+      subview(pos1, count1), string_view_type(t));
   }
 
   /** Compare the string with another.
@@ -4793,7 +4814,7 @@ assign(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIterator>
+template<typename InputIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
@@ -4841,7 +4862,7 @@ insert(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class ForwardIterator>
+template<typename ForwardIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
@@ -4886,7 +4907,7 @@ insert(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIterator>
+template<typename InputIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
@@ -4975,7 +4996,7 @@ append(
 }
 
 template<std::size_t N, typename CharT, typename Traits>
-template<class InputIterator>
+template<typename InputIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
