@@ -20,6 +20,8 @@
 #include <sstream>
 #include <string>
 
+#include <iostream>
+
 namespace boost {
 namespace static_string {
   
@@ -3686,6 +3688,8 @@ testToStaticString()
     BOOST_TEST(testTS(-65535, "-65535", L"-65535", true));
     BOOST_TEST(testTS(-65536, "-65536", L"-65536", true));
     BOOST_TEST(testTS(-4294967295, "-4294967295", L"-4294967295", true));
+    std::cout << "3691: " << to_static_string(-4294967295) << '\n';
+    std::wcout << "3691: " << to_static_wstring(-4294967295) << '\n';
     BOOST_TEST(testTS(1, "1", L"1", true));
     BOOST_TEST(testTS(-1, "-1", L"-1", true));
     BOOST_TEST(testTS(0.1));
@@ -3720,6 +3724,7 @@ testToStaticString()
       auto str = to_static_string(std::numeric_limits<long double>::max());
       BOOST_TEST(str.find('e') != static_string<0>::npos || str.find('.') !=
         static_string<0>::npos);
+      std::cout << "3725: " << str << '\n';
     }
     {
       auto str = to_static_wstring(std::numeric_limits<float>::max());
@@ -3735,6 +3740,7 @@ testToStaticString()
       auto str = to_static_wstring(std::numeric_limits<long double>::max());
       BOOST_TEST(str.find('e') != static_string<0>::npos || str.find('.') !=
         static_string<0>::npos);
+      std::wcout << "3741: " << str << '\n';
     }
 }
 
