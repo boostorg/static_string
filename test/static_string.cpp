@@ -3679,6 +3679,7 @@ void
 testToStaticString()
 {
     BOOST_TEST(testTS(0, "0", L"0", true));
+    BOOST_TEST(testTS(0u, "0", L"0", true));
     BOOST_TEST(testTS(0xffff, "65535", L"65535", true));
     BOOST_TEST(testTS(0x10000, "65536", L"65536", true));
     BOOST_TEST(testTS(0xffffffff, "4294967295", L"4294967295", true));
@@ -3702,6 +3703,39 @@ testToStaticString()
     BOOST_TEST(testTS(std::numeric_limits<unsigned long long>::max()));
     BOOST_TEST(testTS(std::numeric_limits<long double>::min()));
     BOOST_TEST(testTS(std::numeric_limits<float>::min()));
+    
+    // these tests technically are not portable, but they will work
+    // 99% of the time.
+    {
+      auto str = to_static_string(std::numeric_limits<float>::max());
+      BOOST_TEST(str.find('e') != static_string<0>::npos);
+      BOOST_TEST(str.find('+') != static_string<0>::npos);
+    }
+    {
+      auto str = to_static_string(std::numeric_limits<double>::max());
+      BOOST_TEST(str.find('e') != static_string<0>::npos);
+      BOOST_TEST(str.find('+') != static_string<0>::npos);
+    }
+    {
+      auto str = to_static_string(std::numeric_limits<long double>::max());
+      BOOST_TEST(str.find('e') != static_string<0>::npos);
+      BOOST_TEST(str.find('+') != static_string<0>::npos);
+    }
+    {
+      auto str = to_static_wstring(std::numeric_limits<float>::max());
+      BOOST_TEST(str.find('e') != static_string<0>::npos);
+      BOOST_TEST(str.find('+') != static_string<0>::npos);
+    }
+    {
+      auto str = to_static_wstring(std::numeric_limits<double>::max());
+      BOOST_TEST(str.find('e') != static_string<0>::npos);
+      BOOST_TEST(str.find('+') != static_string<0>::npos);
+    }
+    {
+      auto str = to_static_wstring(std::numeric_limits<long double>::max());
+      BOOST_TEST(str.find('e') != static_string<0>::npos);
+      BOOST_TEST(str.find('+') != static_string<0>::npos);
+    }
 }
 
 // done
