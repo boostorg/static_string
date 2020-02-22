@@ -510,7 +510,7 @@ to_static_string_float_impl(long double value) noexcept
       std::char_traits<char>::find(buffer, N, '.');
     // we want at least 2 decimal places
     if (!period || std::size_t(period - buffer) > N - 3)
-      std::snprintf(buffer, N + 1, "%.*e", int(N > 7 ? N - 7 : 0), value);
+      std::snprintf(buffer, N + 1, "%.*Le", int(N > 7 ? N - 7 : 0), value);
   }
   // this will not throw
   return static_string<N>(buffer);
@@ -552,7 +552,7 @@ to_static_wstring_float_impl(long double value) noexcept
       std::char_traits<wchar_t>::find(buffer, N, '.');
     // we want at least 2 decimal places
     if (!period || std::size_t(period - buffer) > N - 3)
-      std::swprintf(buffer, N + 1, L"%.*e", int(N > 7 ? N - 7 : 0), value);
+      std::swprintf(buffer, N + 1, L"%.*Le", int(N > 7 ? N - 7 : 0), value);
   }
   // this will not throw
   return static_wstring<N>(buffer);
