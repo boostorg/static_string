@@ -321,31 +321,6 @@ lexicographical_compare(
   return Traits::compare(s1, s2, n1);
 }
 
-template<typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-inline
-int
-lexicographical_compare(
-  basic_string_view<CharT, Traits> s1,
-  const CharT* s2,
-  std::size_t n2) noexcept
-{
-  return detail::lexicographical_compare<
-    CharT, Traits>(s1.data(), s1.size(), s2, n2);
-}
-
-template<typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-inline
-int
-lexicographical_compare(
-    basic_string_view<CharT, Traits> s1,
-    basic_string_view<CharT, Traits> s2) noexcept
-{
-  return detail::lexicographical_compare<CharT, Traits>(
-    s1.data(), s1.size(), s2.data(), s2.size());
-}
-
 template<typename Traits, typename Integer>
 inline
 char*
@@ -758,7 +733,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(const_pointer s);
 
-  // KRYSTIAN TODO: we can use a better algorithm if this is a forward iterator
+ 
   /** Construct a `basic_static_string`.
     
       Construct from a range of characters
@@ -775,6 +750,7 @@ public:
     InputIterator first,
     InputIterator last)
   {
+    // KRYSTIAN TODO: we can use a better algorithm if this is a forward iterator
     assign(first, last);
   }
 
@@ -807,19 +783,23 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(std::initializer_list<value_type> init)
   {
-    assign(init.begin(), init.end());
+    assign(init.begin(), init.size());
   }
 
-  // KRYSTIAN TODO: this may need to be templated
   /** Construct a `basic_static_string`.
     
-      Construct from a `string_view_type`
+      Construct from a object convertible to `string_view_type`
   */
+  template<typename T
+#ifndef GENERATING_DOCUMENTATION
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+  >
   explicit
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string(string_view_type sv)
+  basic_static_string(const T& t)
   {
-    assign(sv);
+    assign(t);
   }
 
   /** Construct a `basic_static_string`.
@@ -988,7 +968,10 @@ public:
   assign(
     const basic_static_string<M, CharT, Traits>& s,
     size_type pos,
-    size_type count = npos);
+    size_type count = npos)
+  {
+    return assign(s.data() + pos, s.capped_length(pos, count));
+  }
 
   /** Replace the contents.
     
@@ -1261,7 +1244,7 @@ public:
   iterator
   end() noexcept
   {
-    return &data()[size()];
+    return data() + size();
   }
 
   /// Returns an iterator to the end.
@@ -1269,7 +1252,7 @@ public:
   const_iterator
   end() const noexcept
   {
-    return &data()[size()];
+    return data() + size();
   }
 
   /// Returns an iterator to the end.
@@ -1277,7 +1260,7 @@ public:
   const_iterator
   cend() const noexcept
   {
-    return &data()[size()];
+    return data() + size();
   }
 
   /// Returns a reverse iterator to the beginning.
@@ -2227,7 +2210,7 @@ public:
     const basic_static_string<M, CharT, Traits>& s) const
   {
     return detail::lexicographical_compare<CharT, Traits>(
-      subview(pos1, count1), s.data(), s.size());
+      data() + pos1, capped_length(pos1, count1), s.data(), s.size());
   }
 
   /** Compare the string with another.
@@ -2246,8 +2229,9 @@ public:
     size_type pos2,
     size_type count2 = npos) const
   {
-    return detail::lexicographical_compare(
-      subview(pos1, count1), s.subview(pos2, count2));
+    return detail::lexicographical_compare<CharT, Traits>(
+      data() + pos1, capped_length(pos1, count1), 
+      s.data() + pos2, s.capped_length(pos2, count2));
   }
 
   /** Compare the string with another.
@@ -2276,7 +2260,7 @@ public:
     const_pointer s) const
   {
     return detail::lexicographical_compare<CharT, Traits>(
-      subview(pos1, count1), s, traits_type::length(s));
+      data() + pos1, capped_length(pos1, count1), s, traits_type::length(s));
   }
 
   /** Compare the string with another.
@@ -2292,7 +2276,7 @@ public:
     size_type count2) const
   {
     return detail::lexicographical_compare<CharT, Traits>(
-      subview(pos1, count1), s, count2);
+      data() + pos1, capped_length(pos1, count1), s, count2);
   }
 
   /** Compare the string with another.
@@ -2340,8 +2324,9 @@ public:
     size_type count1,
     const T& t) const
   {
+    string_view_type sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
-      subview(pos1, count1), string_view_type(t));
+      data() + pos1, capped_length(pos1, count1), sv.data(), sv.size());
   }
 
   /** Compare the string with another.
@@ -2394,7 +2379,7 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
-    return basic_static_string(&data()[pos], capped_length(pos, count));
+    return basic_static_string(data() + pos, capped_length(pos, count));
   }
 
   /** Return a view of a substring.
@@ -2421,7 +2406,7 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
-    return string_view_type(&data()[pos], capped_length(pos, count));
+    return string_view_type(data() + pos, capped_length(pos, count));
   }
 
   /** Copy a substring to another string.
@@ -2459,7 +2444,10 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
-  resize(size_type n);
+  resize(size_type n)
+  {
+    resize(n, value_type());
+  }
 
   /** Change the size of the string.
 
@@ -4722,8 +4710,8 @@ struct hash<
 #ifndef BOOST_STATIC_STRING_STANDALONE
     return boost::hash_range(str.begin(), str.end());
 #else
-    using view_type = typename boost::static_string::
-      basic_static_string<N, CharT, Traits>::string_view_type;
+    using view_type = typename
+      boost::static_string::basic_string_view<CharT, Traits>;
     return std::hash<view_type>()(view_type(str.data(), str.size()));
 #endif
   }
@@ -4766,35 +4754,6 @@ assign(
   this->set_size(count);
   traits_type::assign(data(), size(), ch);
   return term();
-}
-
-//template<std::size_t N, typename CharT, typename Traits>
-//BOOST_STATIC_STRING_CPP14_CONSTEXPR
-//auto
-//basic_static_string<N, CharT, Traits>::
-//assign(const basic_static_string& s) noexcept ->
-//        basic_static_string&
-//{
-//  if(this == &s)
-//    return *this;
-//  this->set_size(s.size());
-//  traits_type::copy(data(), &s.data()[0], size() + 1);
-//  return *this;
-//}
-
-template<std::size_t N, typename CharT, typename Traits>
-template<std::size_t M>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-auto
-basic_static_string<N, CharT, Traits>::
-assign(
-  const basic_static_string<M, CharT, Traits>& s,
-  size_type pos,
-  size_type count) ->
-    basic_static_string&
-{
-  const auto ss = s.subview(pos, count);
-  return assign(ss.data(), ss.size());
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5027,28 +4986,13 @@ template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 void
 basic_static_string<N, CharT, Traits>::
-resize(size_type n)
-{
-  BOOST_STATIC_STRING_THROW_IF(
-    n > max_size(), std::length_error{"n > max_size()"});
-  const auto curr_size = size();
-  if(n > curr_size)
-    traits_type::assign(&data()[curr_size], n - curr_size, value_type());
-  this->set_size(n);
-  term();
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
-void
-basic_static_string<N, CharT, Traits>::
 resize(size_type n, value_type c)
 {
   BOOST_STATIC_STRING_THROW_IF(
     n > max_size(), std::length_error{"n > max_size()"});
   const auto curr_size = size();
   if(n > curr_size)
-    traits_type::assign(&data()[curr_size], n - curr_size, c);
+    traits_type::assign(data() + curr_size, n - curr_size, c);
   this->set_size(n);
   term();
 }
@@ -5226,7 +5170,7 @@ find(
     return npos;
   if (!n)
     return pos;
-  const auto res = detail::search(&data()[pos], &data()[curr_size], s, &s[n], traits_type::eq);
+  const auto res = detail::search(data() + pos, data() + curr_size, s, s + n, traits_type::eq);
   return res == end() ? npos : detail::distance(data(), res);
 }
 
@@ -5306,7 +5250,7 @@ find_first_not_of(
     return npos;
   if (!n)
     return pos;
-  const auto res = detail::find_not_of<Traits>(&data()[pos], &data()[size()], s, n);
+  const auto res = detail::find_not_of<Traits>(data() + pos, data() + size(), s, n);
   return res == end() ? npos : detail::distance(data(), res);
 }
 
