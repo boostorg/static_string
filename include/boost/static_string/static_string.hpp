@@ -940,36 +940,40 @@ public:
     
       Replace the contents with a copy of another `basic_static_string`
 
+      @throw std::length_error if `s.size() > max_size()`
       @return `*this`
   */
+  template<std::size_t M
+#ifndef GENERATING_DOCUMENTATION
+  , typename std::enable_if<(M < N)>::type* = nullptr
+#endif
+  >
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign(const basic_static_string<M, CharT, Traits>& s)
+  {
+    return assign_unchecked(s.data(), s.size());
+  }
+
+#ifndef GENERATING_DOCUMENTATION
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(const basic_static_string& s) noexcept
   {
     if (this == &s)
       return *this;
-    this->set_size(s.size());
-    traits_type::copy(data(), &s.data()[0], size() + 1);
-    return *this;
+    return assign_unchecked(s.data(), s.size());
   }
 
-  /** Replace the contents.
-    
-      Replace the contents with a copy of another `basic_static_string`
-
-      @throw std::length_error if `s.size() > max_size()`
-      @return `*this`
-  */
-  template<std::size_t M>
+  template<std::size_t M, 
+    typename std::enable_if<(M > N)>::type* = nullptr>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(const basic_static_string<M, CharT, Traits>& s)
   {
-    // VFALCO this could come in two flavors,
-    // N > M and N < M, and skip the exception
-    // check when N > M
     return assign(s.data(), s.size());
   }
+#endif
 
   /** Replace the contents.
     
@@ -4104,6 +4108,12 @@ private:
     size_type count);
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  assign_unchecked(
+    const_pointer s,
+    size_type count) noexcept;
+
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   size_type
   capped_length(
     size_type index,
@@ -4987,9 +4997,9 @@ basic_static_string<N, CharT, Traits>::
 copy(pointer dest, size_type count, size_type pos) const ->
   size_type
 {
-  const auto s = subview(pos, count);
-  traits_type::copy(dest, s.data(), s.size());
-  return s.size();
+  const auto num_copied = capped_length(pos, count);
+  traits_type::copy(dest, data() + pos, num_copied);
+  return num_copied;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5372,6 +5382,21 @@ insert_unchecked(
   this->set_size(curr_size + count);
   return curr_data + index;
 }
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+auto
+basic_static_string<N, CharT, Traits>::
+assign_unchecked(
+  const_pointer s,
+  size_type count) noexcept ->
+    basic_static_string&
+{
+  this->set_size(count);
+  traits_type::copy(data(), s, size() + 1);
+  return *this;
+}
+
 } // static_string
 } // boost
 #endif
