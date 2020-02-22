@@ -469,8 +469,6 @@ to_static_string_float_impl(double value) noexcept
 {
   // extra one needed for null terminator
   char buffer[N + 1];
-  const auto write_count =
-    std::snprintf(buffer, N + 1, "%f", value);
   // since our buffer has a fixed size, if the number of characters
   // that would be written exceeds the size of the buffer,
   // we need touse scientific notation instead.
@@ -482,7 +480,9 @@ to_static_string_float_impl(double value) noexcept
   // and the potential sign of the integral part, total of 6 chars.
   // we will reserve 7 characters just in case the size of the exponent
   // is 3 characters.
-  if (write_count > N)
+  // snprintf returns the number of characters
+  // that would have been written
+  if (std::snprintf(buffer, N + 1, "%f", value) > N)
   {
     const auto period =
       std::char_traits<char>::find(buffer, N, '.');
@@ -501,10 +501,9 @@ to_static_string_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   char buffer[N + 1];
-  // number of characters written
-  const auto write_count =
-    std::snprintf(buffer, N + 1, "%Lf", value);
-  if (write_count > N)
+  // snprintf returns the number of characters
+  // that would have been written
+  if (std::snprintf(buffer, N + 1, "%Lf", value) > N)
   {
     const auto period = 
       std::char_traits<char>::find(buffer, N, '.');
@@ -523,9 +522,9 @@ to_static_wstring_float_impl(double value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
-  const auto write_count =
-    std::swprintf(buffer, N + 1, L"%f", value);
-  if (write_count > N)
+  // swprintf returns a negative number if it can't
+  // fit all the characters in the buffer
+  if (std::swprintf(buffer, N + 1, L"%f", value) < 0)
   {
     const auto period =
       std::char_traits<wchar_t>::find(buffer, N, '.');
@@ -544,9 +543,9 @@ to_static_wstring_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
-  const auto write_count =
-    std::swprintf(buffer, N + 1, L"%Lf", value);
-  if (write_count > N)
+  // swprintf returns a negative number if it can't
+  // fit all the characters in the buffer
+  if (std::swprintf(buffer, N + 1, L"%Lf", value) < 0)
   {
     const auto period =
       std::char_traits<wchar_t>::find(buffer, N, '.');
