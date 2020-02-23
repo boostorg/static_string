@@ -542,8 +542,10 @@ to_static_wstring_float_impl(long double value) noexcept
   wchar_t buffer[N + 1];
   // swprintf returns a negative number if it can't
   // fit all the characters in the buffer
+  std::cout << "trying swprintf\n";
   if (std::swprintf(buffer, N + 1, L"%Lf", value) < 0)
   {
+    std::cout << "swprintf < 0\n";
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count =
