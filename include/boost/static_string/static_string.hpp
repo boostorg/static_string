@@ -559,7 +559,7 @@ to_static_wstring_float_impl(long double value) noexcept
     const int precision = N > reserved_count ? N - reserved_count : 0;
     std::cout << "pre: " << precision << '\n';
     // switch to scientific notation
-    std::cout << "sci: " std::swprintf(buffer, N + 1, L"%.*Le", precision, value) << '\n';
+    std::cout << "sci: " << std::swprintf(buffer, N + 1, L"%.*Le", precision, value) << '\n';
   }
   // this will not throw
   return static_wstring<N>(buffer);
