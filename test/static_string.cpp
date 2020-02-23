@@ -3727,16 +3727,19 @@ testToStaticString()
       auto str = to_static_wstring(std::numeric_limits<float>::max());
       BOOST_TEST(str.find('e') != static_string<0>::npos || str.find('.') !=
         static_string<0>::npos || str == L"infinity" || str == L"inf");
+      std::wcout << str;
     }
     {
       auto str = to_static_wstring(std::numeric_limits<double>::max());
       BOOST_TEST(str.find('e') != static_string<0>::npos || str.find('.') !=
         static_string<0>::npos || str == L"infinity" || str == L"inf");
+      std::wcout << str;
     }
     {
       auto str = to_static_wstring(std::numeric_limits<long double>::max());
       BOOST_TEST(str.find('e') != static_string<0>::npos || str.find('.') !=
         static_string<0>::npos || str == L"infinity" || str == L"inf");
+      std::wcout << str;
     }
 }
 
