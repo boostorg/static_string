@@ -3687,7 +3687,7 @@ testToStaticString()
     BOOST_TEST(testTS(0xffffffff, "4294967295", L"4294967295", true));
     BOOST_TEST(testTS(-65535, "-65535", L"-65535", true));
     BOOST_TEST(testTS(-65536, "-65536", L"-65536", true));
-    BOOST_TEST(testTS(-4294967295, "-4294967295", L"-4294967295", true));
+    BOOST_TEST(testTS(-4294967295ll, "-4294967295", L"-4294967295", true));
     std::cout << "3691: " << to_static_string(-4294967295) << '\n';
     std::wcout << "3691: " << to_static_wstring(-4294967295) << '\n';
     BOOST_TEST(testTS(1, "1", L"1", true));
