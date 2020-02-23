@@ -472,15 +472,14 @@ to_static_string_float_impl(double value) noexcept
   char buffer[N + 1];
   if (std::snprintf(buffer, N + 1, "%f", value) > N)
   {
-    const auto period =
-      std::char_traits<char>::find(buffer, N, '.');
+    // the + 4 is for the decimal, 'e', 
+    // its sign, and the sign of the integral portion
     const int reserved_count = 
       (std::max)(std::size_t(2), count_digits(
       std::numeric_limits<double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
-    // we want at least 2 decimal places
-    if (!period || std::size_t(period - buffer) > N - 3)
-      std::snprintf(buffer, N + 1, "%.*e", precision, value);
+    // switch to scientific notation
+    std::snprintf(buffer, N + 1, "%.*e", precision, value);
   }
   // this will not throw
   return static_string<N>(buffer);
@@ -497,15 +496,14 @@ to_static_string_float_impl(long double value) noexcept
   // that would have been written
   if (std::snprintf(buffer, N + 1, "%Lf", value) > N)
   {
-    const auto period = 
-      std::char_traits<char>::find(buffer, N, '.');
+    // the + 4 is for the decimal, 'e', 
+    // its sign, and the sign of the integral portion
     const int reserved_count =
       (std::max)(std::size_t(2), count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
-    // we want at least 2 decimal places
-    if (!period || std::size_t(period - buffer) > N - 3)
-      std::snprintf(buffer, N + 1, "%.*Le", precision, value);
+    // switch to scientific notation
+    std::snprintf(buffer, N + 1, "%.*Le", precision, value);
   }
   // this will not throw
   return static_string<N>(buffer);
@@ -522,15 +520,14 @@ to_static_wstring_float_impl(double value) noexcept
   // fit all the characters in the buffer
   if (std::swprintf(buffer, N + 1, L"%f", value) < 0)
   {
-    const auto period =
-      std::char_traits<wchar_t>::find(buffer, N, '.');
+    // the + 4 is for the decimal, 'e', 
+    // its sign, and the sign of the integral portion
     const int reserved_count =
       (std::max)(std::size_t(2), count_digits(
       std::numeric_limits<double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
-    // we want at least 2 decimal places
-    if (!period || std::size_t(period - buffer) > N - 3)
-      std::swprintf(buffer, N + 1, L"%.*e", precision, value);
+    // switch to scientific notation
+    std::swprintf(buffer, N + 1, L"%.*e", precision, value);
   }
   // this will not throw
   return static_wstring<N>(buffer);
@@ -547,15 +544,14 @@ to_static_wstring_float_impl(long double value) noexcept
   // fit all the characters in the buffer
   if (std::swprintf(buffer, N + 1, L"%Lf", value) < 0)
   {
-    const auto period =
-      std::char_traits<wchar_t>::find(buffer, N, '.');
+    // the + 4 is for the decimal, 'e', 
+    // its sign, and the sign of the integral portion
     const int reserved_count =
       (std::max)(std::size_t(2), count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
-    // we want at least 2 decimal places
-    if (!period || std::size_t(period - buffer) > N - 3)
-      std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
+    // switch to scientific notation
+    std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
   }
   // this will not throw
   return static_wstring<N>(buffer);
@@ -4589,6 +4585,15 @@ operator<<(
 //
 //------------------------------------------------------------------------------
 
+// Signed overloads have a + 2, one for the missing digit,
+// and one for the sign.
+
+// Unsigned overloads have a + 1, for the missing digit.
+
+// Floating point overloads have a + 4, for the sign
+// of the integral part, sign of the exponent, the 'e', 
+// and the decimal.
+
 /// Converts `value` to a `static_string` 
 static_string<std::numeric_limits<int>::digits10 + 2>
 inline
@@ -4644,30 +4649,30 @@ to_static_string(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_string` 
-static_string<std::numeric_limits<float>::max_digits10 + 3>
+static_string<std::numeric_limits<float>::max_digits10 + 4>
 inline
 to_static_string(float value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<float>::max_digits10 + 3>(value);
+    std::numeric_limits<float>::max_digits10 + 4>(value);
 }
 
 /// Converts `value` to a `static_string` 
-static_string<std::numeric_limits<double>::max_digits10 + 3>
+static_string<std::numeric_limits<double>::max_digits10 + 4>
 inline
 to_static_string(double value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<double>::max_digits10 + 3>(value);
+    std::numeric_limits<double>::max_digits10 + 4>(value);
 }
 
 /// Converts `value` to a `static_string` 
-static_string<std::numeric_limits<long double>::max_digits10 + 3>
+static_string<std::numeric_limits<long double>::max_digits10 + 4>
 inline
 to_static_string(long double value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<long double>::max_digits10 + 3>(value);
+    std::numeric_limits<long double>::max_digits10 + 4>(value);
 }
 
 /// Converts `value` to a `static_wstring` 
@@ -4725,30 +4730,30 @@ to_static_wstring(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_wstring` 
-static_wstring<std::numeric_limits<float>::max_digits10 + 3>
+static_wstring<std::numeric_limits<float>::max_digits10 + 4>
 inline
 to_static_wstring(float value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<float>::max_digits10 + 3>(value);
+    std::numeric_limits<float>::max_digits10 + 4>(value);
 }
 
 /// Converts `value` to a `static_wstring` 
-static_wstring<std::numeric_limits<double>::max_digits10 + 3>
+static_wstring<std::numeric_limits<double>::max_digits10 + 4>
 inline
 to_static_wstring(double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<double>::max_digits10 + 3>(value);
+    std::numeric_limits<double>::max_digits10 + 4>(value);
 }
 
 /// Converts `value` to a `static_wstring` 
-static_wstring<std::numeric_limits<long double>::max_digits10 + 3>
+static_wstring<std::numeric_limits<long double>::max_digits10 + 4>
 inline
 to_static_wstring(long double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<long double>::max_digits10 + 3>(value);
+    std::numeric_limits<long double>::max_digits10 + 4>(value);
 }
 
 //------------------------------------------------------------------------------
