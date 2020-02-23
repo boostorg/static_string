@@ -21,6 +21,8 @@
 #include <iosfwd>
 #include <type_traits>
 
+#include <iostream>
+
 namespace boost {
 namespace static_string {
 
@@ -540,10 +542,13 @@ to_static_wstring_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
+  std::cout << "buffer size: " << (N + 1) << '\n';
   // swprintf returns a negative number if it can't
   // fit all the characters in the buffer
   std::cout << "trying swprintf\n";
-  if (std::swprintf(buffer, N + 1, L"%Lf", value) < 0)
+  const int res = std::swprintf(buffer, N + 1, L"%Lf", value);
+  std::cout << "swprintf res: " << res << '\n';
+  if (res < 0)
   {
     std::cout << "swprintf < 0\n";
     // the + 4 is for the decimal, 'e', 
@@ -552,8 +557,9 @@ to_static_wstring_float_impl(long double value) noexcept
       (std::max)(std::size_t(2), count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
+    std::cout << "pre: " << precision << '\n';
     // switch to scientific notation
-    std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
+    std::cout << "sci: " std::swprintf(buffer, N + 1, L"%.*Le", precision, value) << '\n';
   }
   // this will not throw
   return static_wstring<N>(buffer);
