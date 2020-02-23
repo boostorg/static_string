@@ -21,8 +21,6 @@
 #include <iosfwd>
 #include <type_traits>
 
-#include <iostream>
-
 namespace boost {
 namespace static_string {
 
@@ -519,8 +517,15 @@ to_static_wstring_float_impl(double value) noexcept
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
   // swprintf returns a negative number if it can't
-  // fit all the characters in the buffer
-  if (std::swprintf(buffer, N + 1, L"%f", value) < 0)
+  // fit all the characters in the buffer.
+  // mingw has a non-standard swprintf, so
+  // this just covers all the bases. short
+  // circuit evaluation will ensure that the
+  // second operand is not evaluated on conforming
+  // implementations.
+  const int num_written =
+    std::swprintf(buffer, N + 1, L"%f", value);
+  if (num_written < 0 || num_written > N)
   {
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
@@ -542,24 +547,25 @@ to_static_wstring_float_impl(long double value) noexcept
 {
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
-  std::cout << "buffer size: " << (N + 1) << '\n';
   // swprintf returns a negative number if it can't
-  // fit all the characters in the buffer
-  std::cout << "trying swprintf\n";
-  const int res = std::swprintf(buffer, N + 1, L"%Lf", value);
-  std::cout << "swprintf res: " << res << '\n';
-  if (res < 0)
+  // fit all the characters in the buffer.
+  // mingw has a non-standard swprintf, so
+  // this just covers all the bases. short
+  // circuit evaluation will ensure that the
+  // second operand is not evaluated on conforming
+  // implementations.
+  const int num_written =
+    std::swprintf(buffer, N + 1, L"%Lf", value);
+  if (num_written < 0 || num_written > N)
   {
-    std::cout << "swprintf < 0\n";
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count =
       (std::max)(std::size_t(2), count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
-    std::cout << "pre: " << precision << '\n';
     // switch to scientific notation
-    std::cout << "sci: " << std::swprintf(buffer, N + 1, L"%.*Le", precision, value) << '\n';
+    std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
   }
   // this will not throw
   return static_wstring<N>(buffer);
