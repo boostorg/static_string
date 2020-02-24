@@ -163,7 +163,7 @@ defined(__clang__) && \
 #endif
 
 namespace boost {
-namespace static_string {
+namespace static_strings {
 
 /// The type of `basic_string_view` used by the library
 template<typename CharT, typename Traits>

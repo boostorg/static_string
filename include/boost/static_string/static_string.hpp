@@ -22,7 +22,7 @@
 #include <type_traits>
 
 namespace boost {
-namespace static_string {
+namespace static_strings {
 
 template<std::size_t, typename, typename>
 class basic_static_string;
@@ -33,6 +33,7 @@ class basic_static_string;
 //
 //------------------------------------------------------------------------------
 
+#ifndef BOOST_STATIC_STRING_DOCS
 template<std::size_t N>
 using static_string =
   basic_static_string<N, char, std::char_traits<char>>;
@@ -54,7 +55,7 @@ using static_u32string =
 // Detail
 //
 //--------------------------------------------------------------------------
-#ifndef GENERATING_DOCUMENTATION
+
 namespace detail {
 
 // Find the smallest width integral type that can hold a value as large as N (Glen Fernandes)
@@ -693,12 +694,39 @@ defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS)
     These strings offer performance advantages when an algorithm
     can execute with a reasonable upper limit on the size of a value.
 
+    @par
+    The following alias templates are provided for convenience:
+
+    @code
+    template<std::size_t N>
+    using static_string = 
+      basic_static_string<N, char, std::char_traits<char>>;
+    @endcode
+
+    @code
+    template<std::size_t N>
+    using static_wstring = 
+      basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
+    @endcode
+    
+    @code
+    template<std::size_t N>
+    using static_u16string = 
+      basic_static_string<N, char16_t, std::char_traits<char16_t>>;
+    @endcode
+
+    @code
+    template<std::size_t N>
+    using static_u32string = 
+      basic_static_string<N, char32_t, std::char_traits<char32_t>>;
+    @endcode
+
     @see to_static_string 
 */
 template<std::size_t N, typename CharT,
   typename Traits = std::char_traits<CharT>>
 class basic_static_string 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   : private detail::static_string_base<N, CharT, Traits>
 #endif
 {
@@ -829,7 +857,7 @@ public:
       Construct from a range of characters
   */
   template<typename InputIterator
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename std::enable_if<
       detail::is_input_iterator<InputIterator>
         ::value>::type* = nullptr
@@ -881,7 +909,7 @@ public:
       Construct from a object convertible to `string_view_type`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -901,7 +929,7 @@ public:
       and used to construct the string.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -984,13 +1012,18 @@ public:
 
   /** Assign to the string.
     
-      Assign from `string_view_type`.
+      Assign from an object convertible to `string_view_type`.
   */
+  template<typename T
+#ifndef BOOST_STATIC_STRING_DOCS
+    , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+  >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator=(string_view_type sv)
+  operator=(const T& t)
   {
-    return assign(sv);
+    return assign(t);
   }
 
   /** Replace the contents.
@@ -1014,7 +1047,7 @@ public:
       @return `*this`
   */
   template<std::size_t M
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   , typename std::enable_if<(M < N)>::type* = nullptr
 #endif
   >
@@ -1025,7 +1058,7 @@ public:
     return assign_unchecked(s.data(), s.size());
   }
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(const basic_static_string& s) noexcept
@@ -1099,7 +1132,7 @@ public:
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#ifdef GENERATING_DOCUMENTATION
+#ifdef BOOST_STATIC_STRING_DOCS
   basic_static_string&
 #else
   typename std::enable_if<
@@ -1132,7 +1165,7 @@ public:
       @throw std::length_error if `string_view_type{t}.size() > max_size()`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -1157,7 +1190,7 @@ public:
   */
 
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -1628,7 +1661,7 @@ public:
     return insert_unchecked(index, str.data(), str.size());
   }
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   insert(
@@ -1682,7 +1715,7 @@ public:
     return insert_unchecked(index, str.data() + index_str, str.capped_length(index_str, count));
   }
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   insert(
@@ -1797,7 +1830,7 @@ public:
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#ifdef GENERATING_DOCUMENTATION
+#ifdef BOOST_STATIC_STRING_DOCS
   iterator
 #else
   typename std::enable_if<
@@ -1811,7 +1844,7 @@ public:
     InputIterator first,
     InputIterator last);
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   template<typename ForwardIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   typename std::enable_if<
@@ -1890,7 +1923,7 @@ public:
       @throw std::out_of_range `index > size()`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -1936,7 +1969,7 @@ public:
       @throw std::out_of_range `index_str > sv.size()`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2107,7 +2140,7 @@ public:
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#ifdef GENERATING_DOCUMENTATION
+#ifdef BOOST_STATIC_STRING_DOCS
   basic_static_string&
 #else
   typename std::enable_if<
@@ -2152,7 +2185,7 @@ public:
       @return `*this`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2178,7 +2211,7 @@ public:
       @return `*this`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2265,7 +2298,7 @@ public:
       @throw std::length_error if `string_view_type{t}.size() > max_size()`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2382,7 +2415,7 @@ public:
       convertible to `const_pointer`.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2407,7 +2440,7 @@ public:
       convertible to `const_pointer`.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2432,7 +2465,7 @@ public:
       convertible to `const_pointer`.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2616,7 +2649,7 @@ public:
     return replace_unchecked(pos1, n1, str.data(), str.size());
   }
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   replace(
@@ -2671,7 +2704,7 @@ public:
     return replace_unchecked(pos1, n1, str.data() + pos2, str.capped_length(pos2, n2));
   }
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   replace(
@@ -2716,7 +2749,7 @@ public:
       @throw std::out_of_range `pos1 > size()`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2766,7 +2799,7 @@ public:
       @throw std::out_of_range `pos2 > sv.size()`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -2927,7 +2960,7 @@ public:
     return replace_unchecked(i1, i2, str.data(), str.size());
   }
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   replace(
@@ -2974,7 +3007,7 @@ public:
       @throw std::length_error `size() + (sv.size() - std::distance(i1, i2)) > max_size()`
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -3137,7 +3170,7 @@ public:
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-#ifdef GENERATING_DOCUMENTATION
+#ifdef BOOST_STATIC_STRING_DOCS
   basic_static_string&
 #else
   typename std::enable_if<
@@ -3153,7 +3186,7 @@ public:
     InputIterator j1,
     InputIterator j2);
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
   template<typename ForwardIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   typename std::enable_if<
@@ -3237,7 +3270,7 @@ public:
       for this parameter is `0`.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -3390,7 +3423,7 @@ public:
       for this parameter is @ref npos.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -3538,7 +3571,7 @@ public:
       for this parameter is `0`.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -3681,7 +3714,7 @@ public:
       for this parameter is @ref npos.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -3823,7 +3856,7 @@ public:
       for this parameter is `0`.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -3964,7 +3997,7 @@ public:
       for this parameter is @ref npos.
   */
   template<typename T
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
 #endif
   >
@@ -4800,8 +4833,18 @@ hash_value(
   return boost::hash_range(str.begin(), str.end());
 }
 #endif
-
 } // static_string
+
+//------------------------------------------------------------------------------
+//
+// using Declarations
+//
+//------------------------------------------------------------------------------
+
+using static_strings::static_string;
+using static_strings::static_wstring;
+using static_strings::static_u16string;
+using static_strings::static_u32string;
 } // boost
 
 /// std::hash partial specialization for basic_static_string
@@ -4809,22 +4852,22 @@ namespace std {
 
 template<std::size_t N, typename CharT, typename Traits>
 struct hash<
-#ifdef GENERATING_DOCUMENTATION
+#ifdef BOOST_STATIC_STRING_DOCS
   basic_static_string
 #else
-  boost::static_string::basic_static_string<N, CharT, Traits>
+  boost::static_strings::basic_static_string<N, CharT, Traits>
 #endif
   >
 {
   std::size_t 
   operator()(
-    const boost::static_string::basic_static_string<N, CharT, Traits>& str) const noexcept
+    const boost::static_strings::basic_static_string<N, CharT, Traits>& str) const noexcept
   {
 #ifndef BOOST_STATIC_STRING_STANDALONE
     return boost::hash_range(str.begin(), str.end());
 #else
     using view_type = typename
-      boost::static_string::basic_string_view<CharT, Traits>;
+      boost::static_strings::basic_string_view<CharT, Traits>;
     return std::hash<view_type>()(view_type(str.data(), str.size()));
 #endif
   }
@@ -4837,9 +4880,9 @@ struct hash<
 //
 //--------------------------------------------------------------------------
 
-#ifndef GENERATING_DOCUMENTATION
+#ifndef BOOST_STATIC_STRING_DOCS
 namespace boost {
-namespace static_string {
+namespace static_strings {
 
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
