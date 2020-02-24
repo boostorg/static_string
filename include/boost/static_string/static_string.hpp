@@ -4993,18 +4993,18 @@ insert(
   const auto curr_data = data();
   const std::size_t count = detail::distance(first, last);
   const std::size_t index = pos - curr_data;
-  const auto s = &*first;
+  const auto first_addr = &*first;
   BOOST_STATIC_STRING_THROW_IF(
     count > max_size() - curr_size, std::length_error{"count > max_size() - size()"});
-  const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, s);
-  if (!inside || (inside && ((s - curr_data) + count <= index)))
+  const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
+  if (!inside || (inside && (first_addr + count <= pos)))
   {
     traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
     detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
   }
   else
   {
-    const size_type offset = s - curr_data;
+    const size_type offset = first_addr - curr_data;
     traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
     if (offset < index)
     {
@@ -5208,12 +5208,10 @@ replace(
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
     std::length_error{"replaced string exceeds max_size()"});
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
-  // due to short circuit evaluation, the second operand of the logical
-  // AND expression will only be evaluated if s is within the string,
-  // which means that operand of the cast will never be negative.
-  if (inside && std::size_t(first_addr - curr_data) == pos && n1 == n2)
+  if (inside && first_addr == i1 && n1 == n2)
     return *this;
-  if (!inside || (inside && ((first_addr - curr_data) + n2 <= pos)))
+  // Short circuit evaluation ensures that the pointer arithmetic is valid
+  if (!inside || (inside && (first_addr + n2 <= i1)))
   {
     // source outside
     traits_type::move(&curr_data[pos + n2], &curr_data[pos + n1], curr_size - pos - n1 + 1);
