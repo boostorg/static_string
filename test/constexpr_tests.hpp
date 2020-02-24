@@ -36,7 +36,7 @@ struct cxper_char_traits
 #else
 using cxper_char_traits = std::char_traits<char>;
 #endif
-using cstatic_string = boost::static_string::basic_static_string<50, char, cxper_char_traits>;
+using cstatic_string = boost::static_strings::basic_static_string<50, char, cxper_char_traits>;
 
 inline
 constexpr 

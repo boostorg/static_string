@@ -4,10 +4,8 @@
 
 #include <boost/static_string/detail/static_string.hpp>
 
-namespace boost
-{
-namespace static_string
-{
+namespace boost {
+namespace static_strings {
 
 static_assert(std::is_base_of<
   detail::static_string_base_zero<0, char, std::char_traits<char>>,

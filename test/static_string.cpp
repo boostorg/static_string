@@ -21,7 +21,7 @@
 #include <string>
 
 namespace boost {
-namespace static_string {
+namespace static_strings {
   
 using string_view = basic_string_view<char, std::char_traits<char>>;
 
@@ -7194,5 +7194,5 @@ runTests()
 int
 main()
 {
-  return boost::static_string::runTests();
+  return boost::static_strings::runTests();
 }
