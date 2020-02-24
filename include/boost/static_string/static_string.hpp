@@ -24,7 +24,8 @@
 namespace boost {
 namespace static_strings {
 
-template<std::size_t, typename, typename>
+#ifndef BOOST_STATIC_STRING_DOCS
+template<std::size_t N, typename CharT, typename Traits>
 class basic_static_string;
 
 //------------------------------------------------------------------------------
@@ -33,7 +34,6 @@ class basic_static_string;
 //
 //------------------------------------------------------------------------------
 
-#ifndef BOOST_STATIC_STRING_DOCS
 template<std::size_t N>
 using static_string =
   basic_static_string<N, char, std::char_traits<char>>;
@@ -49,6 +49,11 @@ using static_u16string =
 template<std::size_t N>
 using static_u32string =
   basic_static_string<N, char32_t, std::char_traits<char32_t>>;
+
+#ifdef BOOST_STATIC_STRING_CPP20
+using static_u8string =
+  basic_static_string<N, char8_t, std::char_traits<char8_t>>;
+#endif
 
 //--------------------------------------------------------------------------
 //
@@ -66,7 +71,7 @@ using smallest_width =
   typename std::conditional<(N <= (std::numeric_limits<unsigned int>::max)()), unsigned int,
   typename std::conditional<(N <= (std::numeric_limits<unsigned long>::max)()), unsigned long,
   typename std::conditional<(N <= (std::numeric_limits<unsigned long long>::max)()), unsigned long long,
-  void>::type>::type>::type>::type>::type;
+  std::size_t>::type>::type>::type>::type>::type;
 
 // std::is_nothrow_convertible is C++20
 template<typename To>
@@ -719,6 +724,13 @@ defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS)
     template<std::size_t N>
     using static_u32string = 
       basic_static_string<N, char32_t, std::char_traits<char32_t>>;
+    @endcode
+
+    Addtionally, the alias `static_u8string` is provided in C++20
+
+    @code
+    using static_u8string =
+      basic_static_string<N, char8_t, std::char_traits<char8_t>>;
     @endcode
 
     @see to_static_string 
