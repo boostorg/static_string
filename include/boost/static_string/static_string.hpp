@@ -476,7 +476,9 @@ to_static_string_float_impl(double value) noexcept
 {
   // extra one needed for null terminator
   char buffer[N + 1];
-  if (std::snprintf(buffer, N + 1, "%f", value) > N)
+  // we know that a formatting error will not occur, so
+  // we assume that the result is always positive
+  if (std::size_t(std::snprintf(buffer, N + 1, "%f", value)) > N)
   {
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
@@ -500,7 +502,9 @@ to_static_string_float_impl(long double value) noexcept
   char buffer[N + 1];
   // snprintf returns the number of characters
   // that would have been written
-  if (std::snprintf(buffer, N + 1, "%Lf", value) > N)
+  // we know that a formatting error will not occur, so
+  // we assume that the result is always positive
+  if (std::size_t(std::snprintf(buffer, N + 1, "%Lf", value)) > N)
   {
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
@@ -529,9 +533,13 @@ to_static_wstring_float_impl(double value) noexcept
   // circuit evaluation will ensure that the
   // second operand is not evaluated on conforming
   // implementations.
-  const int num_written =
+  const long long num_written =
     std::swprintf(buffer, N + 1, L"%f", value);
-  if (num_written < 0 || num_written > N)
+  // we have to assume here that no reasonable implementation
+  // will require more than 2^63 chars to represent a float
+  // value.
+  if (num_written < 0 ||
+    num_written > static_cast<long long>(N))
   {
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
@@ -560,9 +568,13 @@ to_static_wstring_float_impl(long double value) noexcept
   // circuit evaluation will ensure that the
   // second operand is not evaluated on conforming
   // implementations.
-  const int num_written =
+  const long long num_written =
     std::swprintf(buffer, N + 1, L"%Lf", value);
-  if (num_written < 0 || num_written > N)
+  // we have to assume here that no reasonable implementation
+  // will require more than 2^63 chars to represent a float
+  // value.
+  if (num_written < 0 ||
+    num_written > static_cast<long long>(N))
   {
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
@@ -726,7 +738,7 @@ defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS)
       basic_static_string<N, char32_t, std::char_traits<char32_t>>;
     @endcode
 
-    Addtionally, the alias `static_u8string` is provided in C++20
+    Addtionally, the alias template `static_u8string` is provided in C++20
 
     @code
     using static_u8string =
@@ -1212,7 +1224,8 @@ public:
     size_type pos,
     size_type count = npos)
   {
-    return assign(string_view_type(t).substr(pos, count));
+    const auto sv = string_view_type(t).substr(pos, count);
+    return assign(sv.data(), sv.size());
   }
 
   //--------------------------------------------------------------------------
@@ -1993,8 +2006,8 @@ public:
     size_type index_str,
     size_type count = npos)
   {
-    const auto s = string_view_type(t).substr(index_str, count);
-    return insert(index, s.data(), s.size());
+    const auto sv = string_view_type(t).substr(index_str, count);
+    return insert(index, sv.data(), sv.size());
   }
 
   /** Removes `min(count, size() - index)` characters starting at `index`
@@ -2234,7 +2247,8 @@ public:
     size_type pos,
     size_type count = npos)
   {
-    return append(string_view_type(t).substr(pos, count));
+    const auto sv = string_view_type(t).substr(pos, count);
+    return append(sv.data(), sv.size());
   }
 
   /** Append to the string.
@@ -2316,8 +2330,7 @@ public:
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator+=(
-    const T& t)
+  operator+=(const T& t)
   {
     return append(t);
   }
@@ -2379,8 +2392,7 @@ public:
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
-  compare(
-    const_pointer s) const noexcept
+  compare(const_pointer s) const noexcept
   {
     return detail::lexicographical_compare<CharT, Traits>(
       data(), size(), s, traits_type::length(s));
@@ -2433,12 +2445,11 @@ public:
   >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
-  compare(
-    const T& t) const noexcept
+  compare(const T& t) const noexcept
   {
     string_view_type sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
-      data(), size(), t.data(), t.size());
+      data(), size(), sv.data(), sv.size());
   }
 
   /** Compare the string with another.
@@ -2490,8 +2501,9 @@ public:
     size_type pos2,
     size_type count2 = npos) const
   {
+    const auto sv = string_view_type(t).substr(pos2, count2);
     return compare(pos1, count1,
-      string_view_type(t).substr(pos2, count2));
+      sv.data(), sv.size());
   }
 
   /** Return a substring.
@@ -2545,7 +2557,8 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
-    return string_view_type(data() + pos, capped_length(pos, count));
+    return string_view_type(
+      data() + pos, capped_length(pos, count));
   }
 
   /** Copy a substring to another string.
