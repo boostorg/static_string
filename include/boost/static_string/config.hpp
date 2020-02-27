@@ -68,6 +68,8 @@
 #else
 #define BOOST_STATIC_STRING_NODISCARD
 #endif
+#else
+#define BOOST_STATIC_STRING_NODISCARD
 #endif
 
 // _MSVC_LANG isn't avaliable until after VS2015
