@@ -62,10 +62,12 @@
 
 // Can we use [[nodiscard]]?
 // KRYSTIAN TODO: these checks need to be improved
-#if defined(__has_attribute) && __has_attribute(nodiscard)
+#if defined(__has_attribute)
+#if __has_attribute(nodiscard)
 #define BOOST_STATIC_STRING_NODISCARD [[nodiscard]]
 #else
 #define BOOST_STATIC_STRING_NODISCARD
+#endif
 #endif
 
 // _MSVC_LANG isn't avaliable until after VS2015

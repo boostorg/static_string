@@ -10,11 +10,10 @@
 
 // Test that header file is self-contained.
 #include <boost/static_string/static_string.hpp>
+#include "constexpr_tests.hpp"
+#include "compile_fail.hpp"
 
 #include <boost/core/lightweight_test.hpp>
-
-#include "constexpr_tests.hpp"
-
 #include <cstdlib>
 #include <cwchar>
 #include <sstream>
@@ -243,14 +242,14 @@ testTS(Arithmetic value, const char* str_expected = "", const wchar_t* wstr_expe
   {
     if (std::is_signed<Arithmetic>::value)
     {
-      return std::strtoll(str.begin(), nullptr, 10) == value &&
-        std::wcstoll(wstr.begin(), nullptr, 10) == value &&
+      return Arithmetic(std::strtoll(str.begin(), nullptr, 10)) == value &&
+        Arithmetic(std::wcstoll(wstr.begin(), nullptr, 10)) == value &&
         (test_expected ? str == str_expected && wstr == wstr_expected : true);
     }
     else
     {
-      return std::strtoull(str.begin(), nullptr, 10) == value &&
-        std::wcstoull(wstr.begin(), nullptr, 10) == value &&
+      return Arithmetic(std::strtoull(str.begin(), nullptr, 10)) == value &&
+        Arithmetic(std::wcstoull(wstr.begin(), nullptr, 10)) == value &&
         (test_expected ? str == str_expected && wstr == wstr_expected : true);
     }
   }

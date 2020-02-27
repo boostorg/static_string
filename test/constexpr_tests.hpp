@@ -7,8 +7,12 @@
 // Official repository: https://github.com/boostorg/static_string
 //
 
-#include <string>
 #include <boost/static_string/static_string.hpp>
+
+#include <string>
+
+namespace boost {
+namespace static_strings {
 
 // char_traits aren't fully constexpr until c++20
 #if BOOST_STATIC_STRING_STANDARD_VERSION <= 201703L && BOOST_STATIC_STRING_STANDARD_VERSION >= 201402L
@@ -16,27 +20,23 @@ struct cxper_char_traits
 {
   using char_type = char;
   using int_type = int;
-  using state_type = mbstate_t;
+  using state_type = std::mbstate_t;
 
-  static constexpr void assign(char_type& c1, const char_type& c2) noexcept {}
-  static constexpr bool eq(char_type c1, char_type c2) noexcept { return true; }
-  static constexpr bool lt(char_type c1, char_type c2) noexcept { return true; }
+  static constexpr void assign(char_type&, const char_type&) noexcept {}
+  static constexpr bool eq(char_type, char_type) noexcept { return true; }
+  static constexpr bool lt(char_type, char_type) noexcept { return true; }
 
-  static constexpr int compare(const char_type* s1, const char_type* s2, size_t n) { return 0; }
-  static constexpr size_t length(const char_type* s) { return 0; }
-  static constexpr const char_type* find(const char_type* s, size_t n,
-                                         const char_type& a)
-  {
-    return 0;
-  }
-  static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n) { return s1; }
-  static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n) { return s1; }
-  static constexpr char_type* assign(char_type* s, size_t n, char_type a) { return s; }
+  static constexpr int compare(const char_type*, const char_type*, std::size_t) { return 0; }
+  static constexpr std::size_t length(const char_type*) { return 0; }
+  static constexpr const char_type* find(const char_type*, std::size_t, const char_type&){ return 0; }
+  static constexpr char_type* move(char_type* s1, const char_type*, std::size_t) { return s1; }
+  static constexpr char_type* copy(char_type* s1, const char_type*, std::size_t) { return s1; }
+  static constexpr char_type* assign(char_type* s, std::size_t, char_type) { return s; }
 };
 #else
 using cxper_char_traits = std::char_traits<char>;
 #endif
-using cstatic_string = boost::static_strings::basic_static_string<50, char, cxper_char_traits>;
+using cstatic_string = basic_static_string<50, char, cxper_char_traits>;
 
 inline
 constexpr 
@@ -73,55 +73,39 @@ testConstantEvaluation()
   // element access
   {
     auto j = a.at(0);
+    static_cast<void>(j);
   }
   {
     auto j = a[0];
+    static_cast<void>(j);
   }
   {
     auto j = a.front();
+    static_cast<void>(j);
   }
   {
     auto j = a.back();
+    static_cast<void>(j);
   }
-  {
-    auto j = a.data();
-  }
-  {
-    auto j = a.c_str();
-  }
-  {
-    auto j = a.begin();
-  }
-  {
-    auto j = a.cbegin();
-  }
-  {
-    auto j = a.end();
-  }
-  {
-    auto j = a.cend();
-  }
+  a.data();
+  a.c_str();
+  a.begin();
+  a.cbegin();
+  a.end();
+  a.cend();
 
   // reverse iterators
-  {
-    auto j = a.rbegin();
-  }
-  {
-    auto j = a.crbegin();
-  }
-  {
-    auto j = a.rend();
-  }
-  {
-    auto j = a.crend();
-  }
+  a.rbegin();
+  a.crbegin();
+  a.rend();
+  a.crend();
 
   // capacity and size
-  auto j = cstatic_string().size() +
-    cstatic_string().empty() +
-    cstatic_string().length() +
-    cstatic_string().max_size() +
-    cstatic_string().capacity();
+  cstatic_string().size();
+  cstatic_string().empty();
+  cstatic_string().length();
+  cstatic_string().max_size();
+  cstatic_string().capacity();
 
   // clear
   a.clear();
@@ -263,34 +247,26 @@ testConstantEvaluation()
   // element access
   {
     auto j = a.at(0);
+    static_cast<void>(j);
   }
   {
     auto j = a[0];
+    static_cast<void>(j);
   }
   {
     auto j = a.front();
+    static_cast<void>(j);
   }
   {
     auto j = a.back();
+    static_cast<void>(j);
   }
-  {
-    auto j = a.data();
-  }
-  {
-    auto j = a.c_str();
-  }
-  {
-    auto j = a.begin();
-  }
-  {
-    auto j = a.cbegin();
-  }
-  {
-    auto j = a.end();
-  }
-  {
-    auto j = a.cend();
-  }
+  a.data();
+  a.c_str();
+  a.begin();
+  a.cbegin();
+  a.end();
+  a.cend();
 
   // reverse iterators
   //{
@@ -307,11 +283,11 @@ testConstantEvaluation()
   //}
 
   // capacity and size
-  auto j = cstatic_string().size() +
-    cstatic_string().empty() +
-    cstatic_string().length() +
-    cstatic_string().max_size() +
-    cstatic_string().capacity();
+  cstatic_string().size();
+  cstatic_string().empty();
+  cstatic_string().length();
+  cstatic_string().max_size();
+  cstatic_string().capacity();
 
   // clear
   a.clear();
@@ -453,41 +429,33 @@ testConstantEvaluation()
   // element access
   {
     auto j = a.at(0);
+    static_cast<void>(j);
   }
   {
     auto j = a[0];
+    static_cast<void>(j);
   }
   {
     auto j = a.front();
+    static_cast<void>(j);
   }
   {
     auto j = a.back();
+    static_cast<void>(j);
   }
-  {
-    auto j = a.data();
-  }
-  {
-    auto j = a.c_str();
-  }
-  {
-    auto j = a.begin();
-  }
-  {
-    auto j = a.cbegin();
-  }
-  {
-    auto j = a.end();
-  }
-  {
-    auto j = a.cend();
-  }
+  a.data();
+  a.c_str();
+  a.begin();
+  a.cbegin();
+  a.end();
+  a.cend();
 
   // capacity and size
-  auto j = cstatic_string().size() +
-    cstatic_string().empty() +
-    cstatic_string().length() +
-    cstatic_string().max_size() +
-    cstatic_string().capacity();
+  cstatic_string().size();
+  cstatic_string().empty();
+  cstatic_string().length();
+  cstatic_string().max_size();
+  cstatic_string().capacity();
 
   // clear
   a.clear();
@@ -605,3 +573,5 @@ testConstantEvaluation()
     cstatic_string().capacity();
 #endif
 }
+} // static_strings
+} // boost
