@@ -1197,7 +1197,7 @@ public:
   basic_static_string&
   assign(const T& t)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return assign(sv.data(), sv.size());
   }
 
@@ -1958,7 +1958,8 @@ public:
     size_type index,
     const T& t)
   {
-    return insert(index, t, 0, npos);
+    const string_view_type sv = t;
+    return insert(index, sv.data(), sv.size());
   }
 
   /** Insert characters from an object convertible to `string_view_type`.
@@ -2447,7 +2448,7 @@ public:
   int
   compare(const T& t) const noexcept
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
       data(), size(), sv.data(), sv.size());
   }
@@ -2474,7 +2475,7 @@ public:
     size_type count1,
     const T& t) const
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
       data() + pos1, capped_length(pos1, count1), sv.data(), sv.size());
   }
@@ -2785,7 +2786,7 @@ public:
     size_type n1,
     const T& t)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return replace(pos1, n1, sv.data(), sv.size());
   }
 
@@ -2837,7 +2838,7 @@ public:
     size_type pos2,
     size_type n2 = npos)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return replace(pos1, n1, sv.substr(pos2, n2));
   }
 
@@ -3043,7 +3044,7 @@ public:
     const_iterator i2,
     const T& t)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return replace(i1, i2, sv.begin(), sv.end());
   }
 
@@ -3306,7 +3307,7 @@ public:
     size_type pos = 0) const
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return find(sv.data(), pos, sv.size());
   }
     
@@ -3459,7 +3460,7 @@ public:
     size_type pos = npos) const 
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return rfind(sv.data(), pos, sv.size());
   }
 
@@ -3607,7 +3608,7 @@ public:
     size_type pos = 0) const
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return find_first_of(sv.data(), pos, sv.size());
   }
 
@@ -3750,7 +3751,7 @@ public:
     size_type pos = npos) const
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return find_last_of(sv.data(), pos, sv.size());
   }
      
@@ -3892,7 +3893,7 @@ public:
     size_type pos = 0) const
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return find_first_not_of(sv.data(), pos, sv.size());
   }
 
@@ -4033,7 +4034,7 @@ public:
     size_type pos = npos) const
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
   {
-    string_view_type sv = t;
+    const string_view_type sv = t;
     return find_last_not_of(sv.data(), pos, sv.size());
   }
 

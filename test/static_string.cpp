@@ -71,7 +71,6 @@ bool
 testI(S s, typename S::size_type pos, const typename S::value_type* str, typename S::size_type n, S expected)
 {
   const typename S::size_type old_size = s.size();
-  S s0 = s;
   if (pos <= old_size)
   {
     s.insert(pos, str, n);
@@ -89,7 +88,6 @@ bool
 testE(S s, typename S::size_type pos, typename S::size_type n, S expected)
 {
   const typename S::size_type old_size = s.size();
-  S s0 = s;
   if (pos <= old_size)
   {
     s.erase(pos, n);
@@ -189,7 +187,6 @@ bool
 testR(S s, typename S::size_type pos, typename S::size_type n1, typename S::size_type n2, typename S::value_type c, S expected)
 {
   const typename S::size_type old_size = s.size();
-  S s0 = s;
   if (pos <= old_size)
   {
     s.replace(pos, n1, n2, c);
@@ -2109,7 +2106,6 @@ testAppend()
               S("1234567890123456789012345678901234567890")));
 
   S s_short = "123/";
-  S s_long = "Lorem ipsum dolor sit amet, consectetur/";
 
   s_short.append(s_short.data(), s_short.size());
   BOOST_TEST(s_short == "123/123/");
@@ -3764,11 +3760,11 @@ testFind()
 
   BOOST_TEST(fs1.find(cs2, 0, 2) == 1);
 
-  BOOST_TEST(fs1.find(cs1, 4) == -1);
-  BOOST_TEST(fs1.find(cs2, 4) == -1);
+  BOOST_TEST(fs1.find(cs1, 4) == S::npos);
+  BOOST_TEST(fs1.find(cs2, 4) == S::npos);
 
   BOOST_TEST(fs1.find('1') == 0);
-  BOOST_TEST(fs1.find('1', 4) == -1);
+  BOOST_TEST(fs1.find('1', 4) == S::npos);
 
   BOOST_TEST(testF(S(""), "", 0, 0, 0));
   BOOST_TEST(testF(S(""), "abcde", 0, 0, 0));
@@ -4071,22 +4067,6 @@ testFind()
   BOOST_TEST(testF(S("abcdeabcdeabcdeabcde"), "abcdeabcde", 20, 10, S::npos));
   BOOST_TEST(testF(S("abcdeabcdeabcdeabcde"), "abcdeabcdeabcdeabcde", 20, 0, 20));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // rfind
 
   BOOST_TEST(fs1.rfind(v1) == 0);
@@ -4099,9 +4079,9 @@ testFind()
   BOOST_TEST(fs1.rfind(cs2) == 1);
 
   BOOST_TEST(fs1.rfind(cs1, 0) == 0);
-  BOOST_TEST(fs1.rfind(cs2, 0) == -1);
+  BOOST_TEST(fs1.rfind(cs2, 0) == S::npos);
   
-  BOOST_TEST(fs1.rfind(cs2, 0, 2) == -1);
+  BOOST_TEST(fs1.rfind(cs2, 0, 2) == S::npos);
   BOOST_TEST(fs1.rfind(cs1, 4) == 0);
 
   BOOST_TEST(fs1.rfind('1') == 0);
@@ -4409,15 +4389,6 @@ testFind()
   BOOST_TEST(testRF(S("abcdeabcdeabcdeabcde"), "abcdeabcde", 20, 10, 10));
   BOOST_TEST(testRF(S("abcdeabcdeabcdeabcde"), "abcdeabcdeabcdeabcde", 20, 0, 20));
 
-
-
-
-
-
-
-
-
-
   // find_first_of
 
   BOOST_TEST(fs1.find_first_of(v1) == 0);
@@ -4437,7 +4408,7 @@ testFind()
   BOOST_TEST(fs1.find_first_of(cs2, 4) == 4);
 
   BOOST_TEST(fs1.find_first_of('1') == 0);
-  BOOST_TEST(fs1.find_first_of('1', 4) == -1);
+  BOOST_TEST(fs1.find_first_of('1', 4) == S::npos);
 
   BOOST_TEST(testFF(S(""), "", 0, 0, S::npos));
   BOOST_TEST(testFF(S(""), "irkhs", 0, 0, S::npos));
@@ -4740,13 +4711,6 @@ testFind()
   BOOST_TEST(testFF(S("fbkeiopclstmdqranjhg"), "trqncbkgmh", 20, 10, S::npos));
   BOOST_TEST(testFF(S("lifhpdgmbconstjeqark"), "tomglrkencbsfjqpihda", 20, 0, S::npos));
 
-
-
-
-
-
-
-
   // find_last_of
 
   BOOST_TEST(fs1.find_last_of(v1) == 4);
@@ -4758,15 +4722,15 @@ testFind()
   BOOST_TEST(fs1.find_last_of(cs2) == 4);
 
   BOOST_TEST(fs1.find_last_of(cs1, 0) == 0);
-  BOOST_TEST(fs1.find_last_of(cs2, 0) == -1);
+  BOOST_TEST(fs1.find_last_of(cs2, 0) == S::npos);
 
-  BOOST_TEST(fs1.find_last_of(cs2, 0, 2) == -1);
+  BOOST_TEST(fs1.find_last_of(cs2, 0, 2) == S::npos);
 
   BOOST_TEST(fs1.find_last_of(cs1, 4) == 4);
   BOOST_TEST(fs1.find_last_of(cs2, 4) == 4);
 
   BOOST_TEST(fs1.find_last_of('1') == 0);
-  BOOST_TEST(fs1.find_last_of('5', 3) == -1);
+  BOOST_TEST(fs1.find_last_of('5', 3) == S::npos);
 
   BOOST_TEST(testFL(S(""), "", 0, 0, S::npos));
   BOOST_TEST(testFL(S(""), "irkhs", 0, 0, S::npos));
@@ -5117,8 +5081,8 @@ testFind()
 
   BOOST_TEST(fs1.find_first_not_of(cs4, 0, 2) == 0);
 
-  BOOST_TEST(fs1.find_first_not_of(cs3, 4) == -1);
-  BOOST_TEST(fs1.find_first_not_of(cs4, 4) == -1);
+  BOOST_TEST(fs1.find_first_not_of(cs3, 4) == S::npos);
+  BOOST_TEST(fs1.find_first_not_of(cs4, 4) == S::npos);
 
   BOOST_TEST(fs1.find_first_not_of('1') == 1);
   BOOST_TEST(fs1.find_first_not_of('1', 3) == 3);
@@ -5458,7 +5422,7 @@ testFind()
   BOOST_TEST(fs1.find_last_not_of(cs3) == 2);
   BOOST_TEST(fs1.find_last_not_of(cs4) == 3);
 
-  BOOST_TEST(fs1.find_last_not_of(cs3, 0) == -1);
+  BOOST_TEST(fs1.find_last_not_of(cs3, 0) == S::npos);
   BOOST_TEST(fs1.find_last_not_of(cs4, 0) == 0);
 
   BOOST_TEST(fs1.find_last_not_of(cs4, 0, 2) == 0);
@@ -7149,6 +7113,7 @@ int
 runTests()
 {
   constexpr auto cxper = testConstantEvaluation();
+  static_cast<void>(cxper);
 
   testConstruct();
     
