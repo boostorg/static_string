@@ -475,6 +475,10 @@ inline
 static_string<N>
 to_static_string_float_impl(double value) noexcept
 {
+  // we have to assume here that no reasonable implementation
+  // will require more than 2^63 chars to represent a float value.
+  const long long narrow =
+    static_cast<long long>(N);
   // extra one needed for null terminator
   char buffer[N + 1];
   // we know that a formatting error will not occur, so
@@ -486,7 +490,8 @@ to_static_string_float_impl(double value) noexcept
     const int reserved_count = 
       (std::max)(2, count_digits(
       std::numeric_limits<double>::max_exponent10)) + 4;
-    const int precision = N > reserved_count ? N - reserved_count : 0;
+    const int precision = narrow > reserved_count ?
+      N - reserved_count : 0;
     // switch to scientific notation
     std::snprintf(buffer, N + 1, "%.*e", precision, value);
   }
@@ -499,6 +504,10 @@ inline
 static_string<N>
 to_static_string_float_impl(long double value) noexcept
 {
+  // we have to assume here that no reasonable implementation
+  // will require more than 2^63 chars to represent a float value.
+  const long long narrow =
+    static_cast<long long>(N);
   // extra one needed for null terminator
   char buffer[N + 1];
   // snprintf returns the number of characters
@@ -512,7 +521,8 @@ to_static_string_float_impl(long double value) noexcept
     const int reserved_count =
       (std::max)(2, count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
-    const int precision = N > reserved_count ? N - reserved_count : 0;
+    const int precision = narrow > reserved_count ?
+      N - reserved_count : 0;
     // switch to scientific notation
     std::snprintf(buffer, N + 1, "%.*Le", precision, value);
   }
@@ -525,6 +535,10 @@ inline
 static_wstring<N>
 to_static_wstring_float_impl(double value) noexcept
 {
+  // we have to assume here that no reasonable implementation
+  // will require more than 2^63 chars to represent a float value.
+  const long long narrow =
+    static_cast<long long>(N);
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
   // swprintf returns a negative number if it can't
@@ -536,18 +550,16 @@ to_static_wstring_float_impl(double value) noexcept
   // implementations.
   const long long num_written =
     std::swprintf(buffer, N + 1, L"%f", value);
-  // we have to assume here that no reasonable implementation
-  // will require more than 2^63 chars to represent a float
-  // value.
   if (num_written < 0 ||
-    num_written > static_cast<long long>(N))
+    num_written > narrow)
   {
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count =
       (std::max)(2, count_digits(
       std::numeric_limits<double>::max_exponent10)) + 4;
-    const int precision = N > reserved_count ? N - reserved_count : 0;
+    const int precision = narrow > reserved_count ? 
+      N - reserved_count : 0;
     // switch to scientific notation
     std::swprintf(buffer, N + 1, L"%.*e", precision, value);
   }
@@ -560,6 +572,10 @@ inline
 static_wstring<N>
 to_static_wstring_float_impl(long double value) noexcept
 {
+  // we have to assume here that no reasonable implementation
+  // will require more than 2^63 chars to represent a float value.
+  const long long narrow =
+    static_cast<long long>(N);
   // extra one needed for null terminator
   wchar_t buffer[N + 1];
   // swprintf returns a negative number if it can't
@@ -571,18 +587,16 @@ to_static_wstring_float_impl(long double value) noexcept
   // implementations.
   const long long num_written =
     std::swprintf(buffer, N + 1, L"%Lf", value);
-  // we have to assume here that no reasonable implementation
-  // will require more than 2^63 chars to represent a float
-  // value.
   if (num_written < 0 ||
-    num_written > static_cast<long long>(N))
+    num_written > narrow)
   {
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count =
       (std::max)(2, count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
-    const int precision = N > reserved_count ? N - reserved_count : 0;
+    const int precision = narrow > reserved_count ?
+      N - reserved_count : 0;
     // switch to scientific notation
     std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
   }
