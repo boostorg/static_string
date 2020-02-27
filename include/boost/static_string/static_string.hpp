@@ -464,7 +464,7 @@ to_static_wstring_int_impl(Integer value) noexcept
 
 BOOST_STATIC_STRING_CPP11_CONSTEXPR
 inline
-std::size_t
+int
 count_digits(std::size_t value)
 {
   return value < 10 ? 1 : count_digits(value / 10) + 1;
@@ -484,7 +484,7 @@ to_static_string_float_impl(double value) noexcept
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count = 
-      (std::max)(std::size_t(2), count_digits(
+      (std::max)(2, count_digits(
       std::numeric_limits<double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
     // switch to scientific notation
@@ -510,7 +510,7 @@ to_static_string_float_impl(long double value) noexcept
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count =
-      (std::max)(std::size_t(2), count_digits(
+      (std::max)(2, count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
     // switch to scientific notation
@@ -545,7 +545,7 @@ to_static_wstring_float_impl(double value) noexcept
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count =
-      (std::max)(std::size_t(2), count_digits(
+      (std::max)(2, count_digits(
       std::numeric_limits<double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
     // switch to scientific notation
@@ -580,7 +580,7 @@ to_static_wstring_float_impl(long double value) noexcept
     // the + 4 is for the decimal, 'e', 
     // its sign, and the sign of the integral portion
     const int reserved_count =
-      (std::max)(std::size_t(2), count_digits(
+      (std::max)(2, count_digits(
       std::numeric_limits<long double>::max_exponent10)) + 4;
     const int precision = N > reserved_count ? N - reserved_count : 0;
     // switch to scientific notation
@@ -4215,12 +4215,16 @@ private:
     return term();
   }
 
+  BOOST_STATIC_STRING_NORETURN
   basic_static_string&
   assign_char(value_type, std::false_type)
   {
     BOOST_STATIC_STRING_THROW(
       std::length_error{"max_size() == 0"});
+    // This eliminates any potential warnings
+#ifdef BOOST_STATIC_STRING_NO_NORETURN
     return *this;
+#endif
   }
 
   // Returns the size of data read from input iterator. Read data begins at data() + size() + 1.

@@ -41,13 +41,29 @@
 #define BOOST_STATIC_STRING_IS_CONST_EVAL __builtin_is_constant_evaluated()
 #endif
 
-// Can we use [[nodiscard]]?
-#ifdef __has_attribute
-#if __has_attribute(nodiscard)
-#define BOOST_STATIC_STRING_NODISCARD [[nodiscard]]
-#else
-#define BOOST_STATIC_STRING_NODISCARD
+// This is borrowed from Boost.JSON
+// https://github.com/vinniefalco/json/blob/develop/include/boost/json/detail/config.hpp
+#if defined(_MSC_VER)
+#define BOOST_STATIC_STRING_NORETURN __declspec(noreturn)
+#elif defined(__GNUC__)
+#define BOOST_STATIC_STRING_NORETURN __attribute__ ((__noreturn__))
+#elif defined(__has_attribute) && defined(__SUNPRO_CC) && (__SUNPRO_CC > 0x5130)
+#if __has_attribute(noreturn)
+#define BOOST_STATIC_STRING_NORETURN [[noreturn]]
 #endif
+#elif defined(__has_cpp_attribute) 
+#if __has_cpp_attribute(noreturn)
+#define BOOST_STATIC_STRING_NORETURN [[noreturn]]
+#endif
+#else
+#define BOOST_STATIC_STRING_NORETURN
+#define BOOST_STATIC_STRING_NO_NORETURN
+#endif
+
+// Can we use [[nodiscard]]?
+// KRYSTIAN TODO: these checks need to be improved
+#if defined(__has_attribute) && __has_attribute(nodiscard)
+#define BOOST_STATIC_STRING_NODISCARD [[nodiscard]]
 #else
 #define BOOST_STATIC_STRING_NODISCARD
 #endif
