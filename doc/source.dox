@@ -35,7 +35,7 @@ INCLUDE_PATH           = ../
 INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = \
-                        GENERATING_DOCUMENTATION
+                        BOOST_STATIC_STRING_DOCS
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 

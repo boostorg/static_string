@@ -12,6 +12,7 @@
 #define BOOST_STATIC_STRING_STATIC_STRING_HPP
 
 #include <boost/static_string/config.hpp>
+
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
@@ -875,7 +876,6 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(const_pointer s);
 
- 
   /** Construct a `basic_static_string`.
     
       Construct from a range of characters
@@ -4858,7 +4858,7 @@ hash_value(
   return boost::hash_range(str.begin(), str.end());
 }
 #endif
-} // static_string
+} // static_strings
 
 //------------------------------------------------------------------------------
 //
@@ -5498,7 +5498,7 @@ insert_unchecked(
   this->set_size(curr_size + count);
   return curr_data + index;
 }
-} // static_string
+} // static_strings
 } // boost
 #endif
 #endif
