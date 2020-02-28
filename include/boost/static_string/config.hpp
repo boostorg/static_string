@@ -34,42 +34,51 @@
 #endif
 
 // Can we use is_constant_evaluated?
-// Standard version
 #if __cpp_lib_is_constant_evaluated >= 201811L
 #define BOOST_STATIC_STRING_IS_CONST_EVAL std::is_constant_evaluated()
 #elif BOOST_STATIC_STRING_HAS_BUILTIN(__builtin_is_constant_evaluated)
 #define BOOST_STATIC_STRING_IS_CONST_EVAL __builtin_is_constant_evaluated()
 #endif
 
-// This is borrowed from Boost.JSON
-// https://github.com/vinniefalco/json/blob/develop/include/boost/json/detail/config.hpp
-#if defined(_MSC_VER)
-#define BOOST_STATIC_STRING_NORETURN __declspec(noreturn)
-#elif defined(__GNUC__)
-#define BOOST_STATIC_STRING_NORETURN __attribute__ ((__noreturn__))
-#elif defined(__has_attribute) && defined(__SUNPRO_CC) && (__SUNPRO_CC > 0x5130)
-#if __has_attribute(noreturn)
-#define BOOST_STATIC_STRING_NORETURN [[noreturn]]
-#endif
-#elif defined(__has_cpp_attribute) 
-#if __has_cpp_attribute(noreturn)
-#define BOOST_STATIC_STRING_NORETURN [[noreturn]]
-#endif
-#else
-#define BOOST_STATIC_STRING_NORETURN
-#define BOOST_STATIC_STRING_NO_NORETURN
+// Check for an attribute
+#if defined(__has_cpp_attribute)
+#define BOOST_STATIC_STRING_CHECK_FOR_ATTR(x) __has_cpp_attribute(x)
+#elif defined(__has_attribute)
+#define BOOST_STATIC_STRING_CHECK_FOR_ATTR(x) __has_attribute(x)
+#else 
+#define BOOST_STATIC_STRING_CHECK_FOR_ATTR(x) 0
 #endif
 
-// Can we use [[nodiscard]]?
-// KRYSTIAN TODO: these checks need to be improved
-#if defined(__has_attribute)
-#if __has_attribute(nodiscard)
-#define BOOST_STATIC_STRING_NODISCARD [[nodiscard]]
-#else
+// Decide which attributes we can use
+#define BOOST_STATIC_STRING_UNLIKELY
 #define BOOST_STATIC_STRING_NODISCARD
+#define BOOST_STATIC_STRING_NORETURN
+// unlikely
+#if BOOST_STATIC_STRING_CHECK_FOR_ATTR(unlikely)
+#undef BOOST_STATIC_STRING_UNLIKELY
+#define BOOST_STATIC_STRING_UNLIKELY [[unlikely]]
 #endif
-#else
-#define BOOST_STATIC_STRING_NODISCARD
+// nodiscard
+#if BOOST_STATIC_STRING_CHECK_FOR_ATTR(nodiscard)
+#undef BOOST_STATIC_STRING_NODISCARD
+#define BOOST_STATIC_STRING_NODISCARD [[nodiscard]]
+#elif defined(_MSC_VER) && _MSC_VER >= 1700
+#undef BOOST_STATIC_STRING_NODISCARD
+#define BOOST_STATIC_STRING_NODISCARD _Check_return_
+#elif defined(__GNUC__) || defined(__clang__)
+#undef BOOST_STATIC_STRING_NODISCARD
+#define BOOST_STATIC_STRING_NODISCARD __attribute__((warn_unused_result))
+#endif
+// noreturn
+#if BOOST_STATIC_STRING_CHECK_FOR_ATTR(noreturn)
+#undef BOOST_STATIC_STRING_NORETURN
+#define BOOST_STATIC_STRING_NORETURN [[noreturn]]
+#elif defined(_MSC_VER)
+#undef BOOST_STATIC_STRING_NORETURN
+#define BOOST_STATIC_STRING_NORETURN __declspec(noreturn)
+#elif defined(__GNUC__) || defined(__clang__)
+#undef BOOST_STATIC_STRING_NORETURN
+#define BOOST_STATIC_STRING_NORETURN __attribute__((__noreturn__))
 #endif
 
 // _MSVC_LANG isn't avaliable until after VS2015
@@ -84,11 +93,11 @@
 #define BOOST_STATIC_STRING_STANDARD_VERSION __cplusplus
 #endif
 
+// Decide what level of constexpr we can use
 #define BOOST_STATIC_STRING_CPP20_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP17_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP14_CONSTEXPR
 #define BOOST_STATIC_STRING_CPP11_CONSTEXPR
-
 #if BOOST_STATIC_STRING_STANDARD_VERSION >= 202002L
 #define BOOST_STATIC_STRING_CPP20
 #undef BOOST_STATIC_STRING_CPP20_CONSTEXPR
@@ -113,7 +122,7 @@
 // Boost and non-Boost versions of utilities
 #ifndef BOOST_STATIC_STRING_STANDALONE
 #ifndef BOOST_STATIC_STRING_THROW_IF
-#define BOOST_STATIC_STRING_THROW_IF(cond, ex) if (cond) BOOST_THROW_EXCEPTION(ex)
+#define BOOST_STATIC_STRING_THROW_IF(cond, ex) if (cond) BOOST_STATIC_STRING_UNLIKELY BOOST_THROW_EXCEPTION(ex)
 #endif
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) BOOST_THROW_EXCEPTION(ex)
@@ -126,7 +135,7 @@
 #endif
 #else
 #ifndef BOOST_STATIC_STRING_THROW_IF
-#define BOOST_STATIC_STRING_THROW_IF(cond, ex) if (cond) throw ex
+#define BOOST_STATIC_STRING_THROW_IF(cond, ex) if (cond) BOOST_STATIC_STRING_UNLIKELY throw ex
 #endif
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) throw ex
