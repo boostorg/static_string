@@ -11,7 +11,10 @@
 #ifndef BOOST_STATIC_STRING_STATIC_STRING_HPP
 #define BOOST_STATIC_STRING_STATIC_STRING_HPP
 
+// External include guard
+#ifndef BOOST_STATIC_STRING_CONFIG_HPP
 #include <boost/static_string/config.hpp>
+#endif
 
 #include <algorithm>
 #include <cstdint>
@@ -5038,37 +5041,31 @@ insert(
   const std::size_t count = detail::distance(first, last);
   const std::size_t index = pos - curr_data;
   const auto first_addr = &*first;
-  // gcc's static analyzer does not recognize exit via
-  // exception as non-evaluation
-  if (count > max_size() - curr_size)
-    BOOST_STATIC_STRING_THROW(
-      std::length_error("count > max_size() - size()"));
+  BOOST_STATIC_STRING_THROW_IF(
+    count > max_size() - curr_size, std::length_error("count > max_size() - size()"));
+  const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
+  if (!inside || (inside && (first_addr + count <= pos)))
+  {
+    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+    detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
+  }
   else
   {
-    const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
-    if (!inside || (inside && (first_addr + count <= pos)))
+    const size_type offset = first_addr - curr_data;
+    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
+    if (offset < index)
     {
-      traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
-      detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
+      const size_type diff = index - offset;
+      traits_type::copy(&curr_data[index], &curr_data[offset], diff);
+      traits_type::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
     }
     else
     {
-      const size_type offset = first_addr - curr_data;
-      traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
-      if (offset < index)
-      {
-        const size_type diff = index - offset;
-        traits_type::copy(&curr_data[index], &curr_data[offset], diff);
-        traits_type::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
-      }
-      else
-      {
-        traits_type::copy(&curr_data[index], &curr_data[offset + count], count);
-      }
+      traits_type::copy(&curr_data[index], &curr_data[offset + count], count);
     }
-    this->set_size(curr_size + count);
-    return curr_data + index;
   }
+  this->set_size(curr_size + count);
+  return curr_data + index;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
