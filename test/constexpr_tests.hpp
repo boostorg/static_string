@@ -47,14 +47,12 @@ testConstantEvaluation()
   // c++20 constexpr tests
   cstatic_string a;
   cstatic_string b(1, 'a');
-  cstatic_string c(b, 0);
-  cstatic_string d(b, 0, 1);
-  cstatic_string e("a", 1);
-  cstatic_string f("a");
-  //cstatic_string g(f.begin(), f.end());
-  cstatic_string h(f);
-  cstatic_string i({'a'});
-  static_cast<void>((c, d, e, f, h, i));
+  cstatic_string(b, 0);
+  cstatic_string(b, 0, 1);
+  cstatic_string("a", 1);
+  cstatic_string("a");
+  cstatic_string{b};
+  cstatic_string({'a'});
 
   // assignment
   a = b;
@@ -220,17 +218,15 @@ testConstantEvaluation()
 #elif defined(BOOST_STATIC_STRING_CPP17)
   //c++17 constexpr tests
 
-    // ctors
+  // ctors
   cstatic_string a;
   cstatic_string b(1, 'a');
-  cstatic_string c(b, 0);
-  cstatic_string d(b, 0, 1);
-  cstatic_string e("a", 1);
-  cstatic_string f("a");
-  //cstatic_string g(f.begin(), f.end());
-  cstatic_string h(f);
-  cstatic_string i({'a'});
-  static_cast<void>((c, d, e, f, h, i));
+  cstatic_string(b, 0);
+  cstatic_string(b, 0, 1);
+  cstatic_string("a", 1);
+  cstatic_string("a");
+  cstatic_string{b};
+  cstatic_string({'a'});
 
   // assignment
   a = b;
@@ -407,14 +403,12 @@ testConstantEvaluation()
   // ctors
   cstatic_string a;
   cstatic_string b(1, 'a');
-  cstatic_string c(b, 0);
-  cstatic_string d(b, 0, 1);
-  cstatic_string e("a", 1);
-  cstatic_string f("a");
-  //cstatic_string g(f.begin(), f.end());
-  cstatic_string h(f);
-  cstatic_string i({'a'});
-  static_cast<void>((c, d, e, f, h, i));
+  cstatic_string(b, 0);
+  cstatic_string(b, 0, 1);
+  cstatic_string("a", 1);
+  cstatic_string("a");
+  cstatic_string{b};
+  cstatic_string({'a'});
 
   // assignment
   a = b;
