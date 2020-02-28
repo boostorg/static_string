@@ -55,6 +55,7 @@ using static_u32string =
   basic_static_string<N, char32_t, std::char_traits<char32_t>>;
 
 #ifdef BOOST_STATIC_STRING_CPP20
+template<std::size_t N>
 using static_u8string =
   basic_static_string<N, char8_t, std::char_traits<char8_t>>;
 #endif
@@ -759,6 +760,7 @@ defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS)
     Addtionally, the alias template `static_u8string` is provided in C++20
 
     @code
+    template<std::size_t N>
     using static_u8string =
       basic_static_string<N, char8_t, std::char_traits<char8_t>>;
     @endcode
