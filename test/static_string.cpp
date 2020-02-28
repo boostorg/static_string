@@ -7036,8 +7036,8 @@ testEmpty()
 {
   static_string<0> a;
   BOOST_TEST(a.size() == 0);
-  BOOST_TEST(a.data());
-  BOOST_TEST(!a.capacity());
+  BOOST_TEST(a.data() != nullptr);
+  BOOST_TEST(a.capacity() == 0);
 }
 
 void

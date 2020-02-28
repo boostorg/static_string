@@ -289,14 +289,14 @@ public:
 
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   std::size_t
-  set_size(std::size_t) noexcept
+  set_size(std::size_t) const noexcept
   {
     return 0;
   }
 
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
-  term_impl() noexcept { }
+  term_impl() const noexcept { }
 
 private:
   static constexpr const value_type null_{};

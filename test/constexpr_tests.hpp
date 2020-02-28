@@ -54,6 +54,7 @@ testConstantEvaluation()
   //cstatic_string g(f.begin(), f.end());
   cstatic_string h(f);
   cstatic_string i({'a'});
+  static_cast<void>((c, d, e, f, h, i));
 
   // assignment
   a = b;
@@ -102,7 +103,8 @@ testConstantEvaluation()
 
   // capacity and size
   cstatic_string().size();
-  cstatic_string().empty();
+  // this is potentially marked nodiscard
+  static_cast<void>(cstatic_string().empty());
   cstatic_string().length();
   cstatic_string().max_size();
   cstatic_string().capacity();
@@ -228,6 +230,7 @@ testConstantEvaluation()
   //cstatic_string g(f.begin(), f.end());
   cstatic_string h(f);
   cstatic_string i({'a'});
+  static_cast<void>((c, d, e, f, h, i));
 
   // assignment
   a = b;
@@ -284,7 +287,8 @@ testConstantEvaluation()
 
   // capacity and size
   cstatic_string().size();
-  cstatic_string().empty();
+  // this is potentially marked nodiscard
+  static_cast<void>(cstatic_string().empty());
   cstatic_string().length();
   cstatic_string().max_size();
   cstatic_string().capacity();
@@ -410,6 +414,7 @@ testConstantEvaluation()
   //cstatic_string g(f.begin(), f.end());
   cstatic_string h(f);
   cstatic_string i({'a'});
+  static_cast<void>((c, d, e, f, h, i));
 
   // assignment
   a = b;
@@ -452,7 +457,8 @@ testConstantEvaluation()
 
   // capacity and size
   cstatic_string().size();
-  cstatic_string().empty();
+  // this is potentially marked nodiscard
+  static_cast<void>(cstatic_string().empty());
   cstatic_string().length();
   cstatic_string().max_size();
   cstatic_string().capacity();
