@@ -570,7 +570,7 @@ testConstantEvaluation()
     cstatic_string().length() + 
     cstatic_string().max_size() + 
     cstatic_string().capacity()) &&
-    cstatic_string().empty());
+    cstatic_string().empty();
 #endif
 }
 } // static_strings
