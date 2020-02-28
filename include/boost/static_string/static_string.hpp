@@ -474,6 +474,14 @@ count_digits(std::size_t value)
   return value < 10 ? 1 : count_digits(value / 10) + 1;
 }
 
+// Ignore -Wformat-truncation, we know what 
+// we are doing here. The version check does 
+// not need to be extremely precise.
+#if defined(__GNUC__) && __GNUC__ > 4
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
+
 template<std::size_t N>
 inline
 static_string<N>
@@ -607,6 +615,10 @@ to_static_wstring_float_impl(long double value) noexcept
   // this will not throw
   return static_wstring<N>(buffer);
 }
+
+#if defined(__GNUC__) && __GNUC__ > 4
+#pragma GCC diagnostic pop
+#endif
 
 template<typename Traits, typename CharT, typename ForwardIterator>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
