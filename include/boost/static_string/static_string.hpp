@@ -306,12 +306,16 @@ private:
   static constexpr const value_type null_{};
 };
 
+// This is only needed in C++14 and lower.
+// see http://eel.is/c++draft/depr.static.constexpr
+#ifndef BOOST_STATIC_STRING_CPP17
 template<typename CharT, typename Traits>
 constexpr
 const
 typename static_string_base<0, CharT, Traits>::value_type
 static_string_base<0, CharT, Traits>::
 null_;
+#endif
 
 template<typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -477,7 +481,7 @@ count_digits(std::size_t value)
 // Ignore -Wformat-truncation, we know what 
 // we are doing here. The version check does 
 // not need to be extremely precise.
-#if defined(__GNUC__) && __GNUC__ > 4
+#if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-truncation"
 #endif
@@ -616,7 +620,7 @@ to_static_wstring_float_impl(long double value) noexcept
   return static_wstring<N>(buffer);
 }
 
-#if defined(__GNUC__) && __GNUC__ > 4
+#if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic pop
 #endif
 
