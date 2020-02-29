@@ -685,7 +685,7 @@ find_first_of(
   return last;
 }
 
-// Check if a pointer lies within the range [src_first, src_last) 
+// Check if a pointer lies within the range {src_first, src_last) 
 // without unspecified behavior, allowing it to be used
 // in a constant evaluation.
 template<typename T>
@@ -1089,8 +1089,9 @@ public:
     
       Replace the contents with `count` copies of character `ch`
 
-      @throw std::length_error if `count > max_size()`
       @return `*this`
+
+      @throw std::length_error if `count > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1102,8 +1103,9 @@ public:
     
       Replace the contents with a copy of another `basic_static_string`
 
-      @throw std::length_error if `s.size() > max_size()`
       @return `*this`
+
+      @throw std::length_error if `s.size() > max_size()`
   */
   template<std::size_t M
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -1140,9 +1142,10 @@ public:
   /** Replace the contents.
     
       Replace the contents with a copy of `count` characters starting at `npos` from `s`.
+      
+      @return `*this`
 
       @throw std::length_error if `count > max_size()`
-      @return `*this`
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1159,8 +1162,9 @@ public:
     
       Replace the contents with the first `count` characters of `s`, including nulls.
 
-      @throw std::length_error if `count > max_size()`
       @return `*this`
+      
+      @throw std::length_error if `count > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1172,8 +1176,9 @@ public:
     
       Replace the contents with a copy of a null terminated string `s`
 
-      @throw std::length_error if `traits_type::length(s) > max_size()`
       @return `*this`
+      
+      @throw std::length_error if `traits_type::length(s) > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1186,8 +1191,9 @@ public:
     
       Replace the contents with a copy of characters from the range `(first, last)`
       
-      @throw std::length_error if `std::distance(first, last) > max_size()`
       @return `*this`
+      
+      @throw std::length_error if `std::distance(first, last) > max_size()`
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1206,8 +1212,9 @@ public:
     
       Replace the contents with the characters in an initializer list
 
-      @throw std::length_error if `ilist.size() > max_size()`
       @return `*this`
+      
+      @throw std::length_error if `ilist.size() > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1240,7 +1247,7 @@ public:
     
       Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
 
-      The range `[pos, count)` is extracted from the value
+      The range `{pos, count)` is extracted from the value
       obtained by converting `t` to `string_view_type`,
       and used to assign the string.
 
@@ -1794,7 +1801,7 @@ public:
 
       @par Precondition
 
-      `pos` shall be vaild within `[data(), data() + size()]`
+      `pos` shall be vaild within `{data(), data() + size()}`
 
       @par Exception Safety
 
@@ -1827,7 +1834,7 @@ public:
 
       @par Precondition
 
-      `pos` shall be valid within `[data(), data() + size()]`
+      `pos` shall be valid within `{data(), data() + size()}`
 
       @par Exception Safety
 
@@ -1855,14 +1862,14 @@ public:
 
   /** Insert a range of characters.
 
-      Inserts characters from the range `[first, last)` before the
+      Inserts characters from the range `{first, last)` before the
       character pointed to by `pos`.
 
       @par Precondition
 
-      `pos` shall be valid within `[data(), data() + size()]`,
+      `pos` shall be valid within `{data(), data() + size()}`,
 
-      `[first, last)` shall be a valid range
+      `{first, last)` shall be a valid range
 
       @par Exception Safety
 
@@ -1923,7 +1930,7 @@ public:
 
       @par Precondition
 
-      `pos` shall be valid within `[data(), data() + size()]`
+      `pos` shall be valid within `{data(), data() + size()}`
 
       @par Exception Safety
 
@@ -1953,11 +1960,11 @@ public:
   /** Insert characters from an object convertible to `string_view_type`.
 
       Constructs a temporary `string_view_type` object `sv` from `t` and
-      inserts `[sv.begin(), sv.end())` at `index`.
+      inserts `{sv.begin(), sv.end())` at `index`.
 
       @par Precondition
 
-      `index` shall be valid within `[data(), data() + size()]`
+      `index` shall be valid within `{data(), data() + size()}`
 
       @par Exception Safety
 
@@ -2047,9 +2054,10 @@ public:
   }
 
   /** Removes `min(count, size() - index)` characters starting at `index`
+      
+      @return `*this`
 
       @throw std::out_of_range if `index > size()`
-      @return `*this`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2108,8 +2116,9 @@ public:
 
       The appended characters may be null.
 
-      @throw std::length_error if `count > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `count > max_size() - size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2123,8 +2132,9 @@ public:
 
       The appended string can contain null characters.
 
-      @throw std::length_error if `s.size() > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `s.size() > max_size() - size()`
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2140,10 +2150,12 @@ public:
       Appends the contents of `s.substr(pos, count)`
 
       The appended string can contain null characters.
+      
+      @return `*this`
 
       @throw std::out_of_range if `pos > s.size()`
+      
       @throw std::length_error if `s.substr(pos, count).size() > max_size() - size()`
-      @return `*this`
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2162,8 +2174,9 @@ public:
     
       The appended string can contain null characters.
 
-      @throw std::length_error if `count > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `count > max_size() - size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2178,8 +2191,9 @@ public:
       The length of the string is determined by the first
       null character using `traits_type::length(s)`.
 
-      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2196,8 +2210,9 @@ public:
       This function does not participate in overload resolution if
       `InputIterator` does not satisfy <em>LegacyInputIterator</em>
 
-      @throw std::length_error if `std::distance(first, last) > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `std::distance(first, last) > max_size() - size()`
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2222,8 +2237,9 @@ public:
 
       The appended string can contain null characters.
 
-      @throw std::length_error if `ilist.size() > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `ilist.size() > max_size() - size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2242,8 +2258,9 @@ public:
       `T` is convertible to `string_view_type` and `T` is not
       convertible to `const_pointer`.
 
-      @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -2267,9 +2284,11 @@ public:
       `T` is convertible to `string_view_type` and `T` is not
       convertible to `const_pointer`.
 
-      @throw std::out_of_range if `pos > string_view_type{t}.size()`
-      @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
       @return `*this`
+      
+      @throw std::out_of_range if `pos > string_view_type{t}.size()`
+      
+      @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -2321,8 +2340,9 @@ public:
       The length of the string is determined by the first
       null character using `traits_type::length(s)`.
 
-      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2337,8 +2357,9 @@ public:
 
       The appended string can contain null characters.
 
-      @throw std::length_error if `ilist.size() > max_size() - size()`
       @return `*this`
+      
+      @throw std::length_error if `ilist.size() > max_size() - size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2387,7 +2408,7 @@ public:
 
   /** Compare the string with another.
         
-      Compares a `[pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+      Compares a `{pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `{pos1, size())`.
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2403,9 +2424,9 @@ public:
 
   /** Compare the string with another.
         
-      Compares a `[pos1, pos1+count1)` substring of this string to a substring `[pos2, pos2+count2)` of `s`. 
-      If `count1 > size() - pos1` the first substring is `[pos1, size())`. Likewise, if `count2 > s.size() - pos2` the
-      second substring is `[pos2, s.size())`.
+      Compares a `{pos1, pos1+count1)` substring of this string to a substring `{pos2, pos2+count2)` of `s`. 
+      If `count1 > size() - pos1` the first substring is `{pos1, size())`. Likewise, if `count2 > s.size() - pos2` the
+      second substring is `{pos2, s.size())`.
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2436,8 +2457,8 @@ public:
 
   /** Compare the string with another.
         
-      Compares a `[pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
-      length `traits_type::length(s)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+      Compares a `{pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
+      length `traits_type::length(s)`. If `count1 > size() - pos1` the substring is `{pos1, size())`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
@@ -2452,7 +2473,7 @@ public:
 
   /** Compare the string with another.
         
-      Compares a `[pos1, pos1+count1)` substring of this string to the characters in the range `[s, s + count2)`. If `count1 > size() - pos1` the substring is `[pos1, size())`.
+      Compares a `{pos1, pos1+count1)` substring of this string to the characters in the range `{s, s + count2)`. If `count1 > size() - pos1` the substring is `{pos1, size())`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
@@ -2490,9 +2511,9 @@ public:
 
   /** Compare the string with another.
 
-      Compares a `[pos1, pos1+count1)` substring of this string to `t` after converting it to
+      Compares a `{pos1, pos1+count1)` substring of this string to `t` after converting it to
       `string_view_type`. If `count1 > size() - pos1` 
-      the substring is `[pos1, size())`.
+      the substring is `{pos1, size())`.
 
       This function participates in overload resolution if
       `T` is convertible to `string_view_type` and `T` is not
@@ -2517,7 +2538,7 @@ public:
 
   /** Compare the string with another.
         
-      Replaces the part of the string indicated by `[pos1, pos1 + count1)` with a substring `[pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
+      Replaces the part of the string indicated by `{pos1, pos1 + count1)` with a substring `{pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
 
       This function participates in overload resolution if
       `T` is convertible to `string_view_type` and `T` is not
@@ -2551,7 +2572,7 @@ public:
       Strong guarantee.
 
       @return A string object containing the characters
-      `[data() + pos, std::min(count, size() - pos))`.
+      `{data() + pos, std::min(count, size() - pos))`.
 
       @param pos The index to being the substring at. The
       default arugment for this parameter is `0`.
@@ -2578,7 +2599,7 @@ public:
       Strong guarantee.
 
       @return A `string_view_type` object referring 
-      to `[data() + pos, std::min(count, size() - pos))`.
+      to `{data() + pos, std::min(count, size() - pos))`.
 
       @param pos The index to being the substring at. The
       default arugment for this parameter is `0`.
@@ -2880,7 +2901,7 @@ public:
   /** Replace a substring with a string.
 
       Replaces `rcount` characters starting at index `pos` with those of
-      `[s, s + n2)`, where `rcount` is `std::min(n1, size() - pos)`.
+      `{s, s + n2)`, where `rcount` is `std::min(n1, size() - pos)`.
 
       @par Exception Safety
 
@@ -2914,7 +2935,7 @@ public:
   /** Replace a substring with a string.
 
       Replaces `rcount` characters starting at index `pos` with those of
-      `[s, s + len)`, where the length of the string `len` is `traits_type::length(s)` and `rcount`
+      `{s, s + len)`, where the length of the string `len` is `traits_type::length(s)` and `rcount`
       is `std::min(n1, size() - pos)`.
 
       @par Exception Safety
@@ -2980,12 +3001,12 @@ public:
 
   /** Replace a range with a string.
 
-      Replaces the characters in the range `[i1, i2)`
+      Replaces the characters in the range `{i1, i2)`
       with those of `str`.
 
       @par Precondition
 
-      `[i1, i2)` is a valid range.
+      `{i1, i2)` is a valid range.
 
       @par Exception Safety
 
@@ -3036,12 +3057,12 @@ public:
   /** Replace a range with an object convertible to `string_view_type`.
 
       Constructs a temporary `string_view_type` object `sv` from `t`, and
-      replaces the characters in the range `[i1, i2)` with those
+      replaces the characters in the range `{i1, i2)` with those
       of `sv`.
 
       @par Precondition
 
-      `[i1, i2)` is a valid range.
+      `{i1, i2)` is a valid range.
 
       @par Exception Safety
 
@@ -3085,12 +3106,12 @@ public:
 
   /** Replace a range with a string.
 
-      Replaces the characters in the range `[i1, i2)` with those of
-      `[s, s + n)`.
+      Replaces the characters in the range `{i1, i2)` with those of
+      `{s, s + n)`.
 
       @par Precondition
 
-      `[i1, i2)` is a valid range.
+      `{i1, i2)` is a valid range.
 
       @par Exception Safety
 
@@ -3123,12 +3144,12 @@ public:
 
   /** Replace a range with a string.
 
-      Replaces the characters in the range `[i1, i2)` with those of
-      `[s, s + len)`, where the length of the string `len` is `traits_type::length(s)`.
+      Replaces the characters in the range `{i1, i2)` with those of
+      `{s, s + len)`, where the length of the string `len` is `traits_type::length(s)`.
 
       @par Precondition
 
-      `[i1, i2)` shall be a valid range.
+      `{i1, i2)` shall be a valid range.
 
       @par Exception Safety
 
@@ -3159,12 +3180,12 @@ public:
 
   /** Replace a range with copies of a character.
 
-      Replaces the characters in the range `[i1, i2)` with
+      Replaces the characters in the range `{i1, i2)` with
       `n` copies of `c`.
 
       @par Precondition
 
-      `[i1, i2)` is a valid range.
+      `{i1, i2)` is a valid range.
 
       @par Exception Safety
 
@@ -3194,14 +3215,14 @@ public:
 
   /** Replace a range with a range.
 
-      Replaces the characters in the range `[i1, i2)`
-      with those of `[j1, j2)`.
+      Replaces the characters in the range `{i1, i2)`
+      with those of `{j1, j2)`.
 
       @par Precondition
 
-      `[i1, i2)` is a valid range.
+      `{i1, i2)` is a valid range.
 
-      `[j1, j2)` is a valid range.
+      `{j1, j2)` is a valid range.
 
       @par Exception Safety
 
@@ -3263,12 +3284,12 @@ public:
 
   /** Replace a range with an initializer list.
 
-      Replaces the characters in the range `[i1, i2)`
+      Replaces the characters in the range `{i1, i2)`
       with those of contained in the initializer list `il`.
 
       @par Precondition
 
-      `[i1, i2)` is a valid range.
+      `{i1, i2)` is a valid range.
 
       @par Exception Safety
 
@@ -3322,8 +3343,8 @@ public:
       !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The lowest index `idx` greater than or equal to `pos`
-      where each element of `[sv.begin(), sv.end())` is equal to
-      that of `[begin() + idx, begin() + idx + count)` if one exists,
+      where each element of `{sv.begin(), sv.end())` is equal to
+      that of `{begin() + idx, begin() + idx + count)` if one exists,
       and @ref npos otherwise.
 
       @param t The string to search for.
@@ -3357,7 +3378,7 @@ public:
 
       @return The lowest index `idx` greater than or equal to `pos` 
       where each element of `str` is equal to that of 
-      `[begin() + idx, begin() + idx + str.size())` 
+      `{begin() + idx, begin() + idx + str.size())` 
       if one exists, and @ref npos otherwise.
 
       @param str The string to search for.
@@ -3386,8 +3407,8 @@ public:
       @note An empty string is always found.
 
       @return The lowest index `idx` greater than or equal to `pos`
-      where each element of `[s, s + n)` is equal to that of
-      `[begin() + idx, begin() + idx + n)` if one exists,
+      where each element of `{s, s + n)` is equal to that of
+      `{begin() + idx, begin() + idx + n)` if one exists,
       and @ref npos otherwise.
 
       @param s The string to search for.
@@ -3414,8 +3435,8 @@ public:
       @note An empty string is always found.
 
       @return The lowest index `idx` greater than or equal to `pos`
-      where each element of `[s, s + count)` is equal to that of
-      `[begin() + idx, begin() + idx + count)` if one exists,
+      where each element of `{s, s + count)` is equal to that of
+      `{begin() + idx, begin() + idx + count)` if one exists,
       and @ref npos otherwise.
 
       @param s The string to search for.
@@ -3441,7 +3462,7 @@ public:
       Linear.
 
       @return The index corrosponding to the first occurrence of `c` within
-      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      `{begin() + pos, end())` if it exists, and @ref npos otherwise.
 
       @param c The character to search for.
       @param pos The index to start searching at. The default argument
@@ -3475,8 +3496,8 @@ public:
       !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The highest index `idx` less than or equal to `pos`
-      where each element of `[sv.begin(), sv.end())` is equal to
-      that of `[begin() + idx, begin() + idx + count)` if one exists,
+      where each element of `{sv.begin(), sv.end())` is equal to
+      that of `{begin() + idx, begin() + idx + count)` if one exists,
       and @ref npos otherwise.
 
       @param t The string to search for.
@@ -3510,7 +3531,7 @@ public:
 
       @return The highest index `idx` less than or equal to `pos`
       where each element of `str` is equal to that
-      of `[begin() + idx, begin() + idx + str.size())`
+      of `{begin() + idx, begin() + idx + str.size())`
       if one exists, and @ref npos otherwise.
 
       @param str The string to search for.
@@ -3538,8 +3559,8 @@ public:
       Linear.
 
       @return The highest index `idx` less than or equal to `pos`
-      where each element of `[s, s + n)` is equal to that of
-      `[begin() + idx, begin() + idx + n)` if one exists,
+      where each element of `{s, s + n)` is equal to that of
+      `{begin() + idx, begin() + idx + n)` if one exists,
       and @ref npos otherwise.
 
       @param s The string to search for.
@@ -3564,8 +3585,8 @@ public:
       Linear.
 
       @return The highest index `idx` less than or equal to `pos`
-      where each element of `[s, s + count)` is equal to that of
-      `[begin() + idx, begin() + idx + count)` if one exists,
+      where each element of `{s, s + count)` is equal to that of
+      `{begin() + idx, begin() + idx + count)` if one exists,
       and @ref npos otherwise.
 
       @param s The string to search for.
@@ -3591,7 +3612,7 @@ public:
       Linear.
 
       @return The index corrosponding to the last occurrence of `c` within
-      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      `{begin(), begin() + pos}` if it exists, and @ref npos otherwise.
 
       @param c The character to search for.
       @param pos The index to stop searching at. The default argument
@@ -3624,8 +3645,8 @@ public:
       !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the first occurrence of
-      any of the characters in `[sv.begin(), sv.end())` within
-      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      any of the characters in `{sv.begin(), sv.end())` within
+      `{begin() + pos, end())` if it exists, and @ref npos otherwise.
 
       @param t The characters to search for.
       @param pos The index to start searching at. The default argument
@@ -3657,7 +3678,7 @@ public:
       Linear.
 
       @return The index corrosponding to the first occurrence of any of the characters
-      of `str` within `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      of `str` within `{begin() + pos, end())` if it exists, and @ref npos otherwise.
 
       @param str The characters to search for.
       @param pos The index to start searching at. The default argument for
@@ -3683,7 +3704,7 @@ public:
       Linear.
 
       @return The index corrosponding to the first occurrence
-      of any of the characters in `[s, s + n)` within `[begin() + pos, end())`
+      of any of the characters in `{s, s + n)` within `{begin() + pos, end())`
       if it exists, and @ref npos otherwise.
 
       @param s The characters to search for.
@@ -3708,8 +3729,8 @@ public:
       Linear.
 
       @return The index corrosponding to the first occurrence of any of
-      the characters in `[s, s + count)` within
-      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      the characters in `{s, s + count)` within
+      `{begin() + pos, end())` if it exists, and @ref npos otherwise.
 
       @param s The characters to search for.
       @param pos The index to start searching at. The default argument
@@ -3734,7 +3755,7 @@ public:
       Linear.
 
       @return The index corrosponding to the first occurrence of `c` within
-      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      `{begin() + pos, end())` if it exists, and @ref npos otherwise.
 
       @param c The character to search for.
       @param pos The index to start searching at. The default argument
@@ -3767,8 +3788,8 @@ public:
       !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the last occurrence of
-      any of the characters in `[sv.begin(), sv.end())` within
-      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      any of the characters in `{sv.begin(), sv.end())` within
+      `{begin(), begin() + pos}` if it exists, and @ref npos otherwise.
 
       @param t The characters to search for.
       @param pos The index to stop searching at. The default argument
@@ -3800,7 +3821,7 @@ public:
       Linear.
 
       @return The index corrosponding to the last occurrence of any of the characters
-      of `str` within `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      of `str` within `{begin(), begin() + pos}` if it exists, and @ref npos otherwise.
 
       @param str The characters to search for.
       @param pos The index to stop searching at. The default argument for
@@ -3826,7 +3847,7 @@ public:
       Linear.
 
       @return The index corrosponding to the last occurrence
-      of any of the characters in `[s, s + n)` within `[begin(), begin() + pos]`
+      of any of the characters in `{s, s + n)` within `{begin(), begin() + pos}`
       if it exists, and @ref npos otherwise.
 
       @param s The characters to search for.
@@ -3851,7 +3872,7 @@ public:
       Linear.
 
       @return The index corrosponding to the last occurrence
-      of any of the characters in `[s, s + count)` within `[begin(), begin() + pos]`
+      of any of the characters in `{s, s + count)` within `{begin(), begin() + pos}`
       if it exists, and @ref npos otherwise.
 
       @param s The characters to search for.
@@ -3877,7 +3898,7 @@ public:
       Linear.
 
       @return The index corrosponding to the last occurrence of `c` within
-      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      `{begin(), begin() + pos}` if it exists, and @ref npos otherwise.
 
       @param c The character to search for.
       @param pos The index to stop searching at. The default argument
@@ -3909,8 +3930,8 @@ public:
       !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the first occurrence of
-      a character that is not in `[sv.begin(), sv.end())` within
-      `[begin() + pos, end())` if it exists, and @ref npos otherwise.
+      a character that is not in `{sv.begin(), sv.end())` within
+      `{begin() + pos, end())` if it exists, and @ref npos otherwise.
 
       @param t The characters to ignore.
       @param pos The index to start searching at. The default argument
@@ -3941,7 +3962,7 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the first character of `[begin() + pos, end())`
+      @return The index corrosponding to the first character of `{begin() + pos, end())`
       that is not within `str` if it exists, and @ref npos otherwise.
 
       @param str The characters to ignore.
@@ -3967,8 +3988,8 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the first character of `[begin() + pos, end())`
-      that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first character of `{begin() + pos, end())`
+      that is not within `{s, s + n)` if it exists, and @ref npos otherwise.
 
       @param s The characters to ignore.
       @param pos The index to start searching at. The default argument for
@@ -3992,8 +4013,8 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the first character of `[begin() + pos, end())`
-      that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the first character of `{begin() + pos, end())`
+      that is not within `{s, s + count)` if it exists, and @ref npos otherwise.
 
       @param s The characters to ignore.
       @param pos The index to start searching at. The default argument for
@@ -4017,7 +4038,7 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the first character of `[begin() + pos, end())`
+      @return The index corrosponding to the first character of `{begin() + pos, end())`
       that is not equal to `c` if it exists, and @ref npos otherwise.
 
       @param c The character to ignore.
@@ -4050,8 +4071,8 @@ public:
       !std::is_convertible<const T&, const CharT*>::value`.
 
       @return The index corrosponding to the last occurrence of
-      a character that is not in `[sv.begin(), sv.end())` within
-      `[begin(), begin() + pos]` if it exists, and @ref npos otherwise.
+      a character that is not in `{sv.begin(), sv.end())` within
+      `{begin(), begin() + pos}` if it exists, and @ref npos otherwise.
 
       @param t The characters to ignore.
       @param pos The index to start searching at. The default argument
@@ -4082,7 +4103,7 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+      @return The index corrosponding to the last character of `{begin(), begin() + pos}`
       that is not within `str` if it exists, and @ref npos otherwise.
 
       @param str The characters to ignore.
@@ -4108,8 +4129,8 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
-      that is not within `[s, s + n)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last character of `{begin(), begin() + pos}`
+      that is not within `{s, s + n)` if it exists, and @ref npos otherwise.
 
       @param s The characters to ignore.
       @param pos The index to stop searching at. The default argument for
@@ -4134,8 +4155,8 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
-      that is not within `[s, s + count)` if it exists, and @ref npos otherwise.
+      @return The index corrosponding to the last character of `{begin(), begin() + pos}`
+      that is not within `{s, s + count)` if it exists, and @ref npos otherwise.
 
       @param s The characters to ignore.
       @param pos The index to stop searching at. The default argument for
@@ -4159,7 +4180,7 @@ public:
 
       Linear.
 
-      @return The index corrosponding to the last character of `[begin(), begin() + pos]`
+      @return The index corrosponding to the last character of `{begin(), begin() + pos}`
       that is not equal to `c` if it exists, and @ref npos otherwise.
 
       @param c The character to ignore.

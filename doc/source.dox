@@ -35,7 +35,12 @@ INCLUDE_PATH           = ../
 INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = \
-                        BOOST_STATIC_STRING_DOCS
+                        BOOST_STATIC_STRING_DOCS \
+						"BOOST_STATIC_STRING_CPP11_CONSTEXPR=constexpr" \
+						"BOOST_STATIC_STRING_CPP14_CONSTEXPR=constexpr" \
+						"BOOST_STATIC_STRING_CPP17_CONSTEXPR=constexpr" \
+						"BOOST_STATIC_STRING_CPP20_CONSTEXPR=constexpr"
+						
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 
