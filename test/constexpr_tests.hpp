@@ -566,10 +566,10 @@ testConstantEvaluation()
   return true;
 #elif defined(BOOST_STATIC_STRING_CPP11)
   // c++11 constexpr tests
-  return bool(cstatic_string().size() + 
+  return (cstatic_string().size() + 
     cstatic_string().length() + 
     cstatic_string().max_size() + 
-    cstatic_string().capacity()) &&
+    cstatic_string().capacity()) != 0 &&
     cstatic_string().empty();
 #endif
 }
