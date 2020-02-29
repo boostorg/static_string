@@ -2,8 +2,8 @@
     "key": "static_string",
     "name": "StaticString",
     "authors": [
-        "Vinnie Falco",
-		"Krystian Stasiowski"
+	    "Krystian Stasiowski",
+        "Vinnie Falco"
     ],
     "description": "A fixed capacity dynamically sized string.",
     "category": [
