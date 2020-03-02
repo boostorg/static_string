@@ -113,7 +113,6 @@ using void_t = typename void_t_helper<Ts...>::type;
 
 // Check if a type can be used for templated
 // overloads string_view_type
-
 template<typename T, typename CharT, typename Traits, typename = void>
 struct enable_if_viewable { };
 
@@ -685,6 +684,8 @@ find_first_of(
   return last;
 }
 
+// KRYSTIAN TODO: add a constexpr rotate
+
 // Check if a pointer lies within the range {src_first, src_last) 
 // without unspecified behavior, allowing it to be used
 // in a constant evaluation.
@@ -746,7 +747,8 @@ defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS)
     These strings offer performance advantages when an algorithm
     can execute with a reasonable upper limit on the size of a value.
 
-    @par
+    @par Aliases
+
     The following alias templates are provided for convenience:
 
     @code
@@ -800,24 +802,45 @@ public:
   //
   //--------------------------------------------------------------------------
 
+  /// The traits type.
   using traits_type       = Traits;
+
+  /// The character type.
   using value_type        = typename traits_type::char_type;
+
+  /// The size type.
   using size_type         = std::size_t;
+
+  /// The difference type.
   using difference_type   = std::ptrdiff_t;
+
+  /// The pointer type.
   using pointer           = value_type*;
+
+  /// The reference type.
   using reference         = value_type&;
+
+  /// The constant pointer type.
   using const_pointer     = const value_type*;
+
+  /// The constant reference type.
   using const_reference   = const value_type&;
+
+  /// The iterator type.
   using iterator          = value_type*;
+
+  /// The constant iterator type.
   using const_iterator    = const value_type*;
     
+  /// The reverse iterator type.
   using reverse_iterator =
     std::reverse_iterator<iterator>;
     
+  /// The constant reverse iterator type.
   using const_reverse_iterator =
     std::reverse_iterator<const_iterator>;
 
-  /// The type of `string_view_type` returned by the interface
+  /// The string view type.
   using string_view_type =
     basic_string_view<value_type, traits_type>;
 
@@ -839,7 +862,7 @@ public:
   //
   //--------------------------------------------------------------------------
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
 
       Construct an empty string
   */
@@ -851,7 +874,7 @@ public:
 #endif
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
     
       Construct the string with `count` copies of character `ch`.
     
@@ -865,7 +888,7 @@ public:
     assign(count, ch);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
         
       Construct with a substring (pos, other.size()) of `other`.
   */
@@ -878,7 +901,7 @@ public:
     assign(other, pos);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
     
       Construct with a substring (pos, count) of `other`.
   */
@@ -892,7 +915,7 @@ public:
     assign(other, pos, count);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
         
       Construct with the first `count` characters of `s`, including nulls.
     */
@@ -904,14 +927,14 @@ public:
     assign(s, count);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
         
       Construct from a null terminated string.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(const_pointer s);
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
     
       Construct from a range of characters
   */
@@ -931,7 +954,7 @@ public:
     assign(first, last);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
         
       Copy constructor.
   */
@@ -941,7 +964,7 @@ public:
     assign(other);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
         
       Copy constructor.
   */
@@ -953,7 +976,7 @@ public:
     assign(other);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
         
       Construct from an initializer list
   */
@@ -963,7 +986,7 @@ public:
     assign(init.begin(), init.size());
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
     
       Construct from a object convertible to `string_view_type`
   */
@@ -979,7 +1002,7 @@ public:
     assign(t);
   }
 
-  /** Construct a `basic_static_string`.
+  /** Constructor.
     
       Construct from any object convertible to `string_view_type`.
 
@@ -1085,13 +1108,27 @@ public:
     return assign(t);
   }
 
-  /** Replace the contents.
-    
-      Replace the contents with `count` copies of character `ch`
+  /** Assign to the string.
+
+      Replaces the contents with `count` copies of
+      character `ch`.
+
+      @par Complexity
+      
+      Linear in `count`.
+      
+      @par Exception Safety
+      
+      Strong guarantee.
 
       @return `*this`
 
-      @throw std::length_error if `count > max_size()`
+      @param count The size of the resulting string.
+      
+      @param ch The value to initialize characters
+      of the string with.
+      
+      @throw std::length_error `count > max_size()`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1099,13 +1136,27 @@ public:
     size_type count,
     value_type ch);
 
-  /** Replace the contents.
-    
-      Replace the contents with a copy of another `basic_static_string`
+  /** Assign to the string.
 
+      Replaces the contents with those of
+      the string `s`.
+      
+      @par Complexity
+
+      Linear in `s.size()`.
+
+      @par Exception Safety
+      
+      Strong guarantee.
+
+      @tparam M The capacity of the other string.
+      
       @return `*this`
 
-      @throw std::length_error if `s.size() > max_size()`
+      @param s The string to replace
+      the contents with.
+
+      @throw std::length_error `s.size() > max_size()`.
   */
   template<std::size_t M
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -1139,13 +1190,32 @@ public:
   }
 #endif
 
-  /** Replace the contents.
-    
-      Replace the contents with a copy of `count` characters starting at `npos` from `s`.
-      
+  /** Assign to the string.
+
+      Let `sub` be `s.substr(pos, count)`. Replaces
+      the contents with those of the string  `sub`.
+
+      @par Complexity
+
+      Linear in `sub.size()`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam M The capacity of the other string.
+
       @return `*this`
 
-      @throw std::length_error if `count > max_size()`
+      @param s The string to replace
+      the contents with.
+      
+      @param pos The index at which to begin the substring.
+
+      @param count The size of the substring. The default
+      argument for this parameter is @ref npos.
+
+      @throw std::length_error `sub.size() > max_size()`.
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1158,28 +1228,55 @@ public:
     return assign(s.data() + pos, s.capped_length(pos, count));
   }
 
-  /** Replace the contents.
-    
-      Replace the contents with the first `count` characters of `s`, including nulls.
+  /** Assign to the string.
 
+      Replaces the contents with those of `{s, s + count)`.
+      
+      @par Complexity
+      
+      Linear in `count`.
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @note
+      
+      The range can contain null characters.
+      
       @return `*this`
       
-      @throw std::length_error if `count > max_size()`
-  */
+      @param count The number of characters to copy.
+      
+      @param s A pointer to the string to copy from.
+      
+      @throw std::length_error `count > max_size()`.
+    */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(
     const_pointer s,
     size_type count);
 
-  /** Replace the contents.
-    
-      Replace the contents with a copy of a null terminated string `s`
+  /** Assign to the string.
+
+      Replaces the contents with those of
+      `{s, s + traits_type::length(s))`.
+
+      @par Complexity
+
+      Linear in `count`.
+
+      @par Exception Safety
+
+      Strong guarantee.
 
       @return `*this`
-      
-      @throw std::length_error if `traits_type::length(s) > max_size()`
-  */
+
+      @param s A pointer to the string to copy from.
+
+      @throw std::length_error `traits_type::length(s) > max_size()`.
+    */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(const_pointer s)
@@ -1187,13 +1284,34 @@ public:
     return assign(s, traits_type::length(s));
   }
 
-  /** Replace the contents.
-    
-      Replace the contents with a copy of characters from the range `(first, last)`
+  /** Assign to the string.
+
+      Replaces the contents with the characters
+      in the range `{first, last)`.
+
+      @par Complexity
+
+      Linear in `std::distance(first, last)`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+      
+      @tparam InputIterator The type of the iterators.
+      
+      @par Constraints
+      
+      `InputIterator` satisfies __InputIterator__.
       
       @return `*this`
       
-      @throw std::length_error if `std::distance(first, last) > max_size()`
+      @param first An iterator referring to the
+      first character to assign.
+
+      @param last An iterator past the end
+      of the range to assign from.
+
+      @throw std::length_error `std::distance(first, last) > max_size()`.
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1208,13 +1326,24 @@ public:
     InputIterator first,
     InputIterator last);
 
-  /** Replace the contents.
-    
-      Replace the contents with the characters in an initializer list
+  /** Assign to the string.
 
+      Replaces the contents with those of the
+      initializer list `ilist`.
+
+      @par Complexity
+      
+      Linear in `init.size()`.
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+      
       @return `*this`
       
-      @throw std::length_error if `ilist.size() > max_size()`
+      @param ilist The initializer list to copy from.
+
+      @throw std::length_error `ilist.size() > max_size()`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1224,11 +1353,37 @@ public:
       return assign(ilist.begin(), ilist.end());
   }
 
-  /** Replace the contents.
-    
-      Replace the contents with a copy of the characters from `string_view_type{t}`
+  /** Assign to the string.
+      
+      Let `sv` be `string_view_type(t)`. Replaces the
+      contents with those of `sv`.
+      
+      @par Complexity
+      
+      Linear in `sv.size()`.
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @note
+      
+      The view can contain null characters.
+      
+      @tparam T A type convertible to `string_view_type`.
 
-      @throw std::length_error if `string_view_type{t}.size() > max_size()`
+      @par Constraints
+
+      @code
+      std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value
+      @endcode
+
+      @return `*this`
+      
+      @param t The object to assign from.
+      
+      @throw std::length_error `sv.size() > max_size()`.
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -1243,18 +1398,43 @@ public:
     return assign(sv.data(), sv.size());
   }
 
-  /** Replace the contents.
-    
-      Replace the contents with a copy of the characters from `string_view_type{t}.substr(pos, count)`
+  /** Assign characters to a string.
 
-      The range `{pos, count)` is extracted from the value
-      obtained by converting `t` to `string_view_type`,
-      and used to assign the string.
+      Let `sv` be `string_view_type(t).substr(pos, count)`.
+      Replaces the contents with those of the substring `sv`.
 
-      @throw std::out_of_range if `pos > string_view_type{t}.size()`
-      @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size()`
+      @par Complexity
+
+      Linear in `sv.size()`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @note
+
+      The view can contain null characters.
+
+      @tparam T A type convertible to `string_view_type`.
+
+      @par Constraints
+
+      @code
+      std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value
+      @endcode
+
+      @return `*this`
+
+      @param t The object to assign from.
+      
+      @param pos The index at which to begin the substring.
+      
+      @param count The size of the substring. The default
+      argument for this parameter is @ref npos.
+
+      @throw std::length_error `sv.size() > max_size()`.
   */
-
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
     , typename = detail::enable_if_viewable_t<T, CharT, Traits>
@@ -1276,9 +1456,22 @@ public:
   //
   //--------------------------------------------------------------------------
 
-  /** Access specified character with bounds checking.
+  /** Access a character with bounds checking.
+      
+      Returns a reference to the character at
+      index `pos`.
 
-      @throw std::out_of_range if `pos >= size()`
+      @par Complexity
+      
+      Constant.
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @param pos The index to access.
+      
+      @throw std::out_of_range `pos >= size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   reference
@@ -1289,9 +1482,22 @@ public:
     return data()[pos];
   }
 
-  /** Access specified character with bounds checking.
+  /** Access a character with bounds checking.
 
-      @throw std::out_of_range if `pos >= size()`
+      Returns a reference to the character at
+      index `pos`.
+
+      @par Complexity
+
+      Constant.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @param pos The index to access.
+
+      @throw std::out_of_range `pos >= size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_reference
@@ -1302,9 +1508,20 @@ public:
     return data()[pos];
   }
 
-  /** Access specified character
+  /** Access a character.
 
-      Undefined behavior if `pos > size()`
+      Returns a reference to the character at
+      index `pos`.
+
+      @par Complexity
+
+      Constant.
+      
+      @par Precondition
+
+      `pos >= size`
+      
+      @param pos The index to access.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   reference
@@ -1313,9 +1530,20 @@ public:
     return data()[pos];
   }
 
-  /** Access specified character.
+  /** Access a character.
 
-      Undefined behavior if `pos > size()`
+      Returns a reference to the character at
+      index `pos`.
+
+      @par Complexity
+
+      Constant.
+
+      @par Precondition
+
+      `pos >= size`
+
+      @param pos The index to access.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_reference
@@ -1324,9 +1552,17 @@ public:
     return data()[pos];
   }
 
-  /** Accesses the first character.
-
-      Undefined behavior if `empty() == true`
+  /** Return the first character.
+      
+      Returns a reference to the first character.
+      
+      @par Complexity
+      
+      Constant.
+      
+      @par Precondition
+      
+      `not empty()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   reference
@@ -1335,9 +1571,17 @@ public:
     return data()[0];
   }
 
-  /** Accesses the first character.
+  /** Return the first character.
 
-      Undefined behavior if `empty() == true`
+      Returns a reference to the first character.
+
+      @par Complexity
+
+      Constant.
+
+      @par Precondition
+
+      `not empty()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_reference
@@ -1346,9 +1590,17 @@ public:
     return data()[0];
   }
 
-  /** Accesses the last character.
+  /** Return the last character.
 
-      Undefined behavior if `empty() == true`
+      Returns a reference to the last character.
+
+      @par Complexity
+
+      Constant.
+
+      @par Precondition
+
+      `not empty()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   reference
@@ -1357,9 +1609,17 @@ public:
     return data()[size() - 1];
   }
 
-  /** Accesses the last character.
+  /** Return the last character.
 
-      Undefined behavior if `empty() == true`
+      Returns a reference to the last character.
+
+      @par Complexity
+
+      Constant.
+
+      @par Precondition
+
+      `not empty()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_reference
@@ -1368,7 +1628,20 @@ public:
     return data()[size() - 1];
   }
 
-  /// Returns a pointer to the first character of the string.
+  /** Return a pointer to string.
+
+      Returns a pointer to the underlying array
+      serving as storage. The value returned is such that
+      the range `{data(), data() + size())` is always a
+      valid range, even if the container is empty.
+
+      @par Complexity
+      
+      Constant.
+      
+      @note The value returned from this function
+      is never never a null pointer value.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   pointer
   data() noexcept
@@ -1376,7 +1649,20 @@ public:
     return this->data_impl();
   }
 
-  /// Returns a pointer to the first character of a string.
+  /** Return a pointer to string.
+
+      Returns a pointer to the underlying array
+      serving as storage. The value returned is such that
+      the range `{data(), data() + size())` is always a
+      valid range, even if the container is empty.
+
+      @par Complexity
+
+      Constant.
+
+      @note The value returned from this function
+      is never never a null pointer value.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_pointer
   data() const noexcept
@@ -1384,7 +1670,20 @@ public:
     return this->data_impl();
   }
 
-  /// Returns a non-modifiable standard C character array version of the string.
+  /** Return a pointer to string.
+
+      Returns a pointer to the underlying array
+      serving as storage. The value returned is such that
+      the range `{c_str(), c_str() + size())` is always a
+      valid range, even if the container is empty.
+
+      @par Complexity
+
+      Constant.
+
+      @note The value returned from this function
+      is never never a null pointer value.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_pointer
   c_str() const noexcept
@@ -1392,7 +1691,15 @@ public:
     return data();
   }
 
-  /// Convert a static string to a `string_view_type`
+  /** Convert to a string view referring to the string.
+
+      Returns a string view referring to the
+      underlying character string.
+
+      @par Complexity
+      
+      Constant.
+  */
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   operator string_view_type() const noexcept
   {
@@ -1405,7 +1712,7 @@ public:
   //
   //--------------------------------------------------------------------------
 
-  /// Returns an iterator to the beginning.
+  /// Return an iterator to the beginning.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   iterator
   begin() noexcept
@@ -1413,7 +1720,7 @@ public:
     return data();
   }
 
-  /// Returns an iterator to the beginning.
+  /// Return an iterator to the beginning.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_iterator
   begin() const noexcept
@@ -1421,7 +1728,7 @@ public:
     return data();
   }
 
-  /// Returns an iterator to the beginning.
+  /// Return an iterator to the beginning.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_iterator
   cbegin() const noexcept
@@ -1429,7 +1736,7 @@ public:
     return data();
   }
 
-  /// Returns an iterator to the end.
+  /// Return an iterator to the end.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   iterator
   end() noexcept
@@ -1437,7 +1744,7 @@ public:
     return data() + size();
   }
 
-  /// Returns an iterator to the end.
+  /// Return an iterator to the end.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_iterator
   end() const noexcept
@@ -1445,7 +1752,7 @@ public:
     return data() + size();
   }
 
-  /// Returns an iterator to the end.
+  /// Return an iterator to the end.
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   const_iterator
   cend() const noexcept
@@ -1453,7 +1760,7 @@ public:
     return data() + size();
   }
 
-  /// Returns a reverse iterator to the beginning.
+  /// Return a reverse iterator to the beginning.
   BOOST_STATIC_STRING_CPP17_CONSTEXPR
   reverse_iterator
   rbegin() noexcept
@@ -1469,7 +1776,7 @@ public:
     return const_reverse_iterator{cend()};
   }
 
-  /// Returns a reverse iterator to the beginning.
+  /// Return a reverse iterator to the beginning.
   BOOST_STATIC_STRING_CPP17_CONSTEXPR
   const_reverse_iterator
   crbegin() const noexcept
@@ -1477,7 +1784,7 @@ public:
     return const_reverse_iterator{cend()};
   }
 
-  /// Returns a reverse iterator to the end.
+  /// Return a reverse iterator to the end.
   BOOST_STATIC_STRING_CPP17_CONSTEXPR
   reverse_iterator
   rend() noexcept
@@ -1485,7 +1792,7 @@ public:
     return reverse_iterator{begin()};
   }
 
-  /// Returns a reverse iterator to the end.
+  /// Return a reverse iterator to the end.
   BOOST_STATIC_STRING_CPP17_CONSTEXPR
   const_reverse_iterator
   rend() const noexcept
@@ -1493,7 +1800,7 @@ public:
     return const_reverse_iterator{cbegin()};
   }
 
-  /// Returns a reverse iterator to the end.
+  /// Return a reverse iterator to the end.
   BOOST_STATIC_STRING_CPP17_CONSTEXPR
   const_reverse_iterator
   crend() const noexcept
@@ -1507,7 +1814,16 @@ public:
   //
   //--------------------------------------------------------------------------
 
-  /// Returns `true` if the string is empty.
+  /** Return if the string is empty.
+
+      Returns whether the string contains no characters.
+
+      @par Complexity
+
+      Constant.
+      
+      @return `size() == 0`
+  */
   BOOST_STATIC_STRING_NODISCARD
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   bool
@@ -1516,7 +1832,15 @@ public:
     return size() == 0;
   }
 
-  /// Returns the number of characters, excluding the null terminator.
+  /** Return the size of the string.
+
+      Returns the number of characters stored in the
+      string, excluding the null terminator.
+
+      @par Complexity
+
+      Constant.
+  */
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   size_type
   size() const noexcept
@@ -1524,9 +1848,14 @@ public:
     return this->size_impl();
   }
 
-  /** Returns the number of characters, excluding the null terminator
+  /** Return the size of the string.
 
-      Equivalent to calling `size()`.
+      Returns the number of characters stored in the
+      string, excluding the null terminator.
+
+      @par Complexity
+
+      Constant.
   */
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   size_type
@@ -1535,7 +1864,15 @@ public:
     return size();
   }
 
-  /// Returns the maximum number of characters that can be stored, excluding the null terminator.
+  /** Return the number of characters that can be stored.
+
+      Returns the maximum size of the string, excluding the
+      null terminator. The returned value is always `N`.
+
+      @par Complexity
+
+      Constant.
+   */
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   size_type
   max_size() const noexcept
@@ -1543,9 +1880,9 @@ public:
     return N;
   }
 
-  /** Reserve space for `n` characters, excluding the null terminator
+  /** Increase the capacity.
 
-      This function has no effect when `n <= max_size()`.
+      This function has no effect.
 
       @throw std::length_error if `n > max_size()`
   */
@@ -1557,10 +1894,15 @@ public:
       n > max_size(), std::length_error("n > max_size()"));
   }
 
-  /** Returns the number of characters that can be held in currently allocated storage.
+  /** Return the number of characters that can be stored.
 
-      This function always returns `max_size()`.
-  */
+      Returns the maximum size of the string, excluding the
+      null terminator. The returned value is always `N`.
+
+      @par Complexity
+
+      Constant.
+   */
   BOOST_STATIC_STRING_CPP11_CONSTEXPR
   size_type
   capacity() const noexcept
@@ -1568,9 +1910,9 @@ public:
     return max_size();
   }
     
-  /** Reduces memory usage by freeing unused memory.
-
-      This function call has no effect.
+  /** Request the removal of unused capacity.
+      
+      This function has no effect.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
@@ -1582,7 +1924,19 @@ public:
   //
   //--------------------------------------------------------------------------
 
-  /// Clears the contents
+  /** Clear the contents.
+      
+      Erases all characters from the string. After this
+      call, @ref size() returns zero.
+
+      @par Complexity
+
+      Linear in @ref size().
+
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
   clear() noexcept
@@ -1591,7 +1945,7 @@ public:
     term();
   }
 
-  /** Insert a character.
+  /** Insert into the string.
 
       Inserts `count` copies of `ch` at the position `index`.
 
@@ -1625,7 +1979,7 @@ public:
     return *this;
   }
     
-  /** Insert a string.
+  /** Insert into the string.
 
       Inserts the null-terminated character string pointed to by `s`
       of length `count` at the position `index` where `count`
@@ -1656,7 +2010,7 @@ public:
     return insert(index, s, traits_type::length(s));
   }
 
-  /** Insert a string.
+  /** Insert into the string.
 
       Inserts `count` characters of the string pointed to by `s`
       at the position `index`.
@@ -1691,7 +2045,7 @@ public:
     return *this;
   }
 
-  /** Insert a string.
+  /** Insert into the string.
 
       Inserts the string `str`
       at the position `index`.
@@ -1739,7 +2093,7 @@ public:
   }
 #endif
 
-  /** Insert a string.
+  /** Insert into the string.
 
       Inserts a string, obtained by `str.substr(index_str, count)`
       at the position `index`.
@@ -1795,7 +2149,7 @@ public:
   }
 #endif
 
-  /** Insert a character.
+  /** Insert into the string.
 
       Inserts the character `ch` before the character pointed by `pos`.
 
@@ -1828,7 +2182,7 @@ public:
     return insert(pos, 1, ch);
   }
 
-  /** Insert characters.
+  /** Insert into the string.
 
       Inserts `count` copies of `ch` before the character pointed by `pos`.
 
@@ -1860,7 +2214,7 @@ public:
     size_type count,
     value_type ch);
 
-  /** Insert a range of characters.
+  /** Insert into the string.
 
       Inserts characters from the range `{first, last)` before the
       character pointed to by `pos`.
@@ -1924,7 +2278,7 @@ public:
     ForwardIterator last);
 #endif
 
-  /** Insert characters from an initializer list.
+  /** Insert into the string.
 
       Inserts characters from `ilist` before `pos`.
 
@@ -1957,7 +2311,7 @@ public:
     return insert_unchecked(pos, ilist.begin(), ilist.size());
   }
 
-  /** Insert characters from an object convertible to `string_view_type`.
+  /** Insert into the string.
 
       Constructs a temporary `string_view_type` object `sv` from `t` and
       inserts `{sv.begin(), sv.end())` at `index`.
@@ -2004,7 +2358,7 @@ public:
     return insert(index, sv.data(), sv.size());
   }
 
-  /** Insert characters from an object convertible to `string_view_type`.
+  /** Insert into the string.
 
       Constructs a temporary `string_view_type` object `sv` from `t`
       and inserts `sv.substr(index_str, count)` at `index`.
@@ -2053,11 +2407,28 @@ public:
     return insert(index, sv.data(), sv.size());
   }
 
-  /** Removes `min(count, size() - index)` characters starting at `index`
+  /** Erase from the string.
+
+      Erases `num` characters from the string, starting at `index`.
+      `num` is determined as the smaller of `count` and `size() - index`.
+
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
       
       @return `*this`
+      
+      @param index The index to erase at.
+      The default argument for this parameter is `0`.
+      
+      @param count The number of characters to erase.
+      The default argument for this parameter is @ref npos.
 
-      @throw std::out_of_range if `index > size()`
+      @throw std::out_of_range `index > size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2069,9 +2440,26 @@ public:
     return *this;
   }
 
-  /** Removes the character at `pos`
+  /** Erase from the string.
 
-      @return iterator pointing to the character immediately following the character erased, or `end()` if no such character exists
+      Erases the character at `pos`.
+      .
+      @par Precondition
+      
+      `pos` shall be valid within `{data(), data() + size()}`
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
+      
+      @return An iterator referring to character immediately following
+      the erased character, or @ref end() if one does not exist.
+      
+      @param pos An iterator referring to the character to erase.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   iterator
@@ -2081,9 +2469,28 @@ public:
     return erase(pos, pos + 1);
   }
 
-  /** Removes the characters in the range `(first, last)`
+  /** Erase from the string.
 
-      @return iterator pointing to the character last pointed to before the erase, or `end()` if no such character exists
+      Erases the characters in the range `{first, last)`.
+
+      @par Precondition
+
+      `{first, last}` shall be valid within `{data(), data() + size()}`
+
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @note All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
+      
+      @return An iterator referring to the character `last`
+      previously referred to, or @ref end() if one does not exist.
+      
+      @param first An iterator referring to the first character to erase.
+      
+      @param last An iterator past the last character to erase.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   iterator
@@ -2091,17 +2498,29 @@ public:
     const_iterator first,
     const_iterator last);
 
-  /** Appends the given character `ch` to the end of the string.
+  /** Append a character.
 
-      @throw std::length_error if `1 > max_size() - size()`
+      Appends a character to the end of the string.
+
+      @par Exception Safety
+      
+      Strong guarantee.
+
+      @param ch The character to append.
+
+      @throw std::length_error `size() >= max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
   push_back(value_type ch);
 
-  /** Removes the last character from the string
+  /** Remove the last character.
 
-      The behavior is undefined if the string is empty.
+      Removes a character from the end of the string.
+      
+      @par Precondition
+
+      `not empty()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
@@ -2590,7 +3009,7 @@ public:
     return basic_static_string(data() + pos, capped_length(pos, count));
   }
 
-  /** Return a view of a substring.
+  /** Return a string view of a substring.
 
       Returns a view of a substring.
 
@@ -2665,16 +3084,16 @@ public:
 
   /** Change the size of the string.
 
-        Resizes the string to contain `n` characters. If
-        `n > size()`, copies of `c` are
-        appended. Otherwise, `size()` is reduced to `n`.
+      Resizes the string to contain `n` characters. If
+      `n > size()`, copies of `c` are
+      appended. Otherwise, `size()` is reduced to `n`.
 
-        @param n The size to resize the string to.
-        @param c The characters to append if the size
-        increases.
+      @param n The size to resize the string to.
+      @param c The characters to append if the size
+      increases.
 
-        @throw std::out_of_range `n > max_size()`
-    */
+      @throw std::out_of_range `n > max_size()`
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
   resize(
@@ -2692,7 +3111,7 @@ public:
   void
   swap(basic_static_string<M, CharT, Traits>& s); 
 
-  /** Replace a substring with a string.
+  /** Replace a part of the string.
 
       Replaces `rcount` characters starting at index `pos1` with those
       of `str`, where `rcount` is `std::min(n1, size() - pos1)`.
@@ -2743,7 +3162,7 @@ public:
   }
 #endif
 
-  /** Replace a substring with a substring.
+  /** Replace a part of the string.
 
       Replaces `rcount` characters starting at index `pos1` with those of
       `str.subview(pos2, n2)`, where `rcount` is `std::min(n1, size() - pos1)`.
@@ -2800,7 +3219,7 @@ public:
   }
 #endif
 
-  /** Replace a substring with an object convertible to `string_view_type`.
+  /** Replace a part of the string.
 
       Constructs a temporary `string_view_type` object `sv` from `t`, and
       replaces `rcount` characters starting at index `pos1` with those
@@ -2846,7 +3265,7 @@ public:
     return replace(pos1, n1, sv.data(), sv.size());
   }
 
-  /** Replace a substring with a substring of an object convertible to `string_view_type`.
+  /** Replace a part of the string.
 
       Constructs a temporary `string_view_type` object `sv` from `t`, and
       replaces `rcount` characters starting at index `pos1` with those
@@ -2898,7 +3317,7 @@ public:
     return replace(pos1, n1, sv.substr(pos2, n2));
   }
 
-  /** Replace a substring with a string.
+  /** Replace a part of the string.
 
       Replaces `rcount` characters starting at index `pos` with those of
       `{s, s + n2)`, where `rcount` is `std::min(n1, size() - pos)`.
@@ -2932,7 +3351,7 @@ public:
     return replace(data() + pos, data() + pos + capped_length(pos, n1), s, n2);
   }
 
-  /** Replace a substring with a string.
+  /** Replace a part of the string.
 
       Replaces `rcount` characters starting at index `pos` with those of
       `{s, s + len)`, where the length of the string `len` is `traits_type::length(s)` and `rcount`
@@ -2965,7 +3384,7 @@ public:
     return replace(pos, n1, s, traits_type::length(s));
   }
 
-  /** Replace a substring with copies of a character.
+  /** Replace a part of the string.
 
       Replaces `rcount` characters starting at index `pos` with `n2` copies
       of `c`, where `rcount` is `std::min(n1, size() - pos)`.
@@ -2999,7 +3418,7 @@ public:
     return replace(data() + pos, data() + pos + capped_length(pos, n1), n2, c);
   }
 
-  /** Replace a range with a string.
+  /** Replace a part of the string.
 
       Replaces the characters in the range `{i1, i2)`
       with those of `str`.
@@ -3054,7 +3473,7 @@ public:
   }
 #endif
 
-  /** Replace a range with an object convertible to `string_view_type`.
+  /** Replace a part of the string.
 
       Constructs a temporary `string_view_type` object `sv` from `t`, and
       replaces the characters in the range `{i1, i2)` with those
@@ -3104,7 +3523,7 @@ public:
     return replace(i1, i2, sv.begin(), sv.end());
   }
 
-  /** Replace a range with a string.
+  /** Replace a part of the string.
 
       Replaces the characters in the range `{i1, i2)` with those of
       `{s, s + n)`.
@@ -3142,7 +3561,7 @@ public:
     return replace(i1, i2, s, s + n);
   }
 
-  /** Replace a range with a string.
+  /** Replace a part of the string.
 
       Replaces the characters in the range `{i1, i2)` with those of
       `{s, s + len)`, where the length of the string `len` is `traits_type::length(s)`.
@@ -3178,7 +3597,7 @@ public:
     return replace(i1, i2, s, traits_type::length(s));
   }
 
-  /** Replace a range with copies of a character.
+  /** Replace a part of the string.
 
       Replaces the characters in the range `{i1, i2)` with
       `n` copies of `c`.
@@ -3213,7 +3632,7 @@ public:
     size_type n,
     value_type c);
 
-  /** Replace a range with a range.
+  /** Replace a part of the string.
 
       Replaces the characters in the range `{i1, i2)`
       with those of `{j1, j2)`.
@@ -3282,7 +3701,7 @@ public:
     ForwardIterator j2);
 #endif
 
-  /** Replace a range with an initializer list.
+  /** Replace a part of the string.
 
       Replaces the characters in the range `{i1, i2)`
       with those of contained in the initializer list `il`.
@@ -4196,7 +4615,16 @@ public:
     return find_last_not_of(&c, pos, 1);
   }
 
-  /// Returns whether the string begins with `s` 
+  /** Return whether the string begins with a string.
+      
+      Returns `true` if the string begins with `s`, and `false` otherwise.
+      
+      @par Complexity
+      
+      Linear.
+      
+      @param s The string view to check for.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   starts_with(
@@ -4206,7 +4634,16 @@ public:
     return size() >= len && !traits_type::compare(data(), s.data(), len);
   }
     
-  /// Returns whether the string begins with `c`
+  /** Return whether the string begins with a character.
+
+      Returns `true` if the string begins with `c`, and `false` otherwise.
+
+      @par Complexity
+
+      Constant.
+
+      @param c The character to check for.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   starts_with(
@@ -4215,7 +4652,18 @@ public:
     return !empty() && traits_type::eq(front(), c);
   }
     
-  /// Returns whether the string begins with `s`
+  /** Return whether the string begins with a string.
+
+      Returns `true` if the string begins with the string
+      pointed to be `s` of length `traits_type::length(s)`,
+      and `false` otherwise.
+
+      @par Complexity
+      
+      Linear.
+      
+      @param s The string to check for.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   starts_with(
@@ -4225,7 +4673,16 @@ public:
     return size() >= len && !traits_type::compare(data(), s, len);
   }
     
-  /// Returns whether the string ends with `s`
+  /** Return whether the string ends with a string.
+
+      Returns `true` if the string ends with `s`, and `false` otherwise.
+
+      @par Complexity
+
+      Linear.
+
+      @param s The string view to check for.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   ends_with(
@@ -4235,7 +4692,16 @@ public:
     return size() >= len && !traits_type::compare(data() + (size() - len), s.data(), len);
   }
     
-  /// Returns whether the string ends with `c`
+  /** Return whether the string ends with a character.
+
+      Returns `true` if the string ends with `c`, and `false` otherwise.
+
+      @par Complexity
+
+      Constant.
+
+      @param c The character to check for.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool
   ends_with(
@@ -4244,7 +4710,18 @@ public:
     return !empty() && traits_type::eq(back(), c);
   }
     
-  /// Returns whether the string begins with `s`
+  /** Return whether the string ends with a string.
+
+      Returns `true` if the string ends with the string
+      pointed to be `s` of length `traits_type::length(s)`,
+      and `false` otherwise.
+
+      @par Complexity
+
+      Linear.
+
+      @param s The string to check for.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool 
   ends_with(

@@ -117,7 +117,7 @@ Certain features can be enabled and disabled though defining configuration macro
 
 Thanks to [@https://github.com/K-ballo Agustín Bergé], [@https://github.com/pdimov Peter Dimov], [@https://github.com/glenfe Glen Fernandes], and [@https://github.com/LeonineKing1199 Christian Mazakas] for their constant feedback and guidance during the development of this library. 
 
-The development of this library was sponsored by [@https://cppalliance.org The C++ Alliance].
+The development of this library is sponsored by [@https://cppalliance.org The C++ Alliance].
 
 [/-----------------------------------------------------------------------------]
 
