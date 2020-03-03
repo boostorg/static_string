@@ -180,8 +180,7 @@ defined(__clang__) && \
 // objects at all in constant expresssions. In these
 // cases, we use whatever will make more constexpr work.
 #if defined(__clang__) && \
-((defined(__GLIBCXX__) &&__GLIBCXX__ >= 20180726L \
-&& __GLIBCXX__ <= 20191102L) || defined(_MSC_VER))
+(defined(__GLIBCXX__) || defined(_MSC_VER))
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
 #endif
 
