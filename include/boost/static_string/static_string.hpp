@@ -803,34 +803,34 @@ public:
   //--------------------------------------------------------------------------
 
   /// The traits type.
-  using traits_type       = Traits;
+  using traits_type = Traits;
 
   /// The character type.
-  using value_type        = typename traits_type::char_type;
+  using value_type = typename traits_type::char_type;
 
   /// The size type.
-  using size_type         = std::size_t;
+  using size_type = std::size_t;
 
   /// The difference type.
-  using difference_type   = std::ptrdiff_t;
+  using difference_type = std::ptrdiff_t;
 
   /// The pointer type.
-  using pointer           = value_type*;
+  using pointer = value_type*;
 
   /// The reference type.
-  using reference         = value_type&;
+  using reference = value_type&;
 
   /// The constant pointer type.
-  using const_pointer     = const value_type*;
+  using const_pointer = const value_type*;
 
   /// The constant reference type.
-  using const_reference   = const value_type&;
+  using const_reference = const value_type&;
 
   /// The iterator type.
-  using iterator          = value_type*;
+  using iterator = value_type*;
 
   /// The constant iterator type.
-  using const_iterator    = const value_type*;
+  using const_iterator = const value_type*;
     
   /// The reverse iterator type.
   using reverse_iterator =
@@ -1032,21 +1032,25 @@ public:
 
   /** Assign to the string.
 
-      If `*this` and `s` are the same object,
-      this function has no effect.
-  */
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string&
-  operator=(const basic_static_string& s) noexcept
-  {
-    return assign(s);
-  }
+      Replaces the contents with those of
+      the string `s`.
 
-  /** Assign to the string.
-    
-      Replace the contents with a copy of `s`
+      @par Complexity
 
-      @throw std::length_error if `s.size() > max_size()`
+      Linear in `s.size()`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam M The size of the other string.
+
+      @return `*this`
+
+      @param s The string to replace
+      the contents with.
+
+      @throw std::length_error `s.size() > max_size()`.
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -1057,10 +1061,23 @@ public:
   }
 
   /** Assign to the string.
-    
-      Replace the contents with those of the null-terminated string `s`
 
-      @throw std::length_error if `traits_type::length(s) > max_size()`
+      Replaces the contents with those of
+      `{s, s + traits_type::length(s))`.
+
+      @par Complexity
+
+      Linear in `count`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @return `*this`
+
+      @param s A pointer to the string to copy from.
+
+      @throw std::length_error `traits_type::length(s) > max_size()`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1070,8 +1087,23 @@ public:
   }
 
   /** Assign to the string.
-    
-      Assign from single character.
+
+      Replaces the contents with a single copy of
+      the character `ch`.
+
+      @par Complexity
+
+      Constant.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @return `*this`
+
+      @param ch The character to assign to.
+
+      @throw std::length_error `count > max_size()`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1083,7 +1115,22 @@ public:
 
   /** Assign to the string.
 
-      Assign from initializer list.
+      Replaces the contents with those of the
+      initializer list `ilist`.
+
+      @par Complexity
+
+      Linear in `init.size()`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @return `*this`
+
+      @param ilist The initializer list to copy from.
+
+      @throw std::length_error `ilist.size() > max_size()`.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -1093,8 +1140,36 @@ public:
   }
 
   /** Assign to the string.
-    
-      Assign from an object convertible to `string_view_type`.
+
+      Replaces the contents with those of
+      `sv`, where `sv` is `string_view_type(t)`.
+
+      @par Complexity
+
+      Linear in `sv.size()`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @note
+
+      The view can contain null characters.
+
+      @tparam T A type convertible to `string_view_type`.
+
+      @par Constraints
+
+      @code
+      std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const CharT*>::value
+      @endcode
+
+      @return `*this`
+
+      @param t The object to assign from.
+
+      @throw std::length_error `sv.size() > max_size()`.
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -1149,7 +1224,7 @@ public:
       
       Strong guarantee.
 
-      @tparam M The capacity of the other string.
+      @tparam M The size of the other string.
       
       @return `*this`
 
@@ -1192,8 +1267,8 @@ public:
 
   /** Assign to the string.
 
-      Let `sub` be `s.substr(pos, count)`. Replaces
-      the contents with those of the string  `sub`.
+      Replaces the contents with those of the string `sub`,
+      where `sub` is `s.substr(pos, count)`.
 
       @par Complexity
 
@@ -1276,7 +1351,7 @@ public:
       @param s A pointer to the string to copy from.
 
       @throw std::length_error `traits_type::length(s) > max_size()`.
-    */
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
   assign(const_pointer s)
@@ -1355,8 +1430,8 @@ public:
 
   /** Assign to the string.
       
-      Let `sv` be `string_view_type(t)`. Replaces the
-      contents with those of `sv`.
+      Replaces the contents with those of
+      `sv`, where `sv` is `string_view_type(t)`.
       
       @par Complexity
       
@@ -1398,10 +1473,10 @@ public:
     return assign(sv.data(), sv.size());
   }
 
-  /** Assign characters to a string.
+  /** Assign to the string.
 
-      Let `sv` be `string_view_type(t).substr(pos, count)`.
-      Replaces the contents with those of the substring `sv`.
+      Replaces the contents with those of the substring `sv`,
+      where `sv` is `string_view_type(t).substr(pos, count)`.
 
       @par Complexity
 
@@ -1628,7 +1703,7 @@ public:
     return data()[size() - 1];
   }
 
-  /** Return a pointer to string.
+  /** Return a pointer to the string.
 
       Returns a pointer to the underlying array
       serving as storage. The value returned is such that
@@ -1649,7 +1724,7 @@ public:
     return this->data_impl();
   }
 
-  /** Return a pointer to string.
+  /** Return a pointer to the string.
 
       Returns a pointer to the underlying array
       serving as storage. The value returned is such that
@@ -1670,7 +1745,7 @@ public:
     return this->data_impl();
   }
 
-  /** Return a pointer to string.
+  /** Return a pointer to the string.
 
       Returns a pointer to the underlying array
       serving as storage. The value returned is such that
@@ -1768,7 +1843,7 @@ public:
     return reverse_iterator{end()};
   }
 
-  /// Returns a reverse iterator to the beginning.
+  /// Return a reverse iterator to the beginning.
   BOOST_STATIC_STRING_CPP17_CONSTEXPR
   const_reverse_iterator
   rbegin() const noexcept
@@ -1884,7 +1959,7 @@ public:
 
       This function has no effect.
 
-      @throw std::length_error if `n > max_size()`
+      @throw std::length_error `n > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
@@ -2443,8 +2518,8 @@ public:
   /** Erase from the string.
 
       Erases the character at `pos`.
-      .
-      @par Precondition
+      
+      @par Preconditions
       
       `pos` shall be valid within `{data(), data() + size()}`
       
@@ -2531,13 +2606,21 @@ public:
     term();
   }
 
-  /** Appends `count` copies of character `ch`
+  /** Append to the string.
 
-      The appended characters may be null.
+      Appends `count` copies of `ch` to the end of the string.
 
+      @par Exception Safety
+
+      Strong guarantee.
+      
       @return `*this`
       
-      @throw std::length_error if `count > max_size() - size()`
+      @param count The number of characters to append.
+      
+      @param ch The character to append.
+      
+      @throw std::length_error `size() + count > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2546,14 +2629,20 @@ public:
     value_type ch);
 
   /** Append to the string.
-    
-      Appends the string `s`.
 
-      The appended string can contain null characters.
+      Appends `s` to the end of the string.
+
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @tparam M The size of the string to append.
 
       @return `*this`
       
-      @throw std::length_error if `s.size() > max_size() - size()`
+      @param s The string to append.
+      
+      @throw std::length_error `size() + s.size() > max_size()`
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2565,16 +2654,27 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends the contents of `s.substr(pos, count)`
 
-      The appended string can contain null characters.
-      
+      Appends the substring `sub` to the end of the string,
+      where `sub` is `s.substr(pos, count)`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam M The size of the string to append.
+
       @return `*this`
 
-      @throw std::out_of_range if `pos > s.size()`
-      
-      @throw std::length_error if `s.substr(pos, count).size() > max_size() - size()`
+      @param s The string to append.
+
+      @param pos The index at which to begin the substring.
+
+      @param count The size of the substring. The default
+      argument for this parameter is @ref npos.
+
+      @throw std::length_error `size() + sub.size() > max_size()`
+      @throw std::out_of_range `pos > s.size()`
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2588,14 +2688,23 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends characters in the range `(s, s + count)`
-    
-      The appended string can contain null characters.
 
+      Appends `count` characters from the string pointed
+      to by `s` to the end of the string.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @note The string can contain null characters.
+      
       @return `*this`
       
-      @throw std::length_error if `count > max_size() - size()`
+      @param s The string to append.
+      
+      @param count The number of characters to append.
+      
+      @throw std::length_error `size() + count > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2604,15 +2713,20 @@ public:
     size_type count);
 
   /** Append to the string.
-    
-      Appends the null-terminated character string pointed to by `s`
-    
-      The length of the string is determined by the first
-      null character using `traits_type::length(s)`.
+
+      Appends `count` characters from the string pointed
+      to by `s` to the end of the string, where `count`
+      is `traits_type::length(s)`.
+
+      @par Exception Safety
+
+      Strong guarantee.
 
       @return `*this`
-      
-      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
+
+      @param s The string to append.
+
+      @throw std::length_error `size() + count > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2621,17 +2735,35 @@ public:
     return append(s, traits_type::length(s));
   }
 
+  // KRYSTIAN TODO: change exception safety
   /** Append to the string.
-    
-      Appends characters from the range `(first, last)`
 
-      The inserted string can contain null characters.
-      This function does not participate in overload resolution if
-      `InputIterator` does not satisfy <em>LegacyInputIterator</em>
+      Appends characters from the range `{first, last)`
+      to the end of the string.
 
+      @par Precondition
+
+      `{first, last)` shall be a valid range
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+      
+      @tparam InputIterator The type of the iterators.
+      
+      @par Constraints
+
+      `InputIterator` satisfies __InputIterator__.
+      
       @return `*this`
       
-      @throw std::length_error if `std::distance(first, last) > max_size() - size()`
+      @param first An iterator referring to the
+      first character to append.
+      
+      @param last An iterator past the end of
+      last character to append.
+      
+      @throw std::length_error `size() + std::distance(first, last) > max_size()`
   */
   template<typename InputIterator>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2651,14 +2783,19 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends characters from initializer list `ilist`
-
-      The appended string can contain null characters.
-
+      
+      Appends the characters from `ilist` to the
+      end of the string.
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+      
       @return `*this`
       
-      @throw std::length_error if `ilist.size() > max_size() - size()`
+      @param ilist The initializer list to append.
+      
+      @throw std::length_error `size() + ilist.size() > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2669,17 +2806,28 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends characters from `string_view_type{t}`
 
-      The appended string can contain null characters.
-      This function participates in overload resolution if
-      `T` is convertible to `string_view_type` and `T` is not
-      convertible to `const_pointer`.
+      Appends `sv` to the end of the string,
+      where `sv` is `string_view_type(t)`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+      
+      @tparam T The type of the object to convert.
+        
+      @par Constraints
+
+      @code
+      std::is_convertible<T const&, string_view>::value && 
+      !std::is_convertible<T const&, char const*>::value
+      @endcode
 
       @return `*this`
-      
-      @throw std::length_error if `string_view_type{t}.size() > max_size() - size()`
+        
+      @param t The string to append.
+
+      @throw std::length_error `size() + sv.size() > max_size()`
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -2695,19 +2843,33 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends characters from `string_view_type{t}.substr{pos, count}`
 
-      The appended string can contain null characters.
-      This function participates in overload resolution if
-      `T` is convertible to `string_view_type` and `T` is not
-      convertible to `const_pointer`.
+      Appends the substring `sv` to the end of the string,
+      where `sv` is `string_view_type(t).substr(pos, count)`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam T The type of the object to convert.
+
+      @par Constraints
+
+      @code
+      std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char const*>::value
+      @endcode
 
       @return `*this`
+
+      @param t The object to append.
       
-      @throw std::out_of_range if `pos > string_view_type{t}.size()`
+      @param pos The index at which to begin the substring.
       
-      @throw std::length_error if `string_view_type{t}.substr(pos, count).size() > max_size() - size()`
+      @param count The size of the substring. The default
+      argument for this parameter is @ref npos.
+
+      @throw std::length_error `size() + sv.size() > max_size()`
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -2727,7 +2889,19 @@ public:
 
   /** Append to the string.
 
-      @throw std::length_error if `s.size() > max_size() - size()`
+      Appends `s` to the end of the string.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam M The size of the string to append.
+
+      @return `*this`
+
+      @param s The string to append.
+
+      @throw std::length_error `size() + s.size() > max_size()`
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2739,10 +2913,16 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends the given character `ch` to the end of the string.
 
-      @throw std::length_error if `1 > max_size() - size()`
+      Appends a character to the end of the string.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @param ch The character to append.
+
+      @throw std::length_error `size() >= max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2753,15 +2933,20 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends the null-terminated character string pointed to by `s`
-    
-      The length of the string is determined by the first
-      null character using `traits_type::length(s)`.
+
+      Appends `count` characters from the string pointed
+      to by `s` to the end of the string, where `count`
+      is `traits_type::length(s)`.
+
+      @par Exception Safety
+
+      Strong guarantee.
 
       @return `*this`
-      
-      @throw std::length_error if `traits_type::length(s) > max_size() - size()`
+
+      @param s The string to append.
+
+      @throw std::length_error `size() + count > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2771,14 +2956,19 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends characters from initializer list `ilist`
 
-      The appended string can contain null characters.
+      Appends the characters from `ilist` to the
+      end of the string.
+
+      @par Exception Safety
+
+      Strong guarantee.
 
       @return `*this`
-      
-      @throw std::length_error if `ilist.size() > max_size() - size()`
+
+      @param ilist The initializer list to append.
+
+      @throw std::length_error `size() + ilist.size() > max_size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
@@ -2789,15 +2979,28 @@ public:
   }
 
   /** Append to the string.
-    
-      Appends a copy of the characters from `string_view_type{t}`
 
-      The appended string can contain null characters.
-      This function participates in overload resolution if
-      `T` is convertible to `string_view_type` and `T` is not
-      convertible to `const_pointer`.
+      Appends `sv` to the end of the string,
+      where `sv` is `string_view_type(t)`.
 
-      @throw std::length_error if `string_view_type{t}.size() > max_size()`
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam T The type of the object to convert.
+
+      @par Constraints
+
+      @code
+      std::is_convertible<T const&, string_view>::value &&
+      !std::is_convertible<T const&, char const*>::value
+      @endcode
+
+      @return `*this`
+
+      @param t The string to append.
+
+      @throw std::length_error `size() + sv.size() > max_size()`
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -2811,9 +3014,21 @@ public:
     return append(t);
   }
 
-  /** Compare the string with another.
-        
-      Compares this string to `s`.
+  /** Compare a string with the string.
+
+      Let `comp` be `traits_type::compare(data(), s.data(), std::min(size(), s.size())`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `size() == s.size()`, `-1` if `size() < s.size()`, and `1`
+      otherwise.
+
+      @par Complexity
+      Linear.
+
+      @return The result of lexicographically comparing `s` and the string.
+      
+      @tparam M The size of the string to compare with.
+
+      @param s The string to compare.
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2825,10 +3040,34 @@ public:
       data(), size(), s.data(), s.size());
   }
 
-  /** Compare the string with another.
-        
-      Compares a `{pos1, pos1+count1)` substring of this string to `s`. If `count1 > size() - pos1` the substring is `{pos1, size())`.
-  */
+  /** Compare a string with the string.
+
+    Let `sub` be `substr(pos1, count1)` and `comp` be
+    `traits_type::compare(sub.data(), s.data(), std::min(sub.size(), s.size())`.
+    If `comp != 0`, then the result is `comp`. Otherwise, the result is
+    `0` if `sub.size() == s.size()`, `-1` if `sub.size() < s.size()`, and `1`
+    otherwise.
+
+    @par Complexity
+    
+    Linear.
+    
+    @par Exception Safety
+    
+    Strong guarantee.
+    
+    @return The result of lexicographically comparing `sub` and `s`. 
+
+    @tparam M The size of the string to compare with.
+
+    @param pos1 The index at which to begin the substring.
+    
+    @param count1 The size of the substring.
+    
+    @param s The string to compare.
+    
+    @throw std::out_of_range `pos1 > size()`
+    */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
@@ -2841,11 +3080,38 @@ public:
       data() + pos1, capped_length(pos1, count1), s.data(), s.size());
   }
 
-  /** Compare the string with another.
+  /** Compare a string with the string.
+
+      Let `sub1` be `substr(pos1, count1)`, `sub2` be
+      `s.substr(pos2, count2)`, and `comp` be
+      `traits_type::compare(sub1.data(), sub2.data(), std::min(sub1.size(), sub2.size())`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `sub1.size() == sub2.size()`, `-1` if `sub1.size() < sub2.size()`, and `1`
+      otherwise.
+
+      @par Complexity
+      
+      Linear.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @return The result of lexicographically comparing `sub1` and `sub2`.
         
-      Compares a `{pos1, pos1+count1)` substring of this string to a substring `{pos2, pos2+count2)` of `s`. 
-      If `count1 > size() - pos1` the first substring is `{pos1, size())`. Likewise, if `count2 > s.size() - pos2` the
-      second substring is `{pos2, s.size())`.
+      @param pos1 The index at which to begin the substring.
+        
+      @param count1 The size of the substring.
+        
+      @param s The string to compare.
+        
+      @param pos2 The index at which to begin the substring to compare.
+        
+      @param count2 The size of the substring to compare.
+        
+      @throw std::out_of_range `pos1 > size()`
+        
+      @throw std::out_of_range `pos2 > s.size()`
   */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
@@ -2862,9 +3128,21 @@ public:
       s.data() + pos2, s.capped_length(pos2, count2));
   }
 
-  /** Compare the string with another.
-        
-      Compares this string to the null-terminated character sequence beginning at the character pointed to by `s` with length `traits_type::length(s)`.
+  /** Compare a string with the string.
+      
+      Let `len` be `traits_type::length(s)` and `comp` be
+      `traits_type::compare(data(), s, std::min(size(), len)`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `size() == len`, `-1` if `size() < len`, and `1`
+      otherwise.
+      
+      @par Complexity
+      
+      Linear.
+
+      @return The result of lexicographically comparing `s` and the string.
+      
+      @param s The string to compare.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
@@ -2874,10 +3152,32 @@ public:
       data(), size(), s, traits_type::length(s));
   }
 
-  /** Compare the string with another.
-        
-      Compares a `{pos1, pos1+count1)` substring of this string to the null-terminated character sequence beginning at the character pointed to by `s` with
-      length `traits_type::length(s)`. If `count1 > size() - pos1` the substring is `{pos1, size())`.
+  /** Compare a string with the string.
+      
+      Let `sub` be `substr(pos1, count1)`, `len` be
+      `traits_type::length(s)`, and `comp` be
+      `traits_type::compare(sub.data(), s, std::min(size(), len)`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `sub.size() == len`, `-1` if `sub.size() < len`, and `1`
+      otherwise.
+      
+      @par Complexity
+      
+      Linear.
+      
+      @par Exception Safety
+      
+      Strong guarantee.
+
+      @return The result of lexicographically comparing `s` and `sub`.
+      
+      @param pos1 The index at which to begin the substring.
+      
+      @param count1 The size of the substring.
+      
+      @param s The string to compare.
+
+      @throw std::out_of_range `pos1 > size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
@@ -2890,9 +3190,33 @@ public:
       data() + pos1, capped_length(pos1, count1), s, traits_type::length(s));
   }
 
-  /** Compare the string with another.
-        
-      Compares a `{pos1, pos1+count1)` substring of this string to the characters in the range `{s, s + count2)`. If `count1 > size() - pos1` the substring is `{pos1, size())`.
+  /** Compare a string with the string.
+
+      Let `sub` be `substr(pos1, count1)`, and `comp` be
+      `traits_type::compare(sub.data(), s, std::min(size(), count2)`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `sub.size() == count2`, `-1` if `sub.size() < count2`, and `1`
+      otherwise.
+
+      @par Complexity
+
+      Linear.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @return The result of lexicographically comparing `s` and `sub`.
+
+      @param pos1 The index at which to begin the substring.
+
+      @param count1 The size of the substring.
+
+      @param s The string to compare.
+
+      @param count2 The length of the string to compare.
+
+      @throw std::out_of_range `pos1 > size()`
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   int
@@ -2906,13 +3230,34 @@ public:
       data() + pos1, capped_length(pos1, count1), s, count2);
   }
 
-  /** Compare the string with another.
-      
-      Compares this string to `t` after converting `t` to `string_view_type`.
+  /** Compare a string with the string.
 
-      This function participates in overload resolution if
-      `T` is convertible to `string_view_type` and `T` is not
-      convertible to `const_pointer`.
+      Let `s` be `string_view_type(t)` and `comp` be
+      `traits_type::compare(data(), s.data(), std::min(size(), s.size())`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `size() == s.size()`, `-1` if `size() < s.size()`, and `1`
+      otherwise.
+      
+      @par Complexity
+      
+      Linear.
+
+      @par Exception Safety
+
+      Strong guarantee.
+      
+      @tparam T The type of the object to convert.
+
+      @par Constraints
+
+      @code
+      std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const_pointer>::value.
+      @endcode
+
+      @return The result of lexicographically comparing `s` and the string.
+      
+      @param t The string to compare.
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -2928,15 +3273,39 @@ public:
       data(), size(), sv.data(), sv.size());
   }
 
-  /** Compare the string with another.
+  /** Compare a string with the string.
 
-      Compares a `{pos1, pos1+count1)` substring of this string to `t` after converting it to
-      `string_view_type`. If `count1 > size() - pos1` 
-      the substring is `{pos1, size())`.
+      Let `s` be `string_view_type(t)`, `sub` be
+      `substr(pos1, count1)`, and `comp` be
+      `traits_type::compare(sub.data(), s.data(), std::min(sub.size(), s.size())`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `sub.size() == s.size()`, `-1` if `sub.size() < s.size()`, and `1`
+      otherwise.
 
-      This function participates in overload resolution if
-      `T` is convertible to `string_view_type` and `T` is not
-      convertible to `const_pointer`.
+      @par Complexity
+
+      Linear.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam T The type of the object to convert.
+
+      @par Constraints
+
+      @code
+      std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const_pointer>::value.
+      @endcode
+
+      @return The result of lexicographically comparing `s` and `sub`.
+
+      @param pos1 The index at which to begin the substring.
+
+      @param count1 The length of the substring.
+
+      @param t The string to compare.
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -2955,13 +3324,43 @@ public:
       data() + pos1, capped_length(pos1, count1), sv.data(), sv.size());
   }
 
-  /** Compare the string with another.
-        
-      Replaces the part of the string indicated by `{pos1, pos1 + count1)` with a substring `{pos2, pos2 + count2)` of `t` after converting to `string_view_type`.
+  /** Compare a string with the string.
 
-      This function participates in overload resolution if
-      `T` is convertible to `string_view_type` and `T` is not
-      convertible to `const_pointer`.
+      Let `sub1` be `substr(pos1, count1)`, `sub2` be
+      `string_view_type(t).substr(pos2, count2)`, and `comp` be
+      `traits_type::compare(sub1.data(), sub2.data(), std::min(sub1.size(), sub2.size())`.
+      If `comp != 0`, then the result is `comp`. Otherwise, the result is
+      `0` if `sub1.size() == sub2.size()`, `-1` if `sub1.size() < sub2.size()`, and `1`
+      otherwise.
+
+      @par Complexity
+
+      Linear.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @tparam T The type of the object to convert.
+
+      @par Constraints
+
+      @code
+      std::is_convertible<const T&, string_view>::value &&
+      !std::is_convertible<const T&, const_pointer>::value.
+      @endcode
+
+      @return The result of lexicographically comparing `sub1` and `sub2`.
+
+      @param pos1 The index at which to begin the substring in the string.
+
+      @param count1 The length of the substring in the string.
+
+      @param t The string to compare.
+
+      @param pos2 The index at which to begin the substring in the string view.
+
+      @param count2 The length of the substring in the string view.
   */
   template<typename T
 #ifndef BOOST_STATIC_STRING_DOCS
@@ -3100,12 +3499,46 @@ public:
     size_type n,
     value_type c);
 
-  /// Exchange the contents of this string with another.
+  /** Swap two strings.
+      
+      Swaps the contents of the string and `s`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @note 
+
+      All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
+
+      @param s The string to swap with.
+  */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
   swap(basic_static_string& s) noexcept;
 
-  /// Exchange the contents of this string with another.
+  /** Swap two strings.
+
+      Swaps the contents of the string and `s`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @note
+
+      All references, pointers, or iterators
+      referring to contained elements are invalidated. Any
+      past-the-end iterators are also invalidated.
+
+      @tparam M The size of the string to swap with.
+
+      @param s The string to swap with.
+
+      @throw std::length_error `s.size() > max_size() || size() > s.max_size()`
+  */
   template<std::size_t M>
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   void
