@@ -7096,7 +7096,7 @@ testOperatorPlus()
   {
     auto res = s1 + "world";
     BOOST_TEST(res == "helloworld");
-    BOOST_TEST(res.capacity() == 15);
+    BOOST_TEST(res.capacity() == 16);
     BOOST_TEST(res.size() == 10);
   }
 
@@ -7104,7 +7104,25 @@ testOperatorPlus()
   {
     auto res = "hello" + s2;
     BOOST_TEST(res == "helloworld");
-    BOOST_TEST(res.capacity() == 15);
+    BOOST_TEST(res.capacity() == 16);
+    BOOST_TEST(res.size() == 10);
+  }
+
+  // operator+(static_string, CharT(&)[N]), no null
+  {
+    char arr[10] = {'w', 'o', 'r', 'l', 'd'};
+    auto res = s1 + arr;
+    BOOST_TEST(res == "helloworld");
+    BOOST_TEST(res.capacity() == 20);
+    BOOST_TEST(res.size() == 10);
+  }
+
+  // operator+(CharT(&)[N], static_string), no null
+  {
+    char arr[10] = {'h', 'e', 'l', 'l', 'o'};
+    auto res = arr + s2;
+    BOOST_TEST(res == "helloworld");
+    BOOST_TEST(res.capacity() == 20);
     BOOST_TEST(res.size() == 10);
   }
 }
