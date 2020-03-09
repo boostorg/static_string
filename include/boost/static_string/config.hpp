@@ -53,6 +53,7 @@
 #define BOOST_STATIC_STRING_UNLIKELY
 #define BOOST_STATIC_STRING_NODISCARD
 #define BOOST_STATIC_STRING_NORETURN
+#define BOOST_STATIC_STRING_NO_NORETURN
 // unlikely
 #if BOOST_STATIC_STRING_CHECK_FOR_ATTR(unlikely)
 #undef BOOST_STATIC_STRING_UNLIKELY
@@ -72,12 +73,15 @@
 // noreturn
 #if BOOST_STATIC_STRING_CHECK_FOR_ATTR(noreturn)
 #undef BOOST_STATIC_STRING_NORETURN
+#undef BOOST_STATIC_STRING_NO_NORETURN
 #define BOOST_STATIC_STRING_NORETURN [[noreturn]]
 #elif defined(_MSC_VER)
 #undef BOOST_STATIC_STRING_NORETURN
+#undef BOOST_STATIC_STRING_NO_NORETURN
 #define BOOST_STATIC_STRING_NORETURN __declspec(noreturn)
 #elif defined(__GNUC__) || defined(__clang__)
 #undef BOOST_STATIC_STRING_NORETURN
+#undef BOOST_STATIC_STRING_NO_NORETURN
 #define BOOST_STATIC_STRING_NORETURN __attribute__((__noreturn__))
 #endif
 
@@ -182,6 +186,16 @@ defined(__clang__) && \
 #if defined(__clang__) && \
 (defined(__GLIBCXX__) || defined(_MSC_VER))
 #define BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS
+#endif
+
+// In gcc-5, we cannot use throw expressions in a
+// constexpr function. However, we have a workaround
+// for this using constructors. Also, non-static member
+// functions that return the class they are a member of
+// causes an ICE during constant evaluation.
+#if defined(__GNUC__) && (__GNUC__== 5) && \
+defined(BOOST_STATIC_STRING_CPP14)
+#define BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
 #endif
 
 namespace boost {

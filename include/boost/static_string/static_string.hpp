@@ -729,6 +729,105 @@ defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS)
     std::less<const T*>()(ptr, src_last);
 #endif
 }
+
+//--------------------------------------------------------------------------
+//
+// exception classes
+//
+//--------------------------------------------------------------------------
+
+struct length_error
+{
+#ifdef BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
+  struct raise_if
+  {
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    raise_if(
+      bool check, 
+      const char* message)
+    {
+      BOOST_STATIC_STRING_THROW_IF(
+        check, std::length_error(message));
+    }
+  };
+
+  struct raise
+  {
+    BOOST_STATIC_STRING_NORETURN
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    raise(const char* message)
+    {
+      BOOST_STATIC_STRING_THROW(std::length_error(message));
+    }
+  };
+#else
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  static
+  void 
+  raise_if(
+    bool check, 
+    const char* message)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      check, std::length_error(message));
+  }
+
+  BOOST_STATIC_STRING_NORETURN
+  static
+  void
+  raise(const char* message)
+  {
+    BOOST_STATIC_STRING_THROW(std::length_error(message));
+  }
+#endif
+};
+
+struct out_of_range
+{
+#ifdef BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
+  struct raise_if
+  {
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    raise_if(
+      bool check, 
+      const char* message)
+    {
+      BOOST_STATIC_STRING_THROW_IF(
+        check, std::out_of_range(message));
+    }
+  };
+
+  struct raise
+  {
+    BOOST_STATIC_STRING_NORETURN
+    BOOST_STATIC_STRING_CPP14_CONSTEXPR
+    raise(const char* message)
+    {
+      BOOST_STATIC_STRING_THROW(std::out_of_range(message));
+    }
+  };
+#else
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  static
+  void
+  raise_if(
+    bool check, 
+    const char* message)
+  {
+    BOOST_STATIC_STRING_THROW_IF(
+      check, std::out_of_range(message));
+  }
+
+  BOOST_STATIC_STRING_NORETURN
+  static
+  void
+  raise(const char* message)
+  {
+    BOOST_STATIC_STRING_THROW(std::out_of_range(message));
+  }
+#endif
+};
+
 } // detail
 #endif
 
@@ -932,7 +1031,10 @@ public:
       Construct from a null terminated string.
   */
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string(const_pointer s);
+  basic_static_string(const_pointer s)
+  {
+    assign(s);
+  }
 
   /** Constructor.
     
@@ -1425,7 +1527,7 @@ public:
   assign(
     std::initializer_list<value_type> ilist)
   {
-      return assign(ilist.begin(), ilist.end());
+    return assign(ilist.begin(), ilist.end());
   }
 
   /** Assign to the string.
@@ -1552,8 +1654,9 @@ public:
   reference
   at(size_type pos)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos >= size(), std::out_of_range("pos >= size()"));
+    detail::out_of_range::raise_if(
+      pos >= size(),
+      "pos >= size()");
     return data()[pos];
   }
 
@@ -1578,8 +1681,9 @@ public:
   const_reference
   at(size_type pos) const
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos >= size(), std::out_of_range("pos >= size()"));
+    detail::out_of_range::raise_if(
+      pos >= size(),
+      "pos >= size()");
     return data()[pos];
   }
 
@@ -1965,8 +2069,9 @@ public:
   void
   reserve(size_type n)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      n > max_size(), std::length_error("n > max_size()"));
+    detail::length_error::raise_if(
+      n > max_size(),
+      "n > max_size()");
   }
 
   /** Return the number of characters that can be stored.
@@ -2048,8 +2153,8 @@ public:
     size_type count,
     value_type ch)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      index > size(), std::out_of_range("index > size()"));
+    detail::out_of_range::raise_if(
+      index > size(), "index > size()");
     insert(begin() + index, count, ch);
     return *this;
   }
@@ -2114,8 +2219,8 @@ public:
     const_pointer s,
     size_type count)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      index > size(), std::out_of_range("index > size()"));
+    detail::out_of_range::raise_if(
+      index > size(), "index > size()");
     insert(data() + index, s, s + count);
     return *this;
   }
@@ -3399,7 +3504,9 @@ public:
 
       @throw std::out_of_range `pos > size()`
   */
+#ifndef BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
+#endif
   basic_static_string
   substr(
     size_type pos = 0,
@@ -3432,6 +3539,7 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
+    
     return string_view_type(
       data() + pos, capped_length(pos, count));
   }
@@ -5186,8 +5294,7 @@ private:
   basic_static_string&
   assign_char(value_type, std::false_type)
   {
-    BOOST_STATIC_STRING_THROW(
-      std::length_error("max_size() == 0"));
+    detail::length_error::raise("max_size() == 0");
     // This eliminates any potential warnings
 #ifdef BOOST_STATIC_STRING_NO_NORETURN
     return *this;
@@ -5211,8 +5318,8 @@ private:
     const_pointer s,
     size_type n2)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      pos > size(), std::out_of_range("pos > size()"));
+    detail::out_of_range::raise_if(
+      pos > size(), "pos > size()");
     return replace_unchecked(data() + pos, data() + pos + capped_length(pos, n1), s, n2);
   }
 
@@ -5231,8 +5338,8 @@ private:
     const_pointer s,
     size_type count)
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      index > size(), std::out_of_range("index > size()"));
+    detail::out_of_range::raise_if(
+      index > size(), "index > size()");
     insert_unchecked(data() + index, s, count);
     return *this;
   }
@@ -5261,9 +5368,9 @@ private:
     size_type index,
     size_type length) const
   {
-    BOOST_STATIC_STRING_THROW_IF(
-      index > size(), std::out_of_range("index > size()"));
-    return (std::min)(length, size() - index);
+    detail::out_of_range::raise_if(
+      index > size(), "index > size()");
+    return (std::min)(size() - index, length);
   }
 };
 
@@ -5880,18 +5987,6 @@ namespace static_strings {
 
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
-basic_static_string<N, CharT, Traits>::
-basic_static_string(const_pointer s)
-{
-  const auto count = traits_type::length(s);
-  BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
-    std::length_error("count > max_size()"));
-  traits_type::copy(data(), s, count + 1);
-  this->set_size(count);
-}
-
-template<std::size_t N, typename CharT, typename Traits>
-BOOST_STATIC_STRING_CPP14_CONSTEXPR
 auto
 basic_static_string<N, CharT, Traits>::
 assign(
@@ -5899,8 +5994,8 @@ assign(
   value_type ch) ->
     basic_static_string&
 {
-  BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
-    std::length_error("count > max_size()"));
+  detail::length_error::raise_if(
+    count > max_size(), "count > max_size()");
   this->set_size(count);
   traits_type::assign(data(), size(), ch);
   return term();
@@ -5915,8 +6010,8 @@ assign(
   size_type count) ->
     basic_static_string&
 {
-  BOOST_STATIC_STRING_THROW_IF(count > max_size(), 
-    std::length_error("count > max_size()"));
+  detail::length_error::raise_if(
+    count > max_size(), "count > max_size()");
   this->set_size(count);
   traits_type::move(data(), s, size());
   return term();
@@ -5941,7 +6036,7 @@ assign(
     {
       this->set_size(i);
       term();
-      BOOST_STATIC_STRING_THROW(std::length_error("n > max_size()"));
+      detail::length_error::raise("n > max_size()");
     }
     traits_type::assign(*ptr, *first);
   }
@@ -5961,8 +6056,9 @@ insert(
 {
   const auto curr_size = size();
   const auto curr_data = data();
-  BOOST_STATIC_STRING_THROW_IF(
-    count > max_size() - curr_size, std::length_error("count() > max_size() - size()"));
+  detail::length_error::raise_if(
+    count > max_size() - curr_size,
+    "count > max_size() - curr_size");
   const auto index = pos - curr_data;
   traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
   traits_type::assign(&curr_data[index], count, ch);
@@ -5988,8 +6084,9 @@ insert(
   const std::size_t count = detail::distance(first, last);
   const std::size_t index = pos - curr_data;
   const auto first_addr = &*first;
-  BOOST_STATIC_STRING_THROW_IF(
-    count > max_size() - curr_size, std::length_error("count > max_size() - size()"));
+  detail::length_error::raise_if(
+    count > max_size() - curr_size,
+    "count > max_size() - curr_size");
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
   if (!inside || (inside && (first_addr + count <= pos)))
   {
@@ -6063,8 +6160,8 @@ push_back(
   value_type ch)
 {
   const auto curr_size = size();
-  BOOST_STATIC_STRING_THROW_IF(
-    curr_size >= max_size(), std::length_error("size() >= max_size()"));
+  detail::length_error::raise_if(
+    curr_size >= max_size(), "curr_size >= max_size()");
   traits_type::assign(data()[curr_size], ch);
   this->set_size(curr_size + 1);
   term();
@@ -6080,8 +6177,8 @@ append(
     basic_static_string&
 {
   const auto curr_size = size();
-  BOOST_STATIC_STRING_THROW_IF(
-    count > max_size() - curr_size, std::length_error("count > max_size() - size()"));
+  detail::length_error::raise_if(
+    count > max_size() - curr_size, "count > max_size() - size()");
   traits_type::assign(end(), count, ch);
   this->set_size(curr_size + count);
   return term();
@@ -6097,8 +6194,8 @@ append(
     basic_static_string&
 {
   const auto curr_size = size();
-  BOOST_STATIC_STRING_THROW_IF(
-    count > max_size() - curr_size, std::length_error("count > max_size() - size()"));
+  detail::length_error::raise_if(
+    count > max_size() - curr_size, "count > max_size() - size()");
   traits_type::copy(end(), s, count);
   this->set_size(curr_size + count);
   return term();
@@ -6110,8 +6207,8 @@ void
 basic_static_string<N, CharT, Traits>::
 resize(size_type n, value_type c)
 {
-  BOOST_STATIC_STRING_THROW_IF(
-    n > max_size(), std::length_error("n > max_size()"));
+  detail::length_error::raise_if(
+    n > max_size(), "n > max_size()");
   const auto curr_size = size();
   if(n > curr_size)
     traits_type::assign(data() + curr_size, n - curr_size, c);
@@ -6141,10 +6238,10 @@ basic_static_string<N, CharT, Traits>::
 swap(basic_static_string<M, CharT, Traits>& s)
 {
   const auto curr_size = size();
-  BOOST_STATIC_STRING_THROW_IF(
-    curr_size > s.max_size(), std::length_error("size() > s.max_size()"));
-  BOOST_STATIC_STRING_THROW_IF(
-    s.size() > max_size(), std::length_error("s.size() > max_size()"));
+  detail::length_error::raise_if(
+    curr_size > s.max_size(), "curr_size > s.max_size()");
+  detail::length_error::raise_if(
+    s.size() > max_size(), "s.size() > max_size()");
   basic_static_string tmp(s);
   s.set_size(curr_size);
   traits_type::copy(&s.data()[0], data(), curr_size + 1);
@@ -6166,10 +6263,10 @@ replace(
   const auto curr_size = size();
   const auto curr_data = data();
   const std::size_t n1 = i2 - i1;
-  BOOST_STATIC_STRING_THROW_IF(
+  detail::length_error::raise_if(
     n > max_size() ||
-    curr_size - n1 >= max_size() - n,
-    std::length_error("replaced string exceeds max_size()"));
+    curr_size - n1 >= max_size() - n, 
+    "replaced string exceeds max_size()");
   const auto pos = i1 - curr_data;
   traits_type::move(&curr_data[pos + n], i2, (end() - i2) + 1);
   traits_type::assign(&curr_data[pos], n, c);
@@ -6197,10 +6294,10 @@ replace(
   const std::size_t n1 = i2 - i1;
   const std::size_t n2 = detail::distance(j1, j2);
   const std::size_t pos = i1 - curr_data;
-  BOOST_STATIC_STRING_THROW_IF(
+  detail::length_error::raise_if(
     n2 > max_size() ||
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
-    std::length_error("replaced string exceeds max_size()"));
+    "replaced string exceeds max_size()");
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
   if (inside && first_addr == i1 && n1 == n2)
     return *this;
@@ -6261,10 +6358,10 @@ replace(
   const std::size_t n1 = detail::distance(i1, i2);
   const std::size_t n2 = read_back(false, j1, j2);
   const std::size_t pos = i1 - curr_data;
-  BOOST_STATIC_STRING_THROW_IF(
+  detail::length_error::raise_if(
     n2 > max_size() ||
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
-    std::length_error("replaced string exceeds max_size()"));
+    "replaced string exceeds max_size()");
   // Rotate to the correct order. [i2, end] will now start with the replaced string, 
   // continue to the existing string not being replaced, and end with a null terminator
   std::rotate(&curr_data[pos], &curr_data[curr_size + 1], &curr_data[curr_size + n2 + 1]);
@@ -6413,8 +6510,8 @@ read_back(
     {
       if (overwrite_null)
         term();
-      BOOST_STATIC_STRING_THROW(
-        std::length_error("count > max_size() - size()"));
+      detail::length_error::raise(
+        "count > max_size() - size()");
     }
     traits_type::assign(curr_data[new_size++ + (!overwrite_null)], *first);
   }
@@ -6436,10 +6533,10 @@ replace_unchecked(
   const auto curr_size = size();
   const std::size_t pos = i1 - curr_data;
   const std::size_t n1 = i2 - i1;
-  BOOST_STATIC_STRING_THROW_IF(
+  detail::length_error::raise_if(
     n2 > max_size() ||
     curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
-    std::length_error("replaced string exceeds max_size()"));
+    "replaced string exceeds max_size()");
   traits_type::move(&curr_data[pos + n2], i2, (end() - i2) + 1);
   traits_type::copy(&curr_data[pos], s, n2);
   this->set_size((curr_size - n1) + n2);
@@ -6458,9 +6555,9 @@ insert_unchecked(
 {
   const auto curr_data = data();
   const auto curr_size = size();
-  BOOST_STATIC_STRING_THROW_IF(
+  detail::length_error::raise_if(
     count > max_size() - curr_size,
-    std::length_error("count > max_size() - size()"));
+    "count > max_size() - curr_size");
   const std::size_t index = pos - curr_data;
   traits_type::move(&curr_data[index + count], pos, (end() - pos) + 1);
   traits_type::copy(&curr_data[index], s, count);
