@@ -22,16 +22,39 @@ struct cxper_char_traits
   using int_type = int;
   using state_type = std::mbstate_t;
 
-  static constexpr void assign(char_type&, const char_type&) noexcept {}
-  static constexpr bool eq(char_type, char_type) noexcept { return true; }
-  static constexpr bool lt(char_type, char_type) noexcept { return true; }
+  static constexpr void assign(char_type& a, const char_type& b) noexcept { a = b;  }
+  static constexpr bool eq(char_type a, char_type b) noexcept { return a == b; }
+  static constexpr bool lt(char_type a, char_type b) noexcept { return a < b; }
 
   static constexpr int compare(const char_type*, const char_type*, std::size_t) { return 0; }
-  static constexpr std::size_t length(const char_type*) { return 0; }
+  static constexpr std::size_t length(const char_type* s)
+  {
+    std::size_t n = 0;
+    while (*(s++));
+    return n;
+  }
   static constexpr const char_type* find(const char_type*, std::size_t, const char_type&){ return 0; }
-  static constexpr char_type* move(char_type* s1, const char_type*, std::size_t) { return s1; }
-  static constexpr char_type* copy(char_type* s1, const char_type*, std::size_t) { return s1; }
-  static constexpr char_type* assign(char_type* s, std::size_t, char_type) { return s; }
+  static constexpr char_type* move(char_type* dest, const char_type* src, std::size_t n)
+  {
+    const auto temp = dest;
+    while (n--)
+      *(dest++) = *(src++);
+    return temp;
+  }
+  static constexpr char_type* copy(char_type* dest, const char_type* src, std::size_t n) 
+  { 
+    const auto temp = dest;
+    while (n--)
+      *(dest++) = *(src++);
+    return temp;
+  }
+  static constexpr char_type* assign(char_type* dest, std::size_t n, char_type ch) 
+  {
+    const auto temp = dest;
+    while (n--)
+      *(dest++) = ch;
+    return temp;
+  }
 };
 #else
 using cxper_char_traits = std::char_traits<char>;
@@ -146,7 +169,6 @@ testConstantEvaluation()
   a.compare(0, 1, "a");
   a.compare(0, 1, "a", 1);
 
-  // substr
   a.substr(0);
 
   // subview
@@ -329,7 +351,11 @@ testConstantEvaluation()
   a.compare(0, 1, "a", 1);
 
   // substr
+  // in gcc 5, a constexpr non-static member function returning the class
+  // is a member of causes an ICE
+#ifndef BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
   a.substr(0);
+#endif
 
   // subview
   a.subview(0);
@@ -497,7 +523,11 @@ testConstantEvaluation()
   a.compare(0, 1, "a", 1);
   
   // substr
-  a.substr(0);
+  // in gcc 5, a constexpr non-static member function returning the class
+  // is a member of causes an ICE
+#ifndef BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
+  a.substr(0, 1);
+#endif
   
   // subview
   a.subview(0);
