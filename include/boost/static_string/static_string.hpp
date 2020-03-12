@@ -730,56 +730,32 @@ defined(BOOST_STATIC_STRING_NO_PTR_COMP_FUNCTIONS)
 #endif
 }
 
-// This nested type workaround is for gcc 5,
+// This workaround is for gcc 5,
 // which prohibits throw expressions in constexpr
 // functions, but for some reason permits them in
 // constructors.
-template<typename Exception>
-struct exception
-{
 #ifdef BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
-  struct raise_if
-  {
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    raise_if(
-      bool check, 
-      const char* message)
-    {
-      if (check)
-        BOOST_STATIC_STRING_THROW(Exception(message));
-    }
-  };
-
-  struct raise
-  {
-    BOOST_STATIC_STRING_NORETURN
-    BOOST_STATIC_STRING_CPP14_CONSTEXPR
-    raise(const char* message)
-    {
-      BOOST_STATIC_STRING_THROW(Exception(message));
-    }
-  };
-#else
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  static
-  void 
-  raise_if(
-    bool check, 
-    const char* message)
-  {
-    if (check)
-      BOOST_STATIC_STRING_THROW(Exception(message));
-  }
-
+template<typename Exception>
+struct throw_exception
+{
   BOOST_STATIC_STRING_NORETURN
-  static
-  void
-  raise(const char* message)
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  throw_exception(const char* msg)
   {
-    BOOST_STATIC_STRING_THROW(Exception(message));
+    BOOST_STATIC_STRING_THROW(Exception(msg));
   }
-#endif
 };
+#else
+template<typename Exception>
+BOOST_STATIC_STRING_NORETURN
+inline
+void
+throw_exception(const char* msg)
+{
+  BOOST_STATIC_STRING_THROW(Exception(msg));
+}
+#endif
+
 } // detail
 #endif
 
@@ -1606,9 +1582,9 @@ public:
   reference
   at(size_type pos)
   {
-    detail::exception<std::out_of_range>::raise_if(
-      pos >= size(),
-      "pos >= size()");
+    if (pos >= size())
+      detail::throw_exception<std::out_of_range>(
+        "pos >= size()");
     return data()[pos];
   }
 
@@ -1633,9 +1609,9 @@ public:
   const_reference
   at(size_type pos) const
   {
-    detail::exception<std::out_of_range>::raise_if(
-      pos >= size(),
-      "pos >= size()");
+    if (pos >= size())
+      detail::throw_exception<std::out_of_range>(
+        "pos >= size()");
     return data()[pos];
   }
 
@@ -2021,9 +1997,9 @@ public:
   void
   reserve(size_type n)
   {
-    detail::exception<std::length_error>::raise_if(
-      n > max_size(),
-      "n > max_size()");
+    if (n > max_size())
+      detail::throw_exception<std::length_error>(
+        "n > max_size()");
   }
 
   /** Return the number of characters that can be stored.
@@ -2105,8 +2081,9 @@ public:
     size_type count,
     value_type ch)
   {
-    detail::exception<std::out_of_range>::raise_if(
-      index > size(), "index > size()");
+    if (index > size())
+      detail::throw_exception<std::out_of_range>(
+        "index > size()");
     insert(begin() + index, count, ch);
     return *this;
   }
@@ -2171,8 +2148,9 @@ public:
     const_pointer s,
     size_type count)
   {
-    detail::exception<std::out_of_range>::raise_if(
-      index > size(), "index > size()");
+    if (index > size())
+      detail::throw_exception<std::out_of_range>(
+        "index > size()");
     insert(data() + index, s, s + count);
     return *this;
   }
@@ -5246,7 +5224,7 @@ private:
   basic_static_string&
   assign_char(value_type, std::false_type)
   {
-    detail::exception<std::length_error>::raise("max_size() == 0");
+    detail::throw_exception<std::length_error>("max_size() == 0");
     // This eliminates any potential warnings
 #ifdef BOOST_STATIC_STRING_NO_NORETURN
     return *this;
@@ -5270,8 +5248,9 @@ private:
     const_pointer s,
     size_type n2)
   {
-    detail::exception<std::out_of_range>::raise_if(
-      pos > size(), "pos > size()");
+    if (pos > size())
+      detail::throw_exception<std::out_of_range>(
+        "pos > size()");
     return replace_unchecked(data() + pos, data() + pos + capped_length(pos, n1), s, n2);
   }
 
@@ -5290,8 +5269,9 @@ private:
     const_pointer s,
     size_type count)
   {
-    detail::exception<std::out_of_range>::raise_if(
-      index > size(), "index > size()");
+    if (index > size())
+      detail::throw_exception<std::out_of_range>(
+        "index > size()");
     insert_unchecked(data() + index, s, count);
     return *this;
   }
@@ -5320,8 +5300,9 @@ private:
     size_type index,
     size_type length) const
   {
-    detail::exception<std::out_of_range>::raise_if(
-      index > size(), "index > size()");
+    if (index > size())
+      detail::throw_exception<std::out_of_range>(
+        "index > size()");
     return (std::min)(size() - index, length);
   }
 };
@@ -5946,8 +5927,9 @@ assign(
   value_type ch) ->
     basic_static_string&
 {
-  detail::exception<std::length_error>::raise_if(
-    count > max_size(), "count > max_size()");
+  if (count > max_size())
+    detail::throw_exception<std::length_error>(
+      "count > max_size()");
   this->set_size(count);
   traits_type::assign(data(), size(), ch);
   return term();
@@ -5962,8 +5944,9 @@ assign(
   size_type count) ->
     basic_static_string&
 {
-  detail::exception<std::length_error>::raise_if(
-    count > max_size(), "count > max_size()");
+  if (count > max_size())
+    detail::throw_exception<std::length_error>(
+      "count > max_size()");
   this->set_size(count);
   traits_type::move(data(), s, size());
   return term();
@@ -5988,7 +5971,7 @@ assign(
     {
       this->set_size(i);
       term();
-      detail::exception<std::length_error>::raise("n > max_size()");
+      detail::throw_exception<std::length_error>("n > max_size()");
     }
     traits_type::assign(*ptr, *first);
   }
@@ -6008,9 +5991,9 @@ insert(
 {
   const auto curr_size = size();
   const auto curr_data = data();
-  detail::exception<std::length_error>::raise_if(
-    count > max_size() - curr_size,
-    "count > max_size() - curr_size");
+  if (count > max_size() - curr_size)
+    detail::throw_exception<std::length_error>(
+      "count > max_size() - curr_size");
   const auto index = pos - curr_data;
   traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
   traits_type::assign(&curr_data[index], count, ch);
@@ -6036,9 +6019,9 @@ insert(
   const std::size_t count = detail::distance(first, last);
   const std::size_t index = pos - curr_data;
   const auto first_addr = &*first;
-  detail::exception<std::length_error>::raise_if(
-    count > max_size() - curr_size,
-    "count > max_size() - curr_size");
+  if (count > max_size() - curr_size)
+    detail::throw_exception<std::length_error>(
+      "count > max_size() - curr_size");
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
   if (!inside || (inside && (first_addr + count <= pos)))
   {
@@ -6112,8 +6095,9 @@ push_back(
   value_type ch)
 {
   const auto curr_size = size();
-  detail::exception<std::length_error>::raise_if(
-    curr_size >= max_size(), "curr_size >= max_size()");
+  if (curr_size >= max_size())
+    detail::throw_exception<std::length_error>(
+      "curr_size >= max_size()");
   traits_type::assign(data()[curr_size], ch);
   this->set_size(curr_size + 1);
   term();
@@ -6129,8 +6113,9 @@ append(
     basic_static_string&
 {
   const auto curr_size = size();
-  detail::exception<std::length_error>::raise_if(
-    count > max_size() - curr_size, "count > max_size() - size()");
+  if (count > max_size() - curr_size)
+    detail::throw_exception<std::length_error>(
+      "count > max_size() - size()");
   traits_type::assign(end(), count, ch);
   this->set_size(curr_size + count);
   return term();
@@ -6146,8 +6131,9 @@ append(
     basic_static_string&
 {
   const auto curr_size = size();
-  detail::exception<std::length_error>::raise_if(
-    count > max_size() - curr_size, "count > max_size() - size()");
+  if (count > max_size() - curr_size)
+    detail::throw_exception<std::length_error>(
+      "count > max_size() - size()");
   traits_type::copy(end(), s, count);
   this->set_size(curr_size + count);
   return term();
@@ -6159,8 +6145,9 @@ void
 basic_static_string<N, CharT, Traits>::
 resize(size_type n, value_type c)
 {
-  detail::exception<std::length_error>::raise_if(
-    n > max_size(), "n > max_size()");
+  if (n > max_size())
+    detail::throw_exception<std::length_error>(
+      "n > max_size()");
   const auto curr_size = size();
   if(n > curr_size)
     traits_type::assign(data() + curr_size, n - curr_size, c);
@@ -6190,10 +6177,12 @@ basic_static_string<N, CharT, Traits>::
 swap(basic_static_string<M, CharT, Traits>& s)
 {
   const auto curr_size = size();
-  detail::exception<std::length_error>::raise_if(
-    curr_size > s.max_size(), "curr_size > s.max_size()");
-  detail::exception<std::length_error>::raise_if(
-    s.size() > max_size(), "s.size() > max_size()");
+  if (curr_size > s.max_size())
+    detail::throw_exception<std::length_error>(
+      "curr_size > s.max_size()");
+  if (s.size() > max_size())
+    detail::throw_exception<std::length_error>(
+      "s.size() > max_size()");
   basic_static_string tmp(s);
   s.set_size(curr_size);
   traits_type::copy(&s.data()[0], data(), curr_size + 1);
@@ -6215,10 +6204,9 @@ replace(
   const auto curr_size = size();
   const auto curr_data = data();
   const std::size_t n1 = i2 - i1;
-  detail::exception<std::length_error>::raise_if(
-    n > max_size() ||
-    curr_size - n1 >= max_size() - n, 
-    "replaced string exceeds max_size()");
+  if (n > max_size() || curr_size - n1 >= max_size() - n)
+    detail::throw_exception<std::length_error>( 
+      "replaced string exceeds max_size()");
   const auto pos = i1 - curr_data;
   traits_type::move(&curr_data[pos + n], i2, (end() - i2) + 1);
   traits_type::assign(&curr_data[pos], n, c);
@@ -6246,10 +6234,9 @@ replace(
   const std::size_t n1 = i2 - i1;
   const std::size_t n2 = detail::distance(j1, j2);
   const std::size_t pos = i1 - curr_data;
-  detail::exception<std::length_error>::raise_if(
-    n2 > max_size() ||
-    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
-    "replaced string exceeds max_size()");
+  if (n2 > max_size() || curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
+    detail::throw_exception<std::length_error>(
+      "replaced string exceeds max_size()");
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
   if (inside && first_addr == i1 && n1 == n2)
     return *this;
@@ -6310,10 +6297,9 @@ replace(
   const std::size_t n1 = detail::distance(i1, i2);
   const std::size_t n2 = read_back(false, j1, j2);
   const std::size_t pos = i1 - curr_data;
-  detail::exception<std::length_error>::raise_if(
-    n2 > max_size() ||
-    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
-    "replaced string exceeds max_size()");
+  if (n2 > max_size() || curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
+    detail::throw_exception<std::length_error>(
+      "replaced string exceeds max_size()");
   // Rotate to the correct order. [i2, end] will now start with the replaced string, 
   // continue to the existing string not being replaced, and end with a null terminator
   std::rotate(&curr_data[pos], &curr_data[curr_size + 1], &curr_data[curr_size + n2 + 1]);
@@ -6462,7 +6448,7 @@ read_back(
     {
       if (overwrite_null)
         term();
-      detail::exception<std::length_error>::raise(
+      detail::throw_exception<std::length_error>(
         "count > max_size() - size()");
     }
     traits_type::assign(curr_data[new_size++ + (!overwrite_null)], *first);
@@ -6485,10 +6471,9 @@ replace_unchecked(
   const auto curr_size = size();
   const std::size_t pos = i1 - curr_data;
   const std::size_t n1 = i2 - i1;
-  detail::exception<std::length_error>::raise_if(
-    n2 > max_size() ||
-    curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2,
-    "replaced string exceeds max_size()");
+  if (n2 > max_size() || curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
+    detail::throw_exception<std::length_error>(
+      "replaced string exceeds max_size()");
   traits_type::move(&curr_data[pos + n2], i2, (end() - i2) + 1);
   traits_type::copy(&curr_data[pos], s, n2);
   this->set_size((curr_size - n1) + n2);
@@ -6507,9 +6492,9 @@ insert_unchecked(
 {
   const auto curr_data = data();
   const auto curr_size = size();
-  detail::exception<std::length_error>::raise_if(
-    count > max_size() - curr_size,
-    "count > max_size() - curr_size");
+  if (count > max_size() - curr_size)
+    detail::throw_exception<std::length_error>(
+      "count > max_size() - curr_size");
   const std::size_t index = pos - curr_data;
   traits_type::move(&curr_data[index + count], pos, (end() - pos) + 1);
   traits_type::copy(&curr_data[index], s, count);
