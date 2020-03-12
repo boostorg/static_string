@@ -21,6 +21,8 @@
 
 namespace boost {
 namespace static_strings {
+
+template class basic_static_string<420, char>;
   
 using string_view = basic_string_view<char, std::char_traits<char>>;
 
@@ -6747,6 +6749,10 @@ testReplace()
   using T = static_string<10>;
   BOOST_TEST_THROWS(T("12345").replace(0, 1, 500, 'a'), std::length_error);
   BOOST_TEST_THROWS(T("12345").replace(0, 1, "aaaaaaaaaaaaaa"), std::length_error);
+
+  // unchecked replacement throwing
+  BOOST_TEST_THROWS(S("aaaaa").replace(10, 1, T("bbbbb")), std::out_of_range);
+  BOOST_TEST_THROWS(T("aaaaa").replace(0, 1, S("bbbbbbbbbbbbb")), std::length_error);
 }
 
 // done
