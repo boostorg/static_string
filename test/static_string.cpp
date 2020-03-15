@@ -1010,7 +1010,15 @@ testInsert()
         BOOST_TEST_THROWS(static_string<4>{"abc"}.insert(4, T{}), std::out_of_range);
         BOOST_TEST_THROWS(static_string<3>{"abc"}.insert(1, T{}), std::length_error);
     }
-
+    // insert(const_iterator, InputIterator, InputIterator)
+    {
+      std::stringstream a("defghi");
+      static_string<30> b = "abcjklmnop";
+      b.insert(b.begin() + 3,
+        std::istream_iterator<char>(a),
+        std::istream_iterator<char>());
+      BOOST_TEST(b == "abcdefghijklmnop");
+    }
     //---
 
     {
@@ -5904,6 +5912,15 @@ testReplace()
     static_string<20> fs1 = "helloworld";
     BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'}) == "helloworld");
   }
+  // replace(const_iterator, const_iterator, InputIterator, InputIterator)
+  {
+    std::stringstream a("defghi");
+    static_string<30> b = "abcabcdefjklmnop";
+    BOOST_TEST(b.replace(b.begin() + 3, b.begin() + 9,
+      std::istream_iterator<char>(a), 
+      std::istream_iterator<char>()) ==
+      "abcdefghijklmnop");
+  }
 
   using S = static_string<400>;
   S s_short = "123/";
@@ -7063,9 +7080,11 @@ void
 testStream()
 {
   std::stringstream a;
-  static_string<10> b;
+  static_string<10> b = "abcdefghij";
   a << b;
+  static_string<10> c(std::istream_iterator<char>{a}, std::istream_iterator<char>{});
   BOOST_TEST(a.str() == b.subview());
+  BOOST_TEST(b == c);
 }
 
 void
