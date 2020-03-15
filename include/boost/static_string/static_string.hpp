@@ -6297,9 +6297,6 @@ replace(
   const std::size_t n1 = detail::distance(i1, i2);
   const std::size_t n2 = read_back(false, j1, j2);
   const std::size_t pos = i1 - curr_data;
-  if (n2 > max_size() || curr_size - (std::min)(n1, curr_size - pos) >= max_size() - n2)
-    detail::throw_exception<std::length_error>(
-      "replaced string exceeds max_size()");
   // Rotate to the correct order. [i2, end] will now start with the replaced string, 
   // continue to the existing string not being replaced, and end with a null terminator
   std::rotate(&curr_data[pos], &curr_data[curr_size + 1], &curr_data[curr_size + n2 + 1]);
@@ -6446,6 +6443,8 @@ read_back(
   {
     if (new_size >= max_size())
     {
+      // if we overwrote the null terminator,
+      // put it back
       if (overwrite_null)
         term();
       detail::throw_exception<std::length_error>(
