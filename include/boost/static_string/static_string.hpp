@@ -3442,7 +3442,8 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
-    return basic_static_string(data() + pos, capped_length(pos, count));
+    return basic_static_string(
+      data() + pos, capped_length(pos, count));
   }
 
   /** Return a string view of a substring.
@@ -3469,7 +3470,6 @@ public:
     size_type pos = 0,
     size_type count = npos) const
   {
-    
     return string_view_type(
       data() + pos, capped_length(pos, count));
   }
