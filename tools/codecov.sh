@@ -13,7 +13,7 @@
 
 set -ex
 
-. ci/travis/enforce.sh
+. ci/enforce.sh
 
 if [ -z "$GCOV" ]; then
     if [ "${B2_TOOLSET%%-*}" == "gcc" ]; then
