@@ -193,11 +193,6 @@ stages:
           #B2_CXXSTD: 14 # default
           B2_ADDRESS_MODEL: address-model=64,32
           VM_IMAGE: 'vs2017-win2016'
-        VS 2015 C++14:
-          B2_TOOLSET: msvc-14.0
-          #B2_CXXSTD: 14 # default
-          B2_ADDRESS_MODEL: address-model=64,32
-          VM_IMAGE: 'vs2015-win2012r2'
 
     pool:
       vmImage: $(VM_IMAGE)
@@ -225,80 +220,57 @@ stages:
 
   - job: 'macOS'
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: 'macOS-10.14'
     strategy:
       matrix:
-        Xcode 10.1:
+        Xcode_11_3_1:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17
+          B2_CXXSTD: 14,17,2a
+          XCODE_APP: /Applications/Xcode_11.3.1.app
+        Xcode_11_2_1:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 14,17,2a
+          XCODE_APP: /Applications/Xcode_11.2.1.app
+        Xcode_11_2:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 14,17,2a
+          XCODE_APP: /Applications/Xcode_11.2.app
+        Xcode_11_1:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 14,17,2a
+          XCODE_APP: /Applications/Xcode_11.1.app
+        Xcode_10_3:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 11,14,17,2a
+          XCODE_APP: /Applications/Xcode_10.3.app
+        Xcode_10_2_1:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 11,14,17,2a
+          XCODE_APP: /Applications/Xcode_10.2.1.app
+        Xcode_10_2:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 11,14,17,2a
+          XCODE_APP: /Applications/Xcode_10.2.app
+        Xcode_10_1:
+          B2_TOOLSET: clang
+          B2_CXXSTD: 11,14,17,2a
           XCODE_APP: /Applications/Xcode_10.1.app
-        Xcode 10.0:
+        Xcode_10_0:
           B2_TOOLSET: clang
-          B2_CXXSTD: 14,17
+          B2_CXXSTD: 11,14,17,2a
           XCODE_APP: /Applications/Xcode_10.app
-        Xcode 9.4.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          XCODE_APP: /Applications/Xcode_9.4.1.app
-        Xcode 9.4:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          XCODE_APP: /Applications/Xcode_9.4.app
-        Xcode 9.3.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14,17
-          XCODE_APP: /Applications/Xcode_9.3.1.app
-        Xcode 9.3:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14
-          XCODE_APP: /Applications/Xcode_9.3.app
-        Xcode 9.2:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11,14
-          XCODE_APP: /Applications/Xcode_9.2.app
-        Xcode 9.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11
-          XCODE_APP: /Applications/Xcode_9.1.app
-        Xcode 9.0.1:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11
-          XCODE_APP: /Applications/Xcode_9.0.1.app
-        Xcode 9.0:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11
-          XCODE_APP: /Applications/Xcode_9.app
-        Xcode 8.3.3:
-          B2_TOOLSET: clang
-          B2_CXXSTD: 11
-          XCODE_APP: /Applications/Xcode_8.3.3.app
     steps:
     - bash: |
         set -e
-        uname -a
-        sudo xcode-select -switch ${XCODE_APP}
-        which clang++
-
-        git clone --branch master https://github.com/boostorg/boost-ci.git boost-ci
-        cp -pr boost-ci/ci boost-ci/.codecov.yml .
-        rm -rf boost-ci
+        git clone --branch master https://github.com/boostorg/boost-ci.git boost-ci-cloned
+        cp -prf boost-ci-cloned/ci .
+        rm -rf boost-ci-cloned
         source ci/azure-pipelines/install.sh
-
-        # AzP requires to run special task in order to export
-        # SELF and BOOST_ROOT as job-scoped variable from a script.
-        # NOTE: Disable set -x is necessary, see the troubleshooting guide
-        # on "Variables having ' (single quote) appended":
-        # https://docs.microsoft.com/en-us/azure/devops/pipelines/troubleshooting
-        set +x
-        echo "##vso[task.setvariable variable=SELF]"$SELF
-        echo "##vso[task.setvariable variable=BOOST_ROOT]"$BOOST_ROOT
-        set -x
       displayName: Install
     - bash: |
         set -e
         echo "SELF=$SELF"
         echo "BOOST_ROOT=$BOOST_ROOT"
-
         cd $BOOST_ROOT/libs/$SELF
-        ci/azure-pipelines/build.sh --debug-configuration
+        ci/azure-pipelines/build.sh
       displayName: 'Build'
