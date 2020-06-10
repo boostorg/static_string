@@ -37,7 +37,7 @@
 
 [heading Introduction]
 
-This library provides a dynamically resizable string of characters with
+TEST This library provides a dynamically resizable string of characters with
 compile-time fixed capacity and contiguous embedded storage in which the
 characters are placed within the string object itself. Its API closely
 resembles that of `std::string`.
