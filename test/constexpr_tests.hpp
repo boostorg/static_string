@@ -41,14 +41,14 @@ struct cxper_char_traits
       *(dest++) = *(src++);
     return temp;
   }
-  static constexpr char_type* copy(char_type* dest, const char_type* src, std::size_t n) 
-  { 
+  static constexpr char_type* copy(char_type* dest, const char_type* src, std::size_t n)
+  {
     const auto temp = dest;
     while (n--)
       *(dest++) = *(src++);
     return temp;
   }
-  static constexpr char_type* assign(char_type* dest, std::size_t n, char_type ch) 
+  static constexpr char_type* assign(char_type* dest, std::size_t n, char_type ch)
   {
     const auto temp = dest;
     while (n--)
@@ -62,8 +62,8 @@ using cxper_char_traits = std::char_traits<char>;
 using cstatic_string = basic_static_string<50, char, cxper_char_traits>;
 
 inline
-constexpr 
-bool 
+constexpr
+bool
 testConstantEvaluation()
 {
 #ifdef BOOST_STATIC_STRING_CPP20
@@ -421,7 +421,7 @@ testConstantEvaluation()
   // ends_with
   a.ends_with('a');
   a.ends_with("a");
- 
+
   return true;
 #elif defined(BOOST_STATIC_STRING_CPP14)
   // c++14 constexpr tests
@@ -521,17 +521,17 @@ testConstantEvaluation()
   a.compare("a");
   a.compare(0, 1, "a");
   a.compare(0, 1, "a", 1);
-  
+
   // substr
   // in gcc 5, a constexpr non-static member function returning the class
   // is a member of causes an ICE
 #ifndef BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
   a.substr(0, 1);
 #endif
-  
+
   // subview
   a.subview(0);
-  
+
   // copy
   char k[20]{};
   a.copy(k, 1, 0);
@@ -596,9 +596,9 @@ testConstantEvaluation()
   return true;
 #elif defined(BOOST_STATIC_STRING_CPP11)
   // c++11 constexpr tests
-  return (cstatic_string().size() + 
-    cstatic_string().length() + 
-    cstatic_string().max_size() + 
+  return (cstatic_string().size() +
+    cstatic_string().length() +
+    cstatic_string().max_size() +
     cstatic_string().capacity()) != 0 &&
     cstatic_string().empty();
 #endif

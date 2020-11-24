@@ -24,7 +24,7 @@ namespace boost {
 namespace static_strings {
 
 template class basic_static_string<420, char>;
-  
+
 using string_view = basic_string_view<char, std::char_traits<char>>;
 
 template <class S>
@@ -110,7 +110,7 @@ testA(S s, const typename S::value_type* str, typename S::size_type n, S expecte
   return s.append(str, n) == expected;
 }
 
-int 
+int
 sign(int x)
 {
   if (x == 0)
@@ -216,7 +216,7 @@ testR(S s, typename S::size_type pos, typename S::size_type n1, const typename S
       // this is a precondition violation for the const_iterator overload
       return s.replace(pos, n1, str, n2) == expected;
     else
-      return s.replace(pos, n1, str, n2) == expected && 
+      return s.replace(pos, n1, str, n2) == expected &&
         s0.replace(s0.begin() + pos, s0.begin() + pos + n1, str, str + n2) == expected;
   }
   else
@@ -399,7 +399,7 @@ testAssignment()
     BOOST_TEST(static_string<3>{}.assign("abc", 3) == "abc");
     BOOST_TEST(static_string<3>{"*"}.assign("abc", 3) == "abc");
     BOOST_TEST_THROWS(static_string<1>{}.assign("abc", 3), std::length_error);
-    
+
     // assign(CharT const* s)
     BOOST_TEST(static_string<3>{}.assign("abc") == "abc");
     BOOST_TEST(static_string<3>{"*"}.assign("abc") == "abc");
@@ -413,7 +413,7 @@ testAssignment()
         BOOST_TEST(static_string<4>{"*"}.assign(cs.begin(), cs.end()) == "abcd");
         BOOST_TEST_THROWS(static_string<2>{"*"}.assign(cs.begin(), cs.end()), std::length_error);
     }
-    
+
     // assign(std::initializer_list<CharT> ilist)
     BOOST_TEST(static_string<3>{}.assign({'a', 'b', 'c'}) == "abc");
     BOOST_TEST(static_string<3>{"*"}.assign({'a', 'b', 'c'}) == "abc");
@@ -451,7 +451,7 @@ testAssignment()
         BOOST_TEST_THROWS(static_string<2>{"**"}.assign(T{}, 6, 3), std::out_of_range);
         BOOST_TEST_THROWS(static_string<2>{"**"}.assign(T{}, 1, 3), std::length_error);
     }
-    
+
     //---
 
     {
@@ -472,7 +472,7 @@ testAssignment()
             s3 = s1,
             std::length_error);
     }
-    
+
     {
         static_string<3> s1;
         s1 = "123";
@@ -686,7 +686,7 @@ testElements()
     BOOST_TEST(static_string<3>{"abc"}.at(2) == 'c');
     BOOST_TEST_THROWS(static_string<3>{""}.at(0), std::out_of_range);
     BOOST_TEST_THROWS(static_string<3>{"abc"}.at(4), std::out_of_range);
-    
+
     // at(size_type pos) const
     BOOST_TEST(cfs3{"abc"}.at(0) == 'a');
     BOOST_TEST(cfs3{"abc"}.at(2) == 'c');
@@ -717,7 +717,7 @@ testElements()
     BOOST_TEST(static_string<3>{"a"}.back() == 'a');
     BOOST_TEST(static_string<3>{"abc"}.back() == 'c');
 
-    // back() const 
+    // back() const
     BOOST_TEST(cfs3{"a"}.back() == 'a');
     BOOST_TEST(cfs3{"abc"}.back() == 'c');
 
@@ -924,7 +924,7 @@ testInsert()
     BOOST_TEST(static_string<4>{"ad"}.insert(1, "bcd", 2) == "abcd");
     BOOST_TEST_THROWS(static_string<4>{"abc"}.insert(4, "*"), std::out_of_range);
     BOOST_TEST_THROWS(static_string<3>{"abc"}.insert(1, "*"), std::length_error);
-    
+
     // insert(size_type index, string_view_type sv)
     BOOST_TEST(static_string<3>{"ac"}.insert(1, sv{"b"}) == "abc");
     BOOST_TEST_THROWS(static_string<4>{"abc"}.insert(4, sv{"*"}), std::out_of_range);
@@ -1639,7 +1639,7 @@ testInsert()
     BOOST_TEST(testI(S("abcdefghijklmnopqrst"), 21, "12345678901234567890", 20, S("can't happen")));
 }
 
-// done 
+// done
 static
 void
 testErase()
@@ -3754,7 +3754,7 @@ testToStaticString()
     BOOST_TEST(testTS(std::numeric_limits<unsigned long long>::max()));
     BOOST_TEST(testTS(std::numeric_limits<long double>::min()));
     BOOST_TEST(testTS(std::numeric_limits<float>::min()));
-    
+
     // these tests technically are not portable, but they will work
     // 99% of the time.
     {
@@ -4136,7 +4136,7 @@ testFind()
 
   BOOST_TEST(fs1.rfind(cs1, 0) == 0);
   BOOST_TEST(fs1.rfind(cs2, 0) == S::npos);
-  
+
   BOOST_TEST(fs1.rfind(cs2, 0, 2) == S::npos);
   BOOST_TEST(fs1.rfind(cs1, 4) == 0);
 
@@ -5114,7 +5114,7 @@ testFind()
 
 
 
-  
+
   // find_first_not_of
 
   const char* cs3 = "12456";
@@ -5963,7 +5963,7 @@ testReplace()
     std::stringstream a("defghi");
     static_string<30> b = "abcabcdefjklmnop";
     BOOST_TEST(b.replace(b.begin() + 3, b.begin() + 9,
-      std::istream_iterator<char>(a), 
+      std::istream_iterator<char>(a),
       std::istream_iterator<char>()) ==
       "abcdefghijklmnop");
   }
@@ -6176,7 +6176,7 @@ testReplace()
   BOOST_TEST(testR(S("abcde"), 5, 1, 5, '2', S("abcde22222")));
   BOOST_TEST(testR(S("abcde"), 5, 1, 10, '2', S("abcde2222222222")));
   BOOST_TEST(testR(S("abcde"), 5, 1, 20, '2', S("abcde22222222222222222222")));
-  
+
   BOOST_TEST(testR(S("abcde"), 0, 4, "12345", 4, S("1234e")));
   BOOST_TEST(testR(S("abcde"), 0, 4, "12345", 5, S("12345e")));
   BOOST_TEST(testR(S("abcde"), 0, 4, "1234567890", 0, S("e")));
@@ -7205,13 +7205,13 @@ runTests()
   static_cast<void>(cxper);
 
   testConstruct();
-    
+
   testAssignment();
-    
+
   testElements();
 
   testIterators();
-    
+
   testCapacity();
 
   testClear();

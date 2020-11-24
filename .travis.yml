@@ -99,8 +99,8 @@ anchors:
                                            "libc6-dbg",
                                            "libc++-dev",
                                            "libstdc++-8-dev" ], sources: [ "llvm-toolchain-xenial-8",
-                                                                           "ubuntu-toolchain-r-test"   ] } }                                                                       
-    
+                                                                           "ubuntu-toolchain-r-test"   ] } }
+
   gcc-48:   &gcc-48   { apt: { packages: [ "g++-4.8"         ]                                           } }
   gcc-49:   &gcc-49   { apt: { packages: [ "g++-4.9"         ], sources: [ "ubuntu-toolchain-r-test"   ] } }
   gcc-5:    &gcc-5    { apt: { packages: [ "g++-5"           ]                                           } }
@@ -190,7 +190,7 @@ jobs:
     - { os: "linux", env: [ "B2_TOOLSET=clang-6.0",   "B2_CXXSTD=14,17"    ], addons: *clang-6   }
     - { os: "linux", env: [ "B2_TOOLSET=clang-7",     "B2_CXXSTD=17"    ], addons: *clang-7   }
     - { os: "linux", env: [ "B2_TOOLSET=clang-8",     "B2_CXXSTD=17"    ], addons: *clang-8   }
-    
+
     -   os: "linux"
         env: ["B2_TOOLSET=clang-9", "B2_CXXSTD=11,14,17"]
         addons:
@@ -203,8 +203,8 @@ jobs:
               - clang-9
               - libc6-dbg
               - libc++-dev
-              - libstdc++-8-dev          
-    
+              - libstdc++-8-dev
+
     # libc++
     - { os: "linux", env: [ "B2_TOOLSET=clang-6.0",   "B2_CXXSTD=11,14",
                             "B2_CXXFLAGS=-stdlib=libc++"                   ], addons: *clang-6   }
@@ -246,7 +246,7 @@ jobs:
       script:
         - cd $BOOST_ROOT/libs/$SELF
         - ci/travis/coverity.sh
-        
+
     # Standalone tests for StaticString
     - { os: "linux", env: [ "COMMENT=STANDALONE",       "B2_TOOLSET=gcc-7",       "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE",       "B2_CXXSTD=17"                                        ], addons: *gcc-7     }
     - { os: "linux", env: [ "COMMENT=STANDALONE",       "B2_TOOLSET=gcc-8",       "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE",       "B2_CXXSTD=17"                                        ], addons: *gcc-8     }
@@ -267,9 +267,9 @@ jobs:
               - libc6-dbg
               - libc++-dev
               - libstdc++-8-dev
-          
+
     - { os: "osx"  , env: [ "COMMENT=STANDALONE",       "B2_TOOLSET=clang",       "B2_DEFINES=define=BOOST_STATIC_STRING_STANDALONE",       "B2_CXXSTD=17"     ]                     }
-  
+
 notifications:
   email:
     false
