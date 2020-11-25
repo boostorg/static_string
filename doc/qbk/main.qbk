@@ -32,6 +32,7 @@
 [template include_file[path][^<'''<ulink url="../../../../'''[path]'''">'''[path]'''</ulink>'''>]]
 
 [def __InputIterator__          [@https://en.cppreference.com/w/cpp/named_req/InputIterator ['InputIterator]]]
+[def __UnaryPredicate__         [@https://en.cppreference.com/w/cpp/named_req/Predicate ['Predicate]]]
 
 [/-----------------------------------------------------------------------------]
 

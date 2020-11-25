@@ -16,6 +16,7 @@
 #include <boost/core/lightweight_test.hpp>
 #include <cstdlib>
 #include <cwchar>
+#include <cctype>
 #include <sstream>
 #include <string>
 
@@ -1846,6 +1847,51 @@ testErase()
     BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 20, 0, S("abcdefghijklmnopqrst")));
     BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 20, 1, S("abcdefghijklmnopqrst")));
     BOOST_TEST(testE(S("abcdefghijklmnopqrst"), 21, 0, S("can't happen")));
+}
+
+// done
+static
+void
+testEraseIf()
+{
+    // erase_if(static_string& str, UnaryPredicate pred)
+
+    {
+        static_string<3> s{""};
+        BOOST_TEST(erase_if(s, [](char c) { return c == 'a'; }) == 0);
+        BOOST_TEST(s == "");
+        BOOST_TEST(*s.end() == 0);
+    }
+    {
+        static_string<3> s{"aaa"};
+        BOOST_TEST(erase_if(s, [](char c) { return c == 'a'; }) == 3);
+        BOOST_TEST(s == "");
+        BOOST_TEST(*s.end() == 0);
+    }
+    {
+        static_string<3> s{"abc"};
+        BOOST_TEST(erase_if(s, [](char c) { return c == 'a'; }) == 1);
+        BOOST_TEST(s == "bc");
+        BOOST_TEST(*s.end() == 0);
+    }
+    {
+        static_string<3> s{"abc"};
+        BOOST_TEST(erase_if(s, [](char c) { return c == 'b'; }) == 1);
+        BOOST_TEST(s == "ac");
+        BOOST_TEST(*s.end() == 0);
+    }
+    {
+        static_string<3> s{"abc"};
+        BOOST_TEST(erase_if(s, [](char c) { return c == 'c'; }) == 1);
+        BOOST_TEST(s == "ab");
+        BOOST_TEST(*s.end() == 0);
+    }
+    {
+        static_string<3> s{"abc"};
+        BOOST_TEST(erase_if(s, [](char c) { return c == 'd'; }) == 0);
+        BOOST_TEST(s == "abc");
+        BOOST_TEST(*s.end() == 0);
+    }
 }
 
 // done
@@ -7171,6 +7217,7 @@ runTests()
   testClear();
   testInsert();
   testErase();
+  testEraseIf();
   testPushBack();
   testPopBack();
   testAppend();
