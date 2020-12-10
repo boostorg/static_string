@@ -257,11 +257,8 @@ public:
   }
 
   size_type size_ = 0;
-#ifdef BOOST_STATIC_STRING_CPP20
-  value_type data_[N + 1];
-#else
+
   value_type data_[N + 1]{};
-#endif
 };
 
 // Optimization for when the size is 0
@@ -1059,6 +1056,33 @@ public:
   // Assignment
   //
   //--------------------------------------------------------------------------
+
+  /** Assign to the string.
+
+      Replaces the contents with those of
+      the string `s`.
+
+      @par Complexity
+
+      Linear in `s.size()`.
+
+      @par Exception Safety
+
+      Strong guarantee.
+
+      @return `*this`
+
+      @param s The string to replace
+      the contents with.
+
+      @throw std::length_error `s.size() > max_size()`.
+  */
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  basic_static_string&
+  operator=(const basic_static_string& s)
+  {
+    return assign(s);
+  }
 
   /** Assign to the string.
 

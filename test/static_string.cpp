@@ -14,6 +14,7 @@
 #include "compile_fail.hpp"
 
 #include <boost/core/lightweight_test.hpp>
+#include <boost/core/ignore_unused.hpp>
 #include <cstdlib>
 #include <cwchar>
 #include <cctype>
@@ -412,6 +413,7 @@ testAssignment()
         BOOST_TEST(static_string<4>{}.assign(cs.begin(), cs.end()) == "abcd");
         BOOST_TEST(static_string<4>{"*"}.assign(cs.begin(), cs.end()) == "abcd");
         BOOST_TEST_THROWS(static_string<2>{"*"}.assign(cs.begin(), cs.end()), std::length_error);
+        ignore_unused(s);
     }
 
     // assign(std::initializer_list<CharT> ilist)
@@ -1050,6 +1052,7 @@ testInsert()
         BOOST_TEST_THROWS(
             (s2.insert(6, "__")),
             std::out_of_range);
+        ignore_unused(s3);
     }
     {
         static_string<7> s1("12345");
@@ -2003,6 +2006,7 @@ testAppend()
           cs.begin() + 2, cs.begin() + 4) == "abcd");
       BOOST_TEST_THROWS(static_string<2>{"ab"}.append(
           cs.begin() + 2, cs.begin() + 4), std::length_error);
+      ignore_unused(s);
   }
 
   // append(std::initializer_list<CharT> ilist)
