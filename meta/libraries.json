@@ -13,5 +13,6 @@
     "maintainers": [
         "Krystian Stasiowski <sdkrystian@gmail.com>",
         "Vinnie Falco <vinnie.falco@gmail.com>"
-    ]
+    ],
+    "cxxstd": "11"
 }
