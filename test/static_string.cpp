@@ -3543,6 +3543,51 @@ testCompare()
     BOOST_TEST(testC(S("abcdefghijklmnopqrst"), 21, 0, "abcdefghijklmnopqrst", 10, 0));
     BOOST_TEST(testC(S("abcdefghijklmnopqrst"), 21, 0, "abcdefghijklmnopqrst", 19, 0));
     BOOST_TEST(testC(S("abcdefghijklmnopqrst"), 21, 0, "abcdefghijklmnopqrst", 20, 0));
+
+    {
+        std::string sv1 = "x";
+        std::string sv2 = "y";
+        str1 s1("x");
+        str2 s2("y");
+
+        BOOST_TEST(sv1 <= s2);
+        BOOST_TEST(sv1 < s2);
+        BOOST_TEST(sv1 != s2);
+        BOOST_TEST(! (sv1 == s2));
+        BOOST_TEST(! (sv1 >= s2));
+        BOOST_TEST(! (sv1 > s2));
+
+        BOOST_TEST(s1 <= sv2);
+        BOOST_TEST(s1 < sv2);
+        BOOST_TEST(s1 != sv2);
+        BOOST_TEST(! (s1 == sv2));
+        BOOST_TEST(! (s1 >= sv2));
+        BOOST_TEST(! (s1 > sv2));
+    }
+
+#ifndef BOOST_NO_CXX17_HDR_STRING_VIEW
+    {
+        std::string_view sv1 = "x";
+        std::string_view sv2 = "y";
+        str1 s1("x");
+        str2 s2("y");
+
+        BOOST_TEST(sv1 <= s2);
+        BOOST_TEST(sv1 < s2);
+        BOOST_TEST(sv1 != s2);
+        BOOST_TEST(! (sv1 == s2));
+        BOOST_TEST(! (sv1 >= s2));
+        BOOST_TEST(! (sv1 > s2));
+
+        BOOST_TEST(s1 <= sv2);
+        BOOST_TEST(s1 < sv2);
+        BOOST_TEST(s1 != sv2);
+        BOOST_TEST(! (s1 == sv2));
+        BOOST_TEST(! (s1 >= sv2));
+        BOOST_TEST(! (s1 > sv2));
+    }
+#endif
+
 }
 
 // done

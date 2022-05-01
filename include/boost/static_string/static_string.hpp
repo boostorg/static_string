@@ -23,7 +23,12 @@
 #include <functional>
 #include <initializer_list>
 #include <iosfwd>
+#include <string>
 #include <type_traits>
+
+#ifndef BOOST_NO_CXX17_HDR_STRING_VIEW
+#include <string_view>
+#endif
 
 namespace boost {
 namespace static_strings {
@@ -5613,6 +5618,331 @@ operator+(
   return basic_static_string<N + M, CharT, Traits>(rhs).insert(
     std::size_t(0), +lhs);
 }
+
+
+//------------------------------------------------------------------------------
+//
+// std::string/std::string_view comparison
+//
+//------------------------------------------------------------------------------
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const std::basic_string<CharT, Traits, Alloc>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) == 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string<CharT, Traits, Alloc>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) == 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const std::basic_string<CharT, Traits, Alloc>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string<CharT, Traits, Alloc>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const std::basic_string<CharT, Traits, Alloc>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) < 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string<CharT, Traits, Alloc>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) < 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const std::basic_string<CharT, Traits, Alloc>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string<CharT, Traits, Alloc>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const std::basic_string<CharT, Traits, Alloc>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) > 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string<CharT, Traits, Alloc>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) > 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const std::basic_string<CharT, Traits, Alloc>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) >= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, typename Alloc>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string<CharT, Traits, Alloc>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) >= 0;
+}
+
+
+#ifndef BOOST_NO_CXX17_HDR_STRING_VIEW
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const std::basic_string_view<CharT, Traits>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) == 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string_view<CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) == 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const std::basic_string_view<CharT, Traits>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string_view<CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const std::basic_string_view<CharT, Traits>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) < 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string_view<CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) < 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const std::basic_string_view<CharT, Traits>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string_view<CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const std::basic_string_view<CharT, Traits>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) > 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string_view<CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) > 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const std::basic_string_view<CharT, Traits>& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) >= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const std::basic_string_view<CharT, Traits>& rhs)
+{
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhs.data(), rhs.size()) >= 0;
+}
+
+#endif
+
 
 //------------------------------------------------------------------------------
 //
