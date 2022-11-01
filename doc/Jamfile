@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2013-2017 Vinnie Falco (vinnie dot falco at gmail dot com)
 # Copyright (c) 2020 Krystian Stasiowski (sdkrystian at gmail dot com)
+# Copyright (c) 2022 Alan de Freitas (alandefreitas@gmail.com)
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -9,8 +10,9 @@
 project static_string/doc ;
 
 import boostbook ;
+import type ;
+import os ;
 import ../../../tools/docca/docca.jam ;
-
 
 docca.reference reference.qbk
     :
@@ -18,7 +20,7 @@ docca.reference reference.qbk
         [ glob-tree-ex ../include/boost/static_string : *.hpp *.ipp : detail impl ]
     :
         <doxygen:param>PROJECT_NAME=StaticString
-        <doxygen:param>PROJECT_BRIEF="String Library"
+        <doxygen:param>PROJECT_BRIEF="Static String Library"
         <doxygen:param>ALIASES="esafe=\"@par Exception Safety\""
         <doxygen:param>FILE_PATTERNS=
         <doxygen:param>EXAMPLE_PATTERNS=
@@ -90,7 +92,7 @@ boostbook static_string
         <xsl:param>chapter.autolabel=0
         <xsl:param>chunk.section.depth=8               # Depth to which sections should be chunked
         <xsl:param>chunk.first.sections=1              # Chunk the first top-level section?
-        <xsl:param>generate.toc=""
+        <xsl:param>generate.toc="chapter toc,title section nop reference nop"
         <include>../../../tools/boostbook/dtd
     :
         <dependency>images
