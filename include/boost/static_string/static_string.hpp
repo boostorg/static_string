@@ -6063,33 +6063,49 @@ insert(
       detail::is_forward_iterator<
         ForwardIterator>::value, iterator>::type
 {
+  // input
+  const std::size_t count = detail::distance(first, last);
+  const auto first_addr = &*first;
+  const auto last_addr = first_addr + count;
+
+  // output
   const auto curr_size = size();
   const auto curr_data = data();
-  const std::size_t count = detail::distance(first, last);
   const std::size_t index = pos - curr_data;
-  const auto first_addr = &*first;
+  auto dest = &curr_data[index];
+
   if (count > max_size() - curr_size)
     detail::throw_exception<std::length_error>(
       "count > max_size() - curr_size");
+
+  traits_type::move(dest + count, dest, curr_size - index + 1);
   const bool inside = detail::ptr_in_range(curr_data, curr_data + curr_size, first_addr);
-  if (!inside || (inside && (first_addr + count <= pos)))
+  if (!inside || last_addr <= pos)
   {
-    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
-    detail::copy_with_traits<Traits>(first, last, &curr_data[index]);
+    detail::copy_with_traits<Traits>(first, last, dest);
   }
-  else
+  else /* if (inside) */
   {
     const size_type offset = first_addr - curr_data;
-    traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
     if (offset < index)
     {
       const size_type diff = index - offset;
-      traits_type::copy(&curr_data[index], &curr_data[offset], diff);
-      traits_type::copy(&curr_data[index + diff], &curr_data[index + count], count - diff);
+#if BOOST_WORKAROUND( BOOST_GCC, >= 120000 )
+      detail::copy_with_traits<Traits>(&curr_data[offset], &curr_data[offset] + diff, dest);
+      detail::copy_with_traits<Traits>(dest + count, dest + 2 * count - diff, &curr_data[index + diff]);
+#else
+      traits_type::copy(dest, &curr_data[offset], diff);
+      traits_type::copy(&curr_data[index + diff], dest + count, count - diff);
+#endif
     }
     else
     {
-      traits_type::copy(&curr_data[index], &curr_data[offset + count], count);
+      auto src = &curr_data[offset + count];
+#if BOOST_WORKAROUND( BOOST_GCC, >= 120000 )
+      detail::copy_with_traits<Traits>(src, src + count, dest);
+#else
+      traits_type::copy(dest, src, count);
+#endif
     }
   }
   this->set_size(curr_size + count);
