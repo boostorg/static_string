@@ -38,8 +38,8 @@ def main(ctx):
   linux_cxx("Coverage", "g++-8", packages="g++-8", buildscript="drone", buildtype="codecov", image=linuxglobalimage, environment={'COMMENT': 'codecov.io', 'LCOV_BRANCH_COVERAGE': '0', 'B2_CXXSTD': '11', 'B2_TOOLSET': 'gcc-8', 'B2_DEFINES': 'BOOST_NO_STRESS_TEST=1', "CODECOV_TOKEN": {"from_secret": "codecov_token"}, "COVERALLS_REPO_TOKEN": {"from_secret": "coveralls_repo_token"}}, globalenv=globalenv),
 
   # Latest gcc
-  linux_cxx("GCC 12: C++17,20", "g++-12", packages="g++-12", buildscript="drone", buildtype="boost", image="cppalliance/droneubuntu2204:1", environment={'B2_TOOLSET': 'gcc-12', 'B2_CXXFLAGS': '-Werror -Wno-error=restrict', 'B2_CXXSTD': '17,20'}, globalenv=globalenv),
-  linux_cxx("GCC 12: C++17,20 Standalone", "g++-12", packages="g++-12", buildscript="drone", buildtype="boost", image="cppalliance/droneubuntu2204:1", environment={'B2_TOOLSET': 'gcc-12', 'B2_CXXFLAGS': '-Werror -Wno-error=restrict', 'B2_DEFINES': 'define=BOOST_STATIC_STRING_STANDALONE', 'B2_CXXSTD': '17,20'}, globalenv=globalenv),
+  linux_cxx("GCC 12: C++17,20", "g++-12", packages="g++-12", buildscript="drone", buildtype="boost", image="cppalliance/droneubuntu2204:1", environment={'B2_TOOLSET': 'gcc-12', 'B2_CXXFLAGS': '-Werror', 'B2_CXXSTD': '17,20'}, globalenv=globalenv),
+  linux_cxx("GCC 12: C++17,20 Standalone", "g++-12", packages="g++-12", buildscript="drone", buildtype="boost", image="cppalliance/droneubuntu2204:1", environment={'B2_TOOLSET': 'gcc-12', 'B2_CXXFLAGS': '-Werror', 'B2_DEFINES': 'define=BOOST_STATIC_STRING_STANDALONE', 'B2_CXXSTD': '17,20'}, globalenv=globalenv),
 
   # Latest clang
   linux_cxx("Clang 15: C++17,20", "clang++-15", packages="clang-15 libstdc++-10-dev", llvm_os="jammy", llvm_ver="15", buildscript="drone", buildtype="boost", image="cppalliance/droneubuntu2204:1", environment={'B2_TOOLSET': 'clang-15', 'B2_CXXFLAGS': '-Werror', 'B2_CXXSTD': '17,20'}, globalenv=globalenv),
@@ -58,7 +58,7 @@ def main(ctx):
   linux_cxx("Valgrind", "clang++-14", packages="clang-14 libc6-dbg libc++-dev libstdc++-9-dev", llvm_os="jammy", llvm_ver="14", buildscript="drone", buildtype="valgrind", image="cppalliance/droneubuntu2204:1", environment={'COMMENT': 'valgrind', 'B2_TOOLSET': 'clang-14', 'B2_CXXSTD': '11,14,17', 'B2_DEFINES': 'BOOST_NO_STRESS_TEST=1', 'B2_VARIANT': 'debug', 'B2_TESTFLAGS': 'testing.launcher=valgrind', 'VALGRIND_OPTS': '--error-exitcode=1'}, globalenv=globalenv),
 
   # arm64 (unsigned char)
-  linux_cxx("ARM64: GCC 11", "g++-11", packages="g++-11", buildscript="drone", buildtype="boost", image="cppalliance/droneubuntu2004:multiarch", environment={'B2_TOOLSET': 'gcc-11', 'B2_CXXFLAGS': '-Werror -Wno-error=array-bounds -Wno-error=restrict -Wno-error=stringop-overflow', 'B2_CXXSTD': '17,20'}, arch="arm64", globalenv=globalenv),
+  linux_cxx("ARM64: GCC 11", "g++-11", packages="g++-11", buildscript="drone", buildtype="boost", image="cppalliance/droneubuntu2004:multiarch", environment={'B2_TOOLSET': 'gcc-11', 'B2_CXXFLAGS': '-Werror -Wno-error=array-bounds -Wno-error=stringop-overflow', 'B2_CXXSTD': '17,20'}, arch="arm64", globalenv=globalenv),
 
   # s390x
   linux_cxx("S390x: Clang 12", "clang++-12", packages="clang-12 libstdc++-9-dev", llvm_os="focal", llvm_ver="12", buildtype="boost", buildscript="drone", image="cppalliance/droneubuntu2004:multiarch", environment={'B2_TOOLSET': 'clang-12', 'B2_CXXFLAGS': '-Werror', 'B2_CXXSTD': '17,20'}, arch="s390x", globalenv=globalenv),
