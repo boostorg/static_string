@@ -21,7 +21,5 @@ add_executable(boost_static_string_tests ${BOOST_STATIC_STRING_TESTS_FILES})
 # The include dependencies are found in the CMakeLists.txt
 # of the root project directory.
 # See: BOOST_STATIC_STRING_UNIT_TEST_LIBRARIES
-target_link_libraries(boost_static_string_tests PRIVATE
-        Boost::static_string
-        Boost::core)
+target_link_libraries(boost_static_string_tests PRIVATE Boost::static_string)
 add_test(NAME boost_static_string_tests COMMAND boost_static_string_tests)

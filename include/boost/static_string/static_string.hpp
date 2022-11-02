@@ -14,6 +14,7 @@
 // External include guard
 #ifndef BOOST_STATIC_STRING_CONFIG_HPP
 #include <boost/static_string/config.hpp>
+#include <boost/config/workaround.hpp>
 #endif
 
 #include <algorithm>
@@ -27,6 +28,13 @@
 
 namespace boost {
 namespace static_strings {
+
+#if BOOST_WORKAROUND(BOOST_GCC_VERSION, >= 80000)
+#pragma GCC diagnostic push // false positives
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wrestrict"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
 
 #ifndef BOOST_STATIC_STRING_DOCS
 template<std::size_t N, typename CharT, typename Traits>
@@ -6090,22 +6098,13 @@ insert(
     if (offset < index)
     {
       const size_type diff = index - offset;
-#if BOOST_WORKAROUND( BOOST_GCC, >= 120000 )
-      detail::copy_with_traits<Traits>(&curr_data[offset], &curr_data[offset] + diff, dest);
-      detail::copy_with_traits<Traits>(dest + count, dest + 2 * count - diff, &curr_data[index + diff]);
-#else
       traits_type::copy(dest, &curr_data[offset], diff);
       traits_type::copy(&curr_data[index + diff], dest + count, count - diff);
-#endif
     }
     else
     {
       auto src = &curr_data[offset + count];
-#if BOOST_WORKAROUND( BOOST_GCC, >= 120000 )
-      detail::copy_with_traits<Traits>(src, src + count, dest);
-#else
       traits_type::copy(dest, src, count);
-#endif
     }
   }
   this->set_size(curr_size + count);
@@ -6565,6 +6564,11 @@ insert_unchecked(
   this->set_size(curr_size + count);
   return curr_data + index;
 }
+
+#if BOOST_WORKAROUND(BOOST_GCC_VERSION, >= 80000)
+#pragma GCC diagnostic pop
+#endif
+
 } // static_strings
 } // boost
 #endif

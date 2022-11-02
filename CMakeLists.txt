@@ -89,6 +89,7 @@ else ()
             INTERFACE
             Boost::assert
             Boost::container_hash
+            Boost::core
             Boost::static_assert
             Boost::throw_exception
             Boost::utility
