@@ -899,6 +899,11 @@ testClear()
     BOOST_TEST(*s.end() == 0);
 }
 
+#if defined(__GNUC__) && __GNUC__ >= 8
+#pragma GCC diagnostic push // false positives
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
 // done
 static
 void
@@ -1641,6 +1646,10 @@ testInsert()
     BOOST_TEST(testI(S("abcdefghijklmnopqrst"), 21, "12345678901234567890", 19, S("can't happen")));
     BOOST_TEST(testI(S("abcdefghijklmnopqrst"), 21, "12345678901234567890", 20, S("can't happen")));
 }
+
+#if defined(__GNUC__) && __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif
 
 // done
 static
@@ -5818,6 +5827,11 @@ testFind()
 
 #include <iostream>
 
+#if defined(__GNUC__) && __GNUC__ >= 8
+#pragma GCC diagnostic push // false positives
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
 // done
 void
 testReplace()
@@ -6822,6 +6836,10 @@ testReplace()
   BOOST_TEST_THROWS(T("aaaaa").replace(0, 1, S("bbbbbbbbbbbbb")), std::length_error);
 }
 
+#if defined(__GNUC__) && __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif
+
 // done
 void
 testSubstr()
@@ -7254,3 +7272,4 @@ main()
 {
   return boost::static_strings::runTests();
 }
+

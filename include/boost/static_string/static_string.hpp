@@ -11,6 +11,14 @@
 #ifndef BOOST_STATIC_STRING_STATIC_STRING_HPP
 #define BOOST_STATIC_STRING_STATIC_STRING_HPP
 
+#if defined(__GNUC__) && __GNUC__ >= 8
+#pragma GCC diagnostic push // false positives
+#pragma GCC system_header
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wrestrict"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
 // External include guard
 #ifndef BOOST_STATIC_STRING_CONFIG_HPP
 #include <boost/static_string/config.hpp>
@@ -28,13 +36,6 @@
 
 namespace boost {
 namespace static_strings {
-
-#if BOOST_WORKAROUND(BOOST_GCC_VERSION, >= 80000)
-#pragma GCC diagnostic push // false positives
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#pragma GCC diagnostic ignored "-Wrestrict"
-#pragma GCC diagnostic ignored "-Wstringop-overflow"
-#endif
 
 #ifndef BOOST_STATIC_STRING_DOCS
 template<std::size_t N, typename CharT, typename Traits>
@@ -6565,11 +6566,12 @@ insert_unchecked(
   return curr_data + index;
 }
 
-#if BOOST_WORKAROUND(BOOST_GCC_VERSION, >= 80000)
+} // static_strings
+} // boost
+
+#if defined(__GNUC__) && __GNUC__ >= 8
 #pragma GCC diagnostic pop
 #endif
 
-} // static_strings
-} // boost
 #endif
 #endif
