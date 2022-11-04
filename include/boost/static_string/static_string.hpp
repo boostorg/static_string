@@ -12,11 +12,17 @@
 #define BOOST_STATIC_STRING_STATIC_STRING_HPP
 
 #if defined(__GNUC__) && __GNUC__ >= 8
-#pragma GCC diagnostic push // false positives
+#pragma GCC diagnostic push
 #pragma GCC system_header
+// false positives
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #pragma GCC diagnostic ignored "-Wrestrict"
 #pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnoexcept-type"
 #endif
 
 // External include guard
@@ -6569,9 +6575,14 @@ insert_unchecked(
 } // static_strings
 } // boost
 
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic pop
+#endif
+
 #if defined(__GNUC__) && __GNUC__ >= 8
 #pragma GCC diagnostic pop
 #endif
+
 
 #endif
 #endif
