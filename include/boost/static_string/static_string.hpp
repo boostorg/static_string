@@ -37,6 +37,7 @@
 #include <cwchar>
 #include <functional>
 #include <initializer_list>
+#include <limits>
 #include <iosfwd>
 #include <type_traits>
 
@@ -126,22 +127,102 @@ struct void_t_helper
 template<typename... Ts>
 using void_t = typename void_t_helper<Ts...>::type;
 
+template <class T, typename CharT, typename = void>
+struct is_string_like : std::false_type {};
+
+template<typename T, typename CharT>
+struct is_string_like<
+    T, CharT,
+    void_t<
+      decltype(std::declval<CharT const*&>() = std::declval<T>().data()),
+      decltype(std::declval<std::size_t&>() = std::declval<T>().size())>>
+  : std::true_type
+{};
+
 // Check if a type can be used for templated
 // overloads string_view_type
+// This will be used by overloads that accept the string_view types
+// directly and other convertible types such as std::string.
+// When no string_view type is available, then we check for the
+// data and size member functions, and use them directly for assignments.
 template<typename T, typename CharT, typename Traits, typename = void>
 struct enable_if_viewable { };
 
 template<typename T, typename CharT, typename Traits>
 struct enable_if_viewable<T, CharT, Traits,
-  typename std::enable_if<
-    std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value &&
-      !std::is_convertible<const T&, const CharT*>::value>::type>
+    typename std::enable_if<
+#if !defined(BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW)
+        is_string_like<T, CharT>::value
+#elif defined(BOOST_STATIC_STRING_STANDALONE)
+        std::is_convertible<const T&, std::basic_string_view<CharT, Traits>>::value &&
+        !std::is_convertible<const T&, const CharT*>::value
+#else
+        (
+            std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value ||
+            std::is_convertible<const T&, core::basic_string_view<CharT>>::value
+        ) &&
+        !std::is_convertible<const T&, const CharT*>::value
+#endif
+    >::type>
 {
   using type = void;
 };
 
 template<typename T, typename CharT, typename Traits>
 using enable_if_viewable_t = typename enable_if_viewable<T, CharT, Traits>::type;
+
+// The common string_view type used in private operations with enable_if_viewable_t
+// - T const& itself when no string_view type is available
+// - basic_string_view (boost::string_view or std::string_view) when in
+//   standalone because core::detail::string_view is unavailable
+// - core::detail::basic_string_view otherwise because it's convertible
+//   to and from most types, including std::string_view
+// After converting a parameter to a common_string_view_type reference, we
+// can use the data() and size() member functions.
+#if !defined(BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW)
+template<typename T, typename CharT, typename Traits>
+using common_string_view_type = T const&;
+#elif defined(BOOST_STATIC_STRING_STANDALONE)
+template<typename T, typename CharT, typename Traits>
+using common_string_view_type = basic_string_view<CharT, Traits>;
+#else
+template <class T, typename CharT, typename Traits, typename = void>
+struct common_string_view_type_impl {};
+
+template<typename T, typename CharT, typename Traits>
+struct common_string_view_type_impl<
+    T, CharT, Traits,
+    typename std::enable_if<
+        is_string_like<T, CharT>::value &&
+        !std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value &&
+        !std::is_convertible<const T&, core::basic_string_view<CharT>>::value>::type>
+{
+  using type = T const&;
+};
+
+template<typename T, typename CharT, typename Traits>
+struct common_string_view_type_impl<
+    T, CharT, Traits,
+    typename std::enable_if<
+        std::is_convertible<const T&, basic_string_view<CharT, Traits>>::value &&
+        !std::is_convertible<const T&, core::basic_string_view<CharT>>::value>::type>
+{
+  using type = basic_string_view<CharT, Traits>;
+};
+
+template<typename T, typename CharT, typename Traits>
+struct common_string_view_type_impl<
+    T, CharT, Traits,
+    typename std::enable_if<
+        std::is_convertible<const T&, core::basic_string_view<CharT>>::value>::type>
+{
+  using type = core::basic_string_view<CharT>;
+};
+
+template<typename T, typename CharT, typename Traits>
+using common_string_view_type = typename common_string_view_type_impl<T, CharT, Traits>::type;
+#endif
+
 
 // Simplified check for if a type is an iterator
 template<typename T, typename = void>
@@ -879,9 +960,11 @@ public:
   using const_reverse_iterator =
     std::reverse_iterator<const_iterator>;
 
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
   /// The string view type.
   using string_view_type =
     basic_string_view<value_type, traits_type>;
+#endif
 
   //--------------------------------------------------------------------------
   //
@@ -1538,7 +1621,7 @@ public:
   basic_static_string&
   assign(const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return assign(sv.data(), sv.size());
   }
 
@@ -1590,8 +1673,12 @@ public:
     size_type pos,
     size_type count = npos)
   {
-    const auto sv = string_view_type(t).substr(pos, count);
-    return assign(sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if( pos > sv.size() )
+      detail::throw_exception<std::out_of_range>(
+          "pos >= t.size()");
+    std::size_t rlen = (std::min)( count, sv.size() - pos );
+    return assign(sv.data() + pos, rlen);
   }
 
   //--------------------------------------------------------------------------
@@ -1837,6 +1924,7 @@ public:
     return data();
   }
 
+#ifdef BOOST_STATIC_STRING_DOCS
   /** Convert to a string view referring to the string.
 
       Returns a string view referring to the
@@ -1851,6 +1939,28 @@ public:
   {
     return string_view_type(data(), size());
   }
+#else
+#ifdef BOOST_STATIC_STRING_HAS_STD_STRING_VIEW
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  operator std::basic_string_view<CharT, Traits>() const noexcept
+  {
+    return std::basic_string_view<CharT, Traits>(data(), size());
+  }
+#endif
+#ifndef BOOST_STATIC_STRING_STANDALONE
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  operator ::boost::basic_string_view<CharT, Traits>() const noexcept
+  {
+    return ::boost::basic_string_view<CharT, Traits>(data(), size());
+  }
+
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  operator ::boost::core::basic_string_view<CharT>() const noexcept
+  {
+    return ::boost::core::basic_string_view<CharT>(data(), size());
+  }
+#endif
+#endif
 
   //--------------------------------------------------------------------------
   //
@@ -2503,7 +2613,7 @@ public:
     size_type index,
     const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return insert(index, sv.data(), sv.size());
   }
 
@@ -2552,8 +2662,10 @@ public:
     size_type index_str,
     size_type count = npos)
   {
-    const auto sv = string_view_type(t).substr(index_str, count);
-    return insert(index, sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv(t);
+    if ( index_str > sv.size() )
+      detail::throw_exception<std::out_of_range>("index_str > t.size()");
+    return insert(index, sv.data() + index_str, (std::min)(sv.size() - index_str, count));
   }
 
   /** Erase from the string.
@@ -2912,7 +3024,7 @@ public:
   basic_static_string&
   append(const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return append(sv.data(), sv.size());
   }
 
@@ -2957,8 +3069,10 @@ public:
     size_type pos,
     size_type count = npos)
   {
-    const auto sv = string_view_type(t).substr(pos, count);
-    return append(sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if ( pos > sv.size() )
+      detail::throw_exception<std::out_of_range>("pos > t.size()");
+    return append(sv.data() + pos, (std::min)(sv.size() - pos, count));
   }
 
   /** Append to the string.
@@ -3342,7 +3456,7 @@ public:
   int
   compare(const T& t) const noexcept
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
       data(), size(), sv.data(), sv.size());
   }
@@ -3393,7 +3507,7 @@ public:
     size_type count1,
     const T& t) const
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return detail::lexicographical_compare<CharT, Traits>(
       data() + pos1, capped_length(pos1, count1), sv.data(), sv.size());
   }
@@ -3450,9 +3564,12 @@ public:
     size_type pos2,
     size_type count2 = npos) const
   {
-    const auto sv = string_view_type(t).substr(pos2, count2);
-    return compare(pos1, count1,
-      sv.data(), sv.size());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if ( pos2 > sv.size())
+      detail::throw_exception<std::out_of_range>("pos2 > sv.size()");
+    return compare(
+        pos1, count1, sv.data() + pos2,
+        (std::min)(sv.size() - pos2, count2));
   }
 
   /** Return a substring.
@@ -3485,6 +3602,7 @@ public:
       data() + pos, capped_length(pos, count));
   }
 
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
   /** Return a string view of a substring.
 
       Returns a view of a substring.
@@ -3512,6 +3630,7 @@ public:
     return string_view_type(
       data() + pos, capped_length(pos, count));
   }
+#endif
 
   /** Copy a substring to another string.
 
@@ -3771,7 +3890,7 @@ public:
     size_type n1,
     const T& t)
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return replace(pos1, n1, sv.data(), sv.size());
   }
 
@@ -3823,8 +3942,12 @@ public:
     size_type pos2,
     size_type n2 = npos)
   {
-    const string_view_type sv = t;
-    return replace(pos1, n1, sv.substr(pos2, n2));
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    if ( pos2 > sv.size())
+      detail::throw_exception<std::out_of_range>("pos2 > t.size()");
+    return replace(
+        pos1, n1, sv.data() + pos2,
+        (std::min)(sv.size() - pos2, n2));
   }
 
   /** Replace a part of the string.
@@ -4029,8 +4152,8 @@ public:
     const_iterator i2,
     const T& t)
   {
-    const string_view_type sv = t;
-    return replace(i1, i2, sv.begin(), sv.end());
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    return replace(i1, i2, sv.data(), sv.data() + sv.size());
   }
 
   /** Replace a part of the string.
@@ -4290,9 +4413,13 @@ public:
   find(
     const T& t,
     size_type pos = 0) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find(sv.data(), pos, sv.size());
   }
 
@@ -4443,9 +4570,13 @@ public:
   rfind(
     const T& t,
     size_type pos = npos) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return rfind(sv.data(), pos, sv.size());
   }
 
@@ -4591,9 +4722,13 @@ public:
   find_first_of(
     const T& t,
     size_type pos = 0) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_first_of(sv.data(), pos, sv.size());
   }
 
@@ -4734,9 +4869,13 @@ public:
   find_last_of(
     const T& t,
     size_type pos = npos) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_last_of(sv.data(), pos, sv.size());
   }
 
@@ -4876,9 +5015,13 @@ public:
   find_first_not_of(
     const T& t,
     size_type pos = 0) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_first_not_of(sv.data(), pos, sv.size());
   }
 
@@ -5017,9 +5160,13 @@ public:
   find_last_not_of(
     const T& t,
     size_type pos = npos) const
+#ifdef BOOST_STATIC_STRING_DOCS
       noexcept(detail::is_nothrow_convertible<const T&, string_view_type>::value)
+#else
+      noexcept(detail::is_nothrow_convertible<const T&, detail::common_string_view_type<T, CharT, Traits>>::value)
+#endif
   {
-    const string_view_type sv = t;
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
     return find_last_not_of(sv.data(), pos, sv.size());
   }
 
@@ -5133,15 +5280,21 @@ public:
 
       Linear.
 
-      @param s The string view to check for.
+      @param t The string view to check for.
   */
+  template<typename T
+#ifndef BOOST_STATIC_STRING_DOCS
+            , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+  >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool
   starts_with(
-    string_view_type s) const noexcept
+    T const& t) const noexcept
   {
-    const size_type len = s.size();
-    return size() >= len && !traits_type::compare(data(), s.data(), len);
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    const size_type len = sv.size();
+    return size() >= len && !traits_type::compare(data(), sv.data(), len);
   }
 
   /** Return whether the string begins with a character.
@@ -5191,15 +5344,21 @@ public:
 
       Linear.
 
-      @param s The string view to check for.
+      @param t The string view to check for.
   */
+  template<typename T
+#ifndef BOOST_STATIC_STRING_DOCS
+            , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+  >
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   bool
   ends_with(
-    string_view_type s) const noexcept
+    T const& t) const noexcept
   {
-    const size_type len = s.size();
-    return size() >= len && !traits_type::compare(data() + (size() - len), s.data(), len);
+    detail::common_string_view_type<T, CharT, Traits> sv = t;
+    const size_type len = sv.size();
+    return size() >= len && !traits_type::compare(data() + (size() - len), sv.data(), len);
   }
 
   /** Return whether the string ends with a character.
@@ -5456,6 +5615,42 @@ operator==(
     rhs, Traits::length(rhs)) == 0;
 }
 
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) == 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator==(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) == 0;
+}
+
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -5480,6 +5675,42 @@ operator!=(
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
     rhs, Traits::length(rhs)) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) != 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator!=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) != 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5508,6 +5739,42 @@ operator<(
     rhs, Traits::length(rhs)) < 0;
 }
 
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) < 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) < 0;
+}
+
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -5532,6 +5799,42 @@ operator<=(
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
     rhs, Traits::length(rhs)) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) <= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator<=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) <= 0;
 }
 
 template<std::size_t N, typename CharT, typename Traits>
@@ -5560,6 +5863,43 @@ operator>(
     rhs, Traits::length(rhs)) > 0;
 }
 
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) > 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) > 0;
+}
+
+
 template<std::size_t N, typename CharT, typename Traits>
 BOOST_STATIC_STRING_CPP14_CONSTEXPR
 inline
@@ -5584,6 +5924,42 @@ operator>=(
   return detail::lexicographical_compare<CharT, Traits>(
     lhs.data(), lhs.size(),
     rhs, Traits::length(rhs)) >= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const T& lhs,
+  const basic_static_string<N, CharT, Traits>& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> lhsv = lhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhsv.data(), lhsv.size(),
+    rhs.data(), rhs.size()) >= 0;
+}
+
+template<std::size_t N, typename CharT, typename Traits, class T
+#ifndef BOOST_STATIC_STRING_DOCS
+      , typename = detail::enable_if_viewable_t<T, CharT, Traits>
+#endif
+    >
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+inline
+bool
+operator>=(
+  const basic_static_string<N, CharT, Traits>& lhs,
+  const T& rhs)
+{
+  detail::common_string_view_type<T, CharT, Traits> rhsv = rhs;
+  return detail::lexicographical_compare<CharT, Traits>(
+    lhs.data(), lhs.size(),
+    rhsv.data(), rhsv.size()) >= 0;
 }
 
 template<
@@ -5721,7 +6097,13 @@ operator<<(
   std::basic_ostream<CharT, Traits>& os,
   const basic_static_string<N, CharT, Traits>& s)
 {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
   return os << basic_string_view<CharT, Traits>(s.data(), s.size());
+#else
+  for (auto c: s)
+    os << c;
+  return os;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -5961,13 +6343,46 @@ struct hash<
   operator()(
     const boost::static_strings::basic_static_string<N, CharT, Traits>& str) const noexcept
   {
-#ifndef BOOST_STATIC_STRING_STANDALONE
+#if !defined(BOOST_STATIC_STRING_STANDALONE)
     return boost::hash_range(str.begin(), str.end());
-#else
+#elif defined(BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW)
     using view_type = typename
       boost::static_strings::basic_string_view<CharT, Traits>;
     return std::hash<view_type>()(view_type(str.data(), str.size()));
+#else
+    std::size_t seed = 0;
+    for (CharT const& c : str) {
+      mix_impl(std::integral_constant<bool, sizeof(std::size_t) >= 8>{}, seed, c);
+    }
+    return seed;
 #endif
+  }
+
+  static
+  void
+  mix_impl(std::true_type, std::size_t& seed, CharT c)
+  {
+    seed += 0x9e3779b9 + std::hash<CharT>()( c );
+    std::size_t const m = (std::size_t(0xe9846af) << 32) + 0x9b1a615d;
+    seed ^= seed >> 32;
+    seed *= m;
+    seed ^= seed >> 32;
+    seed *= m;
+    seed ^= seed >> 28;
+  }
+
+  static
+  void
+  mix_impl(std::false_type, std::size_t& seed, CharT c)
+  {
+    seed += 0x9e3779b9 + std::hash<CharT>()( c );
+    std::size_t const m1 = 0x21f0aaad;
+    std::size_t const m2 = 0x735a2d97;
+    seed ^= seed >> 16;
+    seed *= m1;
+    seed ^= seed >> 15;
+    seed *= m2;
+    seed ^= seed >> 15;
   }
 };
 } // std
