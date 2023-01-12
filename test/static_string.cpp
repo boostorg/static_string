@@ -674,6 +674,13 @@ testAssignment()
 
     s_long.assign(s_long.data() + 2, 8);
     BOOST_TEST(s_long == "rem ipsu");
+
+    // issue #41
+    {
+        boost::static_strings::static_string<0> a;
+        auto b = a;
+        BOOST_TEST(b == "");
+    }
 }
 
 // done
