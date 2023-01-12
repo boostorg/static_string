@@ -26,7 +26,15 @@ namespace static_strings {
 
 template class basic_static_string<420, char>;
 
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
 using string_view = basic_string_view<char, std::char_traits<char>>;
+#endif
+
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
+using string_like = basic_string_view<char, std::char_traits<char>>;
+#else
+using string_like = std::string;
+#endif
 
 template <class S>
 bool
@@ -51,13 +59,21 @@ testSV(const S& s, typename S::size_type pos, typename S::size_type n)
 {
   if (pos <= s.size())
   {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
     typename S::string_view_type str = s.subview(pos, n);
+#else
+    auto str = s.substr(pos, n);
+#endif
     typename S::size_type rlen = (std::min)(n, s.size() - pos);
     return (S::traits_type::compare(s.data() + pos, str.data(), rlen) == 0);
   }
   else
   {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
     BOOST_TEST_THROWS((s.subview(pos, n)), std::out_of_range);
+#else
+    BOOST_TEST_THROWS((s.substr(pos, n)), std::out_of_range);
+#endif
     return true;
   }
 }
@@ -342,11 +358,11 @@ testConstruct()
     }
     {
         static_string<3> s1(
-            string_view("123"));
+            string_like("123"));
         BOOST_TEST(s1 == "123");
         BOOST_TEST(*s1.end() == 0);
         BOOST_TEST_THROWS(
-            (static_string<2>(string_view("123"))),
+            (static_string<2>(string_like("123"))),
             std::length_error);
     }
     {
@@ -424,6 +440,7 @@ testAssignment()
 
     // assign(T const& t)
     {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
         struct T
         {
             operator string_view() const noexcept
@@ -431,6 +448,21 @@ testAssignment()
                 return "abc";
             }
         };
+#else
+      struct T
+      {
+        char const* data() const noexcept
+        {
+          static char p[] = "abc";
+          return p;
+        }
+
+        std::size_t size() const noexcept
+        {
+          return 3;
+        }
+      };
+#endif
         BOOST_TEST(static_string<3>{}.assign(T{}) == "abc");
         BOOST_TEST(static_string<3>{"*"}.assign(T{}) == "abc");
         BOOST_TEST(static_string<3>{"***"}.assign(T{}) == "abc");
@@ -439,6 +471,7 @@ testAssignment()
 
     // assign(T const& t, size_type pos, size_type count = npos)
     {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
         struct T
         {
             operator string_view() const noexcept
@@ -446,6 +479,23 @@ testAssignment()
                 return "abcde";
             }
         };
+#else
+      struct T
+        {
+            char const*
+            data() const noexcept
+            {
+                static char p[] = "abcde";
+                return p;
+            }
+
+            std::size_t
+            size() const
+            {
+                return 5;
+            }
+        };
+#endif
         BOOST_TEST(static_string<5>{}.assign(T{}, 0) == "abcde");
         BOOST_TEST(static_string<5>{}.assign(T{}, 0, 5) == "abcde");
         BOOST_TEST(static_string<5>{}.assign(T{}, 1, 3) == "bcd");
@@ -507,15 +557,14 @@ testAssignment()
     }
     {
         static_string<3> s1;
-        s1 = string_view("123");
+        s1 = string_like("123");
         BOOST_TEST(s1 == "123");
         BOOST_TEST(*s1.end() == 0);
         static_string<1> s2;
         BOOST_TEST_THROWS(
-            s2 = string_view("123"),
+            s2 = string_like("123"),
             std::length_error);
     }
-
     {
         static_string<4> s1;
         s1.assign(3, 'x');
@@ -603,14 +652,14 @@ testAssignment()
     }
     {
         static_string<5> s1;
-        s1.assign(string_view("123"));
+        s1.assign(string_like("123"));
         BOOST_TEST(s1 == "123");
         BOOST_TEST(*s1.end() == 0);
-        s1.assign(string_view("12345"));
+        s1.assign(string_like("12345"));
         BOOST_TEST(s1 == "12345");
         BOOST_TEST(*s1.end() == 0);
         BOOST_TEST_THROWS(
-            s1.assign(string_view("1234567")),
+            s1.assign(string_like("1234567")),
             std::length_error);
     }
     {
@@ -788,11 +837,20 @@ testElements()
         BOOST_TEST(std::memcmp(
             s.c_str(), "123\0", 4) == 0);
     }
+#ifdef BOOST_STATIC_ASSERT_HAS_STRING_VIEW
     {
         static_string<3> s("123");
         string_view sv = s;
         BOOST_TEST(static_string<5>(sv) == "123");
     }
+#endif
+#ifdef BOOST_STATIC_ASSERT_HAS_STD_STRING_VIEW
+    {
+        static_string<3> s("123");
+        std::string_view sv = s;
+        BOOST_TEST(static_string<5>(sv) == "123");
+    }
+#endif
 }
 
 // done
@@ -909,7 +967,7 @@ static
 void
 testInsert()
 {
-    using sv = string_view;
+    using sv = string_like;
     using S = static_string<100>;
 
     // insert(size_type index, size_type count, CharT ch)
@@ -990,6 +1048,7 @@ testInsert()
 
     // insert(size_type index, T const& t)
     {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
         struct T
         {
             operator string_view() const noexcept
@@ -997,6 +1056,23 @@ testInsert()
                 return "b";
             }
         };
+#else
+        struct T
+        {
+            char const*
+            data() const noexcept
+            {
+                static char p[] = "b";
+                return p;
+            }
+
+            std::size_t
+            size() const
+            {
+                return 1;
+            }
+        };
+#endif
         BOOST_TEST(static_string<3>{"ac"}.insert(1, T{}) == "abc");
         BOOST_TEST_THROWS(static_string<4>{"abc"}.insert(4, T{}), std::out_of_range);
         BOOST_TEST_THROWS(static_string<3>{"abc"}.insert(1, T{}), std::length_error);
@@ -1004,6 +1080,7 @@ testInsert()
 
     // insert(size_type index, T const& t, size_type index_str, size_type count = npos)
     {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
         struct T
         {
             operator string_view() const noexcept
@@ -1011,6 +1088,23 @@ testInsert()
                 return "abcd";
             }
         };
+#else
+        struct T
+        {
+            char const*
+            data() const noexcept
+            {
+                static char p[] = "abcd";
+                return p;
+            }
+
+            std::size_t
+            size() const noexcept
+            {
+                return 4;
+            }
+        };
+#endif
         BOOST_TEST(static_string<6>{"ae"}.insert(1, T{}, 1) == "abcde");
         BOOST_TEST(static_string<6>{"abe"}.insert(2, T{}, 2) == "abcde");
         BOOST_TEST(static_string<4>{"ac"}.insert(1, T{}, 1, 1) == "abc");
@@ -1138,16 +1232,16 @@ testInsert()
     }
     {
         static_string<5> s1("123");
-        s1.insert(1, string_view("UV"));
+        s1.insert(1, string_like("UV"));
         BOOST_TEST(s1 == "1UV23");
         BOOST_TEST(*s1.end() == 0);
         static_string<4> s2("123");
         BOOST_TEST_THROWS(
-            (s2.insert(1, string_view("UV"))),
+            (s2.insert(1, string_like("UV"))),
             std::length_error);
         static_string<5> s3("123");
         BOOST_TEST_THROWS(
-            (s3.insert(5, string_view("UV"))),
+            (s3.insert(5, string_like("UV"))),
             std::out_of_range);
     }
     {
@@ -1979,7 +2073,7 @@ void
 testAppend()
 {
   using S = static_string<400>;
-  using sv = string_view;
+  using sv = string_like;
 
   // append(size_type count, CharT ch)
   BOOST_TEST(static_string<1>{}.append(1, 'a') == "a");
@@ -2024,6 +2118,7 @@ testAppend()
 
   // append(T const& t)
   {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
       struct T
       {
           operator string_view() const noexcept
@@ -2031,12 +2126,29 @@ testAppend()
               return "c";
           }
       };
+#else
+      struct T
+      {
+          char const*
+          data() const noexcept
+          {
+              return "c";
+          }
+
+          std::size_t
+          size() const noexcept
+          {
+              return 1;
+          }
+      };
+#endif
       BOOST_TEST(static_string<3>{"ab"}.append(T{}) == "abc");
       BOOST_TEST_THROWS(static_string<3>{"abc"}.append(T{}), std::length_error);
   }
 
   // append(T const& t, size_type pos, size_type count = npos)
   {
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
       struct T
       {
           operator string_view() const noexcept
@@ -2044,6 +2156,22 @@ testAppend()
               return "abcd";
           }
       };
+#else
+      struct T
+      {
+          char const*
+          data() const noexcept
+          {
+              return "abcd";
+          }
+
+          std::size_t
+          size() const noexcept
+          {
+              return 4;
+          }
+      };
+#endif
       BOOST_TEST(static_string<4>{"ab"}.append(T{}, 2) == "abcd");
       BOOST_TEST(static_string<3>{"a"}.append(T{}, 1, 2) == "abc");
       BOOST_TEST_THROWS(static_string<4>{"abc"}.append(T{}, 5), std::out_of_range);
@@ -2134,7 +2262,7 @@ testAppend()
           std::length_error);
   }
   {
-      string_view s1("XYZ");
+      string_like s1("XYZ");
       static_string<5> s2("12");
       s2.append(s1);
       BOOST_TEST(s2 == "12XYZ");
@@ -2189,7 +2317,7 @@ static
 void
 testPlusEquals()
 {
-    using sv = string_view;
+    using sv = string_like;
 
     // operator+=(CharT ch)
     BOOST_TEST((static_string<3>{"ab"} += 'c') == "abc");
@@ -2245,7 +2373,7 @@ testPlusEquals()
             std::length_error);
     }
     {
-        string_view s1("34");
+        string_like s1("34");
         static_string<4> s2("12");
         s2 += s1;
         BOOST_TEST(s2 == "1234");
@@ -2281,6 +2409,7 @@ testCompare()
         BOOST_TEST(s1.compare(0, 2, s2.data()) < 0);
         BOOST_TEST(s2.compare(0, 1, s1.data()) > 0);
 
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
         BOOST_TEST(s1.compare(s2.subview()) < 0);
         BOOST_TEST(s2.compare(s1.subview()) > 0);
 
@@ -2289,6 +2418,7 @@ testCompare()
 
         BOOST_TEST(s1.compare(0, 2, s2.subview(), 0, 1) < 0);
         BOOST_TEST(s2.compare(0, 1, s1.subview(), 0, 2) > 0);
+#endif
 
         BOOST_TEST(s1 < "10");
         BOOST_TEST(s2 > "1");
@@ -2297,6 +2427,14 @@ testCompare()
         BOOST_TEST(s1 < "20");
         BOOST_TEST(s2 > "1");
         BOOST_TEST(s2 > "2");
+
+        BOOST_TEST(s1 < string_like("10"));
+        BOOST_TEST(s2 > string_like("1"));
+        BOOST_TEST(string_like("10") > s1);
+        BOOST_TEST(string_like("1") < s2);
+        BOOST_TEST(s1 < string_like("20"));
+        BOOST_TEST(s2 > string_like("1"));
+        BOOST_TEST(s2 > string_like("2"));
     }
     {
         str2 s1("x");
@@ -2332,6 +2470,19 @@ testCompare()
         BOOST_TEST(! ("x" < s));
         BOOST_TEST(! ("x" > s));
         BOOST_TEST(! ("x" != s));
+
+        BOOST_TEST(s == string_like("x"));
+        BOOST_TEST(s <= string_like("x"));
+        BOOST_TEST(s >= string_like("x"));
+        BOOST_TEST(! (s < string_like("x")));
+        BOOST_TEST(! (s > string_like("x")));
+        BOOST_TEST(! (s != string_like("x")));
+        BOOST_TEST(string_like("x") == s);
+        BOOST_TEST(string_like("x") <= s);
+        BOOST_TEST(string_like("x") >= s);
+        BOOST_TEST(! (string_like("x") < s));
+        BOOST_TEST(! (string_like("x") > s));
+        BOOST_TEST(! (string_like("x") != s));
     }
     {
         str2 s("x");
@@ -2347,6 +2498,19 @@ testCompare()
         BOOST_TEST(! ("y" == s));
         BOOST_TEST(! ("y" <= s));
         BOOST_TEST(! ("y" < s));
+
+        BOOST_TEST(s <= string_like("y"));
+        BOOST_TEST(s < string_like("y"));
+        BOOST_TEST(s != string_like("y"));
+        BOOST_TEST(! (s == string_like("y")));
+        BOOST_TEST(! (s >= string_like("y")));
+        BOOST_TEST(! (s > "x"));
+        BOOST_TEST(string_like("y") >= s);
+        BOOST_TEST(string_like("y") > s);
+        BOOST_TEST(string_like("y") != s);
+        BOOST_TEST(! (string_like("y") == s));
+        BOOST_TEST(! (string_like("y") <= s));
+        BOOST_TEST(! (string_like("y") < s));
     }
     {
         str1 s1("x");
@@ -3808,8 +3972,8 @@ testFind()
 {
   const char* cs1 = "12345";
   const char* cs2 = "2345";
-  string_view v1 = cs1;
-  string_view v2 = cs2;
+  string_like v1 = cs1;
+  string_like v2 = cs2;
   static_string<5> fs1 = cs1;
   static_string<4> fs2 = cs2;
   using S = static_string<400>;
@@ -5132,8 +5296,8 @@ testFind()
 
   const char* cs3 = "12456";
   const char* cs4 = "2356";
-  string_view v3 = cs3;
-  string_view v4 = cs4;
+  string_like v3 = cs3;
+  string_like v4 = cs4;
   static_string<5> fs3 = cs3;
   static_string<4> fs4 = cs4;
 
@@ -5918,12 +6082,12 @@ testReplace()
   // replace(size_type pos1, size_type n1, const T& t);
   {
     static_string<20> fs1 = "helloworld";
-    BOOST_TEST(fs1.replace(0, fs1.size(), string_view(fs1)) == "helloworld");
+    BOOST_TEST(fs1.replace(0, fs1.size(), string_like(fs1.data(), fs1.size())) == "helloworld");
   }
   // replace(size_type pos1, size_type n1, const T& t, size_type pos2, size_type n2 = npos);
   {
     static_string<20> fs1 = "helloworld";
-    BOOST_TEST(fs1.replace(0, fs1.size(), string_view(fs1), 0, fs1.size()) == "helloworld");
+    BOOST_TEST(fs1.replace(0, fs1.size(), string_like(fs1.data(), fs1.size()), 0, fs1.size()) == "helloworld");
   }
   // replace(size_type pos, size_type n, const charT * s);
   {
@@ -5949,7 +6113,7 @@ testReplace()
   // replace(const_iterator i1, const_iterator i2, const T& t);
   {
     static_string<20> fs1 = "helloworld";
-    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), string_view(fs1)) == "helloworld");
+    BOOST_TEST(fs1.replace(fs1.begin(), fs1.end(), string_like(fs1.data(), fs1.size())) == "helloworld");
   }
   // replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
   {
@@ -7096,21 +7260,21 @@ testStartsEnds()
   BOOST_TEST(S("1234567890").starts_with("1234567890"));
   BOOST_TEST(!S("1234567890").starts_with("234"));
   BOOST_TEST(!S("1234567890").starts_with("12345678900"));
-  BOOST_TEST(S("1234567890").starts_with(string_view("1234567890")));
+  BOOST_TEST(S("1234567890").starts_with(string_like("1234567890")));
 
   BOOST_TEST(S("1234567890").ends_with('0'));
   BOOST_TEST(S("1234567890").ends_with("890"));
   BOOST_TEST(S("1234567890").ends_with("1234567890"));
   BOOST_TEST(!S("1234567890").ends_with("234"));
   BOOST_TEST(!S("1234567890").ends_with("12345678900"));
-  BOOST_TEST(S("1234567890").ends_with(string_view("1234567890")));
+  BOOST_TEST(S("1234567890").ends_with(string_like("1234567890")));
 
   BOOST_TEST(!S().starts_with('0'));
   BOOST_TEST(!S().starts_with("0"));
-  BOOST_TEST(!S().starts_with(string_view("0")));
+  BOOST_TEST(!S().starts_with(string_like("0")));
   BOOST_TEST(!S().ends_with('0'));
   BOOST_TEST(!S().ends_with("0"));
-  BOOST_TEST(!S().ends_with(string_view("0")));
+  BOOST_TEST(!S().ends_with(string_like("0")));
 }
 
 void
@@ -7151,7 +7315,9 @@ testStream()
   static_string<10> b = "abcdefghij";
   a << b;
   static_string<10> c(std::istream_iterator<char>{a}, std::istream_iterator<char>{});
+#ifdef BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
   BOOST_TEST(a.str() == b.subview());
+#endif
   BOOST_TEST(b == c);
 }
 
