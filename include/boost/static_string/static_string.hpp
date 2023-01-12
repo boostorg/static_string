@@ -69,7 +69,7 @@ template<std::size_t N>
 using static_u32string =
   basic_static_string<N, char32_t, std::char_traits<char32_t>>;
 
-#ifdef BOOST_STATIC_STRING_CPP20
+#ifdef __cpp_char8_t
 template<std::size_t N>
 using static_u8string =
   basic_static_string<N, char8_t, std::char_traits<char8_t>>;
