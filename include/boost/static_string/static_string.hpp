@@ -1319,7 +1319,7 @@ public:
   basic_static_string&
   assign(const basic_static_string& s) noexcept
   {
-    if (this == &s)
+    if (data() == s.data())
       return *this;
     return assign_unchecked(s.data(), s.size());
   }
