@@ -9,7 +9,7 @@
 //
 
 // Test that header file is self-contained.
-#include <boost/static_string/static_string.hpp>
+#include <boost/static_string.hpp>
 #include "constexpr_tests.hpp"
 #include "compile_fail.hpp"
 
