@@ -7393,6 +7393,15 @@ testOperatorPlus()
   }
 }
 
+// issue 47
+struct issue_47 : static_string<32>
+{
+    bool compare(const issue_47& other) const
+    {
+        return *this < other;
+    }
+};
+
 int
 runTests()
 {
