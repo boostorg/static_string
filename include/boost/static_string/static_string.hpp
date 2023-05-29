@@ -6376,38 +6376,29 @@ struct hash<
     return std::hash<view_type>()(view_type(str.data(), str.size()));
 #else
     std::size_t seed = 0;
-    for (CharT const& c : str) {
-      mix_impl(std::integral_constant<bool, sizeof(std::size_t) >= 8>{}, seed, c);
+    for (CharT const& c : str)
+    {
+#if BOOST_STATIC_STRING_ARCH == 64
+      seed += 0x9e3779b9 + std::hash<CharT>()( c );
+      std::size_t const m = (std::size_t(0xe9846af) << 32) + 0x9b1a615d;
+      seed ^= seed >> 32;
+      seed *= m;
+      seed ^= seed >> 32;
+      seed *= m;
+      seed ^= seed >> 28;
+#elif BOOST_STATIC_STRING_ARCH == 32
+      seed += 0x9e3779b9 + std::hash<CharT>()( c );
+      std::size_t const m1 = 0x21f0aaad;
+      std::size_t const m2 = 0x735a2d97;
+      seed ^= seed >> 16;
+      seed *= m1;
+      seed ^= seed >> 15;
+      seed *= m2;
+      seed ^= seed >> 15;
+#endif
     }
     return seed;
 #endif
-  }
-
-  static
-  void
-  mix_impl(std::true_type, std::size_t& seed, CharT c)
-  {
-    seed += 0x9e3779b9 + std::hash<CharT>()( c );
-    std::size_t const m = (std::size_t(0xe9846af) << 32) + 0x9b1a615d;
-    seed ^= seed >> 32;
-    seed *= m;
-    seed ^= seed >> 32;
-    seed *= m;
-    seed ^= seed >> 28;
-  }
-
-  static
-  void
-  mix_impl(std::false_type, std::size_t& seed, CharT c)
-  {
-    seed += 0x9e3779b9 + std::hash<CharT>()( c );
-    std::size_t const m1 = 0x21f0aaad;
-    std::size_t const m2 = 0x735a2d97;
-    seed ^= seed >> 16;
-    seed *= m1;
-    seed ^= seed >> 15;
-    seed *= m2;
-    seed ^= seed >> 15;
   }
 };
 } // std

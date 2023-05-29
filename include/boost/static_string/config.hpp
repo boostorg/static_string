@@ -14,6 +14,17 @@
 // Are we dependent on Boost?
 // #define BOOST_STATIC_STRING_STANDALONE
 
+#include <cstdint>
+
+// detect 32/64 bit
+#if UINTPTR_MAX == UINT64_MAX
+#define BOOST_STATIC_STRING_ARCH 64
+#elif UINTPTR_MAX == UINT32_MAX
+#define BOOST_STATIC_STRING_ARCH 32
+#else
+#error Unknown or unsupported architecture, please open an issue
+#endif
+
 // Can we have deduction guides?
 #if __cpp_deduction_guides >= 201703L
 #define BOOST_STATIC_STRING_USE_DEDUCT
