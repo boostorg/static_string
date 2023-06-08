@@ -13,7 +13,7 @@ on:
     branches:
       - master
       - develop
-      - feature/**
+      - '*'
 
 concurrency:
   group: ${{format('{0}:{1}', github.repository, github.ref)}}
