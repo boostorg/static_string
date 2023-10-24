@@ -34,7 +34,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
-#include <cwchar>
 #include <functional>
 #include <initializer_list>
 #include <limits>
@@ -58,9 +57,11 @@ template<std::size_t N>
 using static_string =
   basic_static_string<N, char, std::char_traits<char>>;
 
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 template<std::size_t N>
 using static_wstring =
   basic_static_string<N, wchar_t, std::char_traits<wchar_t>>;
+#endif
 
 template<std::size_t N>
 using static_u16string =
@@ -550,6 +551,7 @@ to_static_string_int_impl(Integer value) noexcept
   return static_string<N>(digits_begin, std::distance(digits_begin, digits_end));
 }
 
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 template<std::size_t N, typename Integer>
 inline
 static_wstring<N>
@@ -561,6 +563,7 @@ to_static_wstring_int_impl(Integer value) noexcept
     digits_end, value, std::is_signed<Integer>{});
   return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
 }
+#endif
 
 BOOST_STATIC_STRING_CPP11_CONSTEXPR
 inline
@@ -638,6 +641,7 @@ to_static_string_float_impl(long double value) noexcept
   return static_string<N>(buffer);
 }
 
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 template<std::size_t N>
 inline
 static_wstring<N>
@@ -711,6 +715,7 @@ to_static_wstring_float_impl(long double value) noexcept
   // this will not throw
   return static_wstring<N>(buffer);
 }
+#endif
 
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic pop
@@ -6202,6 +6207,7 @@ to_static_string(long double value) noexcept
     std::numeric_limits<long double>::max_digits10 + 4>(value);
 }
 
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 /// Converts `value` to a `static_wstring`
 static_wstring<std::numeric_limits<int>::digits10 + 2>
 inline
@@ -6282,6 +6288,7 @@ to_static_wstring(long double value) noexcept
   return detail::to_static_wstring_float_impl<
     std::numeric_limits<long double>::max_digits10 + 4>(value);
 }
+#endif
 
 //------------------------------------------------------------------------------
 //
@@ -6322,7 +6329,9 @@ hash_value(
 //------------------------------------------------------------------------------
 
 using static_strings::static_string;
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
 using static_strings::static_wstring;
+#endif
 using static_strings::static_u16string;
 using static_strings::static_u32string;
 } // boost

@@ -228,6 +228,24 @@ defined(BOOST_STATIC_STRING_CPP14)
 #define BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
 #endif
 
+#ifndef BOOST_STATIC_STRING_STANDALONE
+#if ! defined(BOOST_NO_CWCHAR) && ! defined(BOOST_NO_SWPRINTF)
+#define BOOST_STATIC_STRING_HAS_WCHAR
+#endif
+#else
+#ifndef __has_include
+// If we don't have __has_include in standalone,
+// we will assume that <cwchar> exists.
+#define BOOST_STATIC_STRING_HAS_WCHAR
+#elif __has_include(<cwchar>)
+#define BOOST_STATIC_STRING_HAS_WCHAR
+#endif
+#endif
+
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
+#include <cwchar>
+#endif
+
 // Define the basic string_view type used by the library
 // Conversions to and from other available string_view types
 // are still defined.
