@@ -605,5 +605,28 @@ testConstantEvaluation()
     cstatic_string().empty();
 #endif
 }
+
+#ifdef BOOST_STATIC_STRING_CPP20
+
+template<static_string<32> X>
+struct nttp_primary
+{
+  static constexpr bool value = false;
+};
+
+template<>
+struct nttp_primary<"test string">
+{
+  static constexpr bool value = true;
+};
+
+static_assert(!nttp_primary<"random string">::value,
+  "structural equality broken");
+
+static_assert(nttp_primary<"test string">::value,
+  "structural equality broken");
+
+#endif
+
 } // static_strings
 } // boost
