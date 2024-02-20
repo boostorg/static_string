@@ -22,38 +22,74 @@ struct cxper_char_traits
   using int_type = int;
   using state_type = std::mbstate_t;
 
-  static constexpr void assign(char_type& a, const char_type& b) noexcept { a = b;  }
-  static constexpr bool eq(char_type a, char_type b) noexcept { return a == b; }
-  static constexpr bool lt(char_type a, char_type b) noexcept { return a < b; }
+  static constexpr void assign(char_type& a, const char_type& b) noexcept
+  {
+    a = b;
+  }
 
-  static constexpr int compare(const char_type*, const char_type*, std::size_t) { return 0; }
+  static constexpr bool eq(char_type a, char_type b) noexcept
+  {
+    return a == b;
+  }
+
+  static constexpr bool lt(char_type a, char_type b) noexcept
+  {
+    return a < b;
+  }
+
+  static constexpr int compare(const char_type* a, const char_type* b, std::size_t n)
+  {
+    for (; n--; ++a, ++b)
+    {
+      if(lt(*a, *b))
+        return 1;
+      else if(lt(*b, *a))
+        return -1;
+    }
+    return 0;
+  }
+
   static constexpr std::size_t length(const char_type* s)
   {
-    std::size_t n = 0;
-    while (*(s++));
-    return n;
+    auto ptr = s;
+    while (!eq(*ptr, char_type()))
+      ++ptr;
+    return ptr - s;
   }
-  static constexpr const char_type* find(const char_type*, std::size_t, const char_type&){ return 0; }
+
+  static constexpr const char_type* find(const char_type* s, std::size_t n, const char_type& ch)
+  {
+    for (; n--; ++s)
+    {
+      if (eq(*s, ch))
+        return s;
+    }
+    return nullptr;
+  }
+
   static constexpr char_type* move(char_type* dest, const char_type* src, std::size_t n)
   {
-    const auto temp = dest;
-    while (n--)
-      *(dest++) = *(src++);
-    return temp;
+    if (detail::ptr_in_range(src, src + n, dest))
+    {
+      while (n--)
+        assign(dest[n], src[n]);
+      return dest;
+    }
+    return copy(dest, src, n);
   }
+
   static constexpr char_type* copy(char_type* dest, const char_type* src, std::size_t n)
   {
-    const auto temp = dest;
-    while (n--)
-      *(dest++) = *(src++);
-    return temp;
+    for (auto ptr = dest; n--;)
+      assign(*ptr++, *src++);
+    return dest;
   }
+
   static constexpr char_type* assign(char_type* dest, std::size_t n, char_type ch)
   {
-    const auto temp = dest;
-    while (n--)
-      *(dest++) = ch;
-    return temp;
+    for (auto ptr = dest; n--;)
+      assign(*ptr++, ch);
+    return dest;
   }
 };
 #else
@@ -608,7 +644,7 @@ testConstantEvaluation()
 
 #ifdef BOOST_STATIC_STRING_CPP20
 
-template<static_string<32> X>
+template<basic_static_string<32, char, cxper_char_traits> X>
 struct nttp_primary
 {
   static constexpr bool value = false;
