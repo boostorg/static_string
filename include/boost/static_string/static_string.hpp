@@ -1093,11 +1093,7 @@ public:
 
       Copy constructor.
   */
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
-  basic_static_string(const basic_static_string& other) noexcept
-  {
-    assign(other);
-  }
+  basic_static_string(const basic_static_string& other) = default;
 
   /** Constructor.
 
@@ -1185,12 +1181,8 @@ public:
 
       @throw std::length_error `s.size() > max_size()`.
   */
-  BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string&
-  operator=(const basic_static_string& s)
-  {
-    return assign(s);
-  }
+  operator=(const basic_static_string& s) = default;
 
   /** Assign to the string.
 
