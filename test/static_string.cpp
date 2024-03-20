@@ -298,6 +298,53 @@ testTWS(Arithmetic value, const wchar_t* wstr_expected = L"", bool test_expected
 // done
 static
 void
+testTypeTraits()
+{
+    {
+        using S = static_string<0>;
+        static_assert(std::is_trivially_copyable<S>::value, "");
+        static_assert(!std::is_trivially_default_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_constructible<S>::value, "");
+        static_assert(std::is_trivially_move_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_assignable<S>::value, "");
+        static_assert(std::is_trivially_move_assignable<S>::value, "");
+        static_assert(std::is_trivially_destructible<S>::value, "");
+    }
+    {
+        using S = static_string<1>;
+        static_assert(std::is_trivially_copyable<S>::value, "");
+        static_assert(!std::is_trivially_default_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_constructible<S>::value, "");
+        static_assert(std::is_trivially_move_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_assignable<S>::value, "");
+        static_assert(std::is_trivially_move_assignable<S>::value, "");
+        static_assert(std::is_trivially_destructible<S>::value, "");
+    }
+    {
+        using S = static_string<20>;
+        static_assert(std::is_trivially_copyable<S>::value, "");
+        static_assert(!std::is_trivially_default_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_constructible<S>::value, "");
+        static_assert(std::is_trivially_move_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_assignable<S>::value, "");
+        static_assert(std::is_trivially_move_assignable<S>::value, "");
+        static_assert(std::is_trivially_destructible<S>::value, "");
+    }
+    {
+        using S = static_string<400>;
+        static_assert(std::is_trivially_copyable<S>::value, "");
+        static_assert(!std::is_trivially_default_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_constructible<S>::value, "");
+        static_assert(std::is_trivially_move_constructible<S>::value, "");
+        static_assert(std::is_trivially_copy_assignable<S>::value, "");
+        static_assert(std::is_trivially_move_assignable<S>::value, "");
+        static_assert(std::is_trivially_destructible<S>::value, "");
+    }
+}
+
+// done
+static
+void
 testConstruct()
 {
     {
@@ -7460,6 +7507,8 @@ runTests()
 {
   constexpr auto cxper = testConstantEvaluation();
   static_cast<void>(cxper);
+
+  testTypeTraits();
 
   testConstruct();
 
