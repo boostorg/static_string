@@ -15,12 +15,11 @@ constant boost_dependencies :
     /boost/utility//boost_utility ;
 
 project /boost/static_string
-    : common-requirements
-        <include>include
     ;
 
 explicit
-    [ alias boost_static_string : : : : <library>$(boost_dependencies) ]
+    [ alias boost_static_string : : :
+        : <include>include <library>$(boost_dependencies) ]
     [ alias all : boost_static_string test ]
     ;
 
