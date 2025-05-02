@@ -64,7 +64,7 @@ def main(ctx):
   linux_cxx("S390x: Clang 12", "clang++-12", packages="clang-12 libstdc++-9-dev", llvm_os="focal", llvm_ver="12", buildtype="boost", buildscript="drone", image="cppalliance/droneubuntu2004:multiarch", environment={'B2_TOOLSET': 'clang-12', 'B2_CXXFLAGS': '-Werror', 'B2_CXXSTD': '17,20'}, arch="s390x", globalenv=globalenv),
 
   # Documentation
-  # linux_cxx("Docs", "g++", packages="docbook docbook-xml docbook-xsl xsltproc libsaxonhe-java default-jre-headless flex libfl-dev bison unzip rsync", buildtype="docs", buildscript="drone", image="cppalliance/droneubuntu1804:1", environment={'COMMENT': 'docs'}, globalenv=globalenv),
+  # linux_cxx("Docs", "g++", packages="docbook docbook-xml docbook-xsl python3-jinja2 xsltproc flex libfl-dev bison unzip rsync", buildtype="docs", buildscript="drone", image="cppalliance/droneubuntu1804:1", environment={'COMMENT': 'docs'}, globalenv=globalenv),
 
   # CMake tests (https://github.com/boostorg/boost-ci)
   ## Compiling as part of the boost superproject

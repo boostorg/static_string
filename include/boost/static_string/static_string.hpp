@@ -961,7 +961,7 @@ throw_exception(const char* msg)
       basic_static_string<N, char8_t, std::char_traits<char8_t>>;
     @endcode
 
-    @see to_static_string
+    @see @ref to_static_string.
 */
 template<std::size_t N, typename CharT,
   typename Traits = std::char_traits<CharT>>
