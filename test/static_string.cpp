@@ -269,6 +269,12 @@ testTS(Arithmetic value, const char* str_expected = "", bool test_expected = fal
   }
 }
 
+#define TEST_TO_STATIC_STRING(value) do { \
+  const auto str = to_static_string(value); \
+  const auto std_res = std::to_string(value); \
+  BOOST_TEST_EQ(str, std_res); \
+} while(0)
+
 template<typename Arithmetic>
 bool
 testTWS(Arithmetic value, const wchar_t* wstr_expected = L"", bool test_expected = false)
@@ -3946,21 +3952,21 @@ testToStaticString()
     BOOST_TEST(testTS(-4294967295ll, "-4294967295", true));
     BOOST_TEST(testTS(1, "1", true));
     BOOST_TEST(testTS(-1, "-1", true));
-    BOOST_TEST(testTS(0.1));
-    BOOST_TEST(testTS(0.0000001));
-    BOOST_TEST(testTS(-0.0000001));
-    BOOST_TEST(testTS(-0.1));
-    BOOST_TEST(testTS(1234567890.0001));
-    BOOST_TEST(testTS(1.123456789012345));
-    BOOST_TEST(testTS(-1234567890.1234));
-    BOOST_TEST(testTS(-1.123456789012345));
+    TEST_TO_STATIC_STRING(0.1);
+    TEST_TO_STATIC_STRING(0.0000001);
+    TEST_TO_STATIC_STRING(-0.0000001);
+    TEST_TO_STATIC_STRING(-0.1);
+    TEST_TO_STATIC_STRING(1234567890.0001);
+    TEST_TO_STATIC_STRING(1.123456789012345);
+    TEST_TO_STATIC_STRING(-1234567890.1234);
+    TEST_TO_STATIC_STRING(-1.123456789012345);
 
-    BOOST_TEST(testTS(std::numeric_limits<long long>::max()));
-    BOOST_TEST(testTS(std::numeric_limits<long long>::min()));
-    BOOST_TEST(testTS(std::numeric_limits<unsigned long long>::max()));
-    BOOST_TEST(testTS(std::numeric_limits<unsigned long long>::max()));
-    BOOST_TEST(testTS(std::numeric_limits<long double>::min()));
-    BOOST_TEST(testTS(std::numeric_limits<float>::min()));
+    TEST_TO_STATIC_STRING(std::numeric_limits<long long>::max());
+    TEST_TO_STATIC_STRING(std::numeric_limits<long long>::min());
+    TEST_TO_STATIC_STRING(std::numeric_limits<unsigned long long>::max());
+    TEST_TO_STATIC_STRING(std::numeric_limits<unsigned long long>::max());
+    TEST_TO_STATIC_STRING(std::numeric_limits<long double>::min());
+    TEST_TO_STATIC_STRING(std::numeric_limits<float>::min());
 
     // these tests technically are not portable, but they will work
     // 99% of the time.
