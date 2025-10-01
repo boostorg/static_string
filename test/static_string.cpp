@@ -245,7 +245,7 @@ testR(S s, typename S::size_type pos, typename S::size_type n1, const typename S
 
 template<typename Arithmetic>
 bool
-testTS(Arithmetic value, const char* str_expected = "", bool test_expected = false)
+testTS(Arithmetic value, const char* str_expected = nullptr)
 {
   const auto str = to_static_string(value);
   if (std::is_floating_point<Arithmetic>::value)
@@ -259,12 +259,12 @@ testTS(Arithmetic value, const char* str_expected = "", bool test_expected = fal
     {
       return
         Arithmetic(std::strtoll(str.begin(), nullptr, 10)) == value &&
-        (! test_expected || str == str_expected);
+        (! str_expected || str == str_expected);
     }
     else
     {
       return Arithmetic(std::strtoull(str.begin(), nullptr, 10)) == value &&
-        (! test_expected || str == str_expected);
+        (! str_expected || str == str_expected);
     }
   }
 }
@@ -277,7 +277,7 @@ testTS(Arithmetic value, const char* str_expected = "", bool test_expected = fal
 
 template<typename Arithmetic>
 bool
-testTWS(Arithmetic value, const wchar_t* wstr_expected = L"", bool test_expected = false)
+testTWS(Arithmetic value, const wchar_t* wstr_expected = nullptr)
 {
   const auto wstr = to_static_wstring(value);
   if (std::is_floating_point<Arithmetic>::value)
@@ -291,12 +291,12 @@ testTWS(Arithmetic value, const wchar_t* wstr_expected = L"", bool test_expected
     {
       return
         Arithmetic(std::wcstoll(wstr.begin(), nullptr, 10)) == value &&
-        (! test_expected || wstr == wstr_expected);
+        (! wstr_expected || wstr == wstr_expected);
     }
     else
     {
       return Arithmetic(std::wcstoull(wstr.begin(), nullptr, 10)) == value &&
-        (! test_expected || wstr == wstr_expected);
+        (! wstr_expected || wstr == wstr_expected);
     }
   }
 }
@@ -3942,16 +3942,16 @@ testGeneral()
 void
 testToStaticString()
 {
-    BOOST_TEST(testTS(0, "0", true));
-    BOOST_TEST(testTS(0u, "0", true));
-    BOOST_TEST(testTS(0xffff, "65535", true));
-    BOOST_TEST(testTS(0x10000, "65536", true));
-    BOOST_TEST(testTS(0xffffffff, "4294967295", true));
-    BOOST_TEST(testTS(-65535, "-65535", true));
-    BOOST_TEST(testTS(-65536, "-65536", true));
-    BOOST_TEST(testTS(-4294967295ll, "-4294967295", true));
-    BOOST_TEST(testTS(1, "1", true));
-    BOOST_TEST(testTS(-1, "-1", true));
+    BOOST_TEST(testTS(0, "0"));
+    BOOST_TEST(testTS(0u, "0"));
+    BOOST_TEST(testTS(0xffff, "65535"));
+    BOOST_TEST(testTS(0x10000, "65536"));
+    BOOST_TEST(testTS(0xffffffff, "4294967295"));
+    BOOST_TEST(testTS(-65535, "-65535"));
+    BOOST_TEST(testTS(-65536, "-65536"));
+    BOOST_TEST(testTS(-4294967295ll, "-4294967295"));
+    BOOST_TEST(testTS(1, "1"));
+    BOOST_TEST(testTS(-1, "-1"));
     TEST_TO_STATIC_STRING(0.1);
     TEST_TO_STATIC_STRING(0.0000001);
     TEST_TO_STATIC_STRING(-0.0000001);
@@ -3988,16 +3988,16 @@ testToStaticString()
 
 #ifdef BOOST_STATIC_STRING_HAS_WCHAR
 
-    BOOST_TEST(testTWS(0, L"0", true));
-    BOOST_TEST(testTWS(0u, L"0", true));
-    BOOST_TEST(testTWS(0xffff, L"65535", true));
-    BOOST_TEST(testTWS(0x10000, L"65536", true));
-    BOOST_TEST(testTWS(0xffffffff, L"4294967295", true));
-    BOOST_TEST(testTWS(-65535, L"-65535", true));
-    BOOST_TEST(testTWS(-65536, L"-65536", true));
-    BOOST_TEST(testTWS(-4294967295ll, L"-4294967295", true));
-    BOOST_TEST(testTWS(1, L"1", true));
-    BOOST_TEST(testTWS(-1, L"-1", true));
+    BOOST_TEST(testTWS(0, L"0"));
+    BOOST_TEST(testTWS(0u, L"0"));
+    BOOST_TEST(testTWS(0xffff, L"65535"));
+    BOOST_TEST(testTWS(0x10000, L"65536"));
+    BOOST_TEST(testTWS(0xffffffff, L"4294967295"));
+    BOOST_TEST(testTWS(-65535, L"-65535"));
+    BOOST_TEST(testTWS(-65536, L"-65536"));
+    BOOST_TEST(testTWS(-4294967295ll, L"-4294967295"));
+    BOOST_TEST(testTWS(1, L"1"));
+    BOOST_TEST(testTWS(-1, L"-1"));
     BOOST_TEST(testTWS(0.1));
     BOOST_TEST(testTWS(0.0000001));
     BOOST_TEST(testTWS(-0.0000001));
