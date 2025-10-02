@@ -549,11 +549,14 @@ inline
 static_string<N>
 to_static_string_int_impl(Integer value) noexcept
 {
-  char buffer[N];
-  const auto digits_end = std::end(buffer);
-  const auto digits_begin = integer_to_string<std::char_traits<char>, Integer>(
+  static_string<N> result;
+  char * const digits_end = result.data() + N;
+  char * const digits_begin = integer_to_string<std::char_traits<char>, Integer>(
     digits_end, value, std::is_signed<Integer>{});
-  return static_string<N>(digits_begin, std::distance(digits_begin, digits_end));
+  result.set_size(digits_end - digits_begin);
+  std::char_traits<char>::move(result.data(), digits_begin, result.size());
+  result.term();
+  return result;
 }
 
 #ifdef BOOST_STATIC_STRING_HAS_WCHAR
@@ -562,11 +565,14 @@ inline
 static_wstring<N>
 to_static_wstring_int_impl(Integer value) noexcept
 {
-  wchar_t buffer[N];
-  const auto digits_end = std::end(buffer);
-  const auto digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
+  static_wstring<N> result;
+  wchar_t * const digits_end = result.data() + N;
+  wchar_t * const digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
     digits_end, value, std::is_signed<Integer>{});
-  return static_wstring<N>(digits_begin, std::distance(digits_begin, digits_end));
+  result.set_size(digits_end - digits_begin);
+  std::char_traits<wchar_t>::move(result.data(), digits_begin, result.size());
+  result.term();
+  return result;
 }
 #endif
 
@@ -595,11 +601,11 @@ to_static_string_float_impl(double value) noexcept
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  char buffer[N + 1];
+  static_string<N> result;
   // we know that a formatting error will not occur, so
   // we assume that the result is always positive
-  if (std::size_t(std::snprintf(buffer, N + 1, "%f", value)) > N)
+  std::size_t length = std::snprintf(result.data(), N + 1, "%f", value);
+  if (length > N)
   {
     // the + 4 is for the decimal, 'e',
     // its sign, and the sign of the integral portion
@@ -609,10 +615,10 @@ to_static_string_float_impl(double value) noexcept
     const int precision = narrow > reserved_count ?
       N - reserved_count : 0;
     // switch to scientific notation
-    std::snprintf(buffer, N + 1, "%.*e", precision, value);
+    length = std::snprintf(result.data(), N + 1, "%.*e", precision, value);
   }
-  // this will not throw
-  return static_string<N>(buffer);
+  result.set_size(length);
+  return result;
 }
 
 template<std::size_t N>
@@ -624,13 +630,13 @@ to_static_string_float_impl(long double value) noexcept
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  char buffer[N + 1];
+  static_string<N> result;
   // snprintf returns the number of characters
   // that would have been written
   // we know that a formatting error will not occur, so
   // we assume that the result is always positive
-  if (std::size_t(std::snprintf(buffer, N + 1, "%Lf", value)) > N)
+  std::size_t length = std::snprintf(result.data(), N + 1, "%Lf", value);
+  if (length > N)
   {
     // the + 4 is for the decimal, 'e',
     // its sign, and the sign of the integral portion
@@ -640,10 +646,10 @@ to_static_string_float_impl(long double value) noexcept
     const int precision = narrow > reserved_count ?
       N - reserved_count : 0;
     // switch to scientific notation
-    std::snprintf(buffer, N + 1, "%.*Le", precision, value);
+    length = std::snprintf(result.data(), N + 1, "%.*Le", precision, value);
   }
-  // this will not throw
-  return static_string<N>(buffer);
+  result.set_size(length);
+  return result;
 }
 
 #ifdef BOOST_STATIC_STRING_HAS_WCHAR
@@ -656,8 +662,7 @@ to_static_wstring_float_impl(double value) noexcept
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  wchar_t buffer[N + 1];
+  static_wstring<N> result;
   // swprintf returns a negative number if it can't
   // fit all the characters in the buffer.
   // mingw has a non-standard swprintf, so
@@ -665,8 +670,8 @@ to_static_wstring_float_impl(double value) noexcept
   // circuit evaluation will ensure that the
   // second operand is not evaluated on conforming
   // implementations.
-  const long long num_written =
-    std::swprintf(buffer, N + 1, L"%f", value);
+  long long num_written =
+    std::swprintf(result.data(), N + 1, L"%f", value);
   if (num_written < 0 ||
     num_written > narrow)
   {
@@ -678,10 +683,10 @@ to_static_wstring_float_impl(double value) noexcept
     const int precision = narrow > reserved_count ?
       N - reserved_count : 0;
     // switch to scientific notation
-    std::swprintf(buffer, N + 1, L"%.*e", precision, value);
+    num_written = std::swprintf(result.data(), N + 1, L"%.*e", precision, value);
   }
-  // this will not throw
-  return static_wstring<N>(buffer);
+  result.set_size(static_cast<std::size_t>(num_written));
+  return result;
 }
 
 template<std::size_t N>
@@ -693,8 +698,7 @@ to_static_wstring_float_impl(long double value) noexcept
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  // extra one needed for null terminator
-  wchar_t buffer[N + 1];
+  static_wstring<N> result;
   // swprintf returns a negative number if it can't
   // fit all the characters in the buffer.
   // mingw has a non-standard swprintf, so
@@ -702,8 +706,8 @@ to_static_wstring_float_impl(long double value) noexcept
   // circuit evaluation will ensure that the
   // second operand is not evaluated on conforming
   // implementations.
-  const long long num_written =
-    std::swprintf(buffer, N + 1, L"%Lf", value);
+  long long num_written =
+    std::swprintf(result.data(), N + 1, L"%Lf", value);
   if (num_written < 0 ||
     num_written > narrow)
   {
@@ -715,10 +719,10 @@ to_static_wstring_float_impl(long double value) noexcept
     const int precision = narrow > reserved_count ?
       N - reserved_count : 0;
     // switch to scientific notation
-    std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
+    num_written = std::swprintf(result.data(), N + 1, L"%.*Le", precision, value);
   }
-  // this will not throw
-  return static_wstring<N>(buffer);
+  result.set_size(static_cast<std::size_t>(num_written));
+  return result;
 }
 #endif
 
@@ -925,6 +929,37 @@ class basic_static_string
 private:
   template<std::size_t, class, class>
   friend class basic_static_string;
+
+  template<std::size_t P, typename Integer>
+  friend
+  static_string<P>
+  detail::to_static_string_int_impl(Integer value) noexcept;
+
+  template<std::size_t P>
+  friend
+  static_string<P>
+  detail::to_static_string_float_impl(double value) noexcept;
+
+  template<std::size_t P>
+  friend
+  static_string<P>
+  detail::to_static_string_float_impl(long double value) noexcept;
+
+#ifdef BOOST_STATIC_STRING_HAS_WCHAR
+  template<std::size_t P, typename Integer>
+  friend static_wstring<P>
+  detail::to_static_wstring_int_impl(Integer value) noexcept;
+
+  template<std::size_t P>
+  friend
+  static_wstring<P>
+  detail::to_static_wstring_float_impl(double value) noexcept;
+
+  template<std::size_t P>
+  friend
+  static_wstring<P>
+  detail::to_static_wstring_float_impl(long double value) noexcept;
+#endif
 public:
   //--------------------------------------------------------------------------
   //
