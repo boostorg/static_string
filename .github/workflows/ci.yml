@@ -36,6 +36,8 @@ jobs:
   call-boost-ci:
     name: Run Boost.CI
     uses: boostorg/boost-ci/.github/workflows/reusable.yml@master
+    with:
+      exclude_cxxstd: '98,03,0x,2c,26'
     # Example of customization:
     # with:
     #   enable_reflection: true
