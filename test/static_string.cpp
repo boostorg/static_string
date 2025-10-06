@@ -301,7 +301,6 @@ testTWS(Arithmetic value, const wchar_t* wstr_expected = nullptr)
   }
 }
 
-// done
 static
 void
 testTypeTraits()
