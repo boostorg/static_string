@@ -39,6 +39,7 @@ jobs:
     with:
       exclude_cxxstd: '98,03,0x,2c,26'
       enable_pr_coverage: false
+      enable_multiarch: false
     # Example of customization:
     # with:
     #   enable_reflection: true
