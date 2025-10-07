@@ -7421,6 +7421,68 @@ testResize()
 }
 
 void
+testResizeAndOverwrite()
+{
+  {
+    // Basic overwrite
+    static_string<16> s;
+    s.resize_and_overwrite(
+      5,
+      [](char* buf, std::size_t) -> std::size_t
+      {
+        std::strcpy(buf, "Hello");
+        return 5;
+      }
+    );
+    BOOST_TEST(s.size() == 5);
+    BOOST_TEST(s == "Hello");
+  }
+  {
+    // Zero overwrite
+    static_string<16> s;
+    s.resize_and_overwrite(
+      8,
+      [](char*, std::size_t) -> std::size_t
+      {
+        return 0;
+      }
+    );
+    BOOST_TEST(s.empty());
+  }
+  {
+    // Maximum size overwrite
+    constexpr std::size_t N = 16;
+    static_string<N> s;
+    s.resize_and_overwrite(
+      N,
+      [](char* buf, std::size_t n) -> std::size_t
+      {
+        for (std::size_t i = 0; i < n; ++i) {
+          buf[i] = 'x';
+        }
+        return n;
+      }
+    );
+    BOOST_TEST(s.size() == N);
+    BOOST_TEST(s == std::string(N, 'x'));
+  }
+  {
+    // Oversize overwrite
+    static_string<16> s;
+    BOOST_TEST_THROWS(
+      s.resize_and_overwrite(
+        17,
+        [](char*, std::size_t n) -> std::size_t
+        {
+          return n;
+        }
+      ),
+      std::length_error
+    );
+  }
+}
+
+void
 testStream()
 {
   std::stringstream a;
@@ -7539,6 +7601,7 @@ runTests()
   testGeneral();
   testToStaticString();
   testResize();
+  testResizeAndOverwrite();
 
   testFind();
 

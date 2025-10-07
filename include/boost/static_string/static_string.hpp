@@ -39,6 +39,7 @@
 #include <limits>
 #include <iosfwd>
 #include <type_traits>
+#include <utility>
 
 namespace boost {
 namespace static_strings {
@@ -3743,6 +3744,31 @@ public:
     size_type n,
     value_type c);
 
+  /**
+      Resize the string and overwrite its contents.
+
+      Resizes the string to contain `n` characters, and uses the
+      provided function object `op` to overwrite the string contents.
+      The function object is called with two arguments: a pointer to
+      the string internal buffer, and the size of the string. The
+      function object shall return the number of characters written to
+      the buffer, which shall be less than or equal to `n`. The string
+      size is set to the value returned by the function object.
+
+      @par Exception Safety
+
+      Strong guarantee. However, if an exception is thrown by
+      `std::move(op)(p, count)`, the behavior is undefined.
+
+      @throw std::length_error `n > max_size()`
+  */
+  template<typename Operation>
+  BOOST_STATIC_STRING_CPP14_CONSTEXPR
+  void
+  resize_and_overwrite(
+    size_type n,
+    Operation op);
+
   /** Swap two strings.
 
       Swaps the contents of the string and `s`.
@@ -6690,6 +6716,26 @@ resize(size_type n, value_type c)
   if(n > curr_size)
     traits_type::assign(data() + curr_size, n - curr_size, c);
   this->set_size(n);
+  term();
+}
+
+template<std::size_t N, typename CharT, typename Traits>
+template<typename Operation>
+BOOST_STATIC_STRING_CPP14_CONSTEXPR
+void
+basic_static_string<N, CharT, Traits>::
+resize_and_overwrite(
+  size_type n,
+  Operation op)
+{
+  if (n > max_size()) {
+    detail::throw_exception<std::length_error>("n > max_size() in resize_and_overwrite()");
+  }
+
+  CharT* p = data();
+  const auto new_size = std::move(op)(p, n);
+  BOOST_STATIC_STRING_ASSERT(new_size >= 0 && size_type(new_size) <= n);
+  this->set_size(size_type(new_size));
   term();
 }
 
