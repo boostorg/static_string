@@ -550,13 +550,21 @@ inline
 static_string<N>
 to_static_string_int_impl(Integer value) noexcept
 {
+  using size_type = typename static_string<N>::size_type;
   static_string<N> result;
-  char * const digits_end = result.data() + N;
-  char * const digits_begin = integer_to_string<std::char_traits<char>, Integer>(
-    digits_end, value, std::is_signed<Integer>{});
-  result.set_size(digits_end - digits_begin);
-  std::char_traits<char>::move(result.data(), digits_begin, result.size());
-  result.term();
+  result.resize_and_overwrite(
+    N, 
+    [&](char* buffer, size_type) -> size_type
+    {
+      char* const digits_end = buffer + N;
+      char* const digits_begin = integer_to_string<std::char_traits<char>, Integer>(
+          digits_end, value, std::is_signed<Integer>{});
+      const size_type len = digits_end - digits_begin;
+      std::char_traits<char>::move(buffer, digits_begin, len);
+      return len;
+    }
+  );
+
   return result;
 }
 
@@ -566,13 +574,20 @@ inline
 static_wstring<N>
 to_static_wstring_int_impl(Integer value) noexcept
 {
+  using size_type = typename static_wstring<N>::size_type;
   static_wstring<N> result;
-  wchar_t * const digits_end = result.data() + N;
-  wchar_t * const digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
-    digits_end, value, std::is_signed<Integer>{});
-  result.set_size(digits_end - digits_begin);
-  std::char_traits<wchar_t>::move(result.data(), digits_begin, result.size());
-  result.term();
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      wchar_t* const digits_end = buffer + N;
+      wchar_t* const digits_begin = integer_to_wstring<std::char_traits<wchar_t>, Integer>(
+          digits_end, value, std::is_signed<Integer>{});
+      const size_type len = digits_end - digits_begin;
+      std::char_traits<wchar_t>::move(buffer, digits_begin, len);
+      return len;
+    }
+  );
   return result;
 }
 #endif
@@ -598,27 +613,34 @@ inline
 static_string<N>
 to_static_string_float_impl(double value) noexcept
 {
+  using size_type = typename static_string<N>::size_type;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
   static_string<N> result;
-  // we know that a formatting error will not occur, so
-  // we assume that the result is always positive
-  std::size_t length = std::snprintf(result.data(), N + 1, "%f", value);
-  if (length > N)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    length = std::snprintf(result.data(), N + 1, "%.*e", precision, value);
-  }
-  result.set_size(length);
+  result.resize_and_overwrite(
+    N,
+    [&](char* buffer, size_type) -> size_type
+    {
+      // we know that a formatting error will not occur, so
+      // we assume that the result is always positive
+      std::size_t length = std::snprintf(buffer, N + 1, "%f", value);
+      if (length > N)
+      {
+        // the + 4 is for the decimal, 'e',
+        // its sign, and the sign of the integral portion
+        const int reserved_count =
+            (std::max)(2, count_digits(
+                std::numeric_limits<double>::max_exponent10)) + 4;
+        const int precision = narrow > reserved_count ?
+            N - reserved_count : 0;
+        // switch to scientific notation
+        length = std::snprintf(buffer, N + 1, "%.*e", precision, value);
+      }
+      return length;
+    }
+  );
   return result;
 }
 
@@ -627,29 +649,36 @@ inline
 static_string<N>
 to_static_string_float_impl(long double value) noexcept
 {
+  using size_type = typename static_string<N>::size_type;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
   static_string<N> result;
-  // snprintf returns the number of characters
-  // that would have been written
-  // we know that a formatting error will not occur, so
-  // we assume that the result is always positive
-  std::size_t length = std::snprintf(result.data(), N + 1, "%Lf", value);
-  if (length > N)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<long double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    length = std::snprintf(result.data(), N + 1, "%.*Le", precision, value);
-  }
-  result.set_size(length);
+  result.resize_and_overwrite(
+    N,
+    [&](char* buffer, size_type)->size_type
+    {
+      // snprintf returns the number of characters
+      // that would have been written
+      // we know that a formatting error will not occur, so
+      // we assume that the result is always positive
+      std::size_t length = std::snprintf(buffer, N + 1, "%Lf", value);
+      if (length > N)
+      {
+          // the + 4 is for the decimal, 'e',
+          // its sign, and the sign of the integral portion
+          const int reserved_count =
+              (std::max)(2, count_digits(
+                  std::numeric_limits<long double>::max_exponent10)) + 4;
+          const int precision = narrow > reserved_count ?
+              N - reserved_count : 0;
+          // switch to scientific notation
+          length = std::snprintf(buffer, N + 1, "%.*Le", precision, value);
+      }
+      return length;
+    }
+  );
   return result;
 }
 
@@ -659,34 +688,41 @@ inline
 static_wstring<N>
 to_static_wstring_float_impl(double value) noexcept
 {
+  using size_type = typename static_wstring<N>::size_type;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
   static_wstring<N> result;
-  // swprintf returns a negative number if it can't
-  // fit all the characters in the buffer.
-  // mingw has a non-standard swprintf, so
-  // this just covers all the bases. short
-  // circuit evaluation will ensure that the
-  // second operand is not evaluated on conforming
-  // implementations.
-  long long num_written =
-    std::swprintf(result.data(), N + 1, L"%f", value);
-  if (num_written < 0 ||
-    num_written > narrow)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    num_written = std::swprintf(result.data(), N + 1, L"%.*e", precision, value);
-  }
-  result.set_size(static_cast<std::size_t>(num_written));
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      // swprintf returns a negative number if it can't
+      // fit all the characters in the buffer.
+      // mingw has a non-standard swprintf, so
+      // this just covers all the bases. short
+      // circuit evaluation will ensure that the
+      // second operand is not evaluated on conforming
+      // implementations.
+      long long num_written =
+          std::swprintf(buffer, N + 1, L"%f", value);
+      if (num_written < 0 ||
+          num_written > narrow)
+      {
+          // the + 4 is for the decimal, 'e',
+          // its sign, and the sign of the integral portion
+          const int reserved_count =
+              (std::max)(2, count_digits(
+                  std::numeric_limits<double>::max_exponent10)) + 4;
+          const int precision = narrow > reserved_count ?
+              N - reserved_count : 0;
+          // switch to scientific notation
+          num_written = std::swprintf(buffer, N + 1, L"%.*e", precision, value);
+      }
+      return num_written;
+    }
+  );
   return result;
 }
 
@@ -695,34 +731,41 @@ inline
 static_wstring<N>
 to_static_wstring_float_impl(long double value) noexcept
 {
+  using size_type = typename static_wstring<N>::size_type;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
   static_wstring<N> result;
-  // swprintf returns a negative number if it can't
-  // fit all the characters in the buffer.
-  // mingw has a non-standard swprintf, so
-  // this just covers all the bases. short
-  // circuit evaluation will ensure that the
-  // second operand is not evaluated on conforming
-  // implementations.
-  long long num_written =
-    std::swprintf(result.data(), N + 1, L"%Lf", value);
-  if (num_written < 0 ||
-    num_written > narrow)
-  {
-    // the + 4 is for the decimal, 'e',
-    // its sign, and the sign of the integral portion
-    const int reserved_count =
-      (std::max)(2, count_digits(
-      std::numeric_limits<long double>::max_exponent10)) + 4;
-    const int precision = narrow > reserved_count ?
-      N - reserved_count : 0;
-    // switch to scientific notation
-    num_written = std::swprintf(result.data(), N + 1, L"%.*Le", precision, value);
-  }
-  result.set_size(static_cast<std::size_t>(num_written));
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      // swprintf returns a negative number if it can't
+      // fit all the characters in the buffer.
+      // mingw has a non-standard swprintf, so
+      // this just covers all the bases. short
+      // circuit evaluation will ensure that the
+      // second operand is not evaluated on conforming
+      // implementations.
+      long long num_written =
+          std::swprintf(buffer, N + 1, L"%Lf", value);
+      if (num_written < 0 ||
+          num_written > narrow)
+      {
+          // the + 4 is for the decimal, 'e',
+          // its sign, and the sign of the integral portion
+          const int reserved_count =
+              (std::max)(2, count_digits(
+                  std::numeric_limits<long double>::max_exponent10)) + 4;
+          const int precision = narrow > reserved_count ?
+              N - reserved_count : 0;
+          // switch to scientific notation
+          num_written = std::swprintf(buffer, N + 1, L"%.*Le", precision, value);
+      }
+      return num_written;
+    }
+  );
   return result;
 }
 #endif
@@ -931,36 +974,6 @@ private:
   template<std::size_t, class, class>
   friend class basic_static_string;
 
-  template<std::size_t P, typename Integer>
-  friend
-  static_string<P>
-  detail::to_static_string_int_impl(Integer value) noexcept;
-
-  template<std::size_t P>
-  friend
-  static_string<P>
-  detail::to_static_string_float_impl(double value) noexcept;
-
-  template<std::size_t P>
-  friend
-  static_string<P>
-  detail::to_static_string_float_impl(long double value) noexcept;
-
-#ifdef BOOST_STATIC_STRING_HAS_WCHAR
-  template<std::size_t P, typename Integer>
-  friend static_wstring<P>
-  detail::to_static_wstring_int_impl(Integer value) noexcept;
-
-  template<std::size_t P>
-  friend
-  static_wstring<P>
-  detail::to_static_wstring_float_impl(double value) noexcept;
-
-  template<std::size_t P>
-  friend
-  static_wstring<P>
-  detail::to_static_wstring_float_impl(long double value) noexcept;
-#endif
 public:
   //--------------------------------------------------------------------------
   //
