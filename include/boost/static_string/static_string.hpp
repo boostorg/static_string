@@ -6213,9 +6213,11 @@ operator<<(
 
 // Unsigned overloads have a + 1, for the missing digit.
 
-// Floating point overloads have a + 4, for the sign
-// of the integral part, sign of the exponent, the 'e',
-// and the decimal.
+// Floating point overloads have a +7 (for float), + 8
+// (for double), and +10 for long double (that accounts
+// for the sign of the integral part, the missing digit,
+// the decimal point, the sign of the exponent, the 'e'
+// and up to two, three or five digits of exponent).
 
 /// Converts `value` to a `static_string`
 static_string<std::numeric_limits<int>::digits10 + 2>
@@ -6272,30 +6274,30 @@ to_static_string(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_string`
-static_string<std::numeric_limits<float>::max_digits10 + 4>
+static_string<std::numeric_limits<float>::max_digits10 + 7>
 inline
 to_static_string(float value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<float>::max_digits10 + 4>(value);
+    std::numeric_limits<float>::max_digits10 + 7>(value);
 }
 
 /// Converts `value` to a `static_string`
-static_string<std::numeric_limits<double>::max_digits10 + 4>
+static_string<std::numeric_limits<double>::max_digits10 + 8>
 inline
 to_static_string(double value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<double>::max_digits10 + 4>(value);
+    std::numeric_limits<double>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_string`
-static_string<std::numeric_limits<long double>::max_digits10 + 4>
+static_string<std::numeric_limits<long double>::max_digits10 + 10>
 inline
 to_static_string(long double value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<long double>::max_digits10 + 4>(value);
+    std::numeric_limits<long double>::max_digits10 + 10>(value);
 }
 
 #ifdef BOOST_STATIC_STRING_HAS_WCHAR
@@ -6354,30 +6356,30 @@ to_static_wstring(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_wstring`
-static_wstring<std::numeric_limits<float>::max_digits10 + 4>
+static_wstring<std::numeric_limits<float>::max_digits10 + 7>
 inline
 to_static_wstring(float value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<float>::max_digits10 + 4>(value);
+    std::numeric_limits<float>::max_digits10 + 7>(value);
 }
 
 /// Converts `value` to a `static_wstring`
-static_wstring<std::numeric_limits<double>::max_digits10 + 4>
+static_wstring<std::numeric_limits<double>::max_digits10 + 8>
 inline
 to_static_wstring(double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<double>::max_digits10 + 4>(value);
+    std::numeric_limits<double>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_wstring`
-static_wstring<std::numeric_limits<long double>::max_digits10 + 4>
+static_wstring<std::numeric_limits<long double>::max_digits10 + 10>
 inline
 to_static_wstring(long double value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<long double>::max_digits10 + 4>(value);
+    std::numeric_limits<long double>::max_digits10 + 10>(value);
 }
 #endif
 
