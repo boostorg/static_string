@@ -278,4 +278,8 @@ using basic_string_view =
 } // boost
 #endif
 
+#if defined(__cpp_lib_to_string) && __cpp_lib_to_string >= 202306L // std::to_[w]string() redefined in terms of std::format()
+#define BOOST_STATIC_STRING_USE_STD_FORMAT
+#endif
+
 #endif

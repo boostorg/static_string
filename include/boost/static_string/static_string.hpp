@@ -34,6 +34,9 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+#include <format>
+#endif
 #include <functional>
 #include <initializer_list>
 #include <limits>
@@ -608,17 +611,42 @@ count_digits(std::size_t value)
 #pragma GCC diagnostic ignored "-Wformat-truncation"
 #endif
 
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+
+template<std::size_t N, typename FloatingPoint>
+inline
+static_string<N>
+cpp26_to_static_string(FloatingPoint value) noexcept
+{
+  using size_type = typename static_string<N>::size_type;
+  static_string<N> result;
+  result.resize_and_overwrite(
+    N,
+    [&](char* buffer, size_type) -> size_type
+    {
+      const auto formatted = std::format_to_n(buffer, N, "{}", value);
+      return formatted.size;
+    }
+  );
+  return result;
+}
+
+#endif
+
 template<std::size_t N>
 inline
 static_string<N>
 to_static_string_float_impl(double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_string<N>(value);
+#else
   using size_type = typename static_string<N>::size_type;
+  static_string<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  static_string<N> result;
   result.resize_and_overwrite(
     N,
     [&](char* buffer, size_type) -> size_type
@@ -642,6 +670,19 @@ to_static_string_float_impl(double value) noexcept
     }
   );
   return result;
+#endif
+}
+
+template<std::size_t N>
+inline
+static_string<N>
+to_static_string_float_impl(float value) noexcept
+{
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_string<N>(value);
+#else
+  return to_static_string_float_impl<N>(static_cast<double>(value));
+#endif
 }
 
 template<std::size_t N>
@@ -649,12 +690,15 @@ inline
 static_string<N>
 to_static_string_float_impl(long double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_string<N>(value);
+#else
   using size_type = typename static_string<N>::size_type;
+  static_string<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  static_string<N> result;
   result.resize_and_overwrite(
     N,
     [&](char* buffer, size_type)->size_type
@@ -680,20 +724,46 @@ to_static_string_float_impl(long double value) noexcept
     }
   );
   return result;
+#endif
 }
 
 #ifdef BOOST_STATIC_STRING_HAS_WCHAR
+
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+template<std::size_t N, typename FloatingPoint>
+inline
+static_wstring<N>
+cpp26_to_static_wstring(FloatingPoint value) noexcept
+{
+  using size_type = typename static_wstring<N>::size_type;
+  static_wstring<N> result;
+  result.resize_and_overwrite(
+    N,
+    [&](wchar_t* buffer, size_type) -> size_type
+    {
+      const auto formatted = std::format_to_n(buffer, N, L"{}", value);
+      return formatted.size;
+    }
+  );
+  return result;
+}
+
+#endif
+
 template<std::size_t N>
 inline
 static_wstring<N>
 to_static_wstring_float_impl(double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_wstring<N>(value);
+#else
   using size_type = typename static_wstring<N>::size_type;
+  static_wstring<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  static_wstring<N> result;
   result.resize_and_overwrite(
     N,
     [&](wchar_t* buffer, size_type) -> size_type
@@ -724,6 +794,19 @@ to_static_wstring_float_impl(double value) noexcept
     }
   );
   return result;
+#endif
+}
+
+template<std::size_t N>
+inline
+static_wstring<N>
+to_static_wstring_float_impl(float value) noexcept
+{
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_wstring<N>(value);
+#else
+    return to_static_wstring_float_impl<N>(static_cast<double>(value));
+#endif
 }
 
 template<std::size_t N>
@@ -731,12 +814,15 @@ inline
 static_wstring<N>
 to_static_wstring_float_impl(long double value) noexcept
 {
+#if defined(BOOST_STATIC_STRING_USE_STD_FORMAT)
+  return cpp26_to_static_wstring<N>(value);
+#else
   using size_type = typename static_wstring<N>::size_type;
+  static_wstring<N> result;
   // we have to assume here that no reasonable implementation
   // will require more than 2^63 chars to represent a float value.
   const long long narrow =
     static_cast<long long>(N);
-  static_wstring<N> result;
   result.resize_and_overwrite(
     N,
     [&](wchar_t* buffer, size_type) -> size_type
@@ -767,6 +853,7 @@ to_static_wstring_float_impl(long double value) noexcept
     }
   );
   return result;
+#endif
 }
 #endif
 
@@ -6213,11 +6300,13 @@ operator<<(
 
 // Unsigned overloads have a + 1, for the missing digit.
 
-// Floating point overloads have a +7 (for float), + 8
+// Floating point overloads have a +8 (for float), + 8
 // (for double), and +10 for long double (that accounts
 // for the sign of the integral part, the missing digit,
 // the decimal point, the sign of the exponent, the 'e'
-// and up to two, three or five digits of exponent).
+// and up to two, three or five digits of exponent---float
+// uses the same value as double, because we sometimes
+// reuse the conversion from double for floats).
 
 /// Converts `value` to a `static_string`
 static_string<std::numeric_limits<int>::digits10 + 2>
@@ -6274,12 +6363,12 @@ to_static_string(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_string`
-static_string<std::numeric_limits<float>::max_digits10 + 7>
+static_string<std::numeric_limits<float>::max_digits10 + 8>
 inline
 to_static_string(float value) noexcept
 {
   return detail::to_static_string_float_impl<
-    std::numeric_limits<float>::max_digits10 + 7>(value);
+    std::numeric_limits<float>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_string`
@@ -6356,12 +6445,12 @@ to_static_wstring(unsigned long long value) noexcept
 }
 
 /// Converts `value` to a `static_wstring`
-static_wstring<std::numeric_limits<float>::max_digits10 + 7>
+static_wstring<std::numeric_limits<float>::max_digits10 + 8>
 inline
 to_static_wstring(float value) noexcept
 {
   return detail::to_static_wstring_float_impl<
-    std::numeric_limits<float>::max_digits10 + 7>(value);
+    std::numeric_limits<float>::max_digits10 + 8>(value);
 }
 
 /// Converts `value` to a `static_wstring`
