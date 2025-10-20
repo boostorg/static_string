@@ -37,7 +37,7 @@ jobs:
     name: Run Boost.CI
     uses: boostorg/boost-ci/.github/workflows/reusable.yml@master
     with:
-      exclude_cxxstd: '98,03,0x,2c,26'
+      exclude_cxxstd: '98,03,0x'
       enable_pr_coverage: false
       enable_multiarch: false
     # Example of customization:
