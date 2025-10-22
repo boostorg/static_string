@@ -139,18 +139,12 @@
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) BOOST_THROW_EXCEPTION(ex)
 #endif
-#ifndef BOOST_STATIC_STRING_STATIC_ASSERT
-#define BOOST_STATIC_STRING_STATIC_ASSERT(cond, msg) BOOST_STATIC_ASSERT_MSG(cond, msg)
-#endif
 #ifndef BOOST_STATIC_STRING_ASSERT
 #define BOOST_STATIC_STRING_ASSERT(cond) BOOST_ASSERT(cond)
 #endif
 #else
 #ifndef BOOST_STATIC_STRING_THROW
 #define BOOST_STATIC_STRING_THROW(ex) throw ex
-#endif
-#ifndef BOOST_STATIC_STRING_STATIC_ASSERT
-#define BOOST_STATIC_STRING_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
 #endif
 #ifndef BOOST_STATIC_STRING_ASSERT
 #define BOOST_STATIC_STRING_ASSERT(cond) assert(cond)
@@ -161,7 +155,6 @@
 #include <boost/config.hpp>
 #include <boost/assert.hpp>
 #include <boost/container_hash/hash.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/utility/string_view.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <boost/throw_exception.hpp>
