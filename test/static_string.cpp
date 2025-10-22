@@ -919,14 +919,14 @@ testElements()
         BOOST_TEST(std::memcmp(
             s.c_str(), "123\0", 4) == 0);
     }
-#ifdef BOOST_STATIC_ASSERT_HAS_STRING_VIEW
+#ifdef BOOST_STATIC_STRING_HAS_STRING_VIEW
     {
         static_string<3> s("123");
         string_view sv = s;
         BOOST_TEST(static_string<5>(sv) == "123");
     }
 #endif
-#ifdef BOOST_STATIC_ASSERT_HAS_STD_STRING_VIEW
+#ifdef BOOST_STATIC_STRING_HAS_STD_STRING_VIEW
     {
         static_string<3> s("123");
         std::string_view sv = s;
