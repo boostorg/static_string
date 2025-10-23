@@ -38,7 +38,7 @@ def main(ctx):
     job(compiler='clang-14',  cxxstd='11,14,17,20,2b', os='ubuntu-22.04'),
     job(compiler='clang-15',  cxxstd='11,14,17,20,2b', os='ubuntu-22.04', add_llvm=True,
         env={'B2_CXXFLAGS': '-Werror'}),
-    job(name='Clang 15 standalone', compiler='clang-15',  cxxstd='11,14,17,20,2b', os='ubuntu-22.04', add_llvm=True,
+    job(name='Clang 15 standalone', compiler='clang-15',  cxxstd='17,20,2b', os='ubuntu-22.04', add_llvm=True,
         env={'B2_CXXFLAGS': '-Werror', 'B2_DEFINES': 'BOOST_STATIC_STRING_STANDALONE'}),
 
     job(compiler='gcc-4.8',   cxxstd='11',             os='ubuntu-16.04'),
