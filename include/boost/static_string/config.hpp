@@ -168,27 +168,31 @@
 #include <cassert>
 #include <stdexcept>
 
+#if defined(__has_include)
+#  if !__has_include(<string_view>)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
 /*
  * Replicate the logic from Boost.Config
  */
 // GNU libstdc++3:
-#if defined(__GLIBCPP__) || defined(__GLIBCXX__)
-#if (BOOST_LIBSTDCXX_VERSION < 70100) || (__cplusplus <= 201402L)
-#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
-#endif
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+#  if ((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) < 70100) || (__cplusplus <= 201402L)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
 // libc++:
 #elif defined(_LIBCPP_VERSION)
-#if (_LIBCPP_VERSION < 4000) || (__cplusplus <= 201402L)
-#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
-#endif
+#  if (_LIBCPP_VERSION < 4000) || (__cplusplus <= 201402L)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
 // MSVC uses logic from catch all for BOOST_NO_CXX17_HDR_STRING_VIEW
 // catch all:
 #elif !defined(_YVALS) && !defined(_CPPLIB_VER)
-#if (!defined(__has_include) || (__cplusplus < 201700))
-#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
-#elif !__has_include(<string_view>)
-#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
-#endif
+#  if (!defined(__has_include) || (__cplusplus < 201700))
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  elif !__has_include(<string_view>)
+#    define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#  endif
 #endif
 
 #if !defined(BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW) || \
