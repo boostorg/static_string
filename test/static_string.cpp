@@ -7430,7 +7430,12 @@ testResizeAndOverwrite()
       5,
       [](char* buf, std::size_t) -> std::size_t
       {
-        std::strcpy(buf, "Hello");
+        // Don't use std::strcpy() to avoid a MSVC C4996 warning.
+        buf[0] = 'H';
+        buf[1] = 'e';
+        buf[2] = 'l';
+        buf[3] = 'l';
+        buf[4] = 'o';
         return 5;
       }
     );
