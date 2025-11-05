@@ -775,7 +775,7 @@ to_static_wstring_float_impl(double value) noexcept
       // circuit evaluation will ensure that the
       // second operand is not evaluated on conforming
       // implementations.
-      long long num_written =
+      int num_written =
           std::swprintf(buffer, N + 1, L"%f", value);
       if (num_written < 0 ||
           num_written > narrow)
@@ -834,7 +834,7 @@ to_static_wstring_float_impl(long double value) noexcept
       // circuit evaluation will ensure that the
       // second operand is not evaluated on conforming
       // implementations.
-      long long num_written =
+      int num_written =
           std::swprintf(buffer, N + 1, L"%Lf", value);
       if (num_written < 0 ||
           num_written > narrow)
