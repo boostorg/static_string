@@ -3733,8 +3733,8 @@ public:
       `{data() + pos, std::min(count, size() - pos))`.
 
       @param pos The index to being the substring at. The
-      default arugment for this parameter is `0`.
-      @param count The length of the substring. The default arugment
+      default argument for this parameter is `0`.
+      @param count The length of the substring. The default argument
       for this parameter is @ref npos.
 
       @throw std::out_of_range `pos > size()`
@@ -3764,8 +3764,8 @@ public:
       to `{data() + pos, std::min(count, size() - pos))`.
 
       @param pos The index to being the substring at. The
-      default arugment for this parameter is `0`.
-      @param count The length of the substring. The default arugment
+      default argument for this parameter is `0`.
+      @param count The length of the substring. The default argument
       for this parameter is @ref npos.
 
       @throw std::out_of_range `pos > size()`
