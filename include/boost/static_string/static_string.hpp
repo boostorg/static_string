@@ -1202,7 +1202,7 @@ public:
   BOOST_STATIC_STRING_CPP14_CONSTEXPR
   basic_static_string(const_pointer s)
   {
-    assign(s);
+    assign(s, s + traits_type::length(s));
   }
 
   /** Constructor.
@@ -1373,7 +1373,7 @@ public:
   basic_static_string&
   operator=(const_pointer s)
   {
-    return assign(s);
+    return assign(s, s + traits_type::length(s));
   }
 
   /** Assign to the string.
