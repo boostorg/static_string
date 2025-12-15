@@ -67,6 +67,22 @@ bool
 testConstantEvaluation()
 {
 #ifdef BOOST_STATIC_STRING_CPP20
+
+  // Check construction in a constexpr context
+  constexpr basic_static_string s("hello");
+  static_assert(s.size() == 5);
+  static_assert(s == "hello");
+
+  // Check assignment in a constexpr context
+  constexpr auto s2 =
+  []()
+  {
+    basic_static_string s("hello");
+    s = "world";
+    return s;
+  }();
+  static_assert(s2 == "world");
+
   // c++20 constexpr tests
   cstatic_string a;
   cstatic_string b(1, 'a');
