@@ -279,4 +279,11 @@ using basic_string_view =
 #define BOOST_STATIC_STRING_USE_STD_FORMAT
 #endif
 
+#if defined(__GNUC__) && (__GNUC__ >= 5) && (__GNUC__ <= 10) && !defined(__clang__)
+// Workaround for GCC complaining about nested classes being private.
+#define BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND public:
+#else
+#define BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND
+#endif
+
 #endif
