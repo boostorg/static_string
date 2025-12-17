@@ -289,7 +289,10 @@ using basic_string_view =
 // GCC 9 incorrectly rejects the pointer equality comparison in
 // ptr_in_range() in constant expressions. GCC 10 and later handle
 // it correctly.
-#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ == 9)
+//
+// Clang 3.7 and 9-19 have the same issue.
+#if (defined(__GNUC__) && !defined(__clang__) && (__GNUC__ == 9)) \
+    || (defined(__clang__) && ((__clang_major__ == 3 && __clang_minor__ == 7) || ((__clang_major__ >= 9) && (__clang_major__ <= 19))))
 #define BOOST_STATIC_STRING_CONSTEXPR_PTR_CMP_BROKEN
 #endif
 
