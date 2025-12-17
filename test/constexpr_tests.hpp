@@ -617,7 +617,8 @@ testConstantEvaluation()
   a.replace(a.begin(), a.end(), a.begin(), a.end());
   a.replace(a.begin(), a.end(), {'a'});
 
-#ifdef BOOST_STATIC_STRING_IS_CONST_EVAL
+#if defined(BOOST_STATIC_STRING_IS_CONST_EVAL) \
+        && !defined(BOOST_STATIC_STRING_CONSTEXPR_PTR_CMP_BROKEN)
   a.clear();
   a.replace(a.begin(), a.end(), "a");
   a.replace(a.begin(), a.end(), "a", 1);
