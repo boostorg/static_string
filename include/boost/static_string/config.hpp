@@ -286,4 +286,11 @@ using basic_string_view =
 #define BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND
 #endif
 
+// GCC 9 incorrectly rejects the pointer equality comparison in
+// ptr_in_range() in constant expressions. GCC 10 and later handle
+// it correctly.
+#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ == 9)
+#define BOOST_STATIC_STRING_CONSTEXPR_PTR_CMP_BROKEN
+#endif
+
 #endif
