@@ -322,6 +322,8 @@ class static_string_base
   using pointer = value_type*;
   using const_pointer = const value_type*;
 
+BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND
+
   struct size
   {
     class basic_static_string
@@ -387,6 +389,8 @@ class static_string_base<0, CharT, Traits>
   using size_type = std::size_t;
   using value_type = typename Traits::char_type;
   using pointer = value_type*;
+
+BOOST_STATIC_STRING_GCC_NESTED_CLASS_WORKAROUND
 
   struct size
   {
