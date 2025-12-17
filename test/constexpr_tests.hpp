@@ -666,7 +666,7 @@ testConstantEvaluation()
 #endif
 }
 
-#ifdef BOOST_STATIC_STRING_CPP20
+#if __cpp_nontype_template_args >= 201911L
 
 template<basic_static_string<32, char, cxper_char_traits> X>
 struct nttp_primary
