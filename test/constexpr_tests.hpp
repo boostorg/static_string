@@ -111,6 +111,7 @@ testConstantEvaluation()
   // Check construction in a constexpr context
   constexpr basic_static_string s("hello");
   static_assert(s.size() == 5);
+  static_assert(s.static_capacity == 5);
   static_assert(s == "hello");
 
   // Check assignment in a constexpr context
