@@ -6707,6 +6707,9 @@ insert(
   traits_type::move(&curr_data[index + count], &curr_data[index], curr_size - index + 1);
   traits_type::assign(&curr_data[index], count, ch);
   this->size_impl(curr_size + count);
+#if defined(__clang__) && __clang_major__ == 3 && __clang_minor__ == 7
+  term();
+#endif
   return &curr_data[index];
 }
 
