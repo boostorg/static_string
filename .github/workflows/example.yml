@@ -1,0 +1,38 @@
+#
+# Copyright (c) 2025 Gennaro Prota (gennaro dot prota at gmail dot com)
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+#
+# Official repository: https://github.com/boostorg/static_string
+#
+
+name: Example (basic_static_cstring)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - develop
+      - bugfix/**
+      - feature/**
+      - fix/**
+      - github/**
+      - pr/**
+    paths-ignore:
+      - LICENSE
+      - meta/**
+      - README.md
+
+env:
+  B2_TARGETS: libs/$SELF/example
+
+jobs:
+  call-boost-ci:
+    name: Run Boost.CI
+    uses: boostorg/boost-ci/.github/workflows/reusable.yml@master
+    with:
+      exclude_cxxstd: '98,03,0x,11,14,17'
+      enable_pr_coverage: false
+      enable_multiarch: false
