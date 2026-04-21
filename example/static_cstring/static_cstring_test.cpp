@@ -154,6 +154,13 @@ testCStringConstruct()
         BOOST_TEST(*s1.end() == 0);
     }
 
+    // Construct from a C string with embedded NULs.
+    {
+        const char arr[] = { '1', '2', '\0', '4', '5', '\0' };
+        static_cstring<5> s1(arr);
+        BOOST_TEST(s1 == "12" );
+    }
+
     // Copy construction.
     {
         static_cstring<5> s1("12345");

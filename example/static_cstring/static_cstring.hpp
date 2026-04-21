@@ -123,7 +123,7 @@ public:
     constexpr basic_static_cstring(const CharT (&arr)[M])
     {
         static_assert(M <= N + 1, "Array too big for static_cstring");
-        assign(arr, M - 1);
+        assign(arr);
     }
 
     constexpr size_type size() const noexcept
