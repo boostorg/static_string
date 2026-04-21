@@ -13,6 +13,7 @@
 #include <boost/static_string/config.hpp>
 #include <algorithm>
 #include <climits>
+#include <compare>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -45,10 +46,6 @@ public:
     {
         data_[sz] = value_type{};
     }
-
-    // Defaulted comparisons for structural type support.
-    constexpr bool operator==(const static_cstring_base&) const noexcept = default;
-    constexpr auto operator<=>(const static_cstring_base&) const noexcept = default;
 };
 
 // Specialization for N <= UCHAR_MAX: Uses remaining-capacity trick.
@@ -72,10 +69,6 @@ public:
         data_[sz] = value_type{};
         data_[N] = static_cast<value_type>(N - sz);
     }
-
-    // Defaulted comparisons for structural type support.
-    constexpr bool operator==(const static_cstring_base&) const noexcept = default;
-    constexpr auto operator<=>(const static_cstring_base&) const noexcept = default;
 };
 
 } // namespace detail
@@ -392,9 +385,18 @@ public:
         other = tmp;
     }
 
-    // Defaulted comparisons for structural type (C++20).
-    constexpr bool operator==(const basic_static_cstring&) const noexcept = default;
-    constexpr auto operator<=>(const basic_static_cstring&) const noexcept = default;
+    constexpr bool operator==(const basic_static_cstring& other) const noexcept
+    {
+        const size_type sz = size();
+        return sz == other.size()
+            && traits_type::compare(data_, other.data_, sz) == 0;
+    }
+
+    constexpr std::strong_ordering
+    operator<=>(const basic_static_cstring& other) const noexcept
+    {
+        return compare(other) <=> 0;
+    }
 };
 
 #if defined(BOOST_STATIC_STRING_USE_DEDUCT)

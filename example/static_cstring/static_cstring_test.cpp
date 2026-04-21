@@ -447,6 +447,76 @@ testCStringComparison()
 
 static
 void
+testCStringComparisonAfterShrink()
+{
+    // Two semantically equal strings must compare equal, even if one of
+    // them was first longer and then shrunk.
+
+    // Small-N path (remaining-capacity trick): shrinking assign(s, n).
+    {
+        static_cstring<10> s("hello");
+        s.assign("hi", 2);
+        static_cstring<10> fresh("hi");
+
+        BOOST_TEST(s == fresh);
+        BOOST_TEST(!(s != fresh));
+        BOOST_TEST(!(s < fresh));
+        BOOST_TEST(!(s > fresh));
+        BOOST_TEST(s <= fresh);
+        BOOST_TEST(s >= fresh);
+    }
+
+    // Small-N path: shrinking assign(count, ch).
+    {
+        static_cstring<10> s("xxxxx");
+        s.assign(2, 'y');
+        static_cstring<10> fresh(2, 'y');
+
+        BOOST_TEST(s == fresh);
+    }
+
+    // Small-N path: shrinking via operator=(const CharT*).
+    {
+        static_cstring<10> s("hello");
+        s = "hi";
+        static_cstring<10> fresh("hi");
+
+        BOOST_TEST(s == fresh);
+    }
+
+    // Small-N path: shrinking via pop_back().
+    {
+        static_cstring<10> s("abcde");
+        s.pop_back();
+        static_cstring<10> fresh("abcd");
+
+        BOOST_TEST(s == fresh);
+    }
+
+    // Small-N path: shrinking via clear().
+    {
+        static_cstring<10> s("abcde");
+        s.clear();
+        static_cstring<10> fresh;
+
+        BOOST_TEST(s == fresh);
+    }
+
+    // Large-N path (N > UCHAR_MAX, no remaining-capacity trick).
+    {
+        static_cstring<300> s;
+        s.assign(200, 'a');
+        s.assign(50, 'b');
+        static_cstring<300> fresh(50, 'b');
+
+        BOOST_TEST(s == fresh);
+        BOOST_TEST(!(s < fresh));
+        BOOST_TEST(!(s > fresh));
+    }
+}
+
+static
+void
 testCStringConversion()
 {
     // operator string_view().
@@ -650,6 +720,7 @@ runTests()
   testCStringPushPop();
   testCStringAppend();
   testCStringComparison();
+  testCStringComparisonAfterShrink();
   testCStringConversion();
   testCStringStream();
   testCStringSwap();
