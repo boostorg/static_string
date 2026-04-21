@@ -443,6 +443,35 @@ testCStringComparison()
         BOOST_TEST(s.compare("abd") < 0);
         BOOST_TEST(s.compare("abb") > 0);
     }
+
+    // compare(const CharT*) must not throw when the argument is longer
+    // than the static capacity.
+    {
+        static_cstring<3> s("abc");
+        BOOST_TEST(s.compare("abcd") < 0);
+        BOOST_TEST(s.compare("abcdefghijklmnop") < 0);
+        BOOST_TEST(s.compare("abb") > 0);
+        BOOST_TEST(s.compare("abd") < 0);
+        BOOST_TEST(s.compare("abc") == 0);
+        BOOST_TEST(s.compare("ab") > 0);
+        BOOST_TEST(s.compare("") > 0);
+    }
+
+    // Same via operator== / operator!= with an over-long C string.
+    {
+        static_cstring<3> s("abc");
+        BOOST_TEST(!(s == "abcd"));
+        BOOST_TEST(s != "abcd");
+        BOOST_TEST(!("abcd" == s));
+        BOOST_TEST("abcd" != s);
+    }
+
+    // Empty static_cstring vs non-empty C string.
+    {
+        static_cstring<5> empty;
+        BOOST_TEST(empty.compare("hello") < 0);
+        BOOST_TEST(empty.compare("") == 0);
+    }
 }
 
 static

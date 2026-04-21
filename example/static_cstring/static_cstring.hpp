@@ -363,7 +363,17 @@ public:
 
     constexpr int compare(const CharT* s) const noexcept
     {
-        return compare(basic_static_cstring(s));
+        const size_type lhs_sz = size();
+        const size_type rhs_sz = traits_type::length(s);
+        const int result = traits_type::compare(data_, s, (std::min)(lhs_sz, rhs_sz));
+
+        return result != 0
+                 ? result
+                 : lhs_sz < rhs_sz
+                 ? -1
+                 : lhs_sz > rhs_sz
+                 ? 1
+                 : 0;
     }
 
     // Conversions.
