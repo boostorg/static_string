@@ -72,7 +72,7 @@ struct cxper_char_traits
     // This implementation does not handle overlapping ranges where
     // dest > src. A correct implementation would need to detect this
     // case and copy backwards, but detecting overlap requires pointer
-    // comparisons that many of the tested compiles (incorrectly) refuse
+    // comparisons that many of the tested compilers (incorrectly) refuse
     // in constant expressions.
     //
     // Since cxper_char_traits is only used for testing constexpr
