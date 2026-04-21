@@ -122,7 +122,7 @@ public:
     template<std::size_t M>
     constexpr basic_static_cstring(const CharT (&arr)[M])
     {
-        static_assert(M <= N + 1, "String literal too long for static_cstring");
+        static_assert(M <= N + 1, "Array too big for static_cstring");
         assign(arr, M - 1);
     }
 
