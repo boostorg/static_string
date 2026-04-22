@@ -2314,6 +2314,23 @@ public:
     return N;
   }
 
+  /** Return the number of additional characters that can be stored.
+
+      Returns `max_size() - size()`, i.e. the number of characters
+      that can still be inserted before the string reaches its
+      capacity.
+
+      @par Complexity
+
+      Constant.
+   */
+  BOOST_STATIC_STRING_CPP11_CONSTEXPR
+  size_type
+  available() const noexcept
+  {
+    return max_size() - size();
+  }
+
   /** Increase the capacity.
 
       This function has no effect.
