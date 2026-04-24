@@ -1007,7 +1007,7 @@ testCapacity()
     // Intended use with the pos/count-taking overloads.
     {
         static_string<5> s("ab");
-        s.append("xyzwv", 0, s.available());
+        s.append(std::string_view{"xyzwv"}, 0, s.available());
         BOOST_TEST(s == "abxyz");
         BOOST_TEST(s.available() == 0);
     }
