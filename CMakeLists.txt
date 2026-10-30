@@ -54,16 +54,8 @@ endif ()
 
 # Sources
 include(GNUInstallDirs)
-file(GLOB_RECURSE BOOST_STATIC_STRING_HEADERS CONFIGURE_DEPENDS
-        include/boost/*.hpp
-        include/boost/*.ipp
-        include/boost/*.natvis
-        )
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/boost PREFIX "" FILES ${BOOST_STATIC_STRING_HEADERS})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "" FILES ${BOOST_STATIC_STRING_SOURCES})
-
+    
 # Target
 add_library(boost_static_string INTERFACE)
 add_library(Boost::static_string ALIAS boost_static_string)
